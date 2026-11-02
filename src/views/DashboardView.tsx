@@ -202,15 +202,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   10
                 );
                 return (
-                  <div key={d.etapa_id} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
+                  <div key={d.etapa_id} className="flex-1 min-w-0 h-full flex flex-col items-center gap-1.5 group">
                     <span className="font-mono text-[9px] text-[#AAA] opacity-0 group-hover:opacity-100 transition-opacity">
                       ${Math.round((Number(d.valor_ponderado) || 0) / 1000000)}M
                     </span>
-                    <div
-                      style={{ height: `${alturaPct}%` }}
-                      className="w-full max-w-[36px] bg-[#333333] border border-[#555555] group-hover:bg-[#E5E5E5] rounded-t transition-all"
-                    />
-                    <span className="font-mono text-[10px] text-[#8E8E93] truncate w-full text-center">
+                    <div className="w-full flex-1 min-h-0 flex items-end justify-center">
+                      <div
+                        style={{ height: `${alturaPct}%` }}
+                        className="w-full max-w-[36px] bg-[#333333] border border-[#555555] group-hover:bg-[#E5E5E5] rounded-t transition-all"
+                      />
+                    </div>
+                    <span className="font-mono text-[9px] sm:text-[10px] text-[#8E8E93] leading-tight break-words w-full text-center">
                       {d.nombre.split(' ')[0]}
                     </span>
                   </div>
