@@ -44,15 +44,15 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Zona 2: Búsqueda rápida Cmd+K y Selector de Alcance */}
-      <div className="flex items-center gap-3 max-w-md w-full justify-center">
+      <div className="flex items-center gap-3 max-w-md min-w-0 flex-1 sm:w-full justify-end sm:justify-center">
         <button
           onClick={onOpenSearch}
           type="button"
-          className="flex items-center justify-between gap-3 w-full max-w-xs px-3 py-1.5 text-xs text-[#8E8E93] bg-[#161616] dark:bg-[#161616] light:bg-[#F2F2F2] border border-[#2E2E2E] dark:border-[#2E2E2E] light:border-[#E5E5E5] rounded hover:border-[#444] transition-colors"
+          className="flex items-center justify-center sm:justify-between gap-3 w-9 sm:w-full max-w-xs shrink-0 px-2 sm:px-3 py-1.5 text-xs text-[#8E8E93] bg-[#161616] dark:bg-[#161616] light:bg-[#F2F2F2] border border-[#2E2E2E] dark:border-[#2E2E2E] light:border-[#E5E5E5] rounded hover:border-[#444] transition-colors"
         >
           <span className="flex items-center gap-2">
             <Search className="w-3.5 h-3.5 text-[#8E8E93]" />
-            <span className="truncate">Buscar empresas, contactos o negocios...</span>
+            <span className="hidden sm:inline truncate">Buscar empresas, contactos o negocios...</span>
           </span>
           <kbd className="hidden sm:inline-block font-mono text-[10px] bg-[#222] dark:bg-[#222] light:bg-[#DDD] px-1.5 py-0.5 rounded text-[#AAA]">
             ⌘K

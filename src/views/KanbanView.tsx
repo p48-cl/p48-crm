@@ -228,7 +228,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
 
       {/* VISTA KANBAN */}
       {vistaModo === 'kanban' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 overflow-x-auto pb-6">
+        <div className="flex md:grid md:grid-cols-3 lg:grid-cols-5 gap-4 overflow-x-auto snap-x snap-mandatory pb-6">
           {etapas.map((etapa) => {
             const opsEtapa = filteredOportunidades.filter((o) => o.etapa_id === etapa.id);
             const totalEtapaCLP = opsEtapa
@@ -242,7 +242,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                 key={etapa.id}
                 onDragOver={(e) => handleDragOver(e, etapa.id)}
                 onDrop={(e) => handleDrop(e, etapa.id)}
-                className={`flex flex-col bg-[#111111] dark:bg-[#111111] light:bg-[#F5F5F5] border rounded-lg min-w-[240px] transition-colors ${
+                className={`snap-start shrink-0 w-[85vw] sm:w-[60vw] md:w-auto flex flex-col bg-[#111111] dark:bg-[#111111] light:bg-[#F5F5F5] border rounded-lg min-w-[240px] transition-colors ${
                   isDropTarget
                     ? 'border-[#888] bg-[#1A1A1A]'
                     : 'border-[#262626] dark:border-[#262626] light:border-[#DDD]'
