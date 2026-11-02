@@ -224,10 +224,10 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
                       {p.descripcion && <p className="text-[11px] text-[#8E8E93]">{p.descripcion}</p>}
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <button title="Visibilidad para el cliente" onClick={() => ejecutar(() => supabase!.from('proyectos').update({ visible_cliente: !p.visible_cliente }).eq('id', p.id))} className="text-[#8E8E93] hover:text-[#BEFF00]">
+                      <button title="Visibilidad para el cliente" onClick={() => ejecutar(() => supabase!.from('proyectos').update({ visible_cliente: !p.visible_cliente }).eq('id', p.id))} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[#8E8E93] hover:text-[#BEFF00]">
                         {p.visible_cliente ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                       </button>
-                      <button title="Archivar" onClick={() => ejecutar(() => supabase!.from('proyectos').update({ archivado: true }).eq('id', p.id))} className="text-[#8E8E93] hover:text-[#E8005A]">
+                      <button title="Archivar" onClick={() => ejecutar(() => supabase!.from('proyectos').update({ archivado: true }).eq('id', p.id))} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[#8E8E93] hover:text-[#E8005A]">
                         <Archive className="w-4 h-4" />
                       </button>
                     </div>
@@ -242,10 +242,10 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
                         <div className="flex items-start justify-between gap-2">
                           <p className="text-[#EEE] truncate">{en.titulo}</p>
                           <div className="flex items-center gap-2 shrink-0">
-                            <button title="Visibilidad para el cliente" onClick={() => ejecutar(() => supabase!.from('entregables').update({ visible_cliente: !en.visible_cliente }).eq('id', en.id))} className="text-[#8E8E93] hover:text-[#BEFF00]">
+                            <button title="Visibilidad para el cliente" onClick={() => ejecutar(() => supabase!.from('entregables').update({ visible_cliente: !en.visible_cliente }).eq('id', en.id))} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[#8E8E93] hover:text-[#BEFF00]">
                               {en.visible_cliente ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                             </button>
-                            <button title="Archivar" onClick={() => ejecutar(() => supabase!.from('entregables').update({ archivado: true }).eq('id', en.id))} className="text-[#8E8E93] hover:text-[#E8005A]">
+                            <button title="Archivar" onClick={() => ejecutar(() => supabase!.from('entregables').update({ archivado: true }).eq('id', en.id))} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[#8E8E93] hover:text-[#E8005A]">
                               <Archive className="w-3.5 h-3.5" />
                             </button>
                           </div>
@@ -277,11 +277,11 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
                         </label>
                         <div className="flex gap-3">
                           <button className={btnPrimario} disabled={guardando} onClick={() => crearEntregable(p.id)}>Guardar entregable</button>
-                          <button className={btnLink} onClick={() => setEntProyecto(null)}>Cancelar</button>
+                          <button className={btnLink + " min-h-[44px] inline-flex items-center"} onClick={() => setEntProyecto(null)}>Cancelar</button>
                         </div>
                       </div>
                     ) : (
-                      <button className={btnLink} onClick={() => setEntProyecto(p.id)}>+ Entregable</button>
+                      <button className={btnLink + " min-h-[44px] inline-flex items-center"} onClick={() => setEntProyecto(p.id)}>+ Entregable</button>
                     )}
                   </div>
                 </div>
@@ -326,10 +326,10 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
                   <a href={r.url} target="_blank" rel="noreferrer" className="text-[11px] text-[#BEFF00] hover:underline">Abrir</a>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <button title="Visibilidad para el cliente" onClick={() => ejecutar(() => supabase!.from('reportes').update({ visible_cliente: !r.visible_cliente }).eq('id', r.id))} className="text-[#8E8E93] hover:text-[#BEFF00]">
+                  <button title="Visibilidad para el cliente" onClick={() => ejecutar(() => supabase!.from('reportes').update({ visible_cliente: !r.visible_cliente }).eq('id', r.id))} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[#8E8E93] hover:text-[#BEFF00]">
                     {r.visible_cliente ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                   </button>
-                  <button title="Archivar" onClick={() => ejecutar(() => supabase!.from('reportes').update({ archivado: true }).eq('id', r.id))} className="text-[#8E8E93] hover:text-[#E8005A]">
+                  <button title="Archivar" onClick={() => ejecutar(() => supabase!.from('reportes').update({ archivado: true }).eq('id', r.id))} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[#8E8E93] hover:text-[#E8005A]">
                     <Archive className="w-4 h-4" />
                   </button>
                 </div>
@@ -361,7 +361,7 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
                   <p className="text-[#EEE] truncate">{u.nombre}</p>
                   <p className="font-mono text-[10px] text-[#8E8E93] truncate">{u.email}{u.user_id ? ' · ya inició sesión' : ''}</p>
                 </div>
-                <button className={btnLink} onClick={() => ejecutar(() => supabase!.from('cliente_usuarios').update({ activo: !u.activo }).eq('id', u.id))}>
+                <button className={btnLink + " min-h-[44px] inline-flex items-center"} onClick={() => ejecutar(() => supabase!.from('cliente_usuarios').update({ activo: !u.activo }).eq('id', u.id))}>
                   {u.activo ? 'Desactivar' : 'Activar'}
                 </button>
               </div>

@@ -19,7 +19,7 @@ import { OpportunityDetailModal } from './views/OpportunityDetailModal';
 import { CompanyDetailDrawer } from './views/CompanyDetailDrawer';
 import { NewDealModal } from './components/common/NewDealModal';
 import { ActivityModal } from './components/common/ActivityModal';
-import { CheckSquare, Kanban, Clock, Building2, LayoutDashboard } from 'lucide-react';
+import { CheckSquare, Kanban, Clock, Building2, LayoutDashboard, MoreHorizontal, Users, Upload, Settings, Activity } from 'lucide-react';
 import { NewTaskModal } from './components/common/NewTaskModal';
 
 const CRMAppContent: React.FC = () => {
@@ -27,6 +27,7 @@ const CRMAppContent: React.FC = () => {
   const { empresas } = useCRM();
 
   const [currentView, setCurrentView] = useState<ViewType>('inicio');
+  const [masAbierto, setMasAbierto] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
   // Modales y Drawers globales
@@ -233,55 +234,91 @@ const CRMAppContent: React.FC = () => {
       />
 
       {/* Barra de navegación inferior móvil: prioriza tareas, fichas y registro rápido */}
-      <nav className="md:hidden sticky bottom-0 z-30 bg-[#0E0E0E] dark:bg-[#0E0E0E] light:bg-[#FAFAFA] border-t border-[#262626] dark:border-[#262626] light:border-[#DDD] flex items-center justify-around py-2 px-2 text-[10px] font-sans">
+      <nav className="md:hidden sticky bottom-0 z-30 bg-[#0E0E0E] border-t border-[#262626] flex items-center justify-around py-1.5 px-1 text-[10px] font-sans">
         <button
-          onClick={() => setCurrentView('tareas')}
-          className={`flex flex-col items-center gap-1 ${
-            currentView === 'tareas' ? 'text-[#BEFF00] font-semibold' : 'text-[#888]'
+          onClick={() => setCurrentView('inicio')}
+          className={`min-w-[56px] min-h-[52px] flex flex-col items-center justify-center gap-1 ${
+            currentView === 'inicio' ? 'text-[#BEFF00] font-semibold' : 'text-[#888]'
           }`}
         >
-          <CheckSquare className="w-4 h-4" />
-          <span>Tareas</span>
+          <LayoutDashboard className="w-5 h-5" />
+          <span>Inicio</span>
         </button>
 
         <button
           onClick={() => setCurrentView('crm')}
-          className={`flex flex-col items-center gap-1 ${
+          className={`min-w-[56px] min-h-[52px] flex flex-col items-center justify-center gap-1 ${
             currentView === 'crm' ? 'text-[#BEFF00] font-semibold' : 'text-[#888]'
           }`}
         >
-          <Kanban className="w-4 h-4" />
-          <span>CRM / Fichas</span>
+          <Kanban className="w-5 h-5" />
+          <span>Negocios</span>
         </button>
 
         <button
           onClick={() => setActivityModalState({ isOpen: true })}
-          className="flex items-center justify-center w-11 h-11 -mt-5 bg-[#BEFF00] hover:bg-[#aee600] text-[#0A0A0A] rounded-full shadow-lg font-bold transition-transform active:scale-95"
+          className="flex items-center justify-center w-12 h-12 -mt-5 bg-[#BEFF00] hover:bg-[#aee600] text-[#0A0A0A] rounded-full shadow-lg transition-transform active:scale-95"
           title="Registrar Actividad"
         >
           <Clock className="w-5 h-5 stroke-[2.5]" />
         </button>
 
         <button
-          onClick={() => setCurrentView('empresas')}
-          className={`flex flex-col items-center gap-1 ${
-            currentView === 'empresas' ? 'text-[#BEFF00] font-semibold' : 'text-[#888]'
+          onClick={() => setCurrentView('tareas')}
+          className={`min-w-[56px] min-h-[52px] flex flex-col items-center justify-center gap-1 ${
+            currentView === 'tareas' ? 'text-[#BEFF00] font-semibold' : 'text-[#888]'
           }`}
         >
-          <Building2 className="w-4 h-4" />
-          <span>Empresas</span>
+          <CheckSquare className="w-5 h-5" />
+          <span>Tareas</span>
         </button>
 
         <button
-          onClick={() => setCurrentView('inicio')}
-          className={`flex flex-col items-center gap-1 ${
-            currentView === 'inicio' ? 'text-[#BEFF00] font-semibold' : 'text-[#888]'
+          onClick={() => setMasAbierto(true)}
+          className={`min-w-[56px] min-h-[52px] flex flex-col items-center justify-center gap-1 ${
+            ['empresas', 'contactos', 'actividades', 'importar', 'administracion'].includes(currentView)
+              ? 'text-[#BEFF00] font-semibold'
+              : 'text-[#888]'
           }`}
         >
-          <LayoutDashboard className="w-4 h-4" />
-          <span>Inicio</span>
+          <MoreHorizontal className="w-5 h-5" />
+          <span>Más</span>
         </button>
       </nav>
+
+      {masAbierto && (
+        <div className="md:hidden fixed inset-0 z-50 flex items-end bg-black/60" onClick={() => setMasAbierto(false)}>
+          <div
+            className="w-full bg-[#141414] border-t border-[#262626] rounded-t-xl p-4 pb-8 space-y-1"
+            onClick={(ev) => ev.stopPropagation()}
+            role="dialog"
+            aria-label="Más secciones"
+          >
+            <p className="text-[10px] font-mono uppercase text-[#8E8E93] px-2 pb-2">Más secciones</p>
+            {[
+              { id: 'empresas' as const, label: 'Empresas y clientes', icon: Building2 },
+              { id: 'contactos' as const, label: 'Contactos', icon: Users },
+              { id: 'actividades' as const, label: 'Actividades', icon: Activity },
+              { id: 'importar' as const, label: 'Importar CSV', icon: Upload },
+              { id: 'administracion' as const, label: 'Administración', icon: Settings },
+            ].map((item) => (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setCurrentView(item.id);
+                  setMasAbierto(false);
+                }}
+                className={`w-full min-h-[52px] flex items-center gap-3 px-3 rounded-lg text-sm ${
+                  currentView === item.id ? 'text-[#BEFF00] bg-[#1C1C1C]' : 'text-[#E5E5E5] hover:bg-[#1C1C1C]'
+                }`}
+              >
+                <item.icon className="w-5 h-5" />
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -85,7 +85,11 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
     setDragOverEtapaId(null);
     const opId = e.dataTransfer.getData('text/plain') || draggedOpId;
     if (!opId) return;
+    await moverAEtapa(opId, nuevaEtapaId);
+  };
 
+  // Lógica común de cambio de etapa (arrastrar o menú táctil)
+  const moverAEtapa = async (opId: string, nuevaEtapaId: string) => {
     const op = oportunidades.find((o) => o.id === opId);
     if (!op || op.etapa_id === nuevaEtapaId) return;
 
@@ -332,6 +336,21 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                                 {resp?.nombre.split(' ')[0] ?? 'Equipo'}
                               </span>
                             </span>
+                          </div>
+
+                          {/* Mover etapa sin arrastrar (móvil) */}
+                          <div className="md:hidden mb-2" onClick={(ev) => ev.stopPropagation()}>
+                            <label className="sr-only" htmlFor={`mover-${op.id}`}>Mover a otra etapa</label>
+                            <select
+                              id={`mover-${op.id}`}
+                              value={op.etapa_id}
+                              onChange={(ev) => moverAEtapa(op.id, ev.target.value)}
+                              className="w-full min-h-[44px] px-2 text-xs bg-[#101010] border border-[#2E2E2E] rounded text-[#F5F5F5]"
+                            >
+                              {etapas.map((et) => (
+                                <option key={et.id} value={et.id}>{et.nombre}</option>
+                              ))}
+                            </select>
                           </div>
 
                           {/* Próxima Acción */}
