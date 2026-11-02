@@ -265,7 +265,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
 
         if (dbKpis && !errKpis) {
-          setKpis(dbKpis as KPIsDashboard);
+          setKpis((Array.isArray(dbKpis) ? dbKpis[0] : dbKpis) as KPIsDashboard);
         }
       } catch (err) {
         setErrorMensaje(parseSupabaseError(err));
@@ -313,7 +313,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const { data, error } = await supabase!.rpc('kpis_dashboard', {
         p_solo_mios: filtroAlcance === 'mis_datos',
       });
-      if (data && !error) setKpis(data as KPIsDashboard);
+      if (data && !error) setKpis((Array.isArray(data) ? data[0] : data) as KPIsDashboard);
     }
 
     cargarKpis();
@@ -371,7 +371,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const { data: kpisData } = await supabase.rpc('kpis_dashboard', {
       p_solo_mios: filtroAlcance === 'mis_datos',
     });
-    if (kpisData) setKpis(kpisData as KPIsDashboard);
+    if (kpisData) setKpis((Array.isArray(kpisData) ? kpisData[0] : kpisData) as KPIsDashboard);
   };
 
   const crearOportunidad = async (datos: Partial<Oportunidad>): Promise<Oportunidad | null> => {
