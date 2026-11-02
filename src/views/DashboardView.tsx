@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';
 import { formatCLP } from '../lib/formatters';
+import { AgencyDashboard } from '../components/dashboard/AgencyDashboard';
 
 interface DashboardViewProps {
   onNavigateKanban: () => void;
@@ -343,6 +344,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
         </div>
       </div>
+
+      <AgencyDashboard />
     </div>
   );
 };
