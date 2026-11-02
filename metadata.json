@@ -1,0 +1,6 @@
+{
+  "name": "CRM P48",
+  "description": "CRM interno para P48, agencia B2B de marketing de performance en Chile.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

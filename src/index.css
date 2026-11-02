@@ -1,0 +1,36 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'Lexend', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+  --color-obsidian: #0A0A0A;
+  --color-air: #F5F5F5;
+  --color-p48-lime: #BEFF00;
+  --color-p48-magenta: #E8005A;
+}
+
+:root {
+  font-family: 'Lexend', system-ui, -apple-system, sans-serif;
+}
+
+/* Data styling */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Custom scrollbars for dense data tables and kanban */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(140, 140, 140, 0.25);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(140, 140, 140, 0.4);
+}
