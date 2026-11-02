@@ -12,6 +12,7 @@ import { ActivitiesView } from './views/ActivitiesView';
 import { ImportView } from './views/ImportView';
 import { AdminView } from './views/AdminView';
 import { LoginView } from './views/LoginView';
+import { PortalView } from './views/PortalView';
 import { AccessDeniedView } from './views/AccessDeniedView';
 import { GlobalSearchModal } from './components/common/GlobalSearchModal';
 import { OpportunityDetailModal } from './views/OpportunityDetailModal';
@@ -285,12 +286,22 @@ const CRMAppContent: React.FC = () => {
   );
 };
 
+// Separa las dos capas: el equipo entra al CRM interno; los clientes, al portal de solo lectura.
+// El CRMProvider (datos internos) nunca se monta para un cliente.
+const CapaRouter: React.FC = () => {
+  const { isCliente } = useAuth();
+  if (isCliente) return <PortalView />;
+  return (
+    <CRMProvider>
+      <CRMAppContent />
+    </CRMProvider>
+  );
+};
+
 export default function App() {
   return (
     <AuthProvider>
-      <CRMProvider>
-        <CRMAppContent />
-      </CRMProvider>
+      <CapaRouter />
     </AuthProvider>
   );
 }

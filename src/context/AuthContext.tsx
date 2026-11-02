@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Miembro, RolUsuario } from '../types/crm';
+import { Miembro, RolUsuario, PortalEmpresa } from '../types/crm';
 import { supabase, isSupabaseConfigured, isModoDemo } from '../lib/supabase';
 import { parseSupabaseError } from '../lib/errorHandler';
 import { INITIAL_MIEMBROS } from '../lib/mockData';
@@ -9,6 +9,8 @@ interface AuthContextType {
   rol: RolUsuario | null;
   isAdmin: boolean;
   isLoggedIn: boolean;
+  isCliente: boolean;
+  portalEmpresas: PortalEmpresa[];
   isLoading: boolean;
   accessDeniedError: string | null;
   isSupabaseLive: boolean;
@@ -22,6 +24,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<Miembro | null>(null);
+  const [portalEmpresas, setPortalEmpresas] = useState<PortalEmpresa[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [accessDeniedError, setAccessDeniedError] = useState<string | null>(null);
 
@@ -67,6 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await vincularMiembroDesdeSupabase();
         } else if (event === 'SIGNED_OUT') {
           setCurrentUser(null);
+          setPortalEmpresas([]);
         }
       });
 
@@ -90,6 +94,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data, error } = await supabase.rpc('vincular_miembro');
 
       if (error || !data) {
+        // No es miembro del equipo: intentar acceso como cliente del portal
+        const empresasPortal = await cargarAccesoCliente();
+        if (empresasPortal.length > 0) {
+          setAccessDeniedError(null);
+          setCurrentUser(null);
+          setPortalEmpresas(empresasPortal);
+          return;
+        }
         // Bloquear acceso inmediatamente y cerrar sesión
         await supabase.auth.signOut();
         setCurrentUser(null);
@@ -111,6 +123,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await supabase?.auth.signOut();
       setCurrentUser(null);
       setAccessDeniedError('No tienes acceso. Pide acceso a un admin.');
+    }
+  }
+
+  // Acceso de clientes: vincula el correo invitado y lee solo la vista segura del portal
+  async function cargarAccesoCliente(): Promise<PortalEmpresa[]> {
+    if (!supabase) return [];
+    try {
+      await supabase.rpc('vincular_cliente');
+      const { data, error } = await supabase.from('portal_empresa').select('*');
+      if (error || !data) return [];
+      return data as PortalEmpresa[];
+    } catch {
+      return [];
     }
   }
 
@@ -151,6 +176,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await supabase.auth.signOut();
     }
     setCurrentUser(null);
+    setPortalEmpresas([]);
     setIsLoading(false);
   };
 
@@ -178,6 +204,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         rol: currentUser?.rol ?? null,
         isAdmin: currentUser?.rol === 'admin',
         isLoggedIn: Boolean(currentUser),
+        isCliente: portalEmpresas.length > 0 && !currentUser,
+        portalEmpresas,
         isLoading,
         accessDeniedError,
         isSupabaseLive: isSupabaseConfigured,

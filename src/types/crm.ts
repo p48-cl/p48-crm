@@ -327,3 +327,45 @@ export interface ClienteUsuario {
   user_id?: string | null;
   activo: boolean;
 }
+
+// ===== Vistas del portal de clientes (portal_*) =====
+export interface PortalEmpresa {
+  empresa_id: string;
+  nombre: string;
+  plan: string | null;
+  fecha_renovacion: string | null;
+  looker_dashboard_url: string | null;
+  drive_folder_url: string | null;
+}
+
+export interface PortalProyecto {
+  id: string;
+  empresa_id: string;
+  nombre: string;
+  descripcion: string | null;
+  estado: EstadoProyecto;
+  fecha_inicio: string | null;
+  fecha_fin: string | null;
+}
+
+export interface PortalEntregable {
+  id: string;
+  proyecto_id: string;
+  empresa_id: string;
+  titulo: string;
+  descripcion: string | null;
+  estado: EstadoEntregable;
+  fecha_comprometida: string | null;
+  fecha_entrega: string | null;
+  url_documento: string | null;
+}
+
+export interface PortalReporte {
+  id: string;
+  empresa_id: string;
+  proyecto_id: string | null;
+  titulo: string;
+  tipo: TipoReporte;
+  periodo: string | null;
+  url: string;
+}
