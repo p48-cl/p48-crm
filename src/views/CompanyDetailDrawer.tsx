@@ -18,6 +18,7 @@ import {
 import { Empresa, Contacto, Oportunidad, Actividad, Tarea, AccesosAdminMarketing } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
 import { formatCLP, formatFecha, formatMoneda, formatRUT } from '../lib/formatters';
+import { ClientePanel } from '../components/clientes/ClientePanel';
 
 interface CompanyDetailDrawerProps {
   empresa: Empresa | null;
@@ -50,7 +51,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
     industrias,
   } = useCRM();
 
-  const [activeTab, setActiveTab] = useState<'info' | 'contactos' | 'oportunidades' | 'actividades' | 'tareas'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'cliente'>('info');
   const [showAddContact, setShowAddContact] = useState(false);
   const [newContact, setNewContact] = useState<{
     nombre: string;
@@ -186,7 +187,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
         </div>
 
         {/* Navigation Tabs */}
-        <div className="px-5 border-b border-[#262626] dark:border-[#262626] light:border-[#EEE] flex gap-4 text-xs font-medium">
+        <div className="px-5 border-b border-[#262626] dark:border-[#262626] light:border-[#EEE] flex gap-4 text-xs font-medium overflow-x-auto">
           {(
             [
               { id: 'info', label: 'Datos & Accesos' },
@@ -194,6 +195,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
               { id: 'oportunidades', label: `Negocios (${oportunidadesEmpresa.length})` },
               { id: 'actividades', label: `Actividades (${actividadesEmpresa.length})` },
               { id: 'tareas', label: `Tareas (${tareasEmpresa.length})` },
+              ...(empresa.estado === 'cliente' ? [{ id: 'cliente' as const, label: 'Cliente y portal' }] : []),
             ] as const
           ).map((tab) => (
             <button
@@ -764,6 +766,9 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                 </div>
               )}
             </div>
+          )}
+          {activeTab === 'cliente' && empresa.estado === 'cliente' && (
+            <ClientePanel empresaId={empresa.id} />
           )}
         </div>
 
