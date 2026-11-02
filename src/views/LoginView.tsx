@@ -27,12 +27,12 @@ export const LoginView: React.FC = () => {
             className="w-full bg-[#BEFF00] hover:bg-[#aee600] active:scale-[0.99] text-[#0A0A0A] font-semibold text-xs py-3 px-4 rounded transition-all flex items-center justify-center gap-2.5 shadow-md disabled:opacity-50"
           >
             <LogIn className="w-4 h-4 stroke-[2.5]" />
-            <span>Continuar con Google Workspace</span>
+            <span>Continuar con Google</span>
           </button>
 
           <div className="flex items-center gap-2 text-[11px] text-[#777] justify-center font-mono">
             <ShieldCheck className="w-3.5 h-3.5 text-[#BEFF00]" />
-            <span>Acceso restringido a miembros @p48.cl</span>
+            <span>Equipo P48 y clientes con acceso autorizado</span>
           </div>
 
           {!isSupabaseLive && (
