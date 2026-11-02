@@ -274,3 +274,56 @@ export interface DashTareasResponsable {
   vencidas: number;
   hoy: number;
 }
+
+// ===== Capa de clientes (tablas proyectos, entregables, reportes, cliente_usuarios) =====
+export type EstadoProyecto = 'planificado' | 'en_curso' | 'pausado' | 'finalizado';
+export type EstadoEntregable = 'pendiente' | 'en_progreso' | 'en_revision' | 'entregado';
+export type TipoReporte = 'mensual' | 'auditoria' | 'otro';
+
+export interface Proyecto {
+  id: string;
+  empresa_id: string;
+  nombre: string;
+  descripcion?: string | null;
+  estado: EstadoProyecto;
+  fecha_inicio?: string | null;
+  fecha_fin?: string | null;
+  visible_cliente: boolean;
+  archivado: boolean;
+  created_at?: string;
+}
+
+export interface Entregable {
+  id: string;
+  proyecto_id: string;
+  titulo: string;
+  descripcion?: string | null;
+  estado: EstadoEntregable;
+  fecha_comprometida?: string | null;
+  fecha_entrega?: string | null;
+  url_documento?: string | null;
+  notas_internas?: string | null;
+  visible_cliente: boolean;
+  archivado: boolean;
+}
+
+export interface Reporte {
+  id: string;
+  empresa_id: string;
+  proyecto_id?: string | null;
+  titulo: string;
+  tipo: TipoReporte;
+  periodo?: string | null;
+  url: string;
+  visible_cliente: boolean;
+  archivado: boolean;
+}
+
+export interface ClienteUsuario {
+  id: string;
+  empresa_id: string;
+  email: string;
+  nombre: string;
+  user_id?: string | null;
+  activo: boolean;
+}
