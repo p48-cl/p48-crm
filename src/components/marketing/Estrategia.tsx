@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, Pencil, Target, Users, Megaphone } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { parseSupabaseError } from '../../lib/errorHandler';
 import { useDatosMarketing } from './comun';
@@ -20,6 +20,12 @@ const CAMPOS: { id: Campo; titulo: string; ayuda: string }[] = [
   { id: 'notas_creativos', titulo: 'Notas para creativos', ayuda: 'Restricciones, referencias, colores o formatos que el equipo creativo debe respetar.' },
 ];
 
+const GRUPOS: { titulo: string; sub: string; icono: React.ComponentType<{ className?: string }>; campos: Campo[] }[] = [
+  { titulo: 'Negocio', sub: 'Qué meta persigue el cliente', icono: Target, campos: ['objetivo_ventas', 'objetivo_marketing', 'canal_prioritario'] },
+  { titulo: 'Mercado', sub: 'A quién le habla y contra quién compite', icono: Users, campos: ['mercado_objetivo', 'posicionamiento', 'competidores'] },
+  { titulo: 'Marca y creativos', sub: 'Cómo suena y qué debe respetarse', icono: Megaphone, campos: ['storytelling', 'tono_voz', 'notas_creativos'] },
+];
+
 type Valores = Record<Campo, string>;
 const VACIO: Valores = Object.fromEntries(CAMPOS.map((c) => [c.id, ''])) as Valores;
 
@@ -33,6 +39,7 @@ export const Estrategia: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [guardado, setGuardado] = useState<string | null>(null);
   const [copiado, setCopiado] = useState(false);
+  const [editando, setEditando] = useState<Campo | null>(null);
 
   const clienteId = clienteSel || clientes[0]?.id || '';
   const cliente = clientes.find((c) => c.id === clienteId);
@@ -42,9 +49,10 @@ export const Estrategia: React.FC = () => {
     const { data, error: err } = await supabase.from('estrategia_cliente').select('*').eq('empresa_id', clienteId).maybeSingle();
     if (err) setError(parseSupabaseError(err));
     const v = { ...VACIO };
-    for (const c of CAMPOS) v[c.id] = (data as any)?.[c.id] ?? '';
+    for (const c of CAMPOS) v[c.id] = ((data ?? {}) as Record<string, string | null>)[c.id] ?? '';
     setValores(v);
     setGuardado(null);
+    setEditando(null);
   }, [clienteId]);
 
   useEffect(() => {
@@ -92,7 +100,6 @@ export const Estrategia: React.FC = () => {
           ))}
         </select>
         <div className="flex items-center gap-3">
-          <span className="text-[11px] text-[var(--c-muted)]">{completos} de {CAMPOS.length} campos completos</span>
           <button
             onClick={copiarBrief}
             disabled={completos === 0}
@@ -107,21 +114,72 @@ export const Estrategia: React.FC = () => {
       {error && <p className="text-xs text-[var(--c-danger)] border border-[var(--c-danger)]/40 rounded p-2">{error}</p>}
       {guardado && !error && <p className="text-[11px] text-[var(--c-ok)]">Guardado: {guardado}</p>}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {CAMPOS.map((c) => (
-          <div key={c.id} className="surface p-4 space-y-1.5">
-            <label className="block text-xs font-semibold text-[var(--c-text)]">{c.titulo}</label>
-            <p className="text-[11px] text-[var(--c-muted)]">{c.ayuda}</p>
-            <textarea
-              rows={3}
-              className={areaClase}
-              value={valores[c.id]}
-              onChange={(e) => setValores({ ...valores, [c.id]: e.target.value })}
-              onBlur={(e) => guardar(c.id, e.target.value)}
-            />
+      <div className="surface p-4 flex items-center gap-4">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-[var(--c-text)] truncate">{cliente?.nombre}</p>
+          <p className="text-[11px] text-[var(--c-muted)]">Estrategia del cliente · se guarda al salir de cada campo</p>
+        </div>
+        <div className="w-40 shrink-0">
+          <div className="h-1.5 rounded-full bg-[var(--c-surface-3)] overflow-hidden">
+            <div className="h-full bg-[var(--c-accent)]" style={{ width: `${(completos / CAMPOS.length) * 100}%` }} />
           </div>
-        ))}
+          <p className="text-[10px] font-mono text-[var(--c-muted)] mt-1 text-right">{completos}/{CAMPOS.length} definidos</p>
+        </div>
       </div>
+
+      {GRUPOS.map((g) => {
+        const Icono = g.icono;
+        return (
+          <section key={g.titulo} className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Icono className="w-4 h-4 text-[var(--c-accent)]" />
+              <h3 className="text-xs font-semibold text-[var(--c-text)]">{g.titulo}</h3>
+              <span className="text-[11px] text-[var(--c-muted)]">· {g.sub}</span>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+              {g.campos.map((id) => {
+                const c = CAMPOS.find((x) => x.id === id)!;
+                const texto = valores[id];
+                const abierto = editando === id;
+                return (
+                  <div key={id} className="surface p-3.5 space-y-1.5 flex flex-col">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="flex items-center gap-1.5 text-xs font-semibold text-[var(--c-text)]">
+                        <span className={`w-1.5 h-1.5 rounded-full ${texto.trim() ? 'bg-[var(--c-ok)]' : 'bg-[var(--c-muted-2)]'}`} />
+                        {c.titulo}
+                      </span>
+                      {!abierto && (
+                        <button onClick={() => setEditando(id)} className="p-1 rounded text-[var(--c-muted)] hover:text-[var(--c-text)] hover:bg-[var(--c-surface-2)]" aria-label={`Editar ${c.titulo}`}>
+                          <Pencil className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+                    {abierto ? (
+                      <>
+                        <p className="text-[11px] text-[var(--c-muted)]">{c.ayuda}</p>
+                        <textarea
+                          autoFocus
+                          rows={5}
+                          className={areaClase}
+                          value={texto}
+                          onChange={(e) => setValores({ ...valores, [id]: e.target.value })}
+                          onBlur={(e) => { guardar(id, e.target.value); setEditando(null); }}
+                        />
+                      </>
+                    ) : texto.trim() ? (
+                      <p onClick={() => setEditando(id)} className="text-xs text-[var(--c-text-2)] whitespace-pre-wrap cursor-text leading-relaxed">{texto}</p>
+                    ) : (
+                      <button onClick={() => setEditando(id)} className="text-left text-[11px] text-[var(--c-muted)] border border-dashed border-[var(--c-line)] rounded p-2 hover:border-[var(--c-accent)]">
+                        {c.ayuda}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
 };
