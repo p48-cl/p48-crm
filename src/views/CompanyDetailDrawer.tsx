@@ -232,65 +232,6 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
           {/* TAB 1: INFO & ACCESOS */}
           {activeTab === 'info' && (
             <div className="space-y-6">
-              {/* Enlaces Operativos: Looker Studio & Google Drive */}
-              <div className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-bg)] p-4 rounded-lg border border-[var(--c-line)]">
-                <h3 className="text-xs font-semibold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] mb-3">
-                  Enlaces del Cliente P48
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="p-3 bg-[var(--c-surface)] rounded border border-[var(--c-surface-3)] flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <ExternalLink className="w-4 h-4 text-[var(--c-accent)]" />
-                      <div>
-                        <p className="text-xs font-medium text-[var(--c-text)]">Dashboard Looker</p>
-                        <p className="text-[10px] text-[var(--c-muted)] font-mono">Reportes de Performance</p>
-                      </div>
-                    </div>
-                    {empresa.looker_dashboard_url ? (
-                      <a
-                        href={empresa.looker_dashboard_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-xs text-[var(--c-accent)] hover:underline flex items-center gap-1 font-mono"
-                      >
-                        Abrir
-                      </a>
-                    ) : (
-                      <span className="text-[11px] text-[var(--c-muted-2)] font-mono">Sin configurar</span>
-                    )}
-                  </div>
-
-                  <div className="p-3 bg-[var(--c-surface)] rounded border border-[var(--c-surface-3)] flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Folder className="w-4 h-4 text-[var(--c-info)]" />
-                      <div>
-                        <p className="text-xs font-medium text-[var(--c-text)]">Carpeta Drive</p>
-                        <p className="text-[10px] text-[var(--c-muted)] font-mono">Estrategia, Creativos & Contratos</p>
-                      </div>
-                    </div>
-                    {empresa.drive_folder_url ? (
-                      <a
-                        href={empresa.drive_folder_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-xs text-[var(--c-info)] hover:underline flex items-center gap-1 font-mono"
-                      >
-                        Abrir
-                      </a>
-                    ) : (
-                      <span className="text-[11px] text-[var(--c-muted-2)] font-mono">Sin configurar</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Cuentas y permisos del cliente (registro por plataforma) */}
-              <CuentasCliente
-                empresaId={empresa.id}
-                notas={accesos.notas_accesos || ''}
-                onNotas={(v) => actualizarAccesosAdmin(empresa.id, { notas_accesos: v })}
-              />
-
               {/* Parámetros Comerciales & Operativos */}
               <div className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-bg)] p-4 rounded-lg border border-[var(--c-line)] space-y-3">
                 <h3 className="text-xs font-semibold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
@@ -422,6 +363,65 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                   </div>
                 </div>
               </div>
+
+              {/* Enlaces Operativos: Looker Studio & Google Drive */}
+              <div className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-bg)] p-4 rounded-lg border border-[var(--c-line)]">
+                <h3 className="text-xs font-semibold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] mb-3">
+                  Enlaces del Cliente P48
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="p-3 bg-[var(--c-surface)] rounded border border-[var(--c-surface-3)] flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <ExternalLink className="w-4 h-4 text-[var(--c-accent)]" />
+                      <div>
+                        <p className="text-xs font-medium text-[var(--c-text)]">Dashboard Looker</p>
+                        <p className="text-[10px] text-[var(--c-muted)] font-mono">Reportes de Performance</p>
+                      </div>
+                    </div>
+                    {empresa.looker_dashboard_url ? (
+                      <a
+                        href={empresa.looker_dashboard_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs text-[var(--c-accent)] hover:underline flex items-center gap-1 font-mono"
+                      >
+                        Abrir
+                      </a>
+                    ) : (
+                      <span className="text-[11px] text-[var(--c-muted-2)] font-mono">Sin configurar</span>
+                    )}
+                  </div>
+
+                  <div className="p-3 bg-[var(--c-surface)] rounded border border-[var(--c-surface-3)] flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Folder className="w-4 h-4 text-[var(--c-info)]" />
+                      <div>
+                        <p className="text-xs font-medium text-[var(--c-text)]">Carpeta Drive</p>
+                        <p className="text-[10px] text-[var(--c-muted)] font-mono">Estrategia, Creativos & Contratos</p>
+                      </div>
+                    </div>
+                    {empresa.drive_folder_url ? (
+                      <a
+                        href={empresa.drive_folder_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs text-[var(--c-info)] hover:underline flex items-center gap-1 font-mono"
+                      >
+                        Abrir
+                      </a>
+                    ) : (
+                      <span className="text-[11px] text-[var(--c-muted-2)] font-mono">Sin configurar</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Cuentas y permisos del cliente (registro por plataforma) */}
+              <CuentasCliente
+                empresaId={empresa.id}
+                notas={accesos.notas_accesos || ''}
+                onNotas={(v) => actualizarAccesosAdmin(empresa.id, { notas_accesos: v })}
+              />
             </div>
           )}
 
