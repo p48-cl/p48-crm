@@ -24,6 +24,8 @@
   --c-on-accent: #FFFFFF;
   --c-danger: #EF4444;
   --c-ok: #10B981;
+  --c-warn: #B45309;
+  --c-info: #0369A1;
   color-scheme: light;
 }
 .dark {
@@ -42,6 +44,8 @@
   --c-on-accent: #FFFFFF;
   --c-danger: #F87171;
   --c-ok: #34D399;
+  --c-warn: #FBBF24;
+  --c-info: #38BDF8;
   color-scheme: dark;
 }
 

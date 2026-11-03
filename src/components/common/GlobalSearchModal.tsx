@@ -325,9 +325,9 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                       <div
                         className={`w-7 h-7 rounded flex items-center justify-center shrink-0 ${
                           item.tipo === 'empresa'
-                            ? 'bg-[var(--c-surface-2)] text-sky-400'
+                            ? 'bg-[var(--c-surface-2)] text-[var(--c-info)]'
                             : item.tipo === 'contacto'
-                            ? 'bg-[var(--c-surface-2)] text-amber-400'
+                            ? 'bg-[var(--c-surface-2)] text-[var(--c-warn)]'
                             : 'bg-[var(--c-surface-2)] text-[var(--c-accent)]'
                         }`}
                       >

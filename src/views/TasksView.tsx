@@ -245,7 +245,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
                       t.prioridad === 'alta'
                         ? 'text-[var(--c-danger)]'
                         : t.prioridad === 'media'
-                        ? 'text-amber-400'
+                        ? 'text-[var(--c-warn)]'
                         : 'text-[var(--c-muted)]'
                     }`}
                   >

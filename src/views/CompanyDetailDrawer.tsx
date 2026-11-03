@@ -247,7 +247,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
 
                   <div className="p-3 bg-[var(--c-surface)] rounded border border-[var(--c-surface-3)] flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Folder className="w-4 h-4 text-sky-400" />
+                      <Folder className="w-4 h-4 text-[var(--c-info)]" />
                       <div>
                         <p className="text-xs font-medium text-[var(--c-text)]">Carpeta Drive</p>
                         <p className="text-[10px] text-[var(--c-muted)] font-mono">Estrategia, Creativos & Contratos</p>
@@ -258,7 +258,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                         href={empresa.drive_folder_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-xs text-sky-400 hover:underline flex items-center gap-1 font-mono"
+                        className="text-xs text-[var(--c-info)] hover:underline flex items-center gap-1 font-mono"
                       >
                         Abrir
                       </a>
@@ -587,7 +587,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                               c.rol_decision === 'decisor'
                                 ? 'bg-[var(--c-accent)]/15 text-[var(--c-accent)]'
                                 : c.rol_decision === 'influenciador'
-                                ? 'bg-sky-950/60 text-sky-400'
+                                ? 'bg-[var(--c-info)]/10 text-[var(--c-info)]'
                                 : 'bg-[var(--c-surface-2)] text-[var(--c-text-2)]'
                             }`}
                           >
