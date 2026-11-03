@@ -45,11 +45,11 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
   const getIcono = (tipo: TipoActividad) => {
     switch (tipo) {
       case 'llamada':
-        return <Phone className="w-3.5 h-3.5 text-sky-400" />;
+        return <Phone className="w-3.5 h-3.5 text-[var(--c-info)]" />;
       case 'reunion':
         return <Video className="w-3.5 h-3.5 text-[var(--c-accent)]" />;
       case 'nota':
-        return <FileText className="w-3.5 h-3.5 text-amber-400" />;
+        return <FileText className="w-3.5 h-3.5 text-[var(--c-warn)]" />;
       case 'correo_manual':
         return <Mail className="w-3.5 h-3.5 text-purple-400" />;
     }

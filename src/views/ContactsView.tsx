@@ -184,7 +184,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                             con.rol_decision === 'decisor'
                               ? 'bg-[var(--c-accent)]/15 text-[var(--c-accent)]'
                               : con.rol_decision === 'influenciador'
-                              ? 'bg-sky-950/60 text-sky-400'
+                              ? 'bg-[var(--c-info)]/10 text-[var(--c-info)]'
                               : 'bg-[var(--c-surface-2)] text-[var(--c-text-2)]'
                           }`}
                         >

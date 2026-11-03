@@ -245,8 +245,8 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                     prospecto: { label: 'Prospecto', color: 'text-[var(--c-muted)]' },
                     ex_cliente: { label: 'Ex cliente', color: 'text-[var(--c-muted-2)] line-through' },
                     descartado: { label: 'Descartado', color: 'text-[var(--c-muted-2)]' },
-                    proveedor: { label: 'Proveedor', color: 'text-sky-400' },
-                    interno: { label: 'Interno', color: 'text-amber-400' },
+                    proveedor: { label: 'Proveedor', color: 'text-[var(--c-info)]' },
+                    interno: { label: 'Interno', color: 'text-[var(--c-warn)]' },
                     archivado: { label: 'Archivado', color: 'text-[var(--c-muted-2)]' },
                   };
 
@@ -273,10 +273,10 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                                 <span
                                   className={`w-2 h-2 rounded-full inline-block ${
                                     emp.salud === 'verde'
-                                      ? 'bg-emerald-400'
+                                      ? 'bg-[var(--c-ok)]'
                                       : emp.salud === 'amarillo'
-                                      ? 'bg-amber-400'
-                                      : 'bg-rose-500'
+                                      ? 'bg-[var(--c-warn)]'
+                                      : 'bg-[var(--c-danger)]'
                                   }`}
                                   title={`Salud: ${emp.salud}`}
                                 />
@@ -356,7 +356,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                               href={emp.drive_folder_url}
                               target="_blank"
                               rel="noreferrer"
-                              className="text-sky-400 hover:opacity-80 p-1"
+                              className="text-[var(--c-info)] hover:opacity-80 p-1"
                               title="Abrir Carpeta Drive"
                             >
                               <Folder className="w-3.5 h-3.5" />

@@ -314,7 +314,7 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
 
             {/* Campos Contacto */}
             <div className="p-4 bg-[var(--c-surface)] rounded border border-[var(--c-line)] space-y-3">
-              <h4 className="font-semibold text-sky-400 flex items-center gap-1.5">
+              <h4 className="font-semibold text-[var(--c-info)] flex items-center gap-1.5">
                 <Users className="w-3.5 h-3.5" />
                 <span>Contacto Asociado (Opcional)</span>
               </h4>
@@ -529,7 +529,7 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
               <p className="text-[10px] text-[var(--c-muted)]">Empresas Creadas</p>
             </div>
             <div className="p-3 bg-[var(--c-surface-2)] rounded border border-[var(--c-line)]">
-              <p className="font-mono text-lg font-bold text-sky-400">
+              <p className="font-mono text-lg font-bold text-[var(--c-info)]">
                 {resultadoImportacion.contactosCreados}
               </p>
               <p className="text-[10px] text-[var(--c-muted)]">Contactos Creados</p>

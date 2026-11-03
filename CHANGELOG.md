@@ -9,6 +9,7 @@ Estado al 3 de noviembre de 2026. Cada entrada indica si ya está en `main`.
 - **PR #13** · Colores residuales a roles del tema y texto claro solo sobre acento o peligro. **En `main`** (2026-11-03).
 - **PR #14** · Contactos editables (fila → formulario con datos, guardar o archivar) y MRR calculado automáticamente (migración `crm_09`). **En `main`** (2026-11-03).
 - **PR #15** · Registro de cuentas y permisos por cliente y plataforma (7 plataformas, ID externo, estado, quién concedió el acceso, fecha). Reemplaza el checklist. Migra los checkboxes (migración `crm_10`). **Pendiente de unir a `main`** (sin conflictos desde el rebase de 2026-11-03).
+- **PR #18** · Estados visuales con tokens del tema: ámbar, cielo, esmeralda, rosa y rojo fijos pasan a `--c-warn`, `--c-info`, `--c-ok`, `--c-danger`. Corrige texto tenue en claro y fondos oscuros heredados. **Pendiente de unir a `main`.**
 - **PR #16** · Salud de datos por cuenta (última lectura del conector), columnas UTM en oportunidades y tabla `metricas_snapshot` (migración `crm_11`). **Error de base:** se unió a la rama del PR #15 y no a `main`. Su código llega a `main` cuando se una el #15.
 
 ## v0.10.0 · 2026-11-03
