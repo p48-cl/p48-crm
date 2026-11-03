@@ -36,7 +36,7 @@ const Barra: React.FC<{ etiqueta: string; actual: number; meta: number }> = ({ e
 };
 
 export const MetasMes: React.FC = () => {
-  const { isAdmin } = useAuth() as any;
+  const { isAdmin } = useAuth();
   const [avance, setAvance] = useState<Avance[]>([]);
   const [metas, setMetas] = useState<Meta[]>([]);
   const [editando, setEditando] = useState(false);
