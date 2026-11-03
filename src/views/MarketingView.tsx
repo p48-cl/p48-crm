@@ -3,6 +3,7 @@ import { MktDashboard } from '../components/marketing/MktDashboard';
 import { ClienteHub } from '../components/marketing/ClienteHub';
 import { Estrategia } from '../components/marketing/Estrategia';
 import { Ads } from '../components/marketing/Ads';
+import { Importador } from '../components/marketing/Importador';
 
 // Secciones de Mkt Inteligence. SEO queda para la siguiente entrega.
 const SECCIONES = [
@@ -10,6 +11,7 @@ const SECCIONES = [
   { id: 'estrategia', label: 'Estrategia' },
   { id: 'ads', label: 'Ads' },
   { id: 'cliente', label: 'Cliente' },
+  { id: 'cargar', label: 'Cargar datos' },
 ] as const;
 
 export const MarketingView: React.FC<{ onAbrirFicha?: (empresaId: string) => void }> = ({ onAbrirFicha }) => {
@@ -39,6 +41,7 @@ export const MarketingView: React.FC<{ onAbrirFicha?: (empresaId: string) => voi
       {seccion === 'dashboard' && <MktDashboard />}
       {seccion === 'estrategia' && <Estrategia />}
       {seccion === 'ads' && <Ads />}
+      {seccion === 'cargar' && <Importador />}
       {seccion === 'cliente' && <ClienteHub onAbrirFicha={onAbrirFicha} />}
     </div>
   );
