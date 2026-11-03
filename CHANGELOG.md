@@ -2,7 +2,7 @@
 
 Formato: versión, fecha de unión a `main`, PR, qué cambia y si toca base de datos. Las migraciones de Supabase se listan aparte porque se aplican en su propio momento.
 
-## v0.10.0 · pendiente de unir
+## v0.10.0 · 2026-11-03
 - **PR #9** · Inicio por pestañas: Resumen, Ventas, Clientes y Equipo.
 - Solo presentación. Sin cambios de datos ni de base.
 
