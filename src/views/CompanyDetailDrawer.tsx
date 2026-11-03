@@ -394,7 +394,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                       onChange={(e) =>
                         actualizarEmpresa(empresa.id, {
                           fee_mensual_clp: e.target.value ? Number(e.target.value) : null,
-                          mrr_actual_clp: empresa.estado === 'cliente' && e.target.value ? Number(e.target.value) : empresa.mrr_actual_clp,
+                          
                         })
                       }
                       placeholder="Ej: 1500000"
@@ -454,7 +454,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-[11px] text-[var(--c-muted)] mb-1">MRR Actual Registrado</label>
+                    <label className="block text-[11px] text-[var(--c-muted)] mb-1">MRR calculado (automático)</label>
                     <div className="px-3 py-1.5 bg-[var(--c-surface)] rounded border border-[var(--c-line)] font-mono text-xs text-[var(--c-accent)]">
                       {empresa.mrr_actual_clp ? formatCLP(empresa.mrr_actual_clp) : '—'}
                     </div>

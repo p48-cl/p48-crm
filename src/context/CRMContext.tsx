@@ -98,6 +98,7 @@ interface CRMContextType {
   archivarEmpresa: (empresaId: string) => Promise<void>;
   actualizarAccesosAdmin: (empresaId: string, accesos: Partial<AccesosAdminMarketing>) => Promise<void>;
   crearContacto: (datos: Partial<Contacto>) => Promise<Contacto | null>;
+  actualizarContacto: (contactoId: string, datos: Partial<Contacto>) => Promise<void>;
   archivarContacto: (contactoId: string) => Promise<void>;
 
   // Actividades & Tareas
@@ -672,6 +673,33 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return data as Contacto;
   };
 
+  const actualizarContacto = async (contactoId: string, datos: Partial<Contacto>) => {
+    const payload = {
+      ...datos,
+      email: datos.email?.trim().toLowerCase() ?? undefined,
+    };
+    // No se reescriben identificadores ni la marca de archivo desde el formulario
+    delete (payload as Partial<Contacto>).id;
+    delete (payload as Partial<Contacto>).archivado;
+    delete (payload as Partial<Contacto>).created_at;
+
+    if (!supabase) {
+      if (isModoDemo) {
+        setContactos((prev) => prev.map((c) => (c.id === contactoId ? { ...c, ...payload } as Contacto : c)));
+      }
+      return;
+    }
+
+    const { error } = await supabase.from('contactos').update(payload).eq('id', contactoId);
+
+    if (error) {
+      setErrorMensaje(parseSupabaseError(error));
+      return;
+    }
+
+    setContactos((prev) => prev.map((c) => (c.id === contactoId ? ({ ...c, ...payload } as Contacto) : c)));
+  };
+
   const archivarContacto = async (contactoId: string) => {
     if (!supabase) return;
 
@@ -1219,6 +1247,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         archivarEmpresa,
         actualizarAccesosAdmin,
         crearContacto,
+        actualizarContacto,
         archivarContacto,
         registrarActividad,
         crearTarea,
