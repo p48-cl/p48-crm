@@ -43,6 +43,7 @@ export const AgencyDashboard: React.FC<{ seccion: SeccionDashboard }> = ({ secci
   const [porResponsable, setPorResponsable] = useState<DashPipelineResponsable[]>([]);
   const [cartera, setCartera] = useState<DashClienteCartera[]>([]);
   const [tareas, setTareas] = useState<DashTareasResponsable[]>([]);
+  const [pauta, setPauta] = useState<{ nombre: string; costo: number; valor: number; conversiones: number }[]>([]);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -77,6 +78,31 @@ export const AgencyDashboard: React.FC<{ seccion: SeccionDashboard }> = ({ secci
   useEffect(() => {
     cargar();
   }, [cargar]);
+
+  // Pauta del mes por cliente (semanas que empiezan en el mes en curso)
+  useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) return;
+    const hoy = new Date();
+    const inicioMes = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-01`;
+    let vivo = true;
+    Promise.all([
+      supabase.from('metricas_campanas').select('empresa_id,costo_clp,valor_conversion_clp,conversiones').gte('periodo', inicioMes).limit(5000),
+      supabase.from('empresas').select('id,nombre').limit(1000),
+    ]).then(([m, e]) => {
+      if (!vivo || m.error || e.error) return;
+      const nombres = new Map(((e.data ?? []) as { id: string; nombre: string }[]).map((x) => [x.id, x.nombre]));
+      const agg = new Map<string, { nombre: string; costo: number; valor: number; conversiones: number }>();
+      for (const f of (m.data ?? []) as { empresa_id: string; costo_clp: number | string | null; valor_conversion_clp: number | string | null; conversiones: number | string | null }[]) {
+        const a = agg.get(f.empresa_id) ?? { nombre: nombres.get(f.empresa_id) ?? 'Cliente', costo: 0, valor: 0, conversiones: 0 };
+        a.costo += Number(f.costo_clp) || 0;
+        a.valor += Number(f.valor_conversion_clp) || 0;
+        a.conversiones += Number(f.conversiones) || 0;
+        agg.set(f.empresa_id, a);
+      }
+      setPauta([...agg.values()].sort((x, y) => y.costo - x.costo));
+    });
+    return () => { vivo = false; };
+  }, []);
 
   if (!isSupabaseConfigured) return null;
 
@@ -208,6 +234,25 @@ export const AgencyDashboard: React.FC<{ seccion: SeccionDashboard }> = ({ secci
             </div>
           )}
         </div>
+      </div>
+
+      {/* Pauta del mes por cliente */}
+      <div className={`${card} ${vis('clientes')}`}>
+        <Cabecera icon={<Layers className="w-4 h-4" />} title="Pauta del mes por cliente" sub="Inversión, conversiones y ROAS de las campañas (semanas que empiezan este mes)" />
+        {pauta.length === 0 ? (
+          <Vacio texto="Sin datos de campañas este mes. Carga métricas de campañas en Mkt Inteligence › Cargar datos." />
+        ) : (
+          <div className="divide-y divide-[var(--c-line)]">
+            {pauta.map((c) => (
+              <div key={c.nombre + c.costo} className="py-2.5 grid grid-cols-[1fr_auto_auto_auto] gap-4 items-center text-xs">
+                <span className="text-[var(--c-text)] truncate">{c.nombre}</span>
+                <span className="font-mono text-[var(--c-text-2)]">{formatCLP(c.costo)}</span>
+                <span className="font-mono text-[var(--c-muted)]">{c.conversiones.toLocaleString('es-CL')} conv.</span>
+                <span className="font-mono font-semibold text-[var(--c-text)] w-14 text-right">{c.costo > 0 ? `${(c.valor / c.costo).toFixed(1)}x` : '—'}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Cartera de clientes */}
