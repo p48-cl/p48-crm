@@ -36,6 +36,7 @@ const CRMAppContent: React.FC = () => {
   const [isNewDealOpen, setIsNewDealOpen] = useState(false);
   const [selectedOpId, setSelectedOpId] = useState<string | null>(null);
   const [selectedEmpId, setSelectedEmpId] = useState<string | null>(null);
+  const [fichaTab, setFichaTab] = useState<'marketing' | undefined>(undefined);
 
   // Modales rápidos de creación
   const [activityModalState, setActivityModalState] = useState<{
@@ -166,7 +167,7 @@ const CRMAppContent: React.FC = () => {
             />
           )}
 
-          {currentView === 'marketing' && <MarketingView />}
+          {currentView === 'marketing' && <MarketingView onAbrirFicha={(id) => { setFichaTab('marketing'); setSelectedEmpId(id); }} />}
 
           {currentView === 'importar' && <ImportView />}
 
@@ -203,7 +204,8 @@ const CRMAppContent: React.FC = () => {
       <CompanyDetailDrawer
         empresa={selectedEmpresaObj}
         isOpen={Boolean(selectedEmpId)}
-        onClose={() => setSelectedEmpId(null)}
+        onClose={() => { setSelectedEmpId(null); setFichaTab(undefined); }}
+        tabInicial={fichaTab}
         onSelectOportunidad={(opId) => setSelectedOpId(opId)}
         onOpenNewActivity={(empId) =>
           setActivityModalState({ isOpen: true, empresaId: empId })

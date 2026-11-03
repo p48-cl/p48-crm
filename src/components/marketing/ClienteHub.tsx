@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { Play } from 'lucide-react';
+import { Play, IdCard } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { METRICAS, Variacion, Tendencia, fechaCorta, useDatosMarketing } from './comun';
 
-export const ClienteHub: React.FC = () => {
+export const ClienteHub: React.FC<{ onAbrirFicha?: (empresaId: string) => void }> = ({ onAbrirFicha }) => {
   const { currentUser } = useAuth();
   const { clientes, filas, cargando } = useDatosMarketing();
   const [clienteSel, setClienteSel] = useState<string>('');
@@ -59,6 +59,14 @@ export const ClienteHub: React.FC = () => {
             </option>
           ))}
         </select>
+        {onAbrirFicha && clienteId && (
+          <button
+            onClick={() => onAbrirFicha(clienteId)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded border border-[var(--c-line)] text-[var(--c-text)] hover:bg-[var(--c-surface-2)]"
+          >
+            <IdCard className="w-3.5 h-3.5" /> Abrir ficha
+          </button>
+        )}
         <button
           onClick={pedirAnalisis}
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded bg-[var(--c-accent)] text-[var(--c-on-accent)]"
