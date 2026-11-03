@@ -19,6 +19,7 @@ import { Empresa, Contacto, Oportunidad, Actividad, Tarea, AccesosAdminMarketing
 import { useCRM } from '../context/CRMContext';
 import { formatCLP, formatFecha, formatMoneda, formatRUT } from '../lib/formatters';
 import { ClientePanel } from '../components/clientes/ClientePanel';
+import { CuentasCliente } from '../components/clientes/CuentasCliente';
 
 interface CompanyDetailDrawerProps {
   empresa: Empresa | null;
@@ -269,66 +270,12 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                 </div>
               </div>
 
-              {/* Checklist de Accesos Admin de Performance */}
-              <div className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-bg)] p-4 rounded-lg border border-[var(--c-line)]">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <h3 className="text-xs font-semibold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
-                      Checklist de Accesos Admin
-                    </h3>
-                    <p className="text-[11px] text-[var(--c-muted)]">
-                      Requisitos técnicos para gestión de campañas
-                    </p>
-                  </div>
-                  <span className="text-[11px] font-mono text-[var(--c-muted)]">
-                    {[accesos.google_ads, accesos.ga4, accesos.meta_bm, accesos.gtm_cmp].filter(Boolean).length} / 4 Listos
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  {[
-                    { key: 'google_ads' as const, label: 'Google Ads (MCC P48)' },
-                    { key: 'ga4' as const, label: 'Google Analytics 4 (GA4)' },
-                    { key: 'meta_bm' as const, label: 'Meta Business Manager' },
-                    { key: 'gtm_cmp' as const, label: 'GTM / Consent Mode v2' },
-                  ].map((item) => {
-                    const checked = Boolean(accesos[item.key]);
-                    return (
-                      <button
-                        key={item.key}
-                        onClick={() => handleToggleAcceso(item.key)}
-                        className={`p-2.5 rounded border text-left flex items-center justify-between transition-colors ${
-                          checked
-                            ? 'bg-[var(--c-surface-2)] border-[var(--c-line)] text-[var(--c-accent)]'
-                            : 'bg-[var(--c-surface)] border-[var(--c-surface-3)] text-[var(--c-muted)] hover:border-[var(--c-line)]'
-                        }`}
-                      >
-                        <span className="font-medium truncate pr-1">{item.label}</span>
-                        {checked ? (
-                          <CheckCircle className="w-4 h-4 shrink-0 text-[var(--c-accent)]" />
-                        ) : (
-                          <XCircle className="w-4 h-4 shrink-0 text-[var(--c-muted-2)]" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div className="mt-3">
-                  <label className="block text-[11px] font-medium text-[var(--c-muted)] mb-1">
-                    Notas de accesos / credenciales:
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={accesos.notas_accesos || ''}
-                    onChange={(e) =>
-                      actualizarAccesosAdmin(empresa.id, { notas_accesos: e.target.value })
-                    }
-                    placeholder="Ej: Partner ID invitado, falta confirmación por correo..."
-                    className="w-full bg-[var(--c-surface)] border border-[var(--c-surface-3)] rounded p-2 text-xs text-[var(--c-text)] placeholder:text-[var(--c-muted-2)] focus:outline-none focus:border-[var(--c-accent)]"
-                  />
-                </div>
-              </div>
+              {/* Cuentas y permisos del cliente (registro por plataforma) */}
+              <CuentasCliente
+                empresaId={empresa.id}
+                notas={accesos.notas_accesos || ''}
+                onNotas={(v) => actualizarAccesosAdmin(empresa.id, { notas_accesos: v })}
+              />
 
               {/* Parámetros Comerciales & Operativos */}
               <div className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-bg)] p-4 rounded-lg border border-[var(--c-line)] space-y-3">
