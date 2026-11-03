@@ -13,8 +13,8 @@ import {
 } from '../../types/crm';
 
 const card = 'surface p-5 space-y-4';
-const titulo = 'text-xs font-semibold text-[#F5F5F5]';
-const subtitulo = 'text-[11px] text-[#8E8E93]';
+const titulo = 'text-xs font-semibold text-[var(--c-text)]';
+const subtitulo = 'text-[11px] text-[var(--c-muted)]';
 
 const mesCorto = (iso: string) =>
   new Date(iso + 'T12:00:00').toLocaleDateString('es-CL', { month: 'short', year: '2-digit' });
@@ -25,12 +25,12 @@ const Cabecera: React.FC<{ icon: React.ReactNode; title: string; sub: string }> 
       <h3 className={titulo}>{title}</h3>
       <p className={subtitulo}>{sub}</p>
     </div>
-    <span className="text-[#888]">{icon}</span>
+    <span className="text-[var(--c-muted)]">{icon}</span>
   </div>
 );
 
 const Vacio: React.FC<{ texto: string }> = ({ texto }) => (
-  <p className="text-xs text-[#666] text-center py-6">{texto}</p>
+  <p className="text-xs text-[var(--c-muted-2)] text-center py-6">{texto}</p>
 );
 
 export type SeccionDashboard = 'resumen' | 'ventas' | 'clientes' | 'equipo';
@@ -87,19 +87,19 @@ export const AgencyDashboard: React.FC<{ seccion: SeccionDashboard }> = ({ secci
   return (
     <section className="space-y-4" aria-label="Dashboard de agencia">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold tracking-tight text-[#F5F5F5]">{{resumen:'Hoy',ventas:'Ventas',clientes:'Clientes',equipo:'Equipo'}[seccion]}</h2>
+        <h2 className="text-lg font-semibold tracking-tight text-[var(--c-text)]">{{resumen:'Hoy',ventas:'Ventas',clientes:'Clientes',equipo:'Equipo'}[seccion]}</h2>
         <button
           type="button"
           onClick={cargar}
           disabled={cargando}
-          className="text-[11px] font-mono uppercase text-[#8E8E93] hover:text-[#BEFF00] disabled:opacity-50"
+          className="text-[11px] font-mono uppercase text-[var(--c-muted)] hover:text-[var(--c-accent)] disabled:opacity-50"
         >
           {cargando ? 'Cargando…' : 'Actualizar'}
         </button>
       </div>
 
       {error && (
-        <p className="text-xs text-[#E8005A] border border-[#E8005A]/40 rounded p-3">{error}</p>
+        <p className="text-xs text-[var(--c-danger)] border border-[var(--c-danger)]/40 rounded p-3">{error}</p>
       )}
 
       {/* Resultados comerciales */}
@@ -111,9 +111,9 @@ export const AgencyDashboard: React.FC<{ seccion: SeccionDashboard }> = ({ secci
           { l: 'Clientes activos', v: String(cartera.length), s: 'Estado cliente' },
         ].map((k) => (
           <div key={k.l} className="surface p-4 space-y-1">
-            <p className="text-[11px] font-mono text-[#8E8E93] uppercase tracking-wider">{k.l}</p>
-            <p className="text-lg font-mono font-bold text-[#F5F5F5] break-words">{k.v}</p>
-            <p className="text-[10px] text-[#666]">{k.s}</p>
+            <p className="text-[11px] font-mono text-[var(--c-muted)] uppercase tracking-wider">{k.l}</p>
+            <p className="text-lg font-mono font-bold text-[var(--c-text)] break-words">{k.v}</p>
+            <p className="text-[10px] text-[var(--c-muted-2)]">{k.s}</p>
           </div>
         ))}
       </div>
@@ -131,11 +131,11 @@ export const AgencyDashboard: React.FC<{ seccion: SeccionDashboard }> = ({ secci
                 return (
                   <div key={e.etapa_id} className="space-y-1">
                     <div className="flex justify-between text-[11px]">
-                      <span className="text-[#CCC]">{e.nombre}</span>
-                      <span className="font-mono text-[#8E8E93]">{n}</span>
+                      <span className="text-[var(--c-text-2)]">{e.nombre}</span>
+                      <span className="font-mono text-[var(--c-muted)]">{n}</span>
                     </div>
-                    <div className="w-full bg-[#1C1C1C] h-2 rounded overflow-hidden">
-                      <div style={{ width: `${Math.round((n / maxEmbudo) * 100)}%` }} className="bg-[#BEFF00] h-full rounded" />
+                    <div className="w-full bg-[var(--c-surface-2)] h-2 rounded overflow-hidden">
+                      <div style={{ width: `${Math.round((n / maxEmbudo) * 100)}%` }} className="bg-[var(--c-accent)] h-full rounded" />
                     </div>
                   </div>
                 );
@@ -154,13 +154,13 @@ export const AgencyDashboard: React.FC<{ seccion: SeccionDashboard }> = ({ secci
               {forecast.map((f) => (
                 <div key={f.mes} className="space-y-1">
                   <div className="flex justify-between text-[11px]">
-                    <span className="text-[#CCC] capitalize">{mesCorto(f.mes)} · {f.oportunidades} op.</span>
-                    <span className="font-mono text-[#8E8E93]">{formatCLP(Number(f.valor_ponderado) || 0)}</span>
+                    <span className="text-[var(--c-text-2)] capitalize">{mesCorto(f.mes)} · {f.oportunidades} op.</span>
+                    <span className="font-mono text-[var(--c-muted)]">{formatCLP(Number(f.valor_ponderado) || 0)}</span>
                   </div>
-                  <div className="w-full bg-[#1C1C1C] h-2 rounded overflow-hidden">
-                    <div style={{ width: `${Math.round(((Number(f.valor_ponderado) || 0) / maxForecast) * 100)}%` }} className="bg-[#666] h-full rounded" />
+                  <div className="w-full bg-[var(--c-surface-2)] h-2 rounded overflow-hidden">
+                    <div style={{ width: `${Math.round(((Number(f.valor_ponderado) || 0) / maxForecast) * 100)}%` }} className="bg-[var(--c-muted-2)] h-full rounded" />
                   </div>
-                  <p className="text-[10px] text-[#666] font-mono">Neto {formatCLP(Number(f.valor_neto) || 0)}</p>
+                  <p className="text-[10px] text-[var(--c-muted-2)] font-mono">Neto {formatCLP(Number(f.valor_neto) || 0)}</p>
                 </div>
               ))}
             </div>
@@ -177,13 +177,13 @@ export const AgencyDashboard: React.FC<{ seccion: SeccionDashboard }> = ({ secci
               {porResponsable.map((p) => (
                 <div key={p.responsable_id} className="space-y-1">
                   <div className="flex justify-between text-[11px]">
-                    <span className="text-[#CCC] truncate">{p.responsable} · {p.oportunidades_abiertas} op.</span>
-                    <span className="font-mono text-[#8E8E93]">{formatCLP(Number(p.valor_ponderado_total) || 0)}</span>
+                    <span className="text-[var(--c-text-2)] truncate">{p.responsable} · {p.oportunidades_abiertas} op.</span>
+                    <span className="font-mono text-[var(--c-muted)]">{formatCLP(Number(p.valor_ponderado_total) || 0)}</span>
                   </div>
-                  <div className="w-full bg-[#1C1C1C] h-2 rounded overflow-hidden">
-                    <div style={{ width: `${Math.round(((Number(p.valor_ponderado_total) || 0) / maxResp) * 100)}%` }} className="bg-[#BEFF00] h-full rounded" />
+                  <div className="w-full bg-[var(--c-surface-2)] h-2 rounded overflow-hidden">
+                    <div style={{ width: `${Math.round(((Number(p.valor_ponderado_total) || 0) / maxResp) * 100)}%` }} className="bg-[var(--c-accent)] h-full rounded" />
                   </div>
-                  <p className="text-[10px] text-[#666] font-mono">Neto {formatCLP(Number(p.valor_neto_total) || 0)}</p>
+                  <p className="text-[10px] text-[var(--c-muted-2)] font-mono">Neto {formatCLP(Number(p.valor_neto_total) || 0)}</p>
                 </div>
               ))}
             </div>
@@ -199,8 +199,8 @@ export const AgencyDashboard: React.FC<{ seccion: SeccionDashboard }> = ({ secci
             <div className="divide-y divide-[#222]">
               {tareas.map((t) => (
                 <div key={t.responsable_id} className="py-2 flex items-center justify-between text-[11px]">
-                  <span className="text-[#CCC] truncate pr-3">{t.responsable}</span>
-                  <span className="font-mono text-[#8E8E93] whitespace-nowrap">
+                  <span className="text-[var(--c-text-2)] truncate pr-3">{t.responsable}</span>
+                  <span className="font-mono text-[var(--c-muted)] whitespace-nowrap">
                     {t.pendientes} pend · {t.vencidas} venc · {t.hoy} hoy
                   </span>
                 </div>
@@ -220,17 +220,17 @@ export const AgencyDashboard: React.FC<{ seccion: SeccionDashboard }> = ({ secci
             {cartera.map((c) => {
               const pronto = c.dias_a_renovacion != null && c.dias_a_renovacion <= 60;
               return (
-                <div key={c.empresa_id} className="p-3 bg-[#101010] border border-[#262626] rounded space-y-1">
+                <div key={c.empresa_id} className="p-3 bg-[var(--c-surface)] border border-[var(--c-line)] rounded space-y-1">
                   <div className="flex justify-between gap-2">
-                    <span className="text-xs text-[#F5F5F5] font-medium truncate">{c.nombre}</span>
-                    <span className="font-mono text-[10px] text-[#8E8E93] uppercase whitespace-nowrap">
+                    <span className="text-xs text-[var(--c-text)] font-medium truncate">{c.nombre}</span>
+                    <span className="font-mono text-[10px] text-[var(--c-muted)] uppercase whitespace-nowrap">
                       {c.plan ? `Plan ${c.plan}` : 'Sin plan'}
                     </span>
                   </div>
-                  <p className="font-mono text-[11px] text-[#CCC]">
+                  <p className="font-mono text-[11px] text-[var(--c-text-2)]">
                     MRR {c.mrr_actual_clp != null ? formatCLP(Number(c.mrr_actual_clp)) : '—'}
                   </p>
-                  <p className={`font-mono text-[10px] ${pronto ? 'text-[#BEFF00]' : 'text-[#666]'}`}>
+                  <p className={`font-mono text-[10px] ${pronto ? 'text-[var(--c-accent)]' : 'text-[var(--c-muted-2)]'}`}>
                     {c.dias_a_renovacion == null
                       ? 'Renovación sin fecha'
                       : c.dias_a_renovacion < 0

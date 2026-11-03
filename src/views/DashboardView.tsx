@@ -49,7 +49,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   );
 
   // Escala de grises pura para dona de fuentes (sin azul, naranja ni morado)
-  const escalaGrisesFuentes = ['#F5F5F5', '#CCCCCC', '#999999', '#666666', '#444444', '#2B2B2B'];
+  const escalaGrisesFuentes = ['#3B82F6', '#60A5FA', '#93C5FD', '#1D4ED8', '#BFDBFE', '#64748B'];
   const totalFuentes = graficoFuentes.reduce((sum, f) => sum + (Number(f.cantidad) || 0), 0) || 1;
 
   // Max motivos de pérdida para barras horizontales
@@ -63,23 +63,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Cabecera & Selector de Alcance */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-sans text-[#F5F5F5] dark:text-[#F5F5F5] light:text-[#111]">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-sans text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
             Panel de Rendimiento Comercial
           </h1>
-          <p className="text-xs text-[#8E8E93] mt-0.5">
+          <p className="text-xs text-[var(--c-muted)] mt-0.5">
             P48 · Agencia B2B de Performance Marketing en Chile
           </p>
         </div>
 
         {/* Filtro Mis datos / Todo el equipo */}
-        <div className="flex items-center gap-1 p-1 bg-[#141414] dark:bg-[#141414] light:bg-[#FAFAFA] border border-[#262626] rounded-lg text-xs">
-          <Filter className="w-3.5 h-3.5 text-[#888] ml-2 mr-1" />
+        <div className="flex items-center gap-1 p-1 bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-[var(--c-bg)] border border-[var(--c-line)] rounded-lg text-xs">
+          <Filter className="w-3.5 h-3.5 text-[var(--c-muted)] ml-2 mr-1" />
           <button
             onClick={() => setFiltroAlcance('todo_el_equipo')}
             className={`px-3 py-1.5 rounded transition-colors whitespace-nowrap ${
               filtroAlcance === 'todo_el_equipo'
-                ? 'bg-[#2A2A2A] text-[#F5F5F5] font-medium shadow-sm'
-                : 'text-[#8E8E93] hover:text-[#CCC]'
+                ? 'bg-[var(--c-surface-3)] text-[var(--c-text)] font-medium shadow-sm'
+                : 'text-[var(--c-muted)] hover:text-[var(--c-text-2)]'
             }`}
           >
             Todo el equipo
@@ -88,8 +88,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             onClick={() => setFiltroAlcance('mis_datos')}
             className={`px-3 py-1.5 rounded transition-colors whitespace-nowrap ${
               filtroAlcance === 'mis_datos'
-                ? 'bg-[#2A2A2A] text-[#F5F5F5] font-medium shadow-sm'
-                : 'text-[#8E8E93] hover:text-[#CCC]'
+                ? 'bg-[var(--c-surface-3)] text-[var(--c-text)] font-medium shadow-sm'
+                : 'text-[var(--c-muted)] hover:text-[var(--c-text-2)]'
             }`}
           >
             Mis datos
@@ -106,7 +106,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             onClick={() => setPestana(t.id)}
             aria-pressed={pestana === t.id}
             className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors min-h-[44px] ${
-              pestana === t.id ? 'bg-[#2A2A2A] text-[#F5F5F5]' : 'text-[#8E8E93] hover:text-[#CCC]'
+              pestana === t.id ? 'bg-[var(--c-surface-3)] text-[var(--c-text)]' : 'text-[var(--c-muted)] hover:text-[var(--c-text-2)]'
             }`}
           >
             {t.label}
@@ -118,30 +118,30 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 ${pestana === 'resumen' ? '' : 'hidden'}`}>
         {/* KPI 1: Pipeline Ponderado */}
         <div className="surface p-4 space-y-1">
-          <p className="text-[11px] font-mono text-[#8E8E93] uppercase tracking-wider">
+          <p className="text-[11px] font-mono text-[var(--c-muted)] uppercase tracking-wider">
             Pipeline Ponderado
           </p>
-          <p className="text-lg font-bold font-mono text-[#F5F5F5] tracking-tight">
+          <p className="text-lg font-bold font-mono text-[var(--c-text)] tracking-tight">
             {formatCLP(kpis.pipeline_ponderado_total)}
           </p>
-          <p className="text-[10px] text-[#777] font-mono">Pesos Chilenos (CLP)</p>
+          <p className="text-[10px] text-[var(--c-muted)] font-mono">Pesos Chilenos (CLP)</p>
         </div>
 
         {/* KPI 2: Oportunidades Abiertas */}
         <div
           onClick={onNavigateKanban}
-          className="p-4 bg-[#141414] dark:bg-[#141414] light:bg-white rounded-lg border border-[#262626] space-y-1 cursor-pointer hover:border-[#444] transition-colors"
+          className="p-4 bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white rounded-lg border border-[var(--c-line)] space-y-1 cursor-pointer hover:border-[#444] transition-colors"
         >
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-mono text-[#8E8E93] uppercase tracking-wider">
+            <p className="text-[11px] font-mono text-[var(--c-muted)] uppercase tracking-wider">
               Oportunidades Abiertas
             </p>
-            <Kanban className="w-3.5 h-3.5 text-[#888]" />
+            <Kanban className="w-3.5 h-3.5 text-[var(--c-muted)]" />
           </div>
-          <p className="text-lg font-bold font-mono text-[#F5F5F5]">
+          <p className="text-lg font-bold font-mono text-[var(--c-text)]">
             {kpis.oportunidades_abiertas_count}
           </p>
-          <p className="text-[10px] text-[#8E8E93] font-mono">Ver tablero kanban →</p>
+          <p className="text-[10px] text-[var(--c-muted)] font-mono">Ver tablero kanban →</p>
         </div>
 
         {/* KPI 3: Seguimientos Atrasados (ÚNICO foco de Magenta #E8005A de la pantalla si hay alerta) */}
@@ -149,8 +149,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           onClick={onNavigateKanban}
           className={`p-4 rounded-lg border space-y-1 cursor-pointer transition-colors ${
             haySeguimientosAtrasados
-              ? 'bg-[#1C1014] border-[#E8005A] text-[#FFA0B5]'
-              : 'bg-[#141414] border-[#262626]'
+              ? 'bg-[#1C1014] border-[var(--c-danger)] text-[#FFA0B5]'
+              : 'bg-[var(--c-surface)] border-[var(--c-line)]'
           }`}
         >
           <div className="flex items-center justify-between">
@@ -159,13 +159,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </p>
             <AlertCircle
               className={`w-3.5 h-3.5 ${
-                haySeguimientosAtrasados ? 'text-[#E8005A]' : 'text-[#888]'
+                haySeguimientosAtrasados ? 'text-[var(--c-danger)]' : 'text-[var(--c-muted)]'
               }`}
             />
           </div>
           <p
             className={`text-lg font-bold font-mono ${
-              haySeguimientosAtrasados ? 'text-[#E8005A]' : 'text-[#F5F5F5]'
+              haySeguimientosAtrasados ? 'text-[var(--c-danger)]' : 'text-[var(--c-text)]'
             }`}
           >
             {kpis.seguimientos_atrasados_count}
@@ -178,29 +178,29 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* KPI 4: Tareas de Hoy */}
         <div
           onClick={onNavigateTasks}
-          className="p-4 bg-[#141414] dark:bg-[#141414] light:bg-white rounded-lg border border-[#262626] space-y-1 cursor-pointer hover:border-[#444] transition-colors"
+          className="p-4 bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white rounded-lg border border-[var(--c-line)] space-y-1 cursor-pointer hover:border-[#444] transition-colors"
         >
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-mono text-[#8E8E93] uppercase tracking-wider">
+            <p className="text-[11px] font-mono text-[var(--c-muted)] uppercase tracking-wider">
               Tareas de Hoy
             </p>
-            <CheckSquare className="w-3.5 h-3.5 text-[#888]" />
+            <CheckSquare className="w-3.5 h-3.5 text-[var(--c-muted)]" />
           </div>
-          <p className="text-lg font-bold font-mono text-[#F5F5F5]">
+          <p className="text-lg font-bold font-mono text-[var(--c-text)]">
             {kpis.tareas_hoy_count}
           </p>
-          <p className="text-[10px] text-[#777] font-mono">Revisar lista diaria →</p>
+          <p className="text-[10px] text-[var(--c-muted)] font-mono">Revisar lista diaria →</p>
         </div>
 
         {/* KPI 5: MRR Clientes Activos */}
         <div className="surface p-4 space-y-1">
-          <p className="text-[11px] font-mono text-[#8E8E93] uppercase tracking-wider">
+          <p className="text-[11px] font-mono text-[var(--c-muted)] uppercase tracking-wider">
             MRR Clientes Activos
           </p>
-          <p className="text-lg font-bold font-mono text-[#F5F5F5] tracking-tight">
+          <p className="text-lg font-bold font-mono text-[var(--c-text)] tracking-tight">
             {formatCLP(kpis.mrr_clientes_activos)}
           </p>
-          <p className="text-[10px] text-[#777] font-mono">Ingreso Mensual Recurrente</p>
+          <p className="text-[10px] text-[var(--c-muted)] font-mono">Ingreso Mensual Recurrente</p>
         </div>
       </div>
 
@@ -210,17 +210,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="surface p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-xs font-semibold text-[#F5F5F5]">
+              <h3 className="text-xs font-semibold text-[var(--c-text)]">
                 Pipeline Ponderado (Etapas Abiertas)
               </h3>
-              <p className="text-[11px] text-[#8E8E93]">Excluye ganadas y perdidas</p>
+              <p className="text-[11px] text-[var(--c-muted)]">Excluye ganadas y perdidas</p>
             </div>
-            <BarChart3 className="w-4 h-4 text-[#888]" />
+            <BarChart3 className="w-4 h-4 text-[var(--c-muted)]" />
           </div>
 
-          <div className="h-44 flex items-end justify-between gap-3 pt-6 pb-2 px-1 border-b border-[#262626]">
+          <div className="h-44 flex items-end justify-between gap-3 pt-6 pb-2 px-1 border-b border-[var(--c-line)]">
             {etapasAbiertas.length === 0 ? (
-              <p className="text-xs text-[#666] w-full text-center py-10">Sin etapas abiertas con datos.</p>
+              <p className="text-xs text-[var(--c-muted-2)] w-full text-center py-10">Sin etapas abiertas con datos.</p>
             ) : (
               etapasAbiertas.map((d) => {
                 const alturaPct = Math.max(
@@ -235,10 +235,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     <div className="w-full flex-1 min-h-0 flex items-end justify-center">
                       <div
                         style={{ height: `${alturaPct}%` }}
-                        className="w-full max-w-[36px] bg-[#333333] border border-[#555555] group-hover:bg-[#E5E5E5] rounded-t transition-all"
+                        className="w-full max-w-[36px] bg-[var(--c-line)] border border-[#555555] group-hover:bg-[var(--c-line)] rounded-t transition-all"
                       />
                     </div>
-                    <span className="font-mono text-[9px] sm:text-[10px] text-[#8E8E93] leading-tight break-words w-full text-center">
+                    <span className="font-mono text-[9px] sm:text-[10px] text-[var(--c-muted)] leading-tight break-words w-full text-center">
                       {d.nombre.split(' ')[0]}
                     </span>
                   </div>
@@ -248,11 +248,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
 
           {/* Resumen separado de Ganadas y Perdidas */}
-          <div className="pt-2 border-t border-[#222] space-y-1 text-[11px] font-mono text-[#8E8E93]">
-            <p className="text-[10px] text-[#666] uppercase">Cierres Históricos:</p>
+          <div className="pt-2 border-t border-[#222] space-y-1 text-[11px] font-mono text-[var(--c-muted)]">
+            <p className="text-[10px] text-[var(--c-muted-2)] uppercase">Cierres Históricos:</p>
             <div className="flex justify-between">
               {etapasCerradas.map((c) => (
-                <span key={c.etapa_id} className="text-[#CCC]">
+                <span key={c.etapa_id} className="text-[var(--c-text-2)]">
                   {c.nombre}: <strong className="text-white">{c.cantidad}</strong> negocios ({formatCLP(c.valor_ponderado)})
                 </span>
               ))}
@@ -264,18 +264,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="surface p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-xs font-semibold text-[#F5F5F5]">
+              <h3 className="text-xs font-semibold text-[var(--c-text)]">
                 Oportunidades por Canal / Fuente
               </h3>
-              <p className="text-[11px] text-[#8E8E93]">Distinguidas con tonos monocromos</p>
+              <p className="text-[11px] text-[var(--c-muted)]">Distinguidas con tonos monocromos</p>
             </div>
-            <PieChart className="w-4 h-4 text-[#888]" />
+            <PieChart className="w-4 h-4 text-[var(--c-muted)]" />
           </div>
 
           <div className="flex items-center justify-center py-1">
             <div className="relative w-32 h-32 flex items-center justify-center">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="38" className="stroke-[#222]" strokeWidth="16" fill="none" />
+                <circle cx="50" cy="50" r="38" className="stroke-[var(--c-surface-3)]" strokeWidth="16" fill="none" />
                 {(() => {
                   let accumulatedOffset = 0;
                   const circumference = 2 * Math.PI * 38;
@@ -305,10 +305,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 })()}
               </svg>
               <div className="absolute text-center">
-                <span className="font-mono text-base font-bold text-[#F5F5F5]">
+                <span className="font-mono text-base font-bold text-[var(--c-text)]">
                   {totalFuentes}
                 </span>
-                <p className="text-[9px] text-[#888] font-mono uppercase">Fuentes</p>
+                <p className="text-[9px] text-[var(--c-muted)] font-mono uppercase">Fuentes</p>
               </div>
             </div>
           </div>
@@ -321,7 +321,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     className="w-2.5 h-2.5 rounded-sm"
                     style={{ backgroundColor: escalaGrisesFuentes[i % escalaGrisesFuentes.length] }}
                   />
-                  <span className="text-[#CCC] truncate">{f.nombre}</span>
+                  <span className="text-[var(--c-text-2)] truncate">{f.nombre}</span>
                 </div>
                 <span className="font-mono text-[#AAA]">
                   {f.cantidad} ({Math.round(((Number(f.cantidad) || 0) / totalFuentes) * 100)}%)
@@ -335,17 +335,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="surface p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-xs font-semibold text-[#F5F5F5]">
+              <h3 className="text-xs font-semibold text-[var(--c-text)]">
                 Motivos de Pérdida
               </h3>
-              <p className="text-[11px] text-[#8E8E93]">Frecuencia de descartes comerciales</p>
+              <p className="text-[11px] text-[var(--c-muted)]">Frecuencia de descartes comerciales</p>
             </div>
-            <TrendingUp className="w-4 h-4 text-[#888]" />
+            <TrendingUp className="w-4 h-4 text-[var(--c-muted)]" />
           </div>
 
           <div className="space-y-3 pt-2">
             {graficoMotivos.length === 0 ? (
-              <p className="text-xs text-[#666] text-center py-8">Sin descartes registrados.</p>
+              <p className="text-xs text-[var(--c-muted-2)] text-center py-8">Sin descartes registrados.</p>
             ) : (
               graficoMotivos.map((m) => {
                 const cant = Number(m.cantidad) || 0;
@@ -353,13 +353,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 return (
                   <div key={m.nombre} className="space-y-1 text-xs">
                     <div className="flex justify-between text-[11px]">
-                      <span className="text-[#CCC] truncate max-w-[200px]">{m.nombre}</span>
-                      <span className="font-mono text-[#8E8E93]">{cant} negocios</span>
+                      <span className="text-[var(--c-text-2)] truncate max-w-[200px]">{m.nombre}</span>
+                      <span className="font-mono text-[var(--c-muted)]">{cant} negocios</span>
                     </div>
-                    <div className="w-full bg-[#1C1C1C] h-2 rounded overflow-hidden">
+                    <div className="w-full bg-[var(--c-surface-2)] h-2 rounded overflow-hidden">
                       <div
                         style={{ width: `${pct}%` }}
-                        className="bg-[#666666] h-full rounded transition-all"
+                        className="bg-[var(--c-muted-2)] h-full rounded transition-all"
                       />
                     </div>
                   </div>

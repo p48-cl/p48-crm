@@ -68,9 +68,9 @@ export const AdminView: React.FC = () => {
   if (!isAdmin) {
     return (
       <div className="p-12 text-center max-w-md mx-auto space-y-3">
-        <ShieldAlert className="w-10 h-10 text-[#E8005A] mx-auto" />
+        <ShieldAlert className="w-10 h-10 text-[var(--c-danger)] mx-auto" />
         <h2 className="text-base font-bold text-white font-sans">Acceso Denegado</h2>
-        <p className="text-xs text-[#8E8E93]">
+        <p className="text-xs text-[var(--c-muted)]">
           Esta sección está restringida exclusivamente a usuarios con rol de Administrador.
         </p>
       </div>
@@ -166,16 +166,16 @@ export const AdminView: React.FC = () => {
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div>
-        <h1 className="text-xl font-bold font-sans text-[#F5F5F5] dark:text-[#F5F5F5] light:text-[#111]">
+        <h1 className="text-xl font-bold font-sans text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
           Administración del Sistema
         </h1>
-        <p className="text-xs text-[#8E8E93] mt-0.5">
+        <p className="text-xs text-[var(--c-muted)] mt-0.5">
           Configuración interna de P48 · Miembros, criterios de calificación y catálogos comerciales
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-[#262626] pb-1 text-xs font-medium">
+      <div className="flex gap-2 border-b border-[var(--c-line)] pb-1 text-xs font-medium">
         {[
           { id: 'miembros' as const, label: 'Miembros del Equipo', icon: Users },
           { id: 'calificacion' as const, label: 'Criterios de Calificación', icon: Award },
@@ -189,8 +189,8 @@ export const AdminView: React.FC = () => {
               onClick={() => setActiveTab(item.id)}
               className={`py-2 px-3.5 rounded-t border-b-2 flex items-center gap-2 transition-colors ${
                 active
-                  ? 'border-[#BEFF00] text-[#BEFF00] font-semibold'
-                  : 'border-transparent text-[#8E8E93] hover:text-white'
+                  ? 'border-[var(--c-accent)] text-[var(--c-accent)] font-semibold'
+                  : 'border-transparent text-[var(--c-muted)] hover:text-white'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -205,26 +205,26 @@ export const AdminView: React.FC = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-xs font-semibold text-[#F5F5F5]">
+              <h3 className="text-xs font-semibold text-[var(--c-text)]">
                 Gestión de Miembros y Roles
               </h3>
-              <p className="text-[11px] text-[#8E8E93]">
+              <p className="text-[11px] text-[var(--c-muted)]">
                 {miembros.length} colaboradores · El acceso Google Auth valida contra esta tabla
               </p>
             </div>
 
             <button
               onClick={() => setShowNewMemberModal(true)}
-              className="bg-[#BEFF00] hover:bg-[#aee600] active:scale-[0.98] text-[#0A0A0A] font-semibold text-xs py-2 px-3.5 rounded flex items-center gap-1.5 transition-all shadow-sm font-sans"
+              className="bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] active:scale-[0.98] text-[var(--c-on-accent)] font-semibold text-xs py-2 px-3.5 rounded flex items-center gap-1.5 transition-all shadow-sm font-sans"
             >
               <Plus className="w-4 h-4 stroke-[2.5]" />
               <span>Nuevo Miembro</span>
             </button>
           </div>
 
-          <div className="bg-[#141414] rounded-lg border border-[#262626] overflow-hidden shadow-sm">
+          <div className="bg-[var(--c-surface)] rounded-lg border border-[var(--c-line)] overflow-hidden shadow-sm">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#0E0E0E] border-b border-[#262626] text-[#8E8E93] uppercase font-mono text-[10px]">
+              <thead className="bg-[var(--c-surface-2)] border-b border-[var(--c-line)] text-[var(--c-muted)] uppercase font-mono text-[10px]">
                 <tr>
                   <th className="py-2.5 px-4 font-medium">Miembro</th>
                   <th className="py-2.5 px-3 font-medium">Email</th>
@@ -235,10 +235,10 @@ export const AdminView: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-[#222]">
                 {miembros.map((m) => (
-                  <tr key={m.id} className="hover:bg-[#1A1A1A] transition-colors">
+                  <tr key={m.id} className="hover:bg-[var(--c-surface-2)] transition-colors">
                     <td className="py-2.5 px-4">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded bg-[#202020] text-[#BEFF00] font-bold text-xs flex items-center justify-center font-mono">
+                        <div className="w-7 h-7 rounded bg-[var(--c-surface-3)] text-[var(--c-accent)] font-bold text-xs flex items-center justify-center font-mono">
                           {m.nombre.slice(0, 1)}
                         </div>
                         <span className="font-semibold text-white">{m.nombre}</span>
@@ -251,7 +251,7 @@ export const AdminView: React.FC = () => {
                         onChange={(e) =>
                           actualizarRolMiembro(m.id, e.target.value as 'admin' | 'miembro')
                         }
-                        className="bg-[#1C1C1C] border border-[#333] rounded px-2 py-1 text-xs text-white"
+                        className="bg-[var(--c-surface-2)] border border-[#333] rounded px-2 py-1 text-xs text-white"
                       >
                         <option value="admin">admin</option>
                         <option value="miembro">miembro</option>
@@ -259,12 +259,12 @@ export const AdminView: React.FC = () => {
                     </td>
                     <td className="py-2.5 px-3 font-mono text-[11px]">
                       {m.activo ? (
-                        <span className="text-[#BEFF00] flex items-center gap-1">
+                        <span className="text-[var(--c-accent)] flex items-center gap-1">
                           <CheckCircle className="w-3 h-3" />
                           <span>Activo</span>
                         </span>
                       ) : (
-                        <span className="text-[#777] flex items-center gap-1 line-through">
+                        <span className="text-[var(--c-muted)] flex items-center gap-1 line-through">
                           <XCircle className="w-3 h-3" />
                           <span>Inactivo</span>
                         </span>
@@ -273,7 +273,7 @@ export const AdminView: React.FC = () => {
                     <td className="py-2.5 px-3 text-right">
                       <button
                         onClick={() => handleToggleActivo(m)}
-                        className="px-2.5 py-1 text-[11px] rounded bg-[#202020] hover:bg-[#282828] text-[#DDD] transition-colors"
+                        className="px-2.5 py-1 text-[11px] rounded bg-[var(--c-surface-3)] hover:bg-[#282828] text-[var(--c-line)] transition-colors"
                       >
                         {m.activo ? 'Desactivar' : 'Activar'}
                       </button>
@@ -287,43 +287,43 @@ export const AdminView: React.FC = () => {
           {/* Modal Nuevo Miembro */}
           {showNewMemberModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-              <div className="bg-[#141414] border border-[#2E2E2E] rounded-lg max-w-md w-full p-6 shadow-2xl">
+              <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-lg max-w-md w-full p-6 shadow-2xl">
                 <h3 className="text-base font-bold text-white mb-1">Registrar Nuevo Miembro</h3>
-                <p className="text-xs text-[#8E8E93] mb-4">
+                <p className="text-xs text-[var(--c-muted)] mb-4">
                   El usuario podrá iniciar sesión con su cuenta Google corporativa.
                 </p>
 
                 <form onSubmit={handleCrearMiembroSubmit} className="space-y-3">
                   <div>
-                    <label className="block text-xs font-medium text-[#EEE] mb-1">Nombre Completo *</label>
+                    <label className="block text-xs font-medium text-[var(--c-text)] mb-1">Nombre Completo *</label>
                     <input
                       type="text"
                       required
                       placeholder="Ej: Carolina Henríquez"
                       value={newMemberName}
                       onChange={(e) => setNewMemberName(e.target.value)}
-                      className="w-full bg-[#1C1C1C] border border-[#2E2E2E] rounded px-3 py-2 text-xs text-white"
+                      className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-[#EEE] mb-1">Email Corporativo (Google Auth) *</label>
+                    <label className="block text-xs font-medium text-[var(--c-text)] mb-1">Email Corporativo (Google Auth) *</label>
                     <input
                       type="email"
                       required
                       placeholder="nombre@p48.cl"
                       value={newMemberEmail}
                       onChange={(e) => setNewMemberEmail(e.target.value)}
-                      className="w-full bg-[#1C1C1C] border border-[#2E2E2E] rounded px-3 py-2 text-xs text-white font-mono"
+                      className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white font-mono"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-[#EEE] mb-1">Rol en CRM</label>
+                    <label className="block text-xs font-medium text-[var(--c-text)] mb-1">Rol en CRM</label>
                     <select
                       value={newMemberRole}
                       onChange={(e) => setNewMemberRole(e.target.value as 'admin' | 'miembro')}
-                      className="w-full bg-[#1C1C1C] border border-[#2E2E2E] rounded px-3 py-2 text-xs text-white"
+                      className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
                     >
                       <option value="miembro">Miembro (Comercial / Operativo)</option>
                       <option value="admin">Admin (Acceso total & Administración)</option>
@@ -334,13 +334,13 @@ export const AdminView: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setShowNewMemberModal(false)}
-                      className="px-3 py-1.5 text-xs text-[#888] hover:text-white"
+                      className="px-3 py-1.5 text-xs text-[var(--c-muted)] hover:text-white"
                     >
                       Cancelar
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-1.5 text-xs font-semibold bg-[#BEFF00] text-black rounded"
+                      className="px-4 py-1.5 text-xs font-semibold bg-[var(--c-accent)] text-black rounded"
                     >
                       Guardar Miembro
                     </button>
@@ -358,14 +358,14 @@ export const AdminView: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-xs font-semibold text-[#F5F5F5]">
+                <h3 className="text-xs font-semibold text-[var(--c-text)]">
                   {plantilla?.nombre || 'Plantilla de Calificación P48'}
                 </h3>
-                <span className="font-mono text-[10px] text-[#BEFF00] bg-[#BEFF00]/15 px-1.5 py-0.2 rounded">
+                <span className="font-mono text-[10px] text-[var(--c-accent)] bg-[var(--c-accent)]/15 px-1.5 py-0.2 rounded">
                   Única Plantilla Activa
                 </span>
               </div>
-              <p className="text-[11px] text-[#8E8E93] mt-0.5">
+              <p className="text-[11px] text-[var(--c-muted)] mt-0.5">
                 Criterios de evaluación para oportunidades de performance marketing B2B
               </p>
             </div>
@@ -381,7 +381,7 @@ export const AdminView: React.FC = () => {
                 });
                 setShowNewCriterio(!showNewCriterio);
               }}
-              className="bg-[#BEFF00] hover:bg-[#aee600] text-[#0A0A0A] font-semibold text-xs py-1.5 px-3 rounded flex items-center gap-1.5 transition-colors font-sans"
+              className="bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] text-[var(--c-on-accent)] font-semibold text-xs py-1.5 px-3 rounded flex items-center gap-1.5 transition-colors font-sans"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Agregar Criterio</span>
@@ -391,7 +391,7 @@ export const AdminView: React.FC = () => {
           {showNewCriterio && (
             <form
               onSubmit={handleGuardarCriterio}
-              className="p-4 bg-[#141414] rounded-lg border border-[#333] space-y-3"
+              className="p-4 bg-[var(--c-surface)] rounded-lg border border-[#333] space-y-3"
             >
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-bold text-white">
@@ -400,7 +400,7 @@ export const AdminView: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#EEE] mb-1">
+                <label className="block text-xs font-medium text-[var(--c-text)] mb-1">
                   Pregunta o Criterio *
                 </label>
                 <input
@@ -409,17 +409,17 @@ export const AdminView: React.FC = () => {
                   placeholder="Ej: ¿Inversión mínima en Google Ads >= $ 2.5M CLP / mes?"
                   value={nuevoCriterio.pregunta || ''}
                   onChange={(e) => setNuevoCriterio({ ...nuevoCriterio, pregunta: e.target.value })}
-                  className="w-full bg-[#1C1C1C] border border-[#2E2E2E] rounded px-3 py-1.5 text-xs text-white"
+                  className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-1.5 text-xs text-white"
                 />
               </div>
 
               <div className="grid grid-cols-3 gap-3 text-xs">
                 <div>
-                  <label className="block text-[11px] text-[#CCC] mb-1">Tipo de Respuesta</label>
+                  <label className="block text-[11px] text-[var(--c-text-2)] mb-1">Tipo de Respuesta</label>
                   <select
                     value={nuevoCriterio.tipo}
                     onChange={(e) => setNuevoCriterio({ ...nuevoCriterio, tipo: e.target.value as any })}
-                    className="w-full bg-[#1C1C1C] border border-[#2E2E2E] rounded px-2.5 py-1 text-xs text-white"
+                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1 text-xs text-white"
                   >
                     <option value="si_no">Sí / No</option>
                     <option value="puntaje_1_5">Puntaje 1 a 5</option>
@@ -427,14 +427,14 @@ export const AdminView: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] text-[#CCC] mb-1">Peso (Puntos)</label>
+                  <label className="block text-[11px] text-[var(--c-text-2)] mb-1">Peso (Puntos)</label>
                   <input
                     type="number"
                     min={1}
                     max={100}
                     value={nuevoCriterio.peso || 10}
                     onChange={(e) => setNuevoCriterio({ ...nuevoCriterio, peso: Number(e.target.value) })}
-                    className="w-full bg-[#1C1C1C] border border-[#2E2E2E] rounded px-2.5 py-1 text-xs text-white font-mono"
+                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1 text-xs text-white font-mono"
                   />
                 </div>
 
@@ -446,9 +446,9 @@ export const AdminView: React.FC = () => {
                     onChange={(e) =>
                       setNuevoCriterio({ ...nuevoCriterio, es_eliminatorio: e.target.checked })
                     }
-                    className="rounded border-[#444] bg-[#222] text-[#E8005A]"
+                    className="rounded border-[#444] bg-[#222] text-[var(--c-danger)]"
                   />
-                  <label htmlFor="es_elim_chk" className="text-xs text-[#E8005A] font-semibold">
+                  <label htmlFor="es_elim_chk" className="text-xs text-[var(--c-danger)] font-semibold">
                     Criterio Eliminatorio
                   </label>
                 </div>
@@ -461,13 +461,13 @@ export const AdminView: React.FC = () => {
                     setShowNewCriterio(false);
                     setCriterioEditando(null);
                   }}
-                  className="px-2.5 py-1 text-xs text-[#888] hover:text-white"
+                  className="px-2.5 py-1 text-xs text-[var(--c-muted)] hover:text-white"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-3.5 py-1 text-xs font-semibold bg-[#BEFF00] text-black rounded"
+                  className="px-3.5 py-1 text-xs font-semibold bg-[var(--c-accent)] text-black rounded"
                 >
                   {criterioEditando ? 'Actualizar Criterio' : 'Guardar Criterio'}
                 </button>
@@ -475,9 +475,9 @@ export const AdminView: React.FC = () => {
             </form>
           )}
 
-          <div className="bg-[#141414] rounded-lg border border-[#262626] overflow-hidden">
+          <div className="bg-[var(--c-surface)] rounded-lg border border-[var(--c-line)] overflow-hidden">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#0E0E0E] border-b border-[#262626] text-[#8E8E93] uppercase font-mono text-[10px]">
+              <thead className="bg-[var(--c-surface-2)] border-b border-[var(--c-line)] text-[var(--c-muted)] uppercase font-mono text-[10px]">
                 <tr>
                   <th className="py-2.5 px-3">Orden</th>
                   <th className="py-2.5 px-4">Criterio / Pregunta</th>
@@ -490,32 +490,32 @@ export const AdminView: React.FC = () => {
               <tbody className="divide-y divide-[#222]">
                 {criterios.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-6 text-center text-xs text-[#777]">
+                    <td colSpan={6} className="py-6 text-center text-xs text-[var(--c-muted)]">
                       No hay criterios configurados en la plantilla activa.
                     </td>
                   </tr>
                 ) : (
                   criterios.map((c) => (
-                    <tr key={c.id} className="hover:bg-[#1A1A1A]">
-                      <td className="py-2.5 px-3 font-mono text-[11px] text-[#777]">0{c.orden}</td>
+                    <tr key={c.id} className="hover:bg-[var(--c-surface-2)]">
+                      <td className="py-2.5 px-3 font-mono text-[11px] text-[var(--c-muted)]">0{c.orden}</td>
                       <td className="py-2.5 px-4 font-medium text-white">{c.pregunta}</td>
                       <td className="py-2.5 px-3 font-mono text-[11px] text-[#AAA]">
                         {c.tipo === 'si_no' ? 'Sí / No' : '1 a 5'}
                       </td>
-                      <td className="py-2.5 px-3 font-mono text-[#BEFF00] font-bold">{c.peso} pts</td>
+                      <td className="py-2.5 px-3 font-mono text-[var(--c-accent)] font-bold">{c.peso} pts</td>
                       <td className="py-2.5 px-3">
                         {c.es_eliminatorio ? (
-                          <span className="text-[#E8005A] font-mono text-[10px] font-bold">
+                          <span className="text-[var(--c-danger)] font-mono text-[10px] font-bold">
                             ELIMINATORIO
                           </span>
                         ) : (
-                          <span className="text-[#666] font-mono text-[10px]">Opcional</span>
+                          <span className="text-[var(--c-muted-2)] font-mono text-[10px]">Opcional</span>
                         )}
                       </td>
                       <td className="py-2.5 px-3 text-right">
                         <button
                           onClick={() => handleIniciarEdicionCriterio(c)}
-                          className="p-1 text-[#888] hover:text-[#BEFF00] transition-colors"
+                          className="p-1 text-[var(--c-muted)] hover:text-[var(--c-accent)] transition-colors"
                           title="Editar Criterio"
                         >
                           <Edit2 className="w-3.5 h-3.5 inline-block" />
@@ -549,8 +549,8 @@ export const AdminView: React.FC = () => {
                 }}
                 className={`px-3 py-1.5 rounded transition-colors ${
                   catalogoActivo === c.id
-                    ? 'bg-[#BEFF00] text-black font-semibold'
-                    : 'bg-[#1C1C1C] text-[#AAA] hover:text-white'
+                    ? 'bg-[var(--c-accent)] text-black font-semibold'
+                    : 'bg-[var(--c-surface-2)] text-[#AAA] hover:text-white'
                 }`}
               >
                 {c.label}
@@ -570,17 +570,17 @@ export const AdminView: React.FC = () => {
               }...`}
               value={nuevoItemTexto}
               onChange={(e) => setNuevoItemTexto(e.target.value)}
-              className="flex-1 bg-[#141414] border border-[#2E2E2E] rounded px-3 py-2 text-xs text-white"
+              className="flex-1 bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
             />
             <button
               type="submit"
-              className="bg-[#BEFF00] hover:bg-[#aee600] text-black font-semibold text-xs px-4 py-2 rounded transition-colors font-sans"
+              className="bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] text-black font-semibold text-xs px-4 py-2 rounded transition-colors font-sans"
             >
               Agregar
             </button>
           </form>
 
-          <div className="bg-[#141414] rounded-lg border border-[#262626] divide-y divide-[#222]">
+          <div className="bg-[var(--c-surface)] rounded-lg border border-[var(--c-line)] divide-y divide-[#222]">
             {(catalogoActivo === 'fuentes'
               ? fuentes
               : catalogoActivo === 'motivos'
@@ -589,10 +589,10 @@ export const AdminView: React.FC = () => {
             ).map((item) => (
               <div
                 key={item.id}
-                className="p-3 flex items-center justify-between text-xs hover:bg-[#1A1A1A] transition-colors"
+                className="p-3 flex items-center justify-between text-xs hover:bg-[var(--c-surface-2)] transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <span className="font-mono text-[10px] text-[#666]">#{item.orden}</span>
+                  <span className="font-mono text-[10px] text-[var(--c-muted-2)]">#{item.orden}</span>
                   {editandoItemCatalogo?.id === item.id ? (
                     <div className="flex items-center gap-2">
                       <input
@@ -601,23 +601,23 @@ export const AdminView: React.FC = () => {
                         onChange={(e) =>
                           setEditandoItemCatalogo({ ...editandoItemCatalogo, nombre: e.target.value })
                         }
-                        className="bg-[#1C1C1C] border border-[#333] rounded px-2 py-0.5 text-xs text-white"
+                        className="bg-[var(--c-surface-2)] border border-[#333] rounded px-2 py-0.5 text-xs text-white"
                       />
                       <button
                         onClick={() => handleGuardarEdicionCatalogo(item)}
-                        className="text-[11px] text-[#BEFF00] hover:underline"
+                        className="text-[11px] text-[var(--c-accent)] hover:underline"
                       >
                         Guardar
                       </button>
                       <button
                         onClick={() => setEditandoItemCatalogo(null)}
-                        className="text-[11px] text-[#888] hover:text-white"
+                        className="text-[11px] text-[var(--c-muted)] hover:text-white"
                       >
                         Cancelar
                       </button>
                     </div>
                   ) : (
-                    <span className={`font-medium ${item.activo ? 'text-white' : 'line-through text-[#666]'}`}>
+                    <span className={`font-medium ${item.activo ? 'text-white' : 'line-through text-[var(--c-muted-2)]'}`}>
                       {item.nombre}
                     </span>
                   )}
@@ -626,7 +626,7 @@ export const AdminView: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setEditandoItemCatalogo({ id: item.id, nombre: item.nombre })}
-                    className="p-1 text-[#888] hover:text-white transition-colors"
+                    className="p-1 text-[var(--c-muted)] hover:text-white transition-colors"
                     title="Editar nombre"
                   >
                     <Edit2 className="w-3.5 h-3.5" />
@@ -638,8 +638,8 @@ export const AdminView: React.FC = () => {
                     }
                     className={`text-[11px] font-mono px-2 py-0.5 rounded transition-colors ${
                       item.activo
-                        ? 'text-[#8E8E93] hover:text-[#E8005A]'
-                        : 'text-[#BEFF00] hover:underline'
+                        ? 'text-[var(--c-muted)] hover:text-[var(--c-danger)]'
+                        : 'text-[var(--c-accent)] hover:underline'
                     }`}
                   >
                     {item.activo ? 'Desactivar' : 'Reactivar'}
@@ -654,25 +654,25 @@ export const AdminView: React.FC = () => {
       {/* Modal Reasignar Registros al Desactivar Miembro (Máximo 1 alerta magenta) */}
       {desactivandoMiembro && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#141414] border border-[#E8005A]/40 rounded-xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center gap-2 text-[#E8005A]">
+          <div className="bg-[var(--c-surface)] border border-[var(--c-danger)]/40 rounded-xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-2 text-[var(--c-danger)]">
               <AlertTriangle className="w-5 h-5" />
               <h3 className="text-base font-bold text-white">Reasignar Registros</h3>
             </div>
 
-            <p className="text-xs text-[#CCC] leading-relaxed">
+            <p className="text-xs text-[var(--c-text-2)] leading-relaxed">
               El colaborador <strong>{desactivandoMiembro.nombre}</strong> tiene empresas u oportunidades activas asignadas.
               Para desactivarlo, debes reasignar sus registros comerciales a otro miembro activo.
             </p>
 
             <div>
-              <label className="block text-xs font-medium text-[#EEE] mb-1">
+              <label className="block text-xs font-medium text-[var(--c-text)] mb-1">
                 Reasignar todos los negocios y cuentas a:
               </label>
               <select
                 value={sustitutoId}
                 onChange={(e) => setSustitutoId(e.target.value)}
-                className="w-full bg-[#1C1C1C] border border-[#333] rounded px-3 py-2 text-xs text-white"
+                className="w-full bg-[var(--c-surface-2)] border border-[#333] rounded px-3 py-2 text-xs text-white"
               >
                 {miembros
                   .filter((m) => m.id !== desactivandoMiembro.id && m.activo)
@@ -688,14 +688,14 @@ export const AdminView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setDesactivandoMiembro(null)}
-                className="px-3 py-1.5 text-xs text-[#888] hover:text-white"
+                className="px-3 py-1.5 text-xs text-[var(--c-muted)] hover:text-white"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleConfirmarReasignacion}
-                className="px-4 py-1.5 text-xs font-semibold bg-[#E8005A] hover:bg-[#c9004d] text-white rounded transition-colors"
+                className="px-4 py-1.5 text-xs font-semibold bg-[var(--c-danger)] hover:bg-[#c9004d] text-white rounded transition-colors"
               >
                 Reasignar y Desactivar
               </button>

@@ -39,7 +39,7 @@ const fecha = (iso: string | null) =>
   iso ? new Date(iso + 'T12:00:00').toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 const etiqueta = (v: string) => v.replace('_', ' ');
 
-const card = 'p-4 bg-[#141414] border border-[#262626] rounded-lg space-y-3';
+const card = 'p-4 bg-[var(--c-surface)] border border-[var(--c-line)] rounded-lg space-y-3';
 
 export const PortalView: React.FC = () => {
   const { portalEmpresas, logout } = useAuth();
@@ -82,16 +82,16 @@ export const PortalView: React.FC = () => {
   const proximos = entregables.filter((x) => x.estado !== 'entregado').slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F5] font-sans selection:bg-[#BEFF00] selection:text-[#0A0A0A]">
-      <header className="sticky top-0 z-20 bg-[#0A0A0A]/95 border-b border-[#262626] px-4 py-3 flex items-center justify-between gap-3">
+    <div className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] font-sans selection:bg-[var(--c-accent)] selection:text-[var(--c-on-accent)]">
+      <header className="sticky top-0 z-20 bg-[var(--c-bg)]/95 border-b border-[var(--c-line)] px-4 py-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 bg-[#BEFF00] text-[#0A0A0A] font-black flex items-center justify-center text-xs font-mono rounded shrink-0">P48</div>
+          <div className="w-8 h-8 bg-[var(--c-accent)] text-[var(--c-on-accent)] font-black flex items-center justify-center text-xs font-mono rounded shrink-0">J</div>
           <div className="min-w-0">
             <p className="text-sm font-bold truncate">{empresa.nombre}</p>
-            <p className="text-[10px] font-mono uppercase text-[#8E8E93]">Portal de clientes</p>
+            <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Portal de clientes</p>
           </div>
         </div>
-        <button onClick={() => logout()} className="flex items-center gap-1.5 text-xs text-[#8E8E93] hover:text-[#F5F5F5]">
+        <button onClick={() => logout()} className="flex items-center gap-1.5 text-xs text-[var(--c-muted)] hover:text-[var(--c-text)]">
           <LogOut className="w-4 h-4" /> <span className="hidden sm:inline">Cerrar sesión</span>
         </button>
       </header>
@@ -101,7 +101,7 @@ export const PortalView: React.FC = () => {
           <select
             value={empresa.empresa_id}
             onChange={(ev) => setEmpresaId(ev.target.value)}
-            className="w-full px-3 py-2 text-xs bg-[#141414] border border-[#2E2E2E] rounded"
+            className="w-full px-3 py-2 text-xs bg-[var(--c-surface)] border border-[var(--c-line)] rounded"
           >
             {portalEmpresas.map((e) => (
               <option key={e.empresa_id} value={e.empresa_id}>{e.nombre}</option>
@@ -109,35 +109,35 @@ export const PortalView: React.FC = () => {
           </select>
         )}
 
-        {error && <p className="text-xs text-[#E8005A] border border-[#E8005A]/40 rounded p-3">{error}</p>}
+        {error && <p className="text-xs text-[var(--c-danger)] border border-[var(--c-danger)]/40 rounded p-3">{error}</p>}
 
         {/* Resumen */}
         <div className="grid grid-cols-2 gap-3">
           <div className={card}>
-            <p className="text-[11px] font-mono uppercase text-[#8E8E93]">Plan</p>
+            <p className="text-[11px] font-mono uppercase text-[var(--c-muted)]">Plan</p>
             <p className="text-lg font-mono font-bold">{empresa.plan ? `Plan ${empresa.plan}` : '—'}</p>
           </div>
           <div className={card}>
-            <p className="text-[11px] font-mono uppercase text-[#8E8E93]">Renovación</p>
+            <p className="text-[11px] font-mono uppercase text-[var(--c-muted)]">Renovación</p>
             <p className="text-lg font-mono font-bold">{fecha(empresa.fecha_renovacion)}</p>
           </div>
           <div className={card}>
-            <p className="text-[11px] font-mono uppercase text-[#8E8E93]">Proyectos activos</p>
+            <p className="text-[11px] font-mono uppercase text-[var(--c-muted)]">Proyectos activos</p>
             <p className="text-lg font-mono font-bold">{activos.length}</p>
           </div>
           <div className={card}>
-            <p className="text-[11px] font-mono uppercase text-[#8E8E93]">Entregables pendientes</p>
+            <p className="text-[11px] font-mono uppercase text-[var(--c-muted)]">Entregables pendientes</p>
             <p className="text-lg font-mono font-bold">{entregables.filter((x) => x.estado !== 'entregado').length}</p>
           </div>
         </div>
 
         {proximos.length > 0 && (
           <div className={card}>
-            <h2 className="text-xs font-semibold flex items-center gap-2"><CalendarClock className="w-4 h-4 text-[#BEFF00]" /> Próximos entregables</h2>
+            <h2 className="text-xs font-semibold flex items-center gap-2"><CalendarClock className="w-4 h-4 text-[var(--c-accent)]" /> Próximos entregables</h2>
             {proximos.map((x) => (
               <div key={x.id} className="flex justify-between gap-3 text-xs">
                 <span className="truncate">{x.titulo}</span>
-                <span className="font-mono text-[#8E8E93] whitespace-nowrap">{fecha(x.fecha_comprometida)}</span>
+                <span className="font-mono text-[var(--c-muted)] whitespace-nowrap">{fecha(x.fecha_comprometida)}</span>
               </div>
             ))}
           </div>
@@ -150,17 +150,17 @@ export const PortalView: React.FC = () => {
             <iframe
               title="Dashboard de resultados"
               src={embed}
-              className="w-full h-[70vh] min-h-[420px] rounded border border-[#262626] bg-[#101010]"
+              className="w-full h-[70vh] min-h-[420px] rounded border border-[var(--c-line)] bg-[var(--c-surface)]"
               sandbox="allow-scripts allow-same-origin allow-popups"
               referrerPolicy="no-referrer"
               allowFullScreen
             />
           ) : linkLooker ? (
-            <a href={linkLooker} target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-2 text-xs text-[#BEFF00] hover:underline">
+            <a href={linkLooker} target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-2 text-xs text-[var(--c-accent)] hover:underline">
               <ExternalLink className="w-4 h-4" /> Abrir dashboard
             </a>
           ) : (
-            <p className="text-xs text-[#777]">Dashboard en preparación.</p>
+            <p className="text-xs text-[var(--c-muted)]">Dashboard en preparación.</p>
           )}
         </section>
 
@@ -168,7 +168,7 @@ export const PortalView: React.FC = () => {
         <section className="space-y-3">
           <h2 className="text-sm font-bold">Proyectos</h2>
           {proyectos.length === 0 ? (
-            <p className="text-xs text-[#777]">Aún no hay proyectos publicados.</p>
+            <p className="text-xs text-[var(--c-muted)]">Aún no hay proyectos publicados.</p>
           ) : (
             proyectos.map((p) => {
               const ents = entregables.filter((x) => x.proyecto_id === p.id);
@@ -177,11 +177,11 @@ export const PortalView: React.FC = () => {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-sm font-semibold">{p.nombre}</p>
-                      {p.descripcion && <p className="text-xs text-[#8E8E93] mt-0.5">{p.descripcion}</p>}
+                      {p.descripcion && <p className="text-xs text-[var(--c-muted)] mt-0.5">{p.descripcion}</p>}
                     </div>
-                    <span className="font-mono text-[10px] uppercase text-[#BEFF00] whitespace-nowrap">{etiqueta(p.estado)}</span>
+                    <span className="font-mono text-[10px] uppercase text-[var(--c-accent)] whitespace-nowrap">{etiqueta(p.estado)}</span>
                   </div>
-                  <p className="font-mono text-[10px] text-[#666]">{fecha(p.fecha_inicio)} → {fecha(p.fecha_fin)}</p>
+                  <p className="font-mono text-[10px] text-[var(--c-muted-2)]">{fecha(p.fecha_inicio)} → {fecha(p.fecha_fin)}</p>
                   {ents.length > 0 && (
                     <div className="divide-y divide-[#222]">
                       {ents.map((x) => {
@@ -190,12 +190,12 @@ export const PortalView: React.FC = () => {
                           <div key={x.id} className="py-2 flex items-center justify-between gap-3 text-xs">
                             <div className="min-w-0">
                               <p className="truncate">{x.titulo}</p>
-                              <p className="font-mono text-[10px] text-[#8E8E93]">
+                              <p className="font-mono text-[10px] text-[var(--c-muted)]">
                                 {etiqueta(x.estado)}{x.fecha_comprometida ? ` · ${fecha(x.fecha_comprometida)}` : ''}
                               </p>
                             </div>
                             {doc && (
-                              <a href={doc} target="_blank" rel="noreferrer noopener" className="text-[#BEFF00] hover:underline shrink-0">Ver</a>
+                              <a href={doc} target="_blank" rel="noreferrer noopener" className="text-[var(--c-accent)] hover:underline shrink-0">Ver</a>
                             )}
                           </div>
                         );
@@ -212,7 +212,7 @@ export const PortalView: React.FC = () => {
         <section className="space-y-3">
           <h2 className="text-sm font-bold flex items-center gap-2"><FileText className="w-4 h-4" /> Reportes</h2>
           {reportes.length === 0 ? (
-            <p className="text-xs text-[#777]">Aún no hay reportes publicados.</p>
+            <p className="text-xs text-[var(--c-muted)]">Aún no hay reportes publicados.</p>
           ) : (
             <div className={card + ' divide-y divide-[#222] !space-y-0'}>
               {reportes.map((r) => {
@@ -221,9 +221,9 @@ export const PortalView: React.FC = () => {
                   <div key={r.id} className="py-2 flex items-center justify-between gap-3 text-xs first:pt-0 last:pb-0">
                     <div className="min-w-0">
                       <p className="truncate">{r.titulo}</p>
-                      <p className="font-mono text-[10px] text-[#8E8E93]">{r.tipo}{r.periodo ? ` · ${fecha(r.periodo)}` : ''}</p>
+                      <p className="font-mono text-[10px] text-[var(--c-muted)]">{r.tipo}{r.periodo ? ` · ${fecha(r.periodo)}` : ''}</p>
                     </div>
-                    {url && <a href={url} target="_blank" rel="noreferrer noopener" className="text-[#BEFF00] hover:underline shrink-0">Abrir</a>}
+                    {url && <a href={url} target="_blank" rel="noreferrer noopener" className="text-[var(--c-accent)] hover:underline shrink-0">Abrir</a>}
                   </div>
                 );
               })}
@@ -232,8 +232,8 @@ export const PortalView: React.FC = () => {
         </section>
 
         {linkDrive && (
-          <a href={linkDrive} target="_blank" rel="noreferrer noopener" className={card + ' flex items-center gap-3 text-xs hover:border-[#BEFF00]'}>
-            <FolderOpen className="w-4 h-4 text-[#BEFF00]" /> Carpeta de documentos
+          <a href={linkDrive} target="_blank" rel="noreferrer noopener" className={card + ' flex items-center gap-3 text-xs hover:border-[var(--c-accent)]'}>
+            <FolderOpen className="w-4 h-4 text-[var(--c-accent)]" /> Carpeta de documentos
           </a>
         )}
       </main>

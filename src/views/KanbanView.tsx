@@ -135,22 +135,22 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
       {/* Header del CRM */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold font-sans text-[#F5F5F5] dark:text-[#F5F5F5] light:text-[#111]">
+          <h1 className="text-xl font-bold font-sans text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
             Pipeline de Negocios
           </h1>
-          <p className="text-xs text-[#8E8E93] mt-0.5">
+          <p className="text-xs text-[var(--c-muted)] mt-0.5">
             Gestión comercial basada en vista calculada de Supabase
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center p-0.5 bg-[#161616] dark:bg-[#161616] light:bg-[#EAEAEA] border border-[#2E2E2E] rounded text-xs">
+          <div className="flex items-center p-0.5 bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-surface-3)] border border-[var(--c-line)] rounded text-xs">
             <button
               onClick={() => setVistaModo('kanban')}
               className={`px-3 py-1.5 rounded flex items-center gap-1.5 transition-colors ${
                 vistaModo === 'kanban'
-                  ? 'bg-[#2A2A2A] text-[#F5F5F5] font-medium shadow-sm'
-                  : 'text-[#8E8E93] hover:text-[#CCC]'
+                  ? 'bg-[var(--c-surface-3)] text-[var(--c-text)] font-medium shadow-sm'
+                  : 'text-[var(--c-muted)] hover:text-[var(--c-text-2)]'
               }`}
             >
               <Kanban className="w-3.5 h-3.5" />
@@ -160,8 +160,8 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
               onClick={() => setVistaModo('tabla')}
               className={`px-3 py-1.5 rounded flex items-center gap-1.5 transition-colors ${
                 vistaModo === 'tabla'
-                  ? 'bg-[#2A2A2A] text-[#F5F5F5] font-medium shadow-sm'
-                  : 'text-[#8E8E93] hover:text-[#CCC]'
+                  ? 'bg-[var(--c-surface-3)] text-[var(--c-text)] font-medium shadow-sm'
+                  : 'text-[var(--c-muted)] hover:text-[var(--c-text-2)]'
               }`}
             >
               <TableIcon className="w-3.5 h-3.5" />
@@ -172,7 +172,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
           {/* Botón Principal (ÚNICO Lima #BEFF00) */}
           <button
             onClick={onOpenNewDeal}
-            className="bg-[#BEFF00] hover:bg-[#aee600] active:scale-[0.98] text-[#0A0A0A] font-semibold text-xs py-2 px-3.5 rounded flex items-center gap-1.5 transition-all shadow-sm font-sans"
+            className="bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] active:scale-[0.98] text-[var(--c-on-accent)] font-semibold text-xs py-2 px-3.5 rounded flex items-center gap-1.5 transition-all shadow-sm font-sans"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>Nueva Oportunidad</span>
@@ -181,16 +181,16 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
       </div>
 
       {/* Barra de Filtros */}
-      <div className="flex flex-wrap items-center gap-3 bg-[#141414] dark:bg-[#141414] light:bg-[#FAFAFA] p-3 rounded-lg border border-[#262626]">
-        <div className="flex items-center gap-1.5 text-xs text-[#8E8E93]">
-          <Filter className="w-3.5 h-3.5 text-[#777]" />
+      <div className="flex flex-wrap items-center gap-3 bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-[var(--c-bg)] p-3 rounded-lg border border-[var(--c-line)]">
+        <div className="flex items-center gap-1.5 text-xs text-[var(--c-muted)]">
+          <Filter className="w-3.5 h-3.5 text-[var(--c-muted)]" />
           <span>Filtros:</span>
         </div>
 
         <select
           value={filtroResponsable}
           onChange={(e) => setFiltroResponsable(e.target.value)}
-          className="bg-[#1C1C1C] border border-[#2E2E2E] rounded px-2.5 py-1.5 text-xs text-[#EEE] focus:outline-none"
+          className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] focus:outline-none"
         >
           <option value="todos">Todos los responsables</option>
           {miembros.map((m) => (
@@ -203,7 +203,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
         <select
           value={filtroFuente}
           onChange={(e) => setFiltroFuente(e.target.value)}
-          className="bg-[#1C1C1C] border border-[#2E2E2E] rounded px-2.5 py-1.5 text-xs text-[#EEE] focus:outline-none"
+          className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] focus:outline-none"
         >
           <option value="todos">Todas las fuentes</option>
           {fuentes.map((f) => (
@@ -216,7 +216,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
         <select
           value={filtroSeguimiento}
           onChange={(e) => setFiltroSeguimiento(e.target.value)}
-          className="bg-[#1C1C1C] border border-[#2E2E2E] rounded px-2.5 py-1.5 text-xs text-[#EEE] focus:outline-none"
+          className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] focus:outline-none"
         >
           <option value="todos">Todos los seguimientos</option>
           <option value="al_dia">Al día</option>
@@ -225,7 +225,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
           <option value="sin_accion">Sin próxima acción</option>
         </select>
 
-        <div className="ml-auto text-xs text-[#8E8E93] font-mono">
+        <div className="ml-auto text-xs text-[var(--c-muted)] font-mono">
           Mostrando {filteredOportunidades.length} negocios
         </div>
       </div>
@@ -246,34 +246,34 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                 key={etapa.id}
                 onDragOver={(e) => handleDragOver(e, etapa.id)}
                 onDrop={(e) => handleDrop(e, etapa.id)}
-                className={`snap-start shrink-0 w-[85vw] sm:w-[60vw] md:w-auto flex flex-col bg-[#111111] dark:bg-[#111111] light:bg-[#F5F5F5] border rounded-lg min-w-[240px] transition-colors ${
+                className={`snap-start shrink-0 w-[85vw] sm:w-[60vw] md:w-auto flex flex-col bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-[var(--c-text)] border rounded-lg min-w-[240px] transition-colors ${
                   isDropTarget
-                    ? 'border-[#888] bg-[#1A1A1A]'
-                    : 'border-[#262626] dark:border-[#262626] light:border-[#DDD]'
+                    ? 'border-[var(--c-muted)] bg-[var(--c-surface-2)]'
+                    : 'border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-line)]'
                 }`}
               >
                 {/* Cabecera */}
-                <div className="p-3 border-b border-[#222] dark:border-[#222] light:border-[#DDD] flex items-center justify-between">
+                <div className="p-3 border-b border-[#222] dark:border-[#222] light:border-[var(--c-line)] flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <span className="font-semibold text-xs text-[#F5F5F5] dark:text-[#F5F5F5] light:text-[#111]">
+                      <span className="font-semibold text-xs text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
                         {etapa.nombre}
                       </span>
-                      <span className="font-mono text-[10px] text-[#8E8E93]">
+                      <span className="font-mono text-[10px] text-[var(--c-muted)]">
                         ({opsEtapa.length})
                       </span>
                     </div>
                     {/* Cifras en blanco aire */}
-                    <p className="font-mono text-[11px] text-[#F5F5F5] font-semibold mt-0.5">
+                    <p className="font-mono text-[11px] text-[var(--c-text)] font-semibold mt-0.5">
                       {formatMoneda(totalEtapaCLP, 'CLP')}
                     </p>
                     {hayUSD && (
-                      <span className="text-[9px] text-[#8E8E93] font-mono block">
+                      <span className="text-[9px] text-[var(--c-muted)] font-mono block">
                         + montos en US$ aparte
                       </span>
                     )}
                   </div>
-                  <span className="font-mono text-[10px] text-[#666]">
+                  <span className="font-mono text-[10px] text-[var(--c-muted-2)]">
                     {etapa.probabilidad_default}%
                   </span>
                 </div>
@@ -304,34 +304,34 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                           onClick={() => onSelectOportunidad(op.id)}
                           className={`p-3 rounded-lg border text-left cursor-grab active:cursor-grabbing hover:border-[#444] transition-all bg-[#171717] dark:bg-[#171717] light:bg-white shadow-sm ${
                             atrasada
-                              ? 'border-[#E8005A] ring-1 ring-[#E8005A]/40'
-                              : 'border-[#262626] dark:border-[#262626] light:border-[#E5E5E5]'
+                              ? 'border-[var(--c-danger)] ring-1 ring-[var(--c-danger)]/40'
+                              : 'border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-line)]'
                           }`}
                         >
                           <div className="mb-2">
-                            <p className="text-[11px] text-[#8E8E93] font-medium truncate">
+                            <p className="text-[11px] text-[var(--c-muted)] font-medium truncate">
                               {emp?.nombre ?? 'Sin empresa'}
                             </p>
-                            <h4 className="text-xs font-semibold text-[#F5F5F5] dark:text-[#F5F5F5] light:text-[#111] hover:text-[#FFF] transition-colors leading-snug line-clamp-2">
+                            <h4 className="text-xs font-semibold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] hover:text-[#FFF] transition-colors leading-snug line-clamp-2">
                               {op.nombre}
                             </h4>
                           </div>
 
                           {/* Valor neto en Blanco Aire #F5F5F5 & Aviso USD */}
-                          <div className="flex items-center justify-between mb-2 pt-1 border-t border-[#222] dark:border-[#222] light:border-[#EEE]">
+                          <div className="flex items-center justify-between mb-2 pt-1 border-t border-[#222] dark:border-[#222] light:border-[var(--c-text)]">
                             <div>
-                              <span className="font-mono text-xs font-bold text-[#F5F5F5]">
+                              <span className="font-mono text-xs font-bold text-[var(--c-text)]">
                                 {formatMoneda(op.valor_neto, op.moneda)}
                               </span>
                               {esUSD && (
-                                <p className="text-[9px] text-[#888] font-mono leading-none mt-0.5">
+                                <p className="text-[9px] text-[var(--c-muted)] font-mono leading-none mt-0.5">
                                   No incluido en totales CLP
                                 </p>
                               )}
                             </div>
 
                             <span className="text-[11px] text-[#BBB] flex items-center gap-1">
-                              <User className="w-3 h-3 text-[#777]" />
+                              <User className="w-3 h-3 text-[var(--c-muted)]" />
                               <span className="truncate max-w-[80px]">
                                 {resp?.nombre.split(' ')[0] ?? 'Equipo'}
                               </span>
@@ -345,7 +345,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                               id={`mover-${op.id}`}
                               value={op.etapa_id}
                               onChange={(ev) => moverAEtapa(op.id, ev.target.value)}
-                              className="w-full min-h-[44px] px-2 text-xs bg-[#101010] border border-[#2E2E2E] rounded text-[#F5F5F5]"
+                              className="w-full min-h-[44px] px-2 text-xs bg-[var(--c-surface)] border border-[var(--c-line)] rounded text-[var(--c-text)]"
                             >
                               {etapas.map((et) => (
                                 <option key={et.id} value={et.id}>{et.nombre}</option>
@@ -356,27 +356,27 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                           {/* Próxima Acción */}
                           <div className="pt-1.5 border-t border-[#222] text-[11px]">
                             {atrasada ? (
-                              <div className="text-[#E8005A] space-y-0.5">
+                              <div className="text-[var(--c-danger)] space-y-0.5">
                                 <div className="flex items-center gap-1 font-semibold text-[10px] font-mono">
-                                  <AlertCircle className="w-3 h-3 text-[#E8005A]" />
+                                  <AlertCircle className="w-3 h-3 text-[var(--c-danger)]" />
                                   <span>ACCIÓN ATRASADA ({formatFecha(op.proxima_accion_fecha)})</span>
                                 </div>
-                                <p className="text-[#F5F5F5] text-[11px] truncate">
+                                <p className="text-[var(--c-text)] text-[11px] truncate">
                                   {op.proxima_accion_texto || 'Revisar seguimiento'}
                                 </p>
                               </div>
                             ) : sinAccion ? (
-                              <div className="text-[#888] flex items-center gap-1 text-[10px] font-mono">
+                              <div className="text-[var(--c-muted)] flex items-center gap-1 text-[10px] font-mono">
                                 <Clock className="w-3 h-3 shrink-0" />
                                 <span>Sin próxima acción</span>
                               </div>
                             ) : (
                               <div className="text-[#AAA] space-y-0.5">
-                                <p className="text-[#8E8E93] font-mono text-[10px] flex items-center gap-1">
-                                  <Calendar className="w-3 h-3 text-[#666]" />
+                                <p className="text-[var(--c-muted)] font-mono text-[10px] flex items-center gap-1">
+                                  <Calendar className="w-3 h-3 text-[var(--c-muted-2)]" />
                                   <span>{formatFecha(op.proxima_accion_fecha)}</span>
                                 </p>
-                                <p className="truncate text-[#DDD]">{op.proxima_accion_texto}</p>
+                                <p className="truncate text-[var(--c-line)]">{op.proxima_accion_texto}</p>
                               </div>
                             )}
                           </div>
@@ -393,10 +393,10 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
 
       {/* VISTA TABLA */}
       {vistaModo === 'tabla' && (
-        <div className="bg-[#141414] dark:bg-[#141414] light:bg-white border border-[#262626] rounded-lg overflow-hidden shadow-sm">
+        <div className="bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white border border-[var(--c-line)] rounded-lg overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#0E0E0E] dark:bg-[#0E0E0E] light:bg-[#F2F2F2] border-b border-[#262626] text-[#8E8E93] uppercase font-mono text-[11px]">
+              <thead className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-surface-2)] border-b border-[var(--c-line)] text-[var(--c-muted)] uppercase font-mono text-[11px]">
                 <tr>
                   <th className="py-2.5 px-4 font-medium">Oportunidad</th>
                   <th className="py-2.5 px-3 font-medium">Empresa</th>
@@ -411,7 +411,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
               <tbody className="divide-y divide-[#222]">
                 {filteredOportunidades.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-8 text-center text-xs text-[#777]">
+                    <td colSpan={8} className="py-8 text-center text-xs text-[var(--c-muted)]">
                       No hay negocios que cumplan con los filtros seleccionados.
                     </td>
                   </tr>
@@ -428,29 +428,29 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                       <tr
                         key={op.id}
                         onClick={() => onSelectOportunidad(op.id)}
-                        className={`hover:bg-[#1C1C1C] cursor-pointer transition-colors ${
+                        className={`hover:bg-[var(--c-surface-2)] cursor-pointer transition-colors ${
                           atrasada ? 'bg-[#1D1014]/40' : ''
                         }`}
                       >
-                        <td className="py-2.5 px-4 font-semibold text-[#F5F5F5]">
+                        <td className="py-2.5 px-4 font-semibold text-[var(--c-text)]">
                           <div className="flex items-center gap-1.5">
-                            {atrasada && <AlertCircle className="w-3.5 h-3.5 text-[#E8005A] shrink-0" />}
+                            {atrasada && <AlertCircle className="w-3.5 h-3.5 text-[var(--c-danger)] shrink-0" />}
                             <span className="truncate max-w-[200px]">{op.nombre}</span>
                           </div>
                         </td>
-                        <td className="py-2.5 px-3 text-[#CCC]">{emp?.nombre ?? '—'}</td>
-                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#DDD]">{et?.nombre ?? '—'}</td>
-                        <td className="py-2.5 px-3 font-mono text-xs font-bold text-[#F5F5F5] text-right">
+                        <td className="py-2.5 px-3 text-[var(--c-text-2)]">{emp?.nombre ?? '—'}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-[var(--c-line)]">{et?.nombre ?? '—'}</td>
+                        <td className="py-2.5 px-3 font-mono text-xs font-bold text-[var(--c-text)] text-right">
                           {formatMoneda(op.valor_neto, op.moneda)}
                         </td>
-                        <td className="py-2.5 px-3 font-mono text-xs text-[#F5F5F5] text-right">
+                        <td className="py-2.5 px-3 font-mono text-xs text-[var(--c-text)] text-right">
                           {formatMoneda(op.valor_ponderado, op.moneda)}
                         </td>
                         <td className="py-2.5 px-3 text-[#AAA]">{resp?.nombre ?? '—'}</td>
-                        <td className="py-2.5 px-3 text-[#CCC] truncate max-w-[180px]">
-                          {op.proxima_accion_texto || <span className="text-[#666]">Sin definir</span>}
+                        <td className="py-2.5 px-3 text-[var(--c-text-2)] truncate max-w-[180px]">
+                          {op.proxima_accion_texto || <span className="text-[var(--c-muted-2)]">Sin definir</span>}
                         </td>
-                        <td className="py-2.5 px-4 font-mono text-[11px] text-[#777] text-right">
+                        <td className="py-2.5 px-4 font-mono text-[11px] text-[var(--c-muted)] text-right">
                           {formatFecha(op.fecha_cierre_estimada)}
                         </td>
                       </tr>

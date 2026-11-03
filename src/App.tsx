@@ -28,7 +28,7 @@ const CRMAppContent: React.FC = () => {
 
   const [currentView, setCurrentView] = useState<ViewType>('inicio');
   const [masAbierto, setMasAbierto] = useState(false);
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [theme, setTheme] = useState<'dark' | 'light'>('light');
 
   // Modales y Drawers globales
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -76,11 +76,11 @@ const CRMAppContent: React.FC = () => {
   // 1. Estado de carga inicial
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center text-[#F5F5F5] font-sans">
-        <div className="w-10 h-10 bg-[#BEFF00] text-[#0A0A0A] font-black flex items-center justify-center text-sm font-mono rounded animate-pulse">
-          P48
+      <div className="min-h-screen bg-[var(--c-bg)] flex flex-col items-center justify-center text-[var(--c-text)] font-sans">
+        <div className="w-10 h-10 bg-[var(--c-accent)] text-[var(--c-on-accent)] font-black flex items-center justify-center text-sm font-mono rounded animate-pulse">
+          J
         </div>
-        <p className="mt-3 text-xs text-[#8E8E93] font-mono">Cargando CRM P48...</p>
+        <p className="mt-3 text-xs text-[var(--c-muted)] font-mono">Cargando JAMP CRM...</p>
       </div>
     );
   }
@@ -98,7 +98,7 @@ const CRMAppContent: React.FC = () => {
   const selectedEmpresaObj = empresas.find((e) => e.id === selectedEmpId) || null;
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] dark:bg-[#0A0A0A] light:bg-[#F8F9FA] text-[#F5F5F5] dark:text-[#F5F5F5] light:text-[#111111] flex flex-col font-sans transition-colors">
+    <div className="min-h-screen bg-[var(--c-bg)] dark:bg-[var(--c-bg)] light:bg-[var(--c-bg)] text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-surface)] flex flex-col font-sans transition-colors">
       {/* Top Bar Header */}
       <Header
         onOpenSearch={() => setIsSearchOpen(true)}
@@ -120,7 +120,7 @@ const CRMAppContent: React.FC = () => {
         />
 
         {/* Viewport Principal */}
-        <main className="flex-1 overflow-y-auto pb-24 md:pb-0 bg-[#0A0A0A] dark:bg-[#0A0A0A] light:bg-[#F8F9FA]">
+        <main className="flex-1 overflow-y-auto pb-24 md:pb-0 bg-[var(--c-bg)] dark:bg-[var(--c-bg)] light:bg-[var(--c-bg)]">
           {currentView === 'inicio' && (
             <DashboardView
               onNavigateKanban={() => setCurrentView('crm')}
@@ -238,7 +238,7 @@ const CRMAppContent: React.FC = () => {
         <button
           onClick={() => setCurrentView('inicio')}
           className={`min-w-[56px] min-h-[52px] flex flex-col items-center justify-center gap-1 ${
-            currentView === 'inicio' ? 'text-[#BEFF00] font-semibold' : 'text-[#888]'
+            currentView === 'inicio' ? 'text-[var(--c-accent)] font-semibold' : 'text-[var(--c-muted)]'
           }`}
         >
           <LayoutDashboard className="w-5 h-5" />
@@ -248,7 +248,7 @@ const CRMAppContent: React.FC = () => {
         <button
           onClick={() => setCurrentView('crm')}
           className={`min-w-[56px] min-h-[52px] flex flex-col items-center justify-center gap-1 ${
-            currentView === 'crm' ? 'text-[#BEFF00] font-semibold' : 'text-[#888]'
+            currentView === 'crm' ? 'text-[var(--c-accent)] font-semibold' : 'text-[var(--c-muted)]'
           }`}
         >
           <Kanban className="w-5 h-5" />
@@ -257,7 +257,7 @@ const CRMAppContent: React.FC = () => {
 
         <button
           onClick={() => setActivityModalState({ isOpen: true })}
-          className="flex items-center justify-center w-12 h-12 -mt-5 bg-[#BEFF00] hover:bg-[#aee600] text-[#0A0A0A] rounded-full shadow-lg transition-transform active:scale-95"
+          className="flex items-center justify-center w-12 h-12 -mt-5 bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] text-[var(--c-on-accent)] rounded-full shadow-lg transition-transform active:scale-95"
           title="Registrar Actividad"
         >
           <Clock className="w-5 h-5 stroke-[2.5]" />
@@ -266,7 +266,7 @@ const CRMAppContent: React.FC = () => {
         <button
           onClick={() => setCurrentView('tareas')}
           className={`min-w-[56px] min-h-[52px] flex flex-col items-center justify-center gap-1 ${
-            currentView === 'tareas' ? 'text-[#BEFF00] font-semibold' : 'text-[#888]'
+            currentView === 'tareas' ? 'text-[var(--c-accent)] font-semibold' : 'text-[var(--c-muted)]'
           }`}
         >
           <CheckSquare className="w-5 h-5" />
@@ -277,8 +277,8 @@ const CRMAppContent: React.FC = () => {
           onClick={() => setMasAbierto(true)}
           className={`min-w-[56px] min-h-[52px] flex flex-col items-center justify-center gap-1 ${
             ['empresas', 'contactos', 'actividades', 'importar', 'administracion'].includes(currentView)
-              ? 'text-[#BEFF00] font-semibold'
-              : 'text-[#888]'
+              ? 'text-[var(--c-accent)] font-semibold'
+              : 'text-[var(--c-muted)]'
           }`}
         >
           <MoreHorizontal className="w-5 h-5" />
@@ -289,12 +289,12 @@ const CRMAppContent: React.FC = () => {
       {masAbierto && (
         <div className="md:hidden fixed inset-0 z-50 flex items-end bg-black/60" onClick={() => setMasAbierto(false)}>
           <div
-            className="w-full bg-[#141414] border-t border-[#262626] rounded-t-xl p-4 pb-8 space-y-1"
+            className="w-full bg-[var(--c-surface)] border-t border-[var(--c-line)] rounded-t-xl p-4 pb-8 space-y-1"
             onClick={(ev) => ev.stopPropagation()}
             role="dialog"
             aria-label="Más secciones"
           >
-            <p className="text-[10px] font-mono uppercase text-[#8E8E93] px-2 pb-2">Más secciones</p>
+            <p className="text-[10px] font-mono uppercase text-[var(--c-muted)] px-2 pb-2">Más secciones</p>
             {[
               { id: 'empresas' as const, label: 'Empresas y clientes', icon: Building2 },
               { id: 'contactos' as const, label: 'Contactos', icon: Users },
@@ -309,7 +309,7 @@ const CRMAppContent: React.FC = () => {
                   setMasAbierto(false);
                 }}
                 className={`w-full min-h-[52px] flex items-center gap-3 px-3 rounded-lg text-sm ${
-                  currentView === item.id ? 'text-[#BEFF00] bg-[#1C1C1C]' : 'text-[#E5E5E5] hover:bg-[#1C1C1C]'
+                  currentView === item.id ? 'text-[var(--c-accent)] bg-[var(--c-surface-2)]' : 'text-[var(--c-line)] hover:bg-[var(--c-surface-2)]'
                 }`}
               >
                 <item.icon className="w-5 h-5" />

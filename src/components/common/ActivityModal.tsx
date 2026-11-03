@@ -61,18 +61,18 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="bg-[#141414] border border-[#2E2E2E] rounded-xl max-w-lg w-full p-6 shadow-2xl">
+      <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-xl max-w-lg w-full p-6 shadow-2xl">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded bg-[#BEFF00]/15 flex items-center justify-center text-[#BEFF00]">
+            <div className="w-8 h-8 rounded bg-[var(--c-accent)]/15 flex items-center justify-center text-[var(--c-accent)]">
               <Clock className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-[#F5F5F5]">Registrar Actividad</h2>
-              <p className="text-xs text-[#8E8E93]">Bitácora de contacto comercial</p>
+              <h2 className="text-base font-bold text-[var(--c-text)]">Registrar Actividad</h2>
+              <p className="text-xs text-[var(--c-muted)]">Bitácora de contacto comercial</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-[#888] hover:text-white">
+          <button onClick={onClose} className="text-[var(--c-muted)] hover:text-white">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -94,8 +94,8 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
                 onClick={() => setTipo(item.id)}
                 className={`py-2 px-2 rounded border text-xs font-medium flex flex-col items-center gap-1 transition-colors ${
                   active
-                    ? 'bg-[#1C1C1C] border-[#BEFF00] text-[#BEFF00]'
-                    : 'bg-[#121212] border-[#2A2A2A] text-[#888] hover:text-white'
+                    ? 'bg-[var(--c-surface-2)] border-[var(--c-accent)] text-[var(--c-accent)]'
+                    : 'bg-[var(--c-surface)] border-[var(--c-surface-3)] text-[var(--c-muted)] hover:text-white'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -107,8 +107,8 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="block text-xs font-medium text-[#EEE] mb-1">
-              Título / Resumen <span className="text-[#BEFF00]">*</span>
+            <label className="block text-xs font-medium text-[var(--c-text)] mb-1">
+              Título / Resumen <span className="text-[var(--c-accent)]">*</span>
             </label>
             <input
               type="text"
@@ -116,17 +116,17 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
               placeholder="Ej: Llamada de alineación de presupuesto Google Ads"
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
-              className="w-full bg-[#1C1C1C] border border-[#2E2E2E] rounded px-3 py-2 text-xs text-white"
+              className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-[#CCC] mb-1">Empresa</label>
+              <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Empresa</label>
               <select
                 value={empresaId}
                 onChange={(e) => setEmpresaId(e.target.value)}
-                className="w-full bg-[#1C1C1C] border border-[#2E2E2E] rounded px-3 py-2 text-xs text-white"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
               >
                 <option value="">Selecciona empresa...</option>
                 {empresas.map((e) => (
@@ -138,11 +138,11 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[#CCC] mb-1">Negocio</label>
+              <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Negocio</label>
               <select
                 value={oportunidadId}
                 onChange={(e) => setOportunidadId(e.target.value)}
-                className="w-full bg-[#1C1C1C] border border-[#2E2E2E] rounded px-3 py-2 text-xs text-white"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
               >
                 <option value="">(Opcional) Asociar negocio...</option>
                 {oportunidadesFiltradas.map((o) => (
@@ -156,11 +156,11 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-[#CCC] mb-1">Contacto</label>
+              <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Contacto</label>
               <select
                 value={contactoId}
                 onChange={(e) => setContactoId(e.target.value)}
-                className="w-full bg-[#1C1C1C] border border-[#2E2E2E] rounded px-3 py-2 text-xs text-white"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
               >
                 <option value="">(Opcional) Persona...</option>
                 {contactosFiltrados.map((c) => (
@@ -172,49 +172,49 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[#CCC] mb-1">Fecha y Hora</label>
+              <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Fecha y Hora</label>
               <input
                 type="datetime-local"
                 value={fechaActividad}
                 onChange={(e) => setFechaActividad(e.target.value)}
-                className="w-full bg-[#1C1C1C] border border-[#2E2E2E] rounded px-3 py-1.5 text-xs text-white font-mono"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-1.5 text-xs text-white font-mono"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#CCC] mb-1">Descripción / Minuta</label>
+            <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Descripción / Minuta</label>
             <textarea
               rows={3}
               placeholder="Detalle de los puntos acordados o conclusiones..."
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
-              className="w-full bg-[#1C1C1C] border border-[#2E2E2E] rounded p-2.5 text-xs text-white"
+              className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded p-2.5 text-xs text-white"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#CCC] mb-1">Resultado / Acuerdo</label>
+            <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Resultado / Acuerdo</label>
             <input
               type="text"
               placeholder="Ej: Aceptaron auditoría técnica sin costo previo a fee"
               value={resultado}
               onChange={(e) => setResultado(e.target.value)}
-              className="w-full bg-[#1C1C1C] border border-[#2E2E2E] rounded px-3 py-2 text-xs text-white"
+              className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
             />
           </div>
 
-          <div className="flex justify-end gap-2.5 pt-3 border-t border-[#262626]">
+          <div className="flex justify-end gap-2.5 pt-3 border-t border-[var(--c-line)]">
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-2 text-xs text-[#888] hover:text-white"
+              className="px-3 py-2 text-xs text-[var(--c-muted)] hover:text-white"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-xs font-semibold bg-[#BEFF00] text-black rounded"
+              className="px-4 py-2 text-xs font-semibold bg-[var(--c-accent)] text-black rounded"
             >
               Guardar Actividad
             </button>

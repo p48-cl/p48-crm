@@ -69,17 +69,17 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
     <div className="p-6 max-w-7xl mx-auto space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold font-sans text-[#F5F5F5] dark:text-[#F5F5F5] light:text-[#111]">
+          <h1 className="text-xl font-bold font-sans text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
             Directorio de Contactos
           </h1>
-          <p className="text-xs text-[#8E8E93] mt-0.5">
+          <p className="text-xs text-[var(--c-muted)] mt-0.5">
             {filteredContactos.length} contactos comerciales y decisores técnicos
           </p>
         </div>
 
         <button
           onClick={() => setShowNewModal(true)}
-          className="bg-[#BEFF00] hover:bg-[#aee600] active:scale-[0.98] text-[#0A0A0A] font-semibold text-xs py-2 px-3.5 rounded flex items-center gap-1.5 transition-all shadow-sm font-sans"
+          className="bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] active:scale-[0.98] text-[var(--c-on-accent)] font-semibold text-xs py-2 px-3.5 rounded flex items-center gap-1.5 transition-all shadow-sm font-sans"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>Nuevo Contacto</span>
@@ -87,24 +87,24 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
       </div>
 
       {/* Barra de búsqueda */}
-      <div className="bg-[#141414] dark:bg-[#141414] light:bg-[#FAFAFA] p-3 rounded-lg border border-[#262626]">
+      <div className="bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-[var(--c-bg)] p-3 rounded-lg border border-[var(--c-line)]">
         <div className="relative max-w-md">
-          <Search className="w-3.5 h-3.5 text-[#777] absolute left-3 top-2.5" />
+          <Search className="w-3.5 h-3.5 text-[var(--c-muted)] absolute left-3 top-2.5" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Buscar por nombre, email o cargo..."
-            className="w-full bg-[#1C1C1C] dark:bg-[#1C1C1C] light:bg-white border border-[#2E2E2E] rounded pl-8 pr-3 py-1.5 text-xs text-[#EEE] placeholder:text-[#666] focus:outline-none focus:border-[#BEFF00]"
+            className="w-full bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-white border border-[var(--c-line)] rounded pl-8 pr-3 py-1.5 text-xs text-[var(--c-text)] placeholder:text-[var(--c-muted-2)] focus:outline-none focus:border-[var(--c-accent)]"
           />
         </div>
       </div>
 
       {/* Tabla densa de contactos */}
-      <div className="bg-[#141414] dark:bg-[#141414] light:bg-white border border-[#262626] rounded-lg overflow-hidden shadow-sm">
+      <div className="bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white border border-[var(--c-line)] rounded-lg overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#0E0E0E] dark:bg-[#0E0E0E] light:bg-[#F2F2F2] border-b border-[#262626] text-[#8E8E93] uppercase font-mono text-[11px]">
+            <thead className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-surface-2)] border-b border-[var(--c-line)] text-[var(--c-muted)] uppercase font-mono text-[11px]">
               <tr>
                 <th className="py-2.5 px-4 font-medium">Nombre</th>
                 <th className="py-2.5 px-3 font-medium">Empresa</th>
@@ -119,7 +119,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
             <tbody className="divide-y divide-[#222]">
               {filteredContactos.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-8 text-center text-xs text-[#777]">
+                  <td colSpan={8} className="py-8 text-center text-xs text-[var(--c-muted)]">
                     No se encontraron contactos.
                   </td>
                 </tr>
@@ -129,15 +129,15 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                   return (
                     <tr
                       key={con.id}
-                      className="hover:bg-[#1C1C1C] transition-colors"
+                      className="hover:bg-[var(--c-surface-2)] transition-colors"
                     >
                       <td className="py-2.5 px-4">
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-[#F5F5F5] dark:text-[#F5F5F5] light:text-[#111]">
+                          <span className="font-semibold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
                             {con.nombre} {con.apellido}
                           </span>
                           {con.es_principal && (
-                            <span className="text-[10px] text-[#BEFF00] font-mono">
+                            <span className="text-[10px] text-[var(--c-accent)] font-mono">
                               Principal
                             </span>
                           )}
@@ -147,9 +147,9 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                         {emp ? (
                           <button
                             onClick={() => onSelectEmpresa(emp.id)}
-                            className="text-[#BEFF00] hover:underline flex items-center gap-1 font-medium text-left"
+                            className="text-[var(--c-accent)] hover:underline flex items-center gap-1 font-medium text-left"
                           >
-                            <Building2 className="w-3 h-3 text-[#777]" />
+                            <Building2 className="w-3 h-3 text-[var(--c-muted)]" />
                             <span className="truncate max-w-[160px]">{emp.nombre}</span>
                           </button>
                         ) : (
@@ -161,7 +161,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                         <span
                           className={`font-mono text-[10px] px-2 py-0.5 rounded capitalize ${
                             con.rol_decision === 'decisor'
-                              ? 'bg-[#BEFF00]/15 text-[#BEFF00]'
+                              ? 'bg-[var(--c-accent)]/15 text-[var(--c-accent)]'
                               : con.rol_decision === 'influenciador'
                               ? 'bg-sky-950/60 text-sky-400'
                               : 'bg-[#222] text-[#AAA]'
@@ -172,14 +172,14 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                       </td>
                       <td className="py-2.5 px-3 font-mono text-[11px] text-[#AAA]">
                         <a href={`mailto:${con.email}`} className="hover:text-white flex items-center gap-1">
-                          <Mail className="w-3 h-3 text-[#666]" />
+                          <Mail className="w-3 h-3 text-[var(--c-muted-2)]" />
                           <span>{con.email}</span>
                         </a>
                       </td>
                       <td className="py-2.5 px-3 font-mono text-[11px] text-[#AAA]">
                         {con.telefono ? (
                           <a href={`tel:${con.telefono}`} className="hover:text-white flex items-center gap-1">
-                            <Phone className="w-3 h-3 text-[#666]" />
+                            <Phone className="w-3 h-3 text-[var(--c-muted-2)]" />
                             <span>{con.telefono}</span>
                           </a>
                         ) : (
@@ -192,7 +192,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                             href={con.linkedin_url}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-[#888] hover:text-[#BEFF00] inline-block"
+                            className="text-[var(--c-muted)] hover:text-[var(--c-accent)] inline-block"
                           >
                             <Linkedin className="w-3.5 h-3.5" />
                           </a>
@@ -200,7 +200,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                           <span className="text-[#444]">—</span>
                         )}
                       </td>
-                      <td className="py-2.5 px-4 font-mono text-[11px] text-[#777] text-right">
+                      <td className="py-2.5 px-4 font-mono text-[11px] text-[var(--c-muted)] text-right">
                         {formatFecha(con.created_at)}
                       </td>
                     </tr>
@@ -215,16 +215,16 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
       {/* Modal Nuevo Contacto */}
       {showNewModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#141414] border border-[#2E2E2E] rounded-lg max-w-md w-full p-6 shadow-2xl">
-            <h2 className="text-base font-bold text-[#F5F5F5] mb-3">Nuevo Contacto</h2>
+          <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-lg max-w-md w-full p-6 shadow-2xl">
+            <h2 className="text-base font-bold text-[var(--c-text)] mb-3">Nuevo Contacto</h2>
             <form onSubmit={handleCreateSubmit} className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-[#CCC] mb-1">Empresa *</label>
+                <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Empresa *</label>
                 <select
                   required
                   value={newContact.empresa_id}
                   onChange={(e) => setNewContact({ ...newContact, empresa_id: e.target.value })}
-                  className="w-full bg-[#1C1C1C] border border-[#2E2E2E] rounded px-3 py-2 text-xs text-white"
+                  className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
                 >
                   <option value="">Selecciona la empresa...</option>
                   {empresas.map((e) => (
@@ -242,14 +242,14 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                   placeholder="Nombre *"
                   value={newContact.nombre}
                   onChange={(e) => setNewContact({ ...newContact, nombre: e.target.value })}
-                  className="bg-[#1C1C1C] border border-[#2E2E2E] rounded px-2.5 py-1.5 text-xs text-white"
+                  className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
                 />
                 <input
                   type="text"
                   placeholder="Apellido"
                   value={newContact.apellido}
                   onChange={(e) => setNewContact({ ...newContact, apellido: e.target.value })}
-                  className="bg-[#1C1C1C] border border-[#2E2E2E] rounded px-2.5 py-1.5 text-xs text-white"
+                  className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
                 />
               </div>
 
@@ -260,14 +260,14 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                   placeholder="Email *"
                   value={newContact.email}
                   onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
-                  className="bg-[#1C1C1C] border border-[#2E2E2E] rounded px-2.5 py-1.5 text-xs text-white"
+                  className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
                 />
                 <input
                   type="text"
                   placeholder="Cargo"
                   value={newContact.cargo}
                   onChange={(e) => setNewContact({ ...newContact, cargo: e.target.value })}
-                  className="bg-[#1C1C1C] border border-[#2E2E2E] rounded px-2.5 py-1.5 text-xs text-white"
+                  className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
                 />
               </div>
 
@@ -277,14 +277,14 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                   placeholder="Teléfono"
                   value={newContact.telefono}
                   onChange={(e) => setNewContact({ ...newContact, telefono: e.target.value })}
-                  className="bg-[#1C1C1C] border border-[#2E2E2E] rounded px-2.5 py-1.5 text-xs text-white"
+                  className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
                 />
                 <input
                   type="text"
                   placeholder="LinkedIn URL"
                   value={newContact.linkedin_url}
                   onChange={(e) => setNewContact({ ...newContact, linkedin_url: e.target.value })}
-                  className="bg-[#1C1C1C] border border-[#2E2E2E] rounded px-2.5 py-1.5 text-xs text-white"
+                  className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
                 />
               </div>
 
@@ -300,7 +300,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                       rol_decision: e.target.value as 'decisor' | 'influenciador' | 'usuario',
                     })
                   }
-                  className="w-full bg-[#1C1C1C] border border-[#2E2E2E] rounded px-2.5 py-1.5 text-xs text-white"
+                  className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
                 >
                   <option value="decisor">Decisor (Toma de decisión y presupuesto)</option>
                   <option value="influenciador">Influenciador (Líder técnico o de área)</option>
@@ -314,7 +314,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                   id="es_principal_chk"
                   checked={newContact.es_principal}
                   onChange={(e) => setNewContact({ ...newContact, es_principal: e.target.checked })}
-                  className="rounded border-[#444] bg-[#222] text-[#BEFF00]"
+                  className="rounded border-[#444] bg-[#222] text-[var(--c-accent)]"
                 />
                 <label htmlFor="es_principal_chk" className="text-xs text-[#AAA]">
                   Contacto principal para decisiones
@@ -325,13 +325,13 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                 <button
                   type="button"
                   onClick={() => setShowNewModal(false)}
-                  className="px-3 py-1.5 text-xs text-[#888] hover:text-white"
+                  className="px-3 py-1.5 text-xs text-[var(--c-muted)] hover:text-white"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-3.5 py-1.5 text-xs font-semibold bg-[#BEFF00] text-black rounded"
+                  className="px-3.5 py-1.5 text-xs font-semibold bg-[var(--c-accent)] text-black rounded"
                 >
                   Guardar Contacto
                 </button>

@@ -47,7 +47,7 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
       case 'llamada':
         return <Phone className="w-3.5 h-3.5 text-sky-400" />;
       case 'reunion':
-        return <Video className="w-3.5 h-3.5 text-[#BEFF00]" />;
+        return <Video className="w-3.5 h-3.5 text-[var(--c-accent)]" />;
       case 'nota':
         return <FileText className="w-3.5 h-3.5 text-amber-400" />;
       case 'correo_manual':
@@ -59,17 +59,17 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold font-sans text-[#F5F5F5] dark:text-[#F5F5F5] light:text-[#111]">
+          <h1 className="text-xl font-bold font-sans text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
             Línea de Tiempo de Actividades
           </h1>
-          <p className="text-xs text-[#8E8E93] mt-0.5">
+          <p className="text-xs text-[var(--c-muted)] mt-0.5">
             Registro cronológico de interacciones comerciales y operativas
           </p>
         </div>
 
         <button
           onClick={onOpenNewActivity}
-          className="bg-[#BEFF00] hover:bg-[#aee600] active:scale-[0.98] text-[#0A0A0A] font-semibold text-xs py-2 px-3.5 rounded flex items-center gap-1.5 transition-all shadow-sm font-sans"
+          className="bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] active:scale-[0.98] text-[var(--c-on-accent)] font-semibold text-xs py-2 px-3.5 rounded flex items-center gap-1.5 transition-all shadow-sm font-sans"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>Registrar Actividad</span>
@@ -77,12 +77,12 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
       </div>
 
       {/* Barra de Filtros */}
-      <div className="flex items-center gap-3 bg-[#141414] dark:bg-[#141414] light:bg-[#FAFAFA] p-3 rounded-lg border border-[#262626]">
-        <Filter className="w-3.5 h-3.5 text-[#777]" />
+      <div className="flex items-center gap-3 bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-[var(--c-bg)] p-3 rounded-lg border border-[var(--c-line)]">
+        <Filter className="w-3.5 h-3.5 text-[var(--c-muted)]" />
         <select
           value={filtroTipo}
           onChange={(e) => setFiltroTipo(e.target.value)}
-          className="bg-[#1C1C1C] border border-[#2E2E2E] rounded px-2.5 py-1.5 text-xs text-[#EEE] focus:outline-none"
+          className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] focus:outline-none"
         >
           <option value="todos">Todos los tipos</option>
           <option value="llamada">Llamadas</option>
@@ -94,7 +94,7 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
         <select
           value={filtroAutor}
           onChange={(e) => setFiltroAutor(e.target.value)}
-          className="bg-[#1C1C1C] border border-[#2E2E2E] rounded px-2.5 py-1.5 text-xs text-[#EEE] focus:outline-none"
+          className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] focus:outline-none"
         >
           <option value="todos">Todos los autores</option>
           {miembros.map((m) => (
@@ -104,7 +104,7 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
           ))}
         </select>
 
-        <div className="ml-auto font-mono text-xs text-[#8E8E93]">
+        <div className="ml-auto font-mono text-xs text-[var(--c-muted)]">
           {actividadesOrdenadas.length} actividades
         </div>
       </div>
@@ -112,7 +112,7 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
       {/* Línea de tiempo cronológica */}
       <div className="relative pl-6 space-y-4 before:content-[''] before:absolute before:left-2 before:top-3 before:bottom-3 before:w-[2px] before:bg-[#222]">
         {actividadesOrdenadas.length === 0 ? (
-          <p className="text-xs text-[#777] py-8 text-center">No hay actividades registradas con estos filtros.</p>
+          <p className="text-xs text-[var(--c-muted)] py-8 text-center">No hay actividades registradas con estos filtros.</p>
         ) : (
           actividadesOrdenadas.map((act) => {
             const emp = empresas.find((e) => e.id === act.empresa_id);
@@ -123,25 +123,25 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
             return (
               <div key={act.id} className="relative group">
                 {/* Punto en la línea de tiempo */}
-                <div className="absolute -left-6 top-3 w-4 h-4 rounded-full bg-[#181818] border border-[#333] flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#BEFF00]" />
+                <div className="absolute -left-6 top-3 w-4 h-4 rounded-full bg-[var(--c-surface-2)] border border-[#333] flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[var(--c-accent)]" />
                 </div>
 
-                <div className="p-4 bg-[#141414] dark:bg-[#141414] light:bg-white rounded-lg border border-[#262626] space-y-2.5 shadow-xs">
+                <div className="p-4 bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white rounded-lg border border-[var(--c-line)] space-y-2.5 shadow-xs">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded bg-[#1C1C1C] flex items-center justify-center">
+                      <div className="w-6 h-6 rounded bg-[var(--c-surface-2)] flex items-center justify-center">
                         {getIcono(act.tipo)}
                       </div>
-                      <span className="font-semibold text-xs text-[#F5F5F5] dark:text-[#F5F5F5] light:text-[#111]">
+                      <span className="font-semibold text-xs text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
                         {act.titulo}
                       </span>
-                      <span className="text-[10px] uppercase font-mono text-[#8E8E93]">
+                      <span className="text-[10px] uppercase font-mono text-[var(--c-muted)]">
                         ({act.tipo})
                       </span>
                     </div>
 
-                    <span className="font-mono text-[11px] text-[#777]">
+                    <span className="font-mono text-[11px] text-[var(--c-muted)]">
                       {formatFechaHora(act.fecha_actividad)}
                     </span>
                   </div>
@@ -153,19 +153,19 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
                   )}
 
                   {act.resultado && (
-                    <div className="ml-8 p-2 bg-[#1B2217] border border-[#2D4521] rounded text-xs text-[#BEFF00]">
+                    <div className="ml-8 p-2 bg-[#1B2217] border border-[#2D4521] rounded text-xs text-[var(--c-accent)]">
                       <span className="font-semibold">Acuerdo:</span> {act.resultado}
                     </div>
                   )}
 
                   {/* Vínculos a Empresa, Oportunidad, Contacto y Autor */}
-                  <div className="pt-2 border-t border-[#222] flex flex-wrap items-center gap-3 text-[11px] text-[#8E8E93] font-mono pl-8">
+                  <div className="pt-2 border-t border-[#222] flex flex-wrap items-center gap-3 text-[11px] text-[var(--c-muted)] font-mono pl-8">
                     {emp && (
                       <button
                         onClick={() => onSelectEmpresa(emp.id)}
-                        className="hover:text-[#BEFF00] flex items-center gap-1 font-sans"
+                        className="hover:text-[var(--c-accent)] flex items-center gap-1 font-sans"
                       >
-                        <Building2 className="w-3 h-3 text-[#666]" />
+                        <Building2 className="w-3 h-3 text-[var(--c-muted-2)]" />
                         <span>{emp.nombre}</span>
                       </button>
                     )}
@@ -173,23 +173,23 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
                     {op && (
                       <button
                         onClick={() => onSelectOportunidad(op.id)}
-                        className="hover:text-[#BEFF00] flex items-center gap-1 font-sans"
+                        className="hover:text-[var(--c-accent)] flex items-center gap-1 font-sans"
                       >
-                        <Kanban className="w-3 h-3 text-[#666]" />
+                        <Kanban className="w-3 h-3 text-[var(--c-muted-2)]" />
                         <span>{op.nombre}</span>
                       </button>
                     )}
 
                     {con && (
                       <span className="flex items-center gap-1">
-                        <User className="w-3 h-3 text-[#666]" />
+                        <User className="w-3 h-3 text-[var(--c-muted-2)]" />
                         <span>
                           {con.nombre} {con.apellido}
                         </span>
                       </span>
                     )}
 
-                    <span className="ml-auto text-[#666]">
+                    <span className="ml-auto text-[var(--c-muted-2)]">
                       Por {autor?.nombre ?? 'Equipo'}
                     </span>
                   </div>
