@@ -59,6 +59,12 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
       const r = await supabase.from('entregables').select('*').in('proyecto_id', ids).eq('archivado', false).order('fecha_comprometida', { ascending: true, nullsFirst: false });
       en = (r.data as Entregable[]) ?? [];
       e2 = r.error;
+      // Notas internas: tabla propia, solo miembros. Se unen solo para mostrar.
+      if (en.length > 0) {
+        const n = await supabase.from('entregables_internos').select('entregable_id, notas').in('entregable_id', en.map((x) => x.id));
+        const mapa = new Map((n.data ?? []).map((x: { entregable_id: string; notas: string | null }) => [x.entregable_id, x.notas]));
+        en = en.map((x) => ({ ...x, notas_internas: mapa.get(x.id) ?? null }));
+      }
     }
     const fallo = e1 || e2 || e3 || e4;
     if (fallo) setError(parseSupabaseError(fallo));
@@ -107,17 +113,33 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
 
   const crearEntregable = async (proyectoId: string) => {
     if (!supabase || !fe.titulo.trim()) return;
-    const ok = await ejecutar(() =>
-      supabase!.from('entregables').insert({
+    setGuardando(true);
+    setError(null);
+    const { data: creado, error: errE } = await supabase
+      .from('entregables')
+      .insert({
         proyecto_id: proyectoId,
         titulo: fe.titulo.trim(),
         estado: fe.estado,
         fecha_comprometida: fe.fecha_comprometida || null,
         url_documento: fe.url_documento.trim() || null,
-        notas_internas: fe.notas_internas.trim() || null,
         visible_cliente: fe.visible_cliente,
       })
-    );
+      .select('id')
+      .single();
+    if (!errE && creado && fe.notas_internas.trim()) {
+      const { error: errN } = await supabase
+        .from('entregables_internos')
+        .insert({ entregable_id: creado.id, notas: fe.notas_internas.trim() });
+      if (errN) setError(parseSupabaseError(errN));
+    }
+    setGuardando(false);
+    if (errE) {
+      setError(parseSupabaseError(errE));
+      return;
+    }
+    const ok = true;
+    await cargar();
     if (ok) {
       setEntProyecto(null);
       setFe({ titulo: '', estado: 'pendiente', fecha_comprometida: '', url_documento: '', notas_internas: '', visible_cliente: true });
