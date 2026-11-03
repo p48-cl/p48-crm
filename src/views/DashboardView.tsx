@@ -11,6 +11,7 @@ import {
 import { useCRM } from '../context/CRMContext';
 import { formatCLP } from '../lib/formatters';
 import { AgencyDashboard, SeccionDashboard } from '../components/dashboard/AgencyDashboard';
+import { LoUrgenteHoy } from '../components/dashboard/LoUrgenteHoy';
 
 const PESTANAS: { id: SeccionDashboard; label: string }[] = [
   { id: 'resumen', label: 'Resumen' },
@@ -115,6 +116,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </nav>
 
       {/* Grid de 5 KPIs Clave (Cifras en Blanco Aire #F5F5F5) */}
+      {pestana === 'resumen' && (
+        <LoUrgenteHoy
+          seguimientosAtrasados={kpis.seguimientos_atrasados_count}
+          tareasHoy={kpis.tareas_hoy_count}
+          onNavigateKanban={onNavigateKanban}
+          onNavigateTasks={onNavigateTasks}
+        />
+      )}
+
       <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 ${pestana === 'resumen' ? '' : 'hidden'}`}>
         {/* KPI 1: Pipeline Ponderado */}
         <div className="surface p-4 space-y-1">
