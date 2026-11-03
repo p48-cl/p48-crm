@@ -9,6 +9,7 @@ import { CompaniesView } from './views/CompaniesView';
 import { ContactsView } from './views/ContactsView';
 import { TasksView } from './views/TasksView';
 import { ActivitiesView } from './views/ActivitiesView';
+import { MarketingView } from './views/MarketingView';
 import { ImportView } from './views/ImportView';
 import { AdminView } from './views/AdminView';
 import { LoginView } from './views/LoginView';
@@ -19,7 +20,7 @@ import { OpportunityDetailModal } from './views/OpportunityDetailModal';
 import { CompanyDetailDrawer } from './views/CompanyDetailDrawer';
 import { NewDealModal } from './components/common/NewDealModal';
 import { ActivityModal } from './components/common/ActivityModal';
-import { CheckSquare, Kanban, Clock, Building2, LayoutDashboard, MoreHorizontal, Users, Upload, Settings, Activity } from 'lucide-react';
+import { CheckSquare, Kanban, Clock, Building2, LayoutDashboard, MoreHorizontal, Users, Upload, Settings, Activity, BarChart3 } from 'lucide-react';
 import { NewTaskModal } from './components/common/NewTaskModal';
 
 const CRMAppContent: React.FC = () => {
@@ -165,6 +166,8 @@ const CRMAppContent: React.FC = () => {
             />
           )}
 
+          {currentView === 'marketing' && <MarketingView />}
+
           {currentView === 'importar' && <ImportView />}
 
           {currentView === 'administracion' && <AdminView />}
@@ -276,7 +279,7 @@ const CRMAppContent: React.FC = () => {
         <button
           onClick={() => setMasAbierto(true)}
           className={`min-w-[56px] min-h-[52px] flex flex-col items-center justify-center gap-1 ${
-            ['empresas', 'contactos', 'actividades', 'importar', 'administracion'].includes(currentView)
+            ['empresas', 'contactos', 'actividades', 'marketing', 'importar', 'administracion'].includes(currentView)
               ? 'text-[var(--c-accent)] font-semibold'
               : 'text-[var(--c-muted)]'
           }`}
@@ -299,6 +302,7 @@ const CRMAppContent: React.FC = () => {
               { id: 'empresas' as const, label: 'Empresas y clientes', icon: Building2 },
               { id: 'contactos' as const, label: 'Contactos', icon: Users },
               { id: 'actividades' as const, label: 'Actividades', icon: Activity },
+              { id: 'marketing' as const, label: 'Marketing', icon: BarChart3 },
               { id: 'importar' as const, label: 'Importar CSV', icon: Upload },
               { id: 'administracion' as const, label: 'Administración', icon: Settings },
             ].map((item) => (
