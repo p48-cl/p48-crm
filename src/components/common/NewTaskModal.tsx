@@ -57,26 +57,26 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="bg-[#141414] border border-[#2E2E2E] rounded-xl max-w-md w-full p-6 shadow-2xl">
+      <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-xl max-w-md w-full p-6 shadow-2xl">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded bg-[#BEFF00]/15 flex items-center justify-center text-[#BEFF00]">
+            <div className="w-8 h-8 rounded bg-[var(--c-accent)]/15 flex items-center justify-center text-[var(--c-accent)]">
               <CheckSquare className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-[#F5F5F5]">Nueva Tarea</h2>
-              <p className="text-xs text-[#8E8E93]">Compromiso comercial u operativo</p>
+              <h2 className="text-base font-bold text-[var(--c-text)]">Nueva Tarea</h2>
+              <p className="text-xs text-[var(--c-muted)]">Compromiso comercial u operativo</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-[#888] hover:text-white">
+          <button onClick={onClose} className="text-[var(--c-muted)] hover:text-white">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3.5">
           <div>
-            <label className="block text-xs font-medium text-[#EEE] mb-1">
-              Título de la tarea <span className="text-[#BEFF00]">*</span>
+            <label className="block text-xs font-medium text-[var(--c-text)] mb-1">
+              Título de la tarea <span className="text-[var(--c-accent)]">*</span>
             </label>
             <input
               type="text"
@@ -84,17 +84,17 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
               placeholder="Ej: Enviar propuesta de inversión en medios revisada"
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
-              className="w-full bg-[#1C1C1C] border border-[#2E2E2E] rounded px-3 py-2 text-xs text-white"
+              className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-[#CCC] mb-1">Empresa</label>
+              <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Empresa</label>
               <select
                 value={empresaId}
                 onChange={(e) => setEmpresaId(e.target.value)}
-                className="w-full bg-[#1C1C1C] border border-[#2E2E2E] rounded px-3 py-2 text-xs text-white"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
               >
                 <option value="">(Opcional) Empresa...</option>
                 {empresas.map((e) => (
@@ -106,11 +106,11 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[#CCC] mb-1">Negocio</label>
+              <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Negocio</label>
               <select
                 value={oportunidadId}
                 onChange={(e) => setOportunidadId(e.target.value)}
-                className="w-full bg-[#1C1C1C] border border-[#2E2E2E] rounded px-3 py-2 text-xs text-white"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
               >
                 <option value="">(Opcional) Negocio...</option>
                 {oportunidadesFiltradas.map((o) => (
@@ -124,11 +124,11 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-[#CCC] mb-1">Responsable</label>
+              <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Responsable</label>
               <select
                 value={responsableId}
                 onChange={(e) => setResponsableId(e.target.value)}
-                className="w-full bg-[#1C1C1C] border border-[#2E2E2E] rounded px-3 py-2 text-xs text-white"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
               >
                 {miembros.map((m) => (
                   <option key={m.id} value={m.id}>
@@ -139,11 +139,11 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[#CCC] mb-1">Prioridad</label>
+              <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Prioridad</label>
               <select
                 value={prioridad}
                 onChange={(e) => setPrioridad(e.target.value as any)}
-                className="w-full bg-[#1C1C1C] border border-[#2E2E2E] rounded px-3 py-2 text-xs text-white"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
               >
                 <option value="alta">Alta</option>
                 <option value="media">Media</option>
@@ -153,20 +153,20 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#CCC] mb-1">
-              Fecha de Vencimiento <span className="text-[#BEFF00]">*</span>
+            <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">
+              Fecha de Vencimiento <span className="text-[var(--c-accent)]">*</span>
             </label>
             <input
               type="date"
               required
               value={fechaVencimiento}
               onChange={(e) => setFechaVencimiento(e.target.value)}
-              className="w-full bg-[#1C1C1C] border border-[#2E2E2E] rounded px-3 py-1.5 text-xs text-white font-mono"
+              className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-1.5 text-xs text-white font-mono"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#CCC] mb-1">
+            <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">
               Instrucciones / Notas adicionales
             </label>
             <textarea
@@ -174,21 +174,21 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
               placeholder="Detalle o enlaces de referencia..."
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
-              className="w-full bg-[#1C1C1C] border border-[#2E2E2E] rounded p-2 text-xs text-white"
+              className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded p-2 text-xs text-white"
             />
           </div>
 
-          <div className="flex justify-end gap-2.5 pt-3 border-t border-[#262626]">
+          <div className="flex justify-end gap-2.5 pt-3 border-t border-[var(--c-line)]">
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-2 text-xs text-[#888] hover:text-white"
+              className="px-3 py-2 text-xs text-[var(--c-muted)] hover:text-white"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-xs font-semibold bg-[#BEFF00] text-black rounded"
+              className="px-4 py-2 text-xs font-semibold bg-[var(--c-accent)] text-black rounded"
             >
               Guardar Tarea
             </button>

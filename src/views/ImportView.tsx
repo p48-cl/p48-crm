@@ -182,57 +182,57 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold font-sans text-[#F5F5F5] dark:text-[#F5F5F5] light:text-[#111]">
+          <h1 className="text-xl font-bold font-sans text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
             Importador de Empresas y Contactos
           </h1>
-          <p className="text-xs text-[#8E8E93] mt-0.5">
+          <p className="text-xs text-[var(--c-muted)] mt-0.5">
             Carga masiva vía CSV con detección de duplicados y mapeo relacional
           </p>
         </div>
       </div>
 
       {/* Indicador de pasos */}
-      <div className="flex items-center gap-3 p-3 bg-[#141414] rounded-lg border border-[#262626] text-xs font-mono">
-        <span className={step === 'upload' ? 'text-[#BEFF00] font-bold' : 'text-[#666]'}>
+      <div className="flex items-center gap-3 p-3 bg-[var(--c-surface)] rounded-lg border border-[var(--c-line)] text-xs font-mono">
+        <span className={step === 'upload' ? 'text-[var(--c-accent)] font-bold' : 'text-[var(--c-muted-2)]'}>
           1. Subir CSV
         </span>
         <ArrowRight className="w-3.5 h-3.5 text-[#444]" />
-        <span className={step === 'mapping' ? 'text-[#BEFF00] font-bold' : 'text-[#666]'}>
+        <span className={step === 'mapping' ? 'text-[var(--c-accent)] font-bold' : 'text-[var(--c-muted-2)]'}>
           2. Mapear Columnas
         </span>
         <ArrowRight className="w-3.5 h-3.5 text-[#444]" />
-        <span className={step === 'preview' ? 'text-[#BEFF00] font-bold' : 'text-[#666]'}>
+        <span className={step === 'preview' ? 'text-[var(--c-accent)] font-bold' : 'text-[var(--c-muted-2)]'}>
           3. Previsualizar & Duplicados
         </span>
         <ArrowRight className="w-3.5 h-3.5 text-[#444]" />
-        <span className={step === 'completed' ? 'text-[#BEFF00] font-bold' : 'text-[#666]'}>
+        <span className={step === 'completed' ? 'text-[var(--c-accent)] font-bold' : 'text-[var(--c-muted-2)]'}>
           4. Confirmación
         </span>
       </div>
 
       {/* PASO 1: SUBIR CSV */}
       {step === 'upload' && (
-        <div className="p-8 bg-[#141414] rounded-xl border border-[#262626] text-center space-y-4">
-          <div className="w-14 h-14 rounded-full bg-[#1C1C1C] border border-[#2E2E2E] flex items-center justify-center mx-auto text-[#BEFF00]">
+        <div className="p-8 bg-[var(--c-surface)] rounded-xl border border-[var(--c-line)] text-center space-y-4">
+          <div className="w-14 h-14 rounded-full bg-[var(--c-surface-2)] border border-[var(--c-line)] flex items-center justify-center mx-auto text-[var(--c-accent)]">
             <UploadCloud className="w-7 h-7" />
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-[#F5F5F5]">Selecciona un archivo CSV</h3>
-            <p className="text-xs text-[#8E8E93] max-w-md mx-auto mt-1">
+            <h3 className="text-sm font-semibold text-[var(--c-text)]">Selecciona un archivo CSV</h3>
+            <p className="text-xs text-[var(--c-muted)] max-w-md mx-auto mt-1">
               Exportaciones de bases de datos B2B, LinkedIn Sales Navigator o planillas internas con datos de empresas y personas.
             </p>
           </div>
 
           <div className="flex justify-center gap-3 pt-2">
-            <label className="bg-[#BEFF00] hover:bg-[#aee600] text-[#0A0A0A] font-semibold text-xs py-2.5 px-4 rounded cursor-pointer transition-colors">
+            <label className="bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] text-[var(--c-on-accent)] font-semibold text-xs py-2.5 px-4 rounded cursor-pointer transition-colors">
               <span>Examinar archivo CSV...</span>
               <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" />
             </label>
 
             <button
               onClick={handleCargarEjemplo}
-              className="bg-[#1C1C1C] hover:bg-[#252525] text-[#DDD] text-xs py-2.5 px-4 rounded border border-[#2E2E2E] transition-colors"
+              className="bg-[var(--c-surface-2)] hover:bg-[var(--c-line)] text-[var(--c-line)] text-xs py-2.5 px-4 rounded border border-[var(--c-line)] transition-colors"
             >
               Cargar CSV de prueba (Demo)
             </button>
@@ -242,33 +242,33 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
 
       {/* PASO 2: MAPEO DE COLUMNAS */}
       {step === 'mapping' && (
-        <div className="p-6 bg-[#141414] rounded-xl border border-[#262626] space-y-5">
+        <div className="p-6 bg-[var(--c-surface)] rounded-xl border border-[var(--c-line)] space-y-5">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-[#F5F5F5]">Mapeo de Columnas</h3>
-              <p className="text-xs text-[#8E8E93]">
+              <h3 className="text-sm font-semibold text-[var(--c-text)]">Mapeo de Columnas</h3>
+              <p className="text-xs text-[var(--c-muted)]">
                 Asocia las columnas de tu CSV con los campos de la base de datos de P48.
               </p>
             </div>
-            <span className="font-mono text-xs text-[#BEFF00]">{rows.length} filas detectadas</span>
+            <span className="font-mono text-xs text-[var(--c-accent)]">{rows.length} filas detectadas</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             {/* Campos Empresa */}
-            <div className="p-4 bg-[#111] rounded border border-[#262626] space-y-3">
-              <h4 className="font-semibold text-[#BEFF00] flex items-center gap-1.5">
+            <div className="p-4 bg-[#111] rounded border border-[var(--c-line)] space-y-3">
+              <h4 className="font-semibold text-[var(--c-accent)] flex items-center gap-1.5">
                 <Building2 className="w-3.5 h-3.5" />
                 <span>Datos de Empresa</span>
               </h4>
 
               <div>
                 <label className="block text-[11px] text-[#BBB] mb-1">
-                  Nombre Empresa <span className="text-[#BEFF00]">*</span>
+                  Nombre Empresa <span className="text-[var(--c-accent)]">*</span>
                 </label>
                 <select
                   value={mapping.nombreEmpresa}
                   onChange={(e) => setMapping({ ...mapping, nombreEmpresa: e.target.value })}
-                  className="w-full bg-[#1C1C1C] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
+                  className="w-full bg-[var(--c-surface-2)] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
                 >
                   <option value="">Selecciona columna...</option>
                   {headers.map((h) => (
@@ -284,7 +284,7 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
                 <select
                   value={mapping.rut}
                   onChange={(e) => setMapping({ ...mapping, rut: e.target.value })}
-                  className="w-full bg-[#1C1C1C] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
+                  className="w-full bg-[var(--c-surface-2)] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
                 >
                   <option value="">(Opcional) Columna...</option>
                   {headers.map((h) => (
@@ -300,7 +300,7 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
                 <select
                   value={mapping.dominioWeb}
                   onChange={(e) => setMapping({ ...mapping, dominioWeb: e.target.value })}
-                  className="w-full bg-[#1C1C1C] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
+                  className="w-full bg-[var(--c-surface-2)] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
                 >
                   <option value="">(Opcional) Columna...</option>
                   {headers.map((h) => (
@@ -313,7 +313,7 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
             </div>
 
             {/* Campos Contacto */}
-            <div className="p-4 bg-[#111] rounded border border-[#262626] space-y-3">
+            <div className="p-4 bg-[#111] rounded border border-[var(--c-line)] space-y-3">
               <h4 className="font-semibold text-sky-400 flex items-center gap-1.5">
                 <Users className="w-3.5 h-3.5" />
                 <span>Contacto Asociado (Opcional)</span>
@@ -325,7 +325,7 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
                   <select
                     value={mapping.nombreContacto}
                     onChange={(e) => setMapping({ ...mapping, nombreContacto: e.target.value })}
-                    className="w-full bg-[#1C1C1C] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
+                    className="w-full bg-[var(--c-surface-2)] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
                   >
                     <option value="">Columna...</option>
                     {headers.map((h) => (
@@ -340,7 +340,7 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
                   <select
                     value={mapping.apellidoContacto}
                     onChange={(e) => setMapping({ ...mapping, apellidoContacto: e.target.value })}
-                    className="w-full bg-[#1C1C1C] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
+                    className="w-full bg-[var(--c-surface-2)] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
                   >
                     <option value="">Columna...</option>
                     {headers.map((h) => (
@@ -357,7 +357,7 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
                 <select
                   value={mapping.emailContacto}
                   onChange={(e) => setMapping({ ...mapping, emailContacto: e.target.value })}
-                  className="w-full bg-[#1C1C1C] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
+                  className="w-full bg-[var(--c-surface-2)] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
                 >
                   <option value="">Columna...</option>
                   {headers.map((h) => (
@@ -374,7 +374,7 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
                   <select
                     value={mapping.cargoContacto}
                     onChange={(e) => setMapping({ ...mapping, cargoContacto: e.target.value })}
-                    className="w-full bg-[#1C1C1C] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
+                    className="w-full bg-[var(--c-surface-2)] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
                   >
                     <option value="">Columna...</option>
                     {headers.map((h) => (
@@ -389,7 +389,7 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
                   <select
                     value={mapping.telefonoContacto}
                     onChange={(e) => setMapping({ ...mapping, telefonoContacto: e.target.value })}
-                    className="w-full bg-[#1C1C1C] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
+                    className="w-full bg-[var(--c-surface-2)] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
                   >
                     <option value="">Columna...</option>
                     {headers.map((h) => (
@@ -406,14 +406,14 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
           <div className="flex justify-between items-center pt-3 border-t border-[#222]">
             <button
               onClick={() => setStep('upload')}
-              className="text-xs text-[#888] hover:text-white"
+              className="text-xs text-[var(--c-muted)] hover:text-white"
             >
               ← Volver
             </button>
             <button
               disabled={!mapping.nombreEmpresa}
               onClick={() => setStep('preview')}
-              className="bg-[#BEFF00] hover:bg-[#aee600] disabled:opacity-40 text-[#0A0A0A] font-semibold text-xs py-2 px-4 rounded flex items-center gap-1.5 transition-colors"
+              className="bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] disabled:opacity-40 text-[var(--c-on-accent)] font-semibold text-xs py-2 px-4 rounded flex items-center gap-1.5 transition-colors"
             >
               <span>Continuar a Previsualización</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -424,19 +424,19 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
 
       {/* PASO 3: PREVISUALIZACIÓN Y DETECCIÓN DE DUPLICADOS */}
       {step === 'preview' && (
-        <div className="p-6 bg-[#141414] rounded-xl border border-[#262626] space-y-4">
+        <div className="p-6 bg-[var(--c-surface)] rounded-xl border border-[var(--c-line)] space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="text-sm font-semibold text-[#F5F5F5]">
+              <h3 className="text-sm font-semibold text-[var(--c-text)]">
                 Previsualización y Control de Duplicados
               </h3>
-              <p className="text-xs text-[#8E8E93]">
+              <p className="text-xs text-[var(--c-muted)]">
                 Verifica antes de escribir en la base de datos de Supabase
               </p>
             </div>
 
             {duplicadosTotales > 0 && (
-              <div className="flex items-center gap-1.5 text-xs font-mono text-[#E8005A] bg-[#221014] px-2.5 py-1 rounded border border-[#E8005A]/30">
+              <div className="flex items-center gap-1.5 text-xs font-mono text-[var(--c-danger)] bg-[#221014] px-2.5 py-1 rounded border border-[var(--c-danger)]/30">
                 <AlertTriangle className="w-3.5 h-3.5" />
                 <span>{duplicadosTotales} duplicados detectados (se omitirán)</span>
               </div>
@@ -444,9 +444,9 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
           </div>
 
           {/* Tabla de Previsualización */}
-          <div className="border border-[#262626] rounded-lg overflow-x-auto max-h-72">
+          <div className="border border-[var(--c-line)] rounded-lg overflow-x-auto max-h-72">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#0E0E0E] border-b border-[#262626] text-[#8E8E93] font-mono text-[10px] uppercase">
+              <thead className="bg-[var(--c-surface-2)] border-b border-[var(--c-line)] text-[var(--c-muted)] font-mono text-[10px] uppercase">
                 <tr>
                   <th className="py-2 px-3">Estado</th>
                   <th className="py-2 px-3">Empresa</th>
@@ -460,16 +460,16 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
                 {registrosMapeados.map((r, i) => (
                   <tr
                     key={i}
-                    className={r.esDuplicado ? 'bg-[#1D1014]/50' : 'hover:bg-[#1A1A1A]'}
+                    className={r.esDuplicado ? 'bg-[#1D1014]/50' : 'hover:bg-[var(--c-surface-2)]'}
                   >
                     <td className="py-2 px-3 font-mono text-[11px]">
                       {r.esDuplicado ? (
-                        <span className="text-[#E8005A] flex items-center gap-1">
+                        <span className="text-[var(--c-danger)] flex items-center gap-1">
                           <AlertTriangle className="w-3 h-3" />
                           <span>Duplicado</span>
                         </span>
                       ) : (
-                        <span className="text-[#BEFF00] flex items-center gap-1">
+                        <span className="text-[var(--c-accent)] flex items-center gap-1">
                           <CheckCircle2 className="w-3 h-3" />
                           <span>Nuevo</span>
                         </span>
@@ -478,7 +478,7 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
                     <td className="py-2 px-3 font-medium text-white">{r.empresa.nombre}</td>
                     <td className="py-2 px-3 font-mono text-[#AAA]">{r.empresa.rut || '—'}</td>
                     <td className="py-2 px-3 font-mono text-[#AAA]">{r.empresa.dominio_web || '—'}</td>
-                    <td className="py-2 px-3 text-[#DDD]">
+                    <td className="py-2 px-3 text-[var(--c-line)]">
                       {r.contacto.nombre} {r.contacto.apellido}
                     </td>
                     <td className="py-2 px-3 font-mono text-[#AAA]">{r.contacto.email || '—'}</td>
@@ -491,14 +491,14 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
           <div className="flex justify-between items-center pt-3 border-t border-[#222]">
             <button
               onClick={() => setStep('mapping')}
-              className="text-xs text-[#888] hover:text-white"
+              className="text-xs text-[var(--c-muted)] hover:text-white"
             >
               ← Modificar Mapeo
             </button>
 
             <button
               onClick={handleConfirmarImportacion}
-              className="bg-[#BEFF00] hover:bg-[#aee600] text-[#0A0A0A] font-semibold text-xs py-2 px-4 rounded flex items-center gap-1.5 transition-colors"
+              className="bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] text-[var(--c-on-accent)] font-semibold text-xs py-2 px-4 rounded flex items-center gap-1.5 transition-colors"
             >
               <Database className="w-3.5 h-3.5" />
               <span>Confirmar e Importar {registrosMapeados.length - duplicadosTotales} Registros</span>
@@ -509,50 +509,50 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
 
       {/* PASO 4: IMPORTACIÓN COMPLETADA */}
       {step === 'completed' && resultadoImportacion && (
-        <div className="p-8 bg-[#141414] rounded-xl border border-[#262626] text-center space-y-4">
-          <div className="w-14 h-14 rounded-full bg-[#BEFF00]/15 text-[#BEFF00] flex items-center justify-center mx-auto">
+        <div className="p-8 bg-[var(--c-surface)] rounded-xl border border-[var(--c-line)] text-center space-y-4">
+          <div className="w-14 h-14 rounded-full bg-[var(--c-accent)]/15 text-[var(--c-accent)] flex items-center justify-center mx-auto">
             <CheckCircle2 className="w-7 h-7" />
           </div>
 
           <div>
-            <h3 className="text-base font-bold text-[#F5F5F5]">¡Importación Completada!</h3>
-            <p className="text-xs text-[#8E8E93] mt-1">
+            <h3 className="text-base font-bold text-[var(--c-text)]">¡Importación Completada!</h3>
+            <p className="text-xs text-[var(--c-muted)] mt-1">
               Los registros fueron incorporados correctamente al CRM.
             </p>
           </div>
 
           <div className="grid grid-cols-3 gap-3 max-w-md mx-auto pt-2 text-xs">
-            <div className="p-3 bg-[#1A1A1A] rounded border border-[#262626]">
-              <p className="font-mono text-lg font-bold text-[#BEFF00]">
+            <div className="p-3 bg-[var(--c-surface-2)] rounded border border-[var(--c-line)]">
+              <p className="font-mono text-lg font-bold text-[var(--c-accent)]">
                 {resultadoImportacion.empresasCreadas}
               </p>
-              <p className="text-[10px] text-[#888]">Empresas Creadas</p>
+              <p className="text-[10px] text-[var(--c-muted)]">Empresas Creadas</p>
             </div>
-            <div className="p-3 bg-[#1A1A1A] rounded border border-[#262626]">
+            <div className="p-3 bg-[var(--c-surface-2)] rounded border border-[var(--c-line)]">
               <p className="font-mono text-lg font-bold text-sky-400">
                 {resultadoImportacion.contactosCreados}
               </p>
-              <p className="text-[10px] text-[#888]">Contactos Creados</p>
+              <p className="text-[10px] text-[var(--c-muted)]">Contactos Creados</p>
             </div>
-            <div className="p-3 bg-[#1A1A1A] rounded border border-[#262626]">
+            <div className="p-3 bg-[var(--c-surface-2)] rounded border border-[var(--c-line)]">
               <p className="font-mono text-lg font-bold text-[#AAA]">
                 {resultadoImportacion.duplicadosSaltados}
               </p>
-              <p className="text-[10px] text-[#888]">Duplicados Omitidos</p>
+              <p className="text-[10px] text-[var(--c-muted)]">Duplicados Omitidos</p>
             </div>
           </div>
 
           {resultadoImportacion.erroresPorFila && resultadoImportacion.erroresPorFila.length > 0 && (
-            <div className="mt-4 p-4 bg-[#181818] rounded-lg border border-[#333] text-left max-w-lg mx-auto">
-              <div className="flex items-center gap-2 mb-2 text-[#E8005A]">
+            <div className="mt-4 p-4 bg-[var(--c-surface-2)] rounded-lg border border-[#333] text-left max-w-lg mx-auto">
+              <div className="flex items-center gap-2 mb-2 text-[var(--c-danger)]">
                 <AlertTriangle className="w-4 h-4" />
                 <h4 className="text-xs font-semibold">Filas no procesadas ({resultadoImportacion.erroresPorFila.length})</h4>
               </div>
               <div className="max-h-40 overflow-y-auto space-y-1.5 text-xs">
                 {resultadoImportacion.erroresPorFila.map((err, i) => (
                   <div key={i} className="flex items-start gap-2 text-[11px] p-2 bg-[#111] rounded border border-[#222]">
-                    <span className="font-mono font-bold text-[#E8005A]">Fila {err.fila}:</span>
-                    <span className="text-[#CCC]">{err.error}</span>
+                    <span className="font-mono font-bold text-[var(--c-danger)]">Fila {err.fila}:</span>
+                    <span className="text-[var(--c-text-2)]">{err.error}</span>
                   </div>
                 ))}
               </div>

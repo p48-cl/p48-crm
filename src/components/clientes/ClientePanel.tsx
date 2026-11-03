@@ -13,11 +13,11 @@ import {
 } from '../../types/crm';
 
 const input =
-  'w-full px-2.5 py-1.5 text-xs bg-[#101010] border border-[#2E2E2E] rounded text-[#F5F5F5] placeholder-[#666] focus:outline-none focus:border-[#BEFF00]';
+  'w-full px-2.5 py-1.5 text-xs bg-[var(--c-surface)] border border-[var(--c-line)] rounded text-[var(--c-text)] placeholder-[var(--c-muted-2)] focus:outline-none focus:border-[var(--c-accent)]';
 const btnPrimario =
-  'text-xs text-[#0A0A0A] bg-[#BEFF00] hover:bg-[#aee600] px-2.5 py-1 rounded font-medium flex items-center gap-1 transition-colors disabled:opacity-50';
-const btnLink = 'text-[11px] font-mono uppercase text-[#8E8E93] hover:text-[#BEFF00]';
-const filaCard = 'p-3 bg-[#181818] rounded border border-[#262626] space-y-2 text-xs';
+  'text-xs text-[var(--c-on-accent)] bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] px-2.5 py-1 rounded font-medium flex items-center gap-1 transition-colors disabled:opacity-50';
+const btnLink = 'text-[11px] font-mono uppercase text-[var(--c-muted)] hover:text-[var(--c-accent)]';
+const filaCard = 'p-3 bg-[var(--c-surface-2)] rounded border border-[var(--c-line)] space-y-2 text-xs';
 
 const ESTADOS_PROYECTO: EstadoProyecto[] = ['planificado', 'en_curso', 'pausado', 'finalizado'];
 const ESTADOS_ENTREGABLE: EstadoEntregable[] = ['pendiente', 'en_progreso', 'en_revision', 'entregado'];
@@ -177,7 +177,7 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
   };
 
   if (!isSupabaseConfigured) {
-    return <p className="text-xs text-[#777] py-4 text-center">Disponible solo con Supabase conectado.</p>;
+    return <p className="text-xs text-[var(--c-muted)] py-4 text-center">Disponible solo con Supabase conectado.</p>;
   }
 
   const ocultos =
@@ -192,7 +192,7 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
           <button
             key={t}
             onClick={() => setSub(t)}
-            className={sub === t ? 'text-[#BEFF00]' : 'text-[#8E8E93] hover:text-[#CCC]'}
+            className={sub === t ? 'text-[var(--c-accent)]' : 'text-[var(--c-muted)] hover:text-[var(--c-text-2)]'}
           >
             {t === 'portal' ? 'Accesos de portal' : t}
           </button>
@@ -200,16 +200,16 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
       </div>
 
       {ocultos > 0 && (
-        <p className="text-[11px] text-[#8E8E93] border border-[#262626] rounded p-2">
+        <p className="text-[11px] text-[var(--c-muted)] border border-[var(--c-line)] rounded p-2">
           {ocultos} elemento(s) marcados como no visibles para el cliente.
         </p>
       )}
-      {error && <p className="text-xs text-[#E8005A] border border-[#E8005A]/40 rounded p-2">{error}</p>}
+      {error && <p className="text-xs text-[var(--c-danger)] border border-[var(--c-danger)]/40 rounded p-2">{error}</p>}
 
       {sub === 'proyectos' && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-semibold text-[#F5F5F5]">Proyectos y entregables</h3>
+            <h3 className="text-xs font-semibold text-[var(--c-text)]">Proyectos y entregables</h3>
             <button className={btnPrimario} onClick={() => setNuevoProyecto((v) => !v)}>
               <Plus className="w-3.5 h-3.5" /> Proyecto
             </button>
@@ -234,7 +234,7 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
           )}
 
           {proyectos.length === 0 ? (
-            <p className="text-xs text-[#777] py-4 text-center">Sin proyectos para este cliente.</p>
+            <p className="text-xs text-[var(--c-muted)] py-4 text-center">Sin proyectos para este cliente.</p>
           ) : (
             proyectos.map((p) => {
               const ents = entregables.filter((e) => e.proyecto_id === p.id);
@@ -242,14 +242,14 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
                 <div key={p.id} className={filaCard}>
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="font-medium text-[#F5F5F5] truncate">{p.nombre}</p>
-                      {p.descripcion && <p className="text-[11px] text-[#8E8E93]">{p.descripcion}</p>}
+                      <p className="font-medium text-[var(--c-text)] truncate">{p.nombre}</p>
+                      {p.descripcion && <p className="text-[11px] text-[var(--c-muted)]">{p.descripcion}</p>}
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <button title="Visibilidad para el cliente" onClick={() => ejecutar(() => supabase!.from('proyectos').update({ visible_cliente: !p.visible_cliente }).eq('id', p.id))} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[#8E8E93] hover:text-[#BEFF00]">
+                      <button title="Visibilidad para el cliente" onClick={() => ejecutar(() => supabase!.from('proyectos').update({ visible_cliente: !p.visible_cliente }).eq('id', p.id))} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[var(--c-muted)] hover:text-[var(--c-accent)]">
                         {p.visible_cliente ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                       </button>
-                      <button title="Archivar" onClick={() => ejecutar(() => supabase!.from('proyectos').update({ archivado: true }).eq('id', p.id))} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[#8E8E93] hover:text-[#E8005A]">
+                      <button title="Archivar" onClick={() => ejecutar(() => supabase!.from('proyectos').update({ archivado: true }).eq('id', p.id))} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[var(--c-muted)] hover:text-[var(--c-danger)]">
                         <Archive className="w-4 h-4" />
                       </button>
                     </div>
@@ -260,14 +260,14 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
 
                   <div className="space-y-2 pt-1">
                     {ents.map((en) => (
-                      <div key={en.id} className="p-2 bg-[#101010] rounded border border-[#222] space-y-1">
+                      <div key={en.id} className="p-2 bg-[var(--c-surface)] rounded border border-[#222] space-y-1">
                         <div className="flex items-start justify-between gap-2">
-                          <p className="text-[#EEE] truncate">{en.titulo}</p>
+                          <p className="text-[var(--c-text)] truncate">{en.titulo}</p>
                           <div className="flex items-center gap-2 shrink-0">
-                            <button title="Visibilidad para el cliente" onClick={() => ejecutar(() => supabase!.from('entregables').update({ visible_cliente: !en.visible_cliente }).eq('id', en.id))} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[#8E8E93] hover:text-[#BEFF00]">
+                            <button title="Visibilidad para el cliente" onClick={() => ejecutar(() => supabase!.from('entregables').update({ visible_cliente: !en.visible_cliente }).eq('id', en.id))} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[var(--c-muted)] hover:text-[var(--c-accent)]">
                               {en.visible_cliente ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                             </button>
-                            <button title="Archivar" onClick={() => ejecutar(() => supabase!.from('entregables').update({ archivado: true }).eq('id', en.id))} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[#8E8E93] hover:text-[#E8005A]">
+                            <button title="Archivar" onClick={() => ejecutar(() => supabase!.from('entregables').update({ archivado: true }).eq('id', en.id))} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[var(--c-muted)] hover:text-[var(--c-danger)]">
                               <Archive className="w-3.5 h-3.5" />
                             </button>
                           </div>
@@ -276,15 +276,15 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
                           <select className={input + ' max-w-[150px]'} value={en.estado} onChange={(e) => ejecutar(() => supabase!.from('entregables').update({ estado: e.target.value, fecha_entrega: e.target.value === 'entregado' ? new Date().toISOString().slice(0, 10) : null }).eq('id', en.id))}>
                             {ESTADOS_ENTREGABLE.map((s) => <option key={s} value={s}>{etiqueta(s)}</option>)}
                           </select>
-                          {en.fecha_comprometida && <span className="font-mono text-[10px] text-[#8E8E93]">Comprometido {en.fecha_comprometida}</span>}
-                          {en.url_documento && <a href={en.url_documento} target="_blank" rel="noreferrer" className="text-[11px] text-[#BEFF00] hover:underline">Documento</a>}
+                          {en.fecha_comprometida && <span className="font-mono text-[10px] text-[var(--c-muted)]">Comprometido {en.fecha_comprometida}</span>}
+                          {en.url_documento && <a href={en.url_documento} target="_blank" rel="noreferrer" className="text-[11px] text-[var(--c-accent)] hover:underline">Documento</a>}
                         </div>
-                        {en.notas_internas && <p className="text-[10px] text-[#666]">Nota interna: {en.notas_internas}</p>}
+                        {en.notas_internas && <p className="text-[10px] text-[var(--c-muted-2)]">Nota interna: {en.notas_internas}</p>}
                       </div>
                     ))}
 
                     {entProyecto === p.id ? (
-                      <div className="p-2 bg-[#101010] rounded border border-[#262626] space-y-2">
+                      <div className="p-2 bg-[var(--c-surface)] rounded border border-[var(--c-line)] space-y-2">
                         <input className={input} placeholder="Título del entregable" value={fe.titulo} onChange={(e) => setFe({ ...fe, titulo: e.target.value })} />
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           <select className={input} value={fe.estado} onChange={(e) => setFe({ ...fe, estado: e.target.value as EstadoEntregable })}>
@@ -316,7 +316,7 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
       {sub === 'reportes' && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-semibold text-[#F5F5F5]">Reportes</h3>
+            <h3 className="text-xs font-semibold text-[var(--c-text)]">Reportes</h3>
             <button className={btnPrimario} onClick={() => setNuevoReporte((v) => !v)}>
               <Plus className="w-3.5 h-3.5" /> Reporte
             </button>
@@ -338,20 +338,20 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
             </div>
           )}
           {reportes.length === 0 ? (
-            <p className="text-xs text-[#777] py-4 text-center">Sin reportes.</p>
+            <p className="text-xs text-[var(--c-muted)] py-4 text-center">Sin reportes.</p>
           ) : (
             reportes.map((r) => (
               <div key={r.id} className={filaCard + ' flex items-center justify-between gap-2'}>
                 <div className="min-w-0">
-                  <p className="text-[#EEE] truncate">{r.titulo}</p>
-                  <p className="font-mono text-[10px] text-[#8E8E93]">{r.tipo}{r.periodo ? ` · ${r.periodo}` : ''}</p>
-                  <a href={r.url} target="_blank" rel="noreferrer" className="text-[11px] text-[#BEFF00] hover:underline">Abrir</a>
+                  <p className="text-[var(--c-text)] truncate">{r.titulo}</p>
+                  <p className="font-mono text-[10px] text-[var(--c-muted)]">{r.tipo}{r.periodo ? ` · ${r.periodo}` : ''}</p>
+                  <a href={r.url} target="_blank" rel="noreferrer" className="text-[11px] text-[var(--c-accent)] hover:underline">Abrir</a>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <button title="Visibilidad para el cliente" onClick={() => ejecutar(() => supabase!.from('reportes').update({ visible_cliente: !r.visible_cliente }).eq('id', r.id))} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[#8E8E93] hover:text-[#BEFF00]">
+                  <button title="Visibilidad para el cliente" onClick={() => ejecutar(() => supabase!.from('reportes').update({ visible_cliente: !r.visible_cliente }).eq('id', r.id))} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[var(--c-muted)] hover:text-[var(--c-accent)]">
                     {r.visible_cliente ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                   </button>
-                  <button title="Archivar" onClick={() => ejecutar(() => supabase!.from('reportes').update({ archivado: true }).eq('id', r.id))} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[#8E8E93] hover:text-[#E8005A]">
+                  <button title="Archivar" onClick={() => ejecutar(() => supabase!.from('reportes').update({ archivado: true }).eq('id', r.id))} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[var(--c-muted)] hover:text-[var(--c-danger)]">
                     <Archive className="w-4 h-4" />
                   </button>
                 </div>
@@ -363,8 +363,8 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
 
       {sub === 'portal' && (
         <div className="space-y-3">
-          <h3 className="text-xs font-semibold text-[#F5F5F5]">Personas con acceso al portal</h3>
-          <p className="text-[11px] text-[#8E8E93]">
+          <h3 className="text-xs font-semibold text-[var(--c-text)]">Personas con acceso al portal</h3>
+          <p className="text-[11px] text-[var(--c-muted)]">
             Registrar un correo no envía invitación. El acceso del cliente al portal se habilita cuando esté definido el método de inicio de sesión.
           </p>
           <div className={filaCard}>
@@ -375,13 +375,13 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
             <button className={btnPrimario} disabled={guardando} onClick={invitarUsuario}>Registrar persona</button>
           </div>
           {usuarios.length === 0 ? (
-            <p className="text-xs text-[#777] py-2 text-center">Nadie registrado todavía.</p>
+            <p className="text-xs text-[var(--c-muted)] py-2 text-center">Nadie registrado todavía.</p>
           ) : (
             usuarios.map((u) => (
               <div key={u.id} className={filaCard + ' flex items-center justify-between gap-2'}>
                 <div className="min-w-0">
-                  <p className="text-[#EEE] truncate">{u.nombre}</p>
-                  <p className="font-mono text-[10px] text-[#8E8E93] truncate">{u.email}{u.user_id ? ' · ya inició sesión' : ''}</p>
+                  <p className="text-[var(--c-text)] truncate">{u.nombre}</p>
+                  <p className="font-mono text-[10px] text-[var(--c-muted)] truncate">{u.email}{u.user_id ? ' · ya inició sesión' : ''}</p>
                 </div>
                 <button className={btnLink + " min-h-[44px] inline-flex items-center"} onClick={() => ejecutar(() => supabase!.from('cliente_usuarios').update({ activo: !u.activo }).eq('id', u.id))}>
                   {u.activo ? 'Desactivar' : 'Activar'}

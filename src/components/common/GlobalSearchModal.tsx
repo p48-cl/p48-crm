@@ -263,10 +263,10 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-100">
-      <div className="bg-[#121212] dark:bg-[#121212] light:bg-white border border-[#2B2B2B] dark:border-[#2B2B2B] light:border-[#DDD] rounded-xl max-w-xl w-full shadow-2xl overflow-hidden">
+      <div className="bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white border border-[#2B2B2B] dark:border-[#2B2B2B] light:border-[var(--c-line)] rounded-xl max-w-xl w-full shadow-2xl overflow-hidden">
         {/* Input */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-[#242424] dark:border-[#242424] light:border-[#EEE]">
-          <Search className="w-4 h-4 text-[#8E8E93] shrink-0" />
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-text)]">
+          <Search className="w-4 h-4 text-[var(--c-muted)] shrink-0" />
           <input
             ref={inputRef}
             type="text"
@@ -277,17 +277,17 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
             }}
             onKeyDown={handleKeyDownList}
             placeholder="Buscar por empresa, contacto, RUT o negocio..."
-            className="w-full bg-transparent text-sm text-[#F5F5F5] dark:text-[#F5F5F5] light:text-[#111] placeholder:text-[#666] focus:outline-none font-sans"
+            className="w-full bg-transparent text-sm text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] placeholder:text-[var(--c-muted-2)] focus:outline-none font-sans"
           />
           {query ? (
             <button
               onClick={() => setQuery('')}
-              className="text-[#666] hover:text-[#CCC] transition-colors"
+              className="text-[var(--c-muted-2)] hover:text-[var(--c-text-2)] transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
           ) : (
-            <kbd className="font-mono text-[10px] bg-[#222] dark:bg-[#222] light:bg-[#DDD] px-1.5 py-0.5 rounded text-[#888]">
+            <kbd className="font-mono text-[10px] bg-[#222] dark:bg-[#222] light:bg-[var(--c-line)] px-1.5 py-0.5 rounded text-[var(--c-muted)]">
               ESC
             </kbd>
           )}
@@ -296,14 +296,14 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         {/* Resultados */}
         <div className="max-h-80 overflow-y-auto p-2">
           {query.trim() === '' ? (
-            <div className="py-8 text-center text-xs text-[#666]">
+            <div className="py-8 text-center text-xs text-[var(--c-muted-2)]">
               <p>Escribe al menos una letra para buscar en CRM P48.</p>
               <p className="mt-1 font-mono text-[11px] text-[#555]">
                 Atajos: ↑ ↓ para navegar · Enter para abrir
               </p>
             </div>
           ) : resultados.length === 0 ? (
-            <div className="py-8 text-center text-xs text-[#8E8E93]">
+            <div className="py-8 text-center text-xs text-[var(--c-muted)]">
               No se encontraron coincidencias para &quot;{query}&quot;
             </div>
           ) : (
@@ -317,8 +317,8 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                     onMouseEnter={() => setSelectedIndex(index)}
                     className={`w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between transition-colors ${
                       isSelected
-                        ? 'bg-[#222222] dark:bg-[#222222] light:bg-[#EFEFEF] text-white'
-                        : 'text-[#DDD] hover:bg-[#1A1A1A]'
+                        ? 'bg-[var(--c-surface-3)] dark:bg-[var(--c-surface-3)] light:bg-[#EFEFEF] text-white'
+                        : 'text-[var(--c-line)] hover:bg-[var(--c-surface-2)]'
                     }`}
                   >
                     <div className="flex items-center gap-3 truncate">
@@ -328,7 +328,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                             ? 'bg-[#1E293B] text-sky-400'
                             : item.tipo === 'contacto'
                             ? 'bg-[#292218] text-amber-400'
-                            : 'bg-[#1E2E18] text-[#BEFF00]'
+                            : 'bg-[#1E2E18] text-[var(--c-accent)]'
                         }`}
                       >
                         {item.tipo === 'empresa' && <Building2 className="w-4 h-4" />}
@@ -337,15 +337,15 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                       </div>
 
                       <div className="truncate">
-                        <p className="text-xs font-medium text-[#F5F5F5] dark:text-[#F5F5F5] light:text-[#111] truncate">
+                        <p className="text-xs font-medium text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] truncate">
                           {item.titulo}
                         </p>
-                        <p className="text-[11px] text-[#8E8E93] truncate">{item.subtitulo}</p>
+                        <p className="text-[11px] text-[var(--c-muted)] truncate">{item.subtitulo}</p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0 pl-2">
-                      <span className="font-mono text-[11px] text-[#8E8E93]">
+                      <span className="font-mono text-[11px] text-[var(--c-muted)]">
                         {item.metadato}
                       </span>
                       <ArrowRight className="w-3.5 h-3.5 text-[#555]" />
@@ -358,7 +358,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-2 border-t border-[#202020] dark:border-[#202020] light:border-[#EEE] flex items-center justify-between text-[11px] text-[#666] font-mono">
+        <div className="px-4 py-2 border-t border-[var(--c-surface-3)] dark:border-[var(--c-surface-3)] light:border-[var(--c-text)] flex items-center justify-between text-[11px] text-[var(--c-muted-2)] font-mono">
           <span>Búsqueda instantánea P48</span>
           <span>{resultados.length} resultados</span>
         </div>

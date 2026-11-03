@@ -54,13 +54,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
   }
 
   return (
-    <aside className="hidden md:flex w-56 shrink-0 border-r border-[#262626] bg-[#0E0E0E] dark:bg-[#0E0E0E] light:bg-[#FAFAFA] flex-col justify-between py-4 select-none">
+    <aside className="hidden md:flex w-56 shrink-0 border-r border-[var(--c-line)] bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-bg)] flex-col justify-between py-4 select-none">
       <div className="space-y-6">
-        {/* Botón Principal (Lima P48: #BEFF00) */}
+        {/* Botón Principal (acento JAMP) */}
         <div className="px-3">
           <button
             onClick={onOpenNewDeal}
-            className="w-full bg-[#BEFF00] hover:bg-[#aee600] active:scale-[0.98] text-[#0A0A0A] font-semibold text-xs py-2.5 px-3 rounded flex items-center justify-center gap-1.5 transition-all shadow-sm font-sans"
+            className="w-full bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] active:scale-[0.98] text-[var(--c-on-accent)] font-semibold text-xs py-2.5 px-3 rounded flex items-center justify-center gap-1.5 transition-all shadow-sm font-sans"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>Nueva Oportunidad</span>
@@ -78,12 +78,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClick={() => onChangeView(item.id)}
                 className={`w-full flex items-center justify-between px-3 py-2 rounded text-xs font-medium transition-colors ${
                   isActive
-                    ? 'bg-[#1C1C1C] dark:bg-[#1C1C1C] light:bg-[#EAEAEA] text-[#F5F5F5] dark:text-[#F5F5F5] light:text-[#111111]'
-                    : 'text-[#8E8E93] hover:text-[#F5F5F5] hover:bg-[#151515] dark:hover:bg-[#151515] light:hover:bg-[#F2F2F2]'
+                    ? 'bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-surface-3)] text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-surface)]'
+                    : 'text-[var(--c-muted)] hover:text-[var(--c-text)] hover:bg-[#151515] dark:hover:bg-[#151515] light:hover:bg-[var(--c-surface-2)]'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-[#BEFF00]' : 'text-[#8E8E93]'}`} />
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-[var(--c-accent)]' : 'text-[var(--c-muted)]'}`} />
                   <span>{item.label}</span>
                 </div>
 
@@ -91,8 +91,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <span
                     className={`font-mono text-[10px] px-1.5 py-0.2 rounded font-bold ${
                       item.badgeAlert
-                        ? 'bg-[#E8005A]/20 text-[#E8005A]'
-                        : 'bg-[#2A2A2A] text-[#BBB]'
+                        ? 'bg-[var(--c-danger)]/20 text-[var(--c-danger)]'
+                        : 'bg-[var(--c-surface-3)] text-[#BBB]'
                     }`}
                   >
                     {item.badgeCount}
@@ -108,15 +108,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="px-3 pt-4 border-t border-[#222]">
         <button
           onClick={onOpenQuickActivity}
-          className="w-full bg-[#1A1A1A] hover:bg-[#242424] text-[#CCC] hover:text-white border border-[#2E2E2E] text-xs py-2 px-3 rounded flex items-center justify-center gap-1.5 transition-colors font-medium"
+          className="w-full bg-[var(--c-surface-2)] hover:bg-[var(--c-line)] text-[var(--c-text-2)] hover:text-white border border-[var(--c-line)] text-xs py-2 px-3 rounded flex items-center justify-center gap-1.5 transition-colors font-medium"
         >
-          <Clock className="w-3.5 h-3.5 text-[#8E8E93]" />
+          <Clock className="w-3.5 h-3.5 text-[var(--c-muted)]" />
           <span>Registrar Actividad</span>
         </button>
 
         <div className="mt-3 text-center">
           <p className="text-[10px] text-[#555] font-mono">
-            P48 · Performance Agency
+            JAMP CRM · Multi-agente
           </p>
         </div>
       </div>

@@ -142,24 +142,24 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-[#121212] dark:bg-[#121212] light:bg-white border border-[#262626] rounded-xl max-w-4xl w-full h-[90vh] shadow-2xl flex flex-col justify-between overflow-hidden">
+      <div className="bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white border border-[var(--c-line)] rounded-xl max-w-4xl w-full h-[90vh] shadow-2xl flex flex-col justify-between overflow-hidden">
         {/* Header Ficha */}
-        <div className="p-5 border-b border-[#262626] flex items-start justify-between bg-[#0E0E0E]">
+        <div className="p-5 border-b border-[var(--c-line)] flex items-start justify-between bg-[var(--c-surface-2)]">
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded bg-[#1C1C1C] border border-[#2A2A2A] flex items-center justify-center text-[#F5F5F5]">
+            <div className="w-10 h-10 rounded bg-[var(--c-surface-2)] border border-[var(--c-surface-3)] flex items-center justify-center text-[var(--c-text)]">
               <Kanban className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-[#F5F5F5]">{oportunidad.nombre}</h2>
-                <span className="font-mono text-xs text-[#F5F5F5] font-bold">
+                <h2 className="text-lg font-bold text-[var(--c-text)]">{oportunidad.nombre}</h2>
+                <span className="font-mono text-xs text-[var(--c-text)] font-bold">
                   {formatMoneda(oportunidad.valor_neto, oportunidad.moneda)}
                 </span>
                 {oportunidad.moneda === 'USD' && (
-                  <span className="text-[10px] text-[#888] font-mono">(No suma a CLP)</span>
+                  <span className="text-[10px] text-[var(--c-muted)] font-mono">(No suma a CLP)</span>
                 )}
               </div>
-              <div className="flex items-center gap-3 text-xs text-[#8E8E93] mt-1 font-mono">
+              <div className="flex items-center gap-3 text-xs text-[var(--c-muted)] mt-1 font-mono">
                 {empresa && (
                   <button
                     onClick={() => {
@@ -183,12 +183,12 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={handleArchive}
-              className="p-1.5 text-[#8E8E93] hover:text-[#E8005A] rounded transition-colors"
+              className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-danger)] rounded transition-colors"
               title="Archivar"
             >
               <Archive className="w-4 h-4" />
             </button>
-            <button onClick={onClose} className="p-1.5 text-[#8E8E93] hover:text-white rounded">
+            <button onClick={onClose} className="p-1.5 text-[var(--c-muted)] hover:text-white rounded">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -196,9 +196,9 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
 
         {/* Alerta de Criterio Eliminatorio (v_calificacion_oportunidad.falla_eliminatorio) */}
         {fallaEliminatorio && (
-          <div className="px-5 py-3 bg-[#241015] border-b border-[#E8005A]/40 text-[#FFA0B5] text-xs flex items-center justify-between">
+          <div className="px-5 py-3 bg-[#241015] border-b border-[var(--c-danger)]/40 text-[#FFA0B5] text-xs flex items-center justify-between">
             <div className="flex items-center gap-2 font-medium">
-              <ShieldAlert className="w-4 h-4 text-[#E8005A]" />
+              <ShieldAlert className="w-4 h-4 text-[var(--c-danger)]" />
               <span>
                 Fallo de criterio eliminatorio: la oportunidad no cumple los requisitos base de P48.
                 Se requiere registrar una excepción para continuar.
@@ -213,13 +213,13 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
             {/* Próxima Acción */}
             <div
               className={`p-4 rounded-lg border transition-colors ${
-                atrasada ? 'bg-[#1C1115] border-[#E8005A]' : 'bg-[#161616] border-[#262626]'
+                atrasada ? 'bg-[#1C1115] border-[var(--c-danger)]' : 'bg-[var(--c-surface-2)] border-[var(--c-line)]'
               }`}
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <Clock className={`w-4 h-4 ${atrasada ? 'text-[#E8005A]' : 'text-[#888]'}`} />
-                  <h3 className="text-xs font-semibold text-[#F5F5F5]">Próxima Acción Comercial</h3>
+                  <Clock className={`w-4 h-4 ${atrasada ? 'text-[var(--c-danger)]' : 'text-[var(--c-muted)]'}`} />
+                  <h3 className="text-xs font-semibold text-[var(--c-text)]">Próxima Acción Comercial</h3>
                 </div>
 
                 {!editingAccion && (
@@ -251,13 +251,13 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                     <div className="flex gap-2">
                       <button
                         onClick={() => setEditingAccion(false)}
-                        className="px-2.5 py-1 text-xs text-[#888] hover:text-white"
+                        className="px-2.5 py-1 text-xs text-[var(--c-muted)] hover:text-white"
                       >
                         Cancelar
                       </button>
                       <button
                         onClick={handleSaveProximaAccion}
-                        className="px-3 py-1 text-xs font-semibold bg-[#BEFF00] text-black rounded"
+                        className="px-3 py-1 text-xs font-semibold bg-[var(--c-accent)] text-black rounded"
                       >
                         Guardar
                       </button>
@@ -266,36 +266,36 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                 </div>
               ) : (
                 <div className="text-xs space-y-1">
-                  <p className="text-[#DDD] font-medium">
+                  <p className="text-[var(--c-line)] font-medium">
                     {oportunidad.proxima_accion_texto || 'Sin próxima acción definida.'}
                   </p>
-                  <p className="text-[11px] font-mono text-[#8E8E93] flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 text-[#666]" />
+                  <p className="text-[11px] font-mono text-[var(--c-muted)] flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5 text-[var(--c-muted-2)]" />
                     <span>Fecha: {formatFecha(oportunidad.proxima_accion_fecha)}</span>
-                    {atrasada && <span className="text-[#E8005A] font-bold ml-2">¡ATRASADO!</span>}
+                    {atrasada && <span className="text-[var(--c-danger)] font-bold ml-2">¡ATRASADO!</span>}
                   </p>
                 </div>
               )}
             </div>
 
             {/* Calificación según plantilla activa (criterios en orden) */}
-            <div className="bg-[#161616] p-4 rounded-lg border border-[#262626] space-y-4">
-              <div className="flex items-center justify-between border-b border-[#262626] pb-3">
+            <div className="bg-[var(--c-surface-2)] p-4 rounded-lg border border-[var(--c-line)] space-y-4">
+              <div className="flex items-center justify-between border-b border-[var(--c-line)] pb-3">
                 <div>
-                  <h3 className="text-xs font-semibold text-[#F5F5F5]">
+                  <h3 className="text-xs font-semibold text-[var(--c-text)]">
                     {plantilla?.nombre || 'Calificación de Oportunidad'}
                   </h3>
-                  <p className="text-[11px] text-[#8E8E93]">
+                  <p className="text-[11px] text-[var(--c-muted)]">
                     {plantilla?.descripcion || 'Validación según criterios de la plantilla activa'}
                   </p>
                 </div>
 
                 {/* Puntaje desde v_calificacion_oportunidad */}
                 <div className="text-right">
-                  <p className="text-[10px] text-[#8E8E93] font-mono uppercase">Puntaje Base</p>
-                  <p className="font-mono text-sm font-bold text-[#F5F5F5]">
+                  <p className="text-[10px] text-[var(--c-muted)] font-mono uppercase">Puntaje Base</p>
+                  <p className="font-mono text-sm font-bold text-[var(--c-text)]">
                     {calificacion?.puntaje_total ?? 0}{' '}
-                    <span className="text-xs text-[#666]">
+                    <span className="text-xs text-[var(--c-muted-2)]">
                       / {calificacion?.puntaje_maximo ?? 100} pts
                     </span>
                   </p>
@@ -307,18 +307,18 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                 {criteriosOrdenados.map((crit, idx) => (
                   <div
                     key={crit.id}
-                    className="p-3 rounded border border-[#262626] bg-[#111111] text-xs space-y-2"
+                    className="p-3 rounded border border-[var(--c-line)] bg-[var(--c-surface)] text-xs space-y-2"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-[10px] text-[#777]">0{idx + 1}.</span>
-                          <span className="font-medium text-[#EEE]">{crit.pregunta}</span>
+                          <span className="font-mono text-[10px] text-[var(--c-muted)]">0{idx + 1}.</span>
+                          <span className="font-medium text-[var(--c-text)]">{crit.pregunta}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-[10px] font-mono text-[#8E8E93] mt-0.5">
+                        <div className="flex items-center gap-2 text-[10px] font-mono text-[var(--c-muted)] mt-0.5">
                           <span>Peso: {crit.peso} pts</span>
                           {crit.es_eliminatorio && (
-                            <span className="text-[#E8005A] font-semibold">
+                            <span className="text-[var(--c-danger)] font-semibold">
                               · Criterio Eliminatorio
                             </span>
                           )}
@@ -328,7 +328,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                       {/* Botones de respuesta (guarda sin puntaje_obtenido) */}
                       <div className="shrink-0 flex items-center gap-1">
                         {crit.tipo === 'si_no' ? (
-                          <div className="flex items-center gap-1 bg-[#1C1C1C] p-0.5 rounded border border-[#2E2E2E]">
+                          <div className="flex items-center gap-1 bg-[var(--c-surface-2)] p-0.5 rounded border border-[var(--c-line)]">
                             <button
                               onClick={() => handleRespuestaCriterio(crit, 'si')}
                               className="px-2.5 py-1 rounded font-mono text-xs text-[#BBB] hover:text-white hover:bg-[#333]"
@@ -343,7 +343,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                             </button>
                           </div>
                         ) : (
-                          <div className="flex items-center gap-1 bg-[#1C1C1C] p-0.5 rounded border border-[#2E2E2E]">
+                          <div className="flex items-center gap-1 bg-[var(--c-surface-2)] p-0.5 rounded border border-[var(--c-line)]">
                             {['1', '2', '3', '4', '5'].map((num) => (
                               <button
                                 key={num}
@@ -366,12 +366,12 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
           {/* Columna Derecha */}
           <div className="space-y-6">
             {/* Etapa */}
-            <div className="p-4 bg-[#161616] rounded-lg border border-[#262626] space-y-3">
-              <h3 className="text-xs font-semibold text-[#F5F5F5]">Etapa Comercial</h3>
+            <div className="p-4 bg-[var(--c-surface-2)] rounded-lg border border-[var(--c-line)] space-y-3">
+              <h3 className="text-xs font-semibold text-[var(--c-text)]">Etapa Comercial</h3>
               <select
                 value={oportunidad.etapa_id}
                 onChange={(e) => moverOportunidadEtapa(oportunidad.id, e.target.value)}
-                className="w-full bg-[#111] border border-[#2E2E2E] rounded px-3 py-2 text-xs text-white font-mono"
+                className="w-full bg-[#111] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white font-mono"
               >
                 {etapas.map((et) => (
                   <option key={et.id} value={et.id}>
@@ -380,7 +380,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                 ))}
               </select>
 
-              <div className="text-[11px] font-mono text-[#8E8E93] pt-1">
+              <div className="text-[11px] font-mono text-[var(--c-muted)] pt-1">
                 <p>
                   Ponderado (Base): {formatMoneda(oportunidad.valor_ponderado, oportunidad.moneda)}
                 </p>
@@ -388,12 +388,12 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
             </div>
 
             {/* Tareas */}
-            <div className="p-4 bg-[#161616] rounded-lg border border-[#262626] space-y-3">
+            <div className="p-4 bg-[var(--c-surface-2)] rounded-lg border border-[var(--c-line)] space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-semibold text-[#F5F5F5]">Tareas ({tareasOp.length})</h3>
+                <h3 className="text-xs font-semibold text-[var(--c-text)]">Tareas ({tareasOp.length})</h3>
                 <button
                   onClick={() => onOpenNewTask(oportunidad.empresa_id, oportunidad.id)}
-                  className="text-xs text-[#0A0A0A] bg-[#BEFF00] hover:bg-[#aee600] px-2 py-0.5 rounded font-medium flex items-center gap-1"
+                  className="text-xs text-[var(--c-on-accent)] bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] px-2 py-0.5 rounded font-medium flex items-center gap-1"
                 >
                   <Plus className="w-3 h-3" />
                   <span>Tarea</span>
@@ -402,29 +402,29 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
 
               <div className="space-y-2 max-h-40 overflow-y-auto">
                 {tareasOp.length === 0 ? (
-                  <p className="text-[11px] text-[#777] text-center py-2">Sin tareas asociadas.</p>
+                  <p className="text-[11px] text-[var(--c-muted)] text-center py-2">Sin tareas asociadas.</p>
                 ) : (
                   tareasOp.map((t) => (
                     <div
                       key={t.id}
-                      className="p-2 bg-[#111] rounded border border-[#262626] flex items-center justify-between text-xs"
+                      className="p-2 bg-[#111] rounded border border-[var(--c-line)] flex items-center justify-between text-xs"
                     >
                       <button
                         onClick={() => toggleTareaCompletada(t.id!, t.completada)}
                         className="flex items-center gap-2 text-left"
                       >
                         <CheckSquare
-                          className={`w-3.5 h-3.5 ${t.completada ? 'text-white' : 'text-[#666]'}`}
+                          className={`w-3.5 h-3.5 ${t.completada ? 'text-white' : 'text-[var(--c-muted-2)]'}`}
                         />
                         <span
                           className={`text-[11px] ${
-                            t.completada ? 'line-through text-[#666]' : 'text-[#DDD]'
+                            t.completada ? 'line-through text-[var(--c-muted-2)]' : 'text-[var(--c-line)]'
                           }`}
                         >
                           {t.titulo}
                         </span>
                       </button>
-                      <span className="font-mono text-[10px] text-[#888]">
+                      <span className="font-mono text-[10px] text-[var(--c-muted)]">
                         {formatFecha(t.fecha_vencimiento)}
                       </span>
                     </div>
@@ -434,14 +434,14 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
             </div>
 
             {/* Actividades */}
-            <div className="p-4 bg-[#161616] rounded-lg border border-[#262626] space-y-3">
+            <div className="p-4 bg-[var(--c-surface-2)] rounded-lg border border-[var(--c-line)] space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-semibold text-[#F5F5F5]">
+                <h3 className="text-xs font-semibold text-[var(--c-text)]">
                   Actividades ({actividadesOp.length})
                 </h3>
                 <button
                   onClick={() => onOpenNewActivity(oportunidad.empresa_id, oportunidad.id)}
-                  className="text-xs text-[#0A0A0A] bg-[#BEFF00] hover:bg-[#aee600] px-2 py-0.5 rounded font-medium flex items-center gap-1"
+                  className="text-xs text-[var(--c-on-accent)] bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] px-2 py-0.5 rounded font-medium flex items-center gap-1"
                 >
                   <Plus className="w-3 h-3" />
                   <span>Actividad</span>
@@ -450,16 +450,16 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
 
               <div className="space-y-2 max-h-44 overflow-y-auto">
                 {actividadesOp.length === 0 ? (
-                  <p className="text-[11px] text-[#777] text-center py-2">Sin actividades aún.</p>
+                  <p className="text-[11px] text-[var(--c-muted)] text-center py-2">Sin actividades aún.</p>
                 ) : (
                   actividadesOp.map((act) => (
                     <div
                       key={act.id}
-                      className="p-2 bg-[#111] rounded border border-[#262626] text-xs space-y-1"
+                      className="p-2 bg-[#111] rounded border border-[var(--c-line)] text-xs space-y-1"
                     >
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="font-medium text-[#EEE] capitalize">{act.tipo}</span>
-                        <span className="font-mono text-[10px] text-[#777]">
+                        <span className="font-medium text-[var(--c-text)] capitalize">{act.tipo}</span>
+                        <span className="font-mono text-[10px] text-[var(--c-muted)]">
                           {formatFecha(act.fecha_actividad)}
                         </span>
                       </div>
@@ -475,20 +475,20 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
         {/* Modal de Excepción */}
         {excepcionCriterio && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div className="bg-[#141414] border border-[#E8005A] rounded-lg max-w-md w-full p-6 shadow-2xl">
-              <div className="flex items-center gap-2 mb-3 text-[#E8005A]">
+            <div className="bg-[var(--c-surface)] border border-[var(--c-danger)] rounded-lg max-w-md w-full p-6 shadow-2xl">
+              <div className="flex items-center gap-2 mb-3 text-[var(--c-danger)]">
                 <ShieldAlert className="w-5 h-5" />
                 <h3 className="text-sm font-bold text-white">Excepción a Criterio Eliminatorio</h3>
               </div>
 
-              <p className="text-xs text-[#CCC] mb-3">
+              <p className="text-xs text-[var(--c-text-2)] mb-3">
                 Criterio: &quot;{excepcionCriterio.criterio.pregunta}&quot;
               </p>
 
               <form onSubmit={handleGuardarExcepcion} className="space-y-3">
                 <div>
-                  <label className="block text-xs font-medium text-[#EEE] mb-1">
-                    Motivo justificado de la excepción <span className="text-[#E8005A]">*</span>
+                  <label className="block text-xs font-medium text-[var(--c-text)] mb-1">
+                    Motivo justificado de la excepción <span className="text-[var(--c-danger)]">*</span>
                   </label>
                   <textarea
                     rows={3}
@@ -496,38 +496,38 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                     placeholder="Fundamento obligatorio para autorizar el avance..."
                     value={motivoExcepcion}
                     onChange={(e) => setMotivoExcepcion(e.target.value)}
-                    className="w-full bg-[#1C1C1C] border border-[#333] rounded p-2 text-xs text-white"
+                    className="w-full bg-[var(--c-surface-2)] border border-[#333] rounded p-2 text-xs text-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#EEE] mb-1">
-                    Fecha de revisión obligatoria <span className="text-[#E8005A]">*</span>
+                  <label className="block text-xs font-medium text-[var(--c-text)] mb-1">
+                    Fecha de revisión obligatoria <span className="text-[var(--c-danger)]">*</span>
                   </label>
                   <input
                     type="date"
                     required
                     value={fechaRevisionExcepcion}
                     onChange={(e) => setFechaRevisionExcepcion(e.target.value)}
-                    className="w-full bg-[#1C1C1C] border border-[#333] rounded px-3 py-1.5 text-xs text-white font-mono"
+                    className="w-full bg-[var(--c-surface-2)] border border-[#333] rounded px-3 py-1.5 text-xs text-white font-mono"
                   />
                 </div>
 
                 {errorExcepcion && (
-                  <p className="text-xs text-[#E8005A] font-medium">{errorExcepcion}</p>
+                  <p className="text-xs text-[var(--c-danger)] font-medium">{errorExcepcion}</p>
                 )}
 
                 <div className="flex justify-end gap-2 pt-3 border-t border-[#222]">
                   <button
                     type="button"
                     onClick={() => setExcepcionCriterio(null)}
-                    className="px-3 py-1.5 text-xs text-[#888] hover:text-white"
+                    className="px-3 py-1.5 text-xs text-[var(--c-muted)] hover:text-white"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    className="px-3.5 py-1.5 text-xs font-semibold bg-[#BEFF00] text-black rounded"
+                    className="px-3.5 py-1.5 text-xs font-semibold bg-[var(--c-accent)] text-black rounded"
                   >
                     Guardar Excepción
                   </button>
@@ -538,11 +538,11 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
         )}
 
         {/* Footer */}
-        <div className="p-4 border-t border-[#262626] bg-[#0E0E0E] flex items-center justify-between text-xs text-[#8E8E93]">
+        <div className="p-4 border-t border-[var(--c-line)] bg-[var(--c-surface-2)] flex items-center justify-between text-xs text-[var(--c-muted)]">
           <span className="font-mono text-[11px]">ID: {oportunidad.id}</span>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 bg-[#222] hover:bg-[#2E2E2E] text-white rounded transition-colors"
+            className="px-4 py-1.5 bg-[#222] hover:bg-[var(--c-line)] text-white rounded transition-colors"
           >
             Cerrar Ficha
           </button>

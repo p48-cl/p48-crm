@@ -83,17 +83,17 @@ export const TasksView: React.FC<TasksViewProps> = ({
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold font-sans text-[#F5F5F5] dark:text-[#F5F5F5] light:text-[#111]">
+          <h1 className="text-xl font-bold font-sans text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
             Gestión de Tareas
           </h1>
-          <p className="text-xs text-[#8E8E93] mt-0.5">
+          <p className="text-xs text-[var(--c-muted)] mt-0.5">
             Compromisos comerciales y entregables operativos del equipo
           </p>
         </div>
 
         <button
           onClick={onOpenNewTask}
-          className="bg-[#BEFF00] hover:bg-[#aee600] active:scale-[0.98] text-[#0A0A0A] font-semibold text-xs py-2 px-3.5 rounded flex items-center gap-1.5 transition-all shadow-sm font-sans"
+          className="bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] active:scale-[0.98] text-[var(--c-on-accent)] font-semibold text-xs py-2 px-3.5 rounded flex items-center gap-1.5 transition-all shadow-sm font-sans"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>Nueva Tarea</span>
@@ -101,7 +101,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
       </div>
 
       {/* Pestañas: Hoy, Esta semana, Atrasadas (resaltadas en Magenta), Todas */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#262626] pb-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--c-line)] pb-1">
         <div className="flex gap-2 text-xs font-medium overflow-x-auto">
           {[
             { id: 'hoy' as const, label: 'Hoy', count: counts.hoyCount },
@@ -121,18 +121,18 @@ export const TasksView: React.FC<TasksViewProps> = ({
                 onClick={() => setTab(item.id)}
                 className={`py-2 px-3 rounded-t border-b-2 flex items-center gap-1.5 transition-colors whitespace-nowrap ${
                   active
-                    ? 'border-[#BEFF00] text-[#BEFF00] font-semibold'
-                    : 'border-transparent text-[#8E8E93] hover:text-white'
+                    ? 'border-[var(--c-accent)] text-[var(--c-accent)] font-semibold'
+                    : 'border-transparent text-[var(--c-muted)] hover:text-white'
                 }`}
               >
                 <span>{item.label}</span>
                 <span
                   className={`font-mono text-[10px] px-1.5 py-0.2 rounded font-bold ${
                     item.alert
-                      ? 'bg-[#E8005A]/20 text-[#E8005A]'
+                      ? 'bg-[var(--c-danger)]/20 text-[var(--c-danger)]'
                       : active
-                      ? 'bg-[#222] text-[#BEFF00]'
-                      : 'bg-[#1C1C1C] text-[#888]'
+                      ? 'bg-[#222] text-[var(--c-accent)]'
+                      : 'bg-[var(--c-surface-2)] text-[var(--c-muted)]'
                   }`}
                 >
                   {item.count}
@@ -143,12 +143,12 @@ export const TasksView: React.FC<TasksViewProps> = ({
         </div>
 
         {/* Filtro por Responsable */}
-        <div className="flex items-center gap-2 text-xs text-[#8E8E93] shrink-0">
-          <Filter className="w-3.5 h-3.5 text-[#777]" />
+        <div className="flex items-center gap-2 text-xs text-[var(--c-muted)] shrink-0">
+          <Filter className="w-3.5 h-3.5 text-[var(--c-muted)]" />
           <select
             value={filtroResponsable}
             onChange={(e) => setFiltroResponsable(e.target.value)}
-            className="bg-[#1C1C1C] border border-[#2E2E2E] rounded px-2.5 py-1 text-xs text-[#EEE] focus:outline-none"
+            className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1 text-xs text-[var(--c-text)] focus:outline-none"
           >
             <option value="todos">Todo el equipo</option>
             {miembros.map((m) => (
@@ -163,7 +163,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
       {/* Lista de Tareas */}
       <div className="space-y-2">
         {tareasFiltradas.length === 0 ? (
-          <div className="p-12 text-center text-xs text-[#777] bg-[#141414] rounded-lg border border-[#262626]">
+          <div className="p-12 text-center text-xs text-[var(--c-muted)] bg-[var(--c-surface)] rounded-lg border border-[var(--c-line)]">
             No tienes tareas pendientes en esta vista.
           </div>
         ) : (
@@ -178,20 +178,20 @@ export const TasksView: React.FC<TasksViewProps> = ({
                 key={t.id}
                 className={`p-3.5 rounded-lg border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors ${
                   t.completada
-                    ? 'bg-[#111111] border-[#222] opacity-60'
+                    ? 'bg-[var(--c-surface)] border-[#222] opacity-60'
                     : atrasada
-                    ? 'bg-[#1B1014] border-[#E8005A]/50 ring-1 ring-[#E8005A]/20'
-                    : 'bg-[#141414] border-[#262626] hover:border-[#383838]'
+                    ? 'bg-[#1B1014] border-[var(--c-danger)]/50 ring-1 ring-[var(--c-danger)]/20'
+                    : 'bg-[var(--c-surface)] border-[var(--c-line)] hover:border-[#383838]'
                 }`}
               >
                 <div className="flex items-start gap-3">
                   <button
                     onClick={() => toggleTareaCompletada(t.id, t.completada)}
-                    className="mt-0.5 text-[#777] hover:text-[#BEFF00] transition-colors"
+                    className="mt-0.5 text-[var(--c-muted)] hover:text-[var(--c-accent)] transition-colors"
                   >
                     <CheckSquare
                       className={`w-4 h-4 ${
-                        t.completada ? 'text-[#BEFF00]' : 'text-[#555]'
+                        t.completada ? 'text-[var(--c-accent)]' : 'text-[#555]'
                       }`}
                     />
                   </button>
@@ -200,25 +200,25 @@ export const TasksView: React.FC<TasksViewProps> = ({
                     <p
                       className={`text-xs font-semibold ${
                         t.completada
-                          ? 'line-through text-[#666]'
-                          : 'text-[#F5F5F5] dark:text-[#F5F5F5] light:text-[#111]'
+                          ? 'line-through text-[var(--c-muted-2)]'
+                          : 'text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]'
                       }`}
                     >
                       {t.titulo}
                     </p>
 
                     {t.descripcion && (
-                      <p className="text-[11px] text-[#8E8E93] mt-0.5 line-clamp-1">
+                      <p className="text-[11px] text-[var(--c-muted)] mt-0.5 line-clamp-1">
                         {t.descripcion}
                       </p>
                     )}
 
                     {/* Vínculos */}
-                    <div className="flex flex-wrap items-center gap-3 text-[10px] text-[#777] font-mono mt-1.5">
+                    <div className="flex flex-wrap items-center gap-3 text-[10px] text-[var(--c-muted)] font-mono mt-1.5">
                       {emp && (
                         <button
                           onClick={() => onSelectEmpresa(emp.id)}
-                          className="hover:text-[#BEFF00] flex items-center gap-1 font-sans"
+                          className="hover:text-[var(--c-accent)] flex items-center gap-1 font-sans"
                         >
                           <Building2 className="w-3 h-3 text-[#555]" />
                           <span>{emp.nombre}</span>
@@ -227,7 +227,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
                       {op && (
                         <button
                           onClick={() => onSelectOportunidad(op.id)}
-                          className="hover:text-[#BEFF00] flex items-center gap-1 font-sans"
+                          className="hover:text-[var(--c-accent)] flex items-center gap-1 font-sans"
                         >
                           <Kanban className="w-3 h-3 text-[#555]" />
                           <span>{op.nombre}</span>
@@ -243,10 +243,10 @@ export const TasksView: React.FC<TasksViewProps> = ({
                   <span
                     className={`font-mono text-[10px] font-semibold ${
                       t.prioridad === 'alta'
-                        ? 'text-[#E8005A]'
+                        ? 'text-[var(--c-danger)]'
                         : t.prioridad === 'media'
                         ? 'text-amber-400'
-                        : 'text-[#888]'
+                        : 'text-[var(--c-muted)]'
                     }`}
                   >
                     {t.prioridad.toUpperCase()}
@@ -254,7 +254,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
 
                   <span
                     className={`font-mono text-xs flex items-center gap-1 ${
-                      atrasada ? 'text-[#E8005A] font-bold' : 'text-[#8E8E93]'
+                      atrasada ? 'text-[var(--c-danger)] font-bold' : 'text-[var(--c-muted)]'
                     }`}
                   >
                     <Calendar className="w-3.5 h-3.5 text-[#555]" />
