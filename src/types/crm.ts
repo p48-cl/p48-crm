@@ -105,6 +105,9 @@ export interface Oportunidad {
   motivo_perdida_detalle?: string | null;
   proxima_accion_texto?: string | null;
   proxima_accion_fecha?: string | null;
+  utm_fuente?: string | null;
+  utm_campana?: string | null;
+  utm_medio?: string | null;
   archivado?: boolean;
   created_at?: string;
 }
