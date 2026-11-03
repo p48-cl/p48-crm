@@ -28,6 +28,7 @@ export const Ads: React.FC = () => {
   const [clienteSel, setClienteSel] = useState('todos');
   const [campanas, setCampanas] = useState<Campana[]>([]);
   const [conPrueba, setConPrueba] = useState(false);
+  const [plataformaSel, setPlataformaSel] = useState('todas');
 
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) return;
@@ -48,7 +49,10 @@ export const Ads: React.FC = () => {
 
   const d = useMemo(() => {
     const filtradas = campanas.filter(
-      (c) => (clienteSel === 'todos' || c.empresa_id === clienteSel) && (conPrueba || !c.es_prueba),
+      (c) =>
+        (clienteSel === 'todos' || c.empresa_id === clienteSel) &&
+        (plataformaSel === 'todas' || c.plataforma === plataformaSel) &&
+        (conPrueba || !c.es_prueba),
     );
     const periodos = [...new Set(filtradas.map((c) => c.periodo))].sort();
     const ultima = periodos[periodos.length - 1];
@@ -96,7 +100,7 @@ export const Ads: React.FC = () => {
     });
 
     return { ultima, ahora, antes, porSemana, alertas, tabla, hayDatos: periodos.length > 0 };
-  }, [campanas, clienteSel, conPrueba, nombres]);
+  }, [campanas, clienteSel, plataformaSel, conPrueba, nombres]);
 
   if (cargando) return <p className="text-sm text-[var(--c-muted)]">Cargando...</p>;
 
@@ -115,6 +119,13 @@ export const Ads: React.FC = () => {
           {clientes.map((c) => (
             <option key={c.id} value={c.id}>{c.nombre}</option>
           ))}
+        </select>
+        <select className={select} value={plataformaSel} onChange={(e) => setPlataformaSel(e.target.value)} aria-label="Plataforma">
+          <option value="todas">Todas las plataformas</option>
+          <option value="google_ads">Google Ads</option>
+          <option value="meta_ads">Meta Ads</option>
+          <option value="tiktok_ads">TikTok Ads</option>
+          <option value="linkedin_ads">LinkedIn Ads</option>
         </select>
         <label className="flex items-center gap-1.5 text-xs text-[var(--c-text-2)]">
           <input type="checkbox" checked={conPrueba} onChange={(e) => setConPrueba(e.target.checked)} />
