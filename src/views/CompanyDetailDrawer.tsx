@@ -221,11 +221,13 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
           {activeTab === 'info' && (
             <div className="space-y-6">
               {/* Parámetros Comerciales & Operativos */}
-              <div className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-bg)] p-4 rounded-lg border border-[var(--c-line)] space-y-3">
-                <h3 className="text-xs font-semibold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
-                  Parámetros Comerciales & Contrato
-                </h3>
+              <div className="surface p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-semibold text-[var(--c-text)]">Contrato y estado</h3>
+                  <span className="text-[10px] font-mono text-[var(--c-muted)]">Lo que define la relación</span>
+                </div>
 
+                <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)] -mb-1">Estado</p>
                 <div className="grid grid-cols-3 gap-3 text-xs">
                   <div>
                     <label className="block text-[11px] text-[var(--c-muted)] mb-1">Estado Empresa</label>
@@ -275,6 +277,8 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                   </div>
                 </div>
 
+                <div className="h-px bg-[var(--c-line)]" />
+                <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)] -mb-1">Económico</p>
                 <div className="grid grid-cols-3 gap-3 text-xs">
                   <div>
                     <label className="block text-[11px] text-[var(--c-muted)] mb-1">Fee Mensual (CLP)</label>
@@ -322,7 +326,9 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 text-xs pt-1">
+                <div className="h-px bg-[var(--c-line)]" />
+                <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)] -mb-1">Responsable</p>
+                <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>
                     <label className="block text-[11px] text-[var(--c-muted)] mb-1">Responsable Comercial</label>
                     <select
