@@ -2,7 +2,7 @@
 -- (fee, MRR, salud, responsable, RUT). El portal solo necesita 6 columnas.
 -- Solución: la vista portal_empresa se ejecuta con privilegios del dueño, filtrada por
 -- empresas_del_cliente(), y se quita la política directa sobre empresas.
--- Estado: PREPARADA, pendiente de aplicar tras confirmación.
+-- Estado: APLICADA y verificada (0 políticas de cliente en empresas; portal_empresa con security_invoker=false).
 
 drop policy if exists "cliente lee su empresa" on public.empresas;
 

@@ -91,6 +91,7 @@ Caso a vigilar: reabrir una oportunidad ganada no revierte la empresa a prospect
 | crm_18 | auditoria_indices_politicas | Índices de llaves foráneas y políticas de escritura separadas |
 | crm_19 | origen_dato_y_cargas | Origen, `cargado_por` y `cargas_datos` |
 | crm_20 | seo_keywords | Palabras clave SEO por semana |
+| crm_21 | portal_sin_fuga_empresas | Quita la lectura directa de `empresas` para clientes; `portal_empresa` pasa a ejecutarse con privilegios del dueño, filtrada por `empresas_del_cliente()` |
 
 ## 8. Frontend: estructura
 - `src/context/AuthContext.tsx`: sesión, vinculación de miembro o cliente.
