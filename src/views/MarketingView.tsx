@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { MktDashboard } from '../components/marketing/MktDashboard';
 import { ClienteHub } from '../components/marketing/ClienteHub';
+import { Estrategia } from '../components/marketing/Estrategia';
 
-// Secciones de Mkt Inteligence. Estrategia, SEO y Ads entran en entregas siguientes.
+// Secciones de Mkt Inteligence. SEO y Ads entran en entregas siguientes.
 const SECCIONES = [
   { id: 'dashboard', label: 'Dashboard' },
+  { id: 'estrategia', label: 'Estrategia' },
   { id: 'cliente', label: 'Cliente' },
 ] as const;
 
@@ -32,7 +34,9 @@ export const MarketingView: React.FC = () => {
           </button>
         ))}
       </div>
-      {seccion === 'dashboard' ? <MktDashboard /> : <ClienteHub />}
+      {seccion === 'dashboard' && <MktDashboard />}
+      {seccion === 'estrategia' && <Estrategia />}
+      {seccion === 'cliente' && <ClienteHub />}
     </div>
   );
 };

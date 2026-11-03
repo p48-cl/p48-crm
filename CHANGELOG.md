@@ -16,6 +16,7 @@ Estado al 3 de noviembre de 2026. Cada entrada indica si ya está en `main`.
 - **PR #23** · Hub Marketing por cliente: selector de cliente, seis métricas con variación, gráfico de tendencia SVG y botón "Ejecutar análisis" (crea una solicitud). Migración `crm_13`: columna `es_prueba` en `metricas_snapshot`, tabla `analisis_solicitudes`, datos de prueba del cliente demo. **Pendiente de unir a `main`.**
 - **PR #24** · Accesos ampliados: Instagram, Facebook, TikTok, LinkedIn, sitio web, landing pages y otros activos, con agregado manual por nombre. Migración `crm_14`. Carga inicial de Hotel Cabo de Hornos (Google Ads y GA4 concedidos, Search Console pendiente de verificar) con métricas reales de cuatro semanas. **Pendiente de unir a `main`.**
 - **PR #25** · Mkt Inteligence con secciones: Dashboard de cartera (KPIs semanales, gráficos de inversión y sesiones, tabla por cliente, alertas, filtros de cliente y rango, opción de incluir datos de prueba) y Cliente (hub individual). Sin migraciones. Estrategia, SEO y Ads quedan para entregas siguientes. **Pendiente de unir a `main`.**
+- **PR #26** · Mkt Inteligence > Estrategia: ficha editable por cliente (objetivos de ventas y marketing, posicionamiento, mercado, storytelling, canal prioritario, tono, competidores, notas para creativos) con guardado automático y botón para copiar el brief. Migración `crm_15`. **Pendiente de unir a `main`.**
 - **PR #16** · Salud de datos por cuenta (última lectura del conector), columnas UTM en oportunidades y tabla `metricas_snapshot` (migración `crm_11`). **En `main`** (2026-11-03), a través del PR #15. Error de base: se unió a la rama del #15 y no directamente a `main`.
 
 ## v0.10.0 · 2026-11-03
@@ -74,6 +75,7 @@ Estado al 3 de noviembre de 2026. Cada entrada indica si ya está en `main`.
 | 20261103184757 | crm_11_marketing_base | Columnas `utm_fuente`, `utm_campana`, `utm_medio` en `oportunidades`; `ultima_lectura` en `cuentas_cliente`; tabla `metricas_snapshot` con RLS para miembros. |
 | (aplicada 2026-11-03) | crm_13_hub_marketing_pruebas | `es_prueba` en `metricas_snapshot`; tabla `analisis_solicitudes` con RLS; datos de prueba del cliente demo (4 lunes de octubre). |
 | (aplicada 2026-11-03) | crm_14_accesos_ampliados | `cuentas_cliente`: nuevas plataformas (IG, Facebook, TikTok, LinkedIn, sitio web, landing, otro), columnas `etiqueta` y `url`, índice único por etiqueta. |
+| (aplicada 2026-11-03) | crm_15_estrategia_cliente | Tabla `estrategia_cliente` (una fila por cliente) con RLS para miembros. |
 | (aplicada 2026-11-03) | crm_13_hub_marketing_pruebas | `es_prueba` en `metricas_snapshot`; tabla `analisis_solicitudes` con RLS; datos de prueba del cliente demo (4 lunes de octubre). |
 | (aplicada 2026-11-03) | crm_12_metas_comerciales | Tabla `metas_comerciales` (global y por persona) con RLS, meta global inicial 20/6/2, y vista `v_avance_mes` (leads, reuniones, cierres del mes en hora de Chile). |
 
