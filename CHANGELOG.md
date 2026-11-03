@@ -5,6 +5,7 @@ Formato: versión, fecha de unión a `main`, PR, qué cambia y si toca base de d
 ## v0.11.0 · en curso (no publicada)
 Estado al 3 de noviembre de 2026. Cada entrada indica si ya está en `main`.
 
+- **PR #42** · Documentación y datos de prueba: `ARQUITECTURA.md` puesto al día con el esquema real (29 tablas, 16 vistas, 44 llaves foráneas, migraciones crm_01 a crm_20, verificación del asesor de seguridad). Nuevo `supabase/seed/demo_seed.sql` y `demo_cleanup.sql` con datos `DEMO –` (ids `dede…`) que se borran con un solo script. Sin cambios de interfaz ni migraciones.
 - **PR #41** · Inicio > Clientes: tarjeta «Pauta del mes por cliente» con inversión, conversiones y ROAS de `metricas_campanas` (semanas que empiezan en el mes en curso). Sin migraciones. **Pendiente de unir a `main`.**
 - **PR #40** · Mkt Inteligence > Orgánico: métricas de redes sin pauta (Instagram, Facebook, TikTok, LinkedIn, YouTube, otra) por cliente, con última lectura y variación. Lee `metricas_snapshot` y se carga con la plantilla «Métricas semanales». Sin migraciones. **Pendiente de unir a `main`.**
 - **PR #39** · Mkt Inteligence > Ads: filtro por plataforma (Google, Meta, TikTok, LinkedIn) para ver Meta Ads por separado. Usa `metricas_campanas` y las plantillas de carga de #33; sin migraciones. **Pendiente de unir a `main`.**
