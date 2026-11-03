@@ -5,6 +5,7 @@ Formato: versión, fecha de unión a `main`, PR, qué cambia y si toca base de d
 ## v0.11.0 · en curso (no publicada)
 Estado al 3 de noviembre de 2026. Cada entrada indica si ya está en `main`.
 
+- **PR #44** · Móvil y contraste: texto inactivo del menú «Más secciones» legible; barra del Kanban compacta ("Tablero", "Tabla", "+ Nueva"); filtros del Kanban en dos columnas; título y pestañas de Inicio en una fila con desplazamiento; separador de tareas solo en escritorio. Sin migraciones.
 - **PR #43** · Seguridad: un cliente ya no puede leer la fila completa de su empresa por REST (fee, MRR, salud, responsable). `portal_empresa` pasa a ejecutarse con privilegios del dueño y filtrado por `empresas_del_cliente()`. Migración `crm_21` preparada en `supabase/migrations/`, pendiente de aplicar. **Pendiente de unir a `main`.**
 - **PR #42** · Documentación y datos de prueba: `ARQUITECTURA.md` puesto al día con el esquema real (29 tablas, 16 vistas, 44 llaves foráneas, migraciones crm_01 a crm_20, verificación del asesor de seguridad). Nuevo `supabase/seed/demo_seed.sql` y `demo_cleanup.sql` con datos `DEMO –` (ids `dede…`) que se borran con un solo script. Sin cambios de interfaz ni migraciones.
 - **PR #41** · Inicio > Clientes: tarjeta «Pauta del mes por cliente» con inversión, conversiones y ROAS de `metricas_campanas` (semanas que empiezan en el mes en curso). Sin migraciones. **Pendiente de unir a `main`.**

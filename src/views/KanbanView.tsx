@@ -156,7 +156,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
               }`}
             >
               <Kanban className="w-3.5 h-3.5" />
-              <span>Tablero Kanban</span>
+              <span>Tablero<span className="hidden sm:inline"> Kanban</span></span>
             </button>
             <button
               onClick={() => setVistaModo('tabla')}
@@ -167,7 +167,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
               }`}
             >
               <TableIcon className="w-3.5 h-3.5" />
-              <span>Vista Tabla</span>
+              <span><span className="hidden sm:inline">Vista </span>Tabla</span>
             </button>
           </div>
 
@@ -177,14 +177,14 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
             className="bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] active:scale-[0.98] text-[var(--c-on-accent)] font-semibold text-xs py-2 px-3.5 rounded flex items-center gap-1.5 transition-all shadow-sm font-sans"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>Nueva Oportunidad</span>
+            <span className="hidden sm:inline">Nueva Oportunidad</span><span className="sm:hidden">Nueva</span>
           </button>
         </div>
       </div>
 
       {/* Barra de Filtros */}
-      <div className="flex flex-wrap items-center gap-3 bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-[var(--c-bg)] p-3 rounded-lg border border-[var(--c-line)]">
-        <div className="flex items-center gap-1.5 text-xs text-[var(--c-muted)]">
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3 bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-[var(--c-bg)] p-3 rounded-lg border border-[var(--c-line)]">
+        <div className="col-span-2 sm:col-span-1 flex items-center gap-1.5 text-xs text-[var(--c-muted)]">
           <Filter className="w-3.5 h-3.5 text-[var(--c-muted)]" />
           <span>Filtros:</span>
         </div>
@@ -192,7 +192,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
         <select
           value={filtroResponsable}
           onChange={(e) => setFiltroResponsable(e.target.value)}
-          className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] focus:outline-none"
+          className="w-full sm:w-auto min-w-0 bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] focus:outline-none"
         >
           <option value="todos">Todos los responsables</option>
           {miembros.map((m) => (
@@ -205,7 +205,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
         <select
           value={filtroFuente}
           onChange={(e) => setFiltroFuente(e.target.value)}
-          className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] focus:outline-none"
+          className="w-full sm:w-auto min-w-0 bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] focus:outline-none"
         >
           <option value="todos">Todas las fuentes</option>
           {fuentes.map((f) => (
@@ -218,7 +218,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
         <select
           value={filtroSeguimiento}
           onChange={(e) => setFiltroSeguimiento(e.target.value)}
-          className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] focus:outline-none"
+          className="w-full sm:w-auto min-w-0 bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] focus:outline-none"
         >
           <option value="todos">Todos los seguimientos</option>
           <option value="al_dia">Al día</option>
@@ -375,10 +375,10 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                             ) : (
                               <div className="text-[var(--c-text-2)] space-y-0.5">
                                 <p className="text-[var(--c-muted)] font-mono text-[10px] flex items-center gap-1">
-                                  <Calendar className="w-3 h-3 text-[var(--c-muted-2)]" />
+                                  <Calendar className="w-3 h-3 text-[var(--c-muted)]" />
                                   <span>{formatFecha(op.proxima_accion_fecha)}</span>
                                 </p>
-                                <p className="truncate text-[var(--c-line)]">{op.proxima_accion_texto}</p>
+                                <p className="truncate text-[var(--c-text-2)]">{op.proxima_accion_texto}</p>
                               </div>
                             )}
                           </div>

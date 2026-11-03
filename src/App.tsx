@@ -315,7 +315,7 @@ const CRMAppContent: React.FC = () => {
                   setMasAbierto(false);
                 }}
                 className={`w-full min-h-[52px] flex items-center gap-3 px-3 rounded-lg text-sm ${
-                  currentView === item.id ? 'text-[var(--c-accent)] bg-[var(--c-surface-2)]' : 'text-[var(--c-line)] hover:bg-[var(--c-surface-2)]'
+                  currentView === item.id ? 'text-[var(--c-accent)] bg-[var(--c-surface-2)]' : 'text-[var(--c-text-2)] hover:bg-[var(--c-surface-2)]'
                 }`}
               >
                 <item.icon className="w-5 h-5" />
