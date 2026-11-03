@@ -4,7 +4,7 @@ import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { parseSupabaseError as parseErrorSafe } from '../../lib/errorHandler';
 import { useAuth } from '../../context/AuthContext';
 import { descargarCSV, parseCSV } from '../../lib/csv';
-import { PLANTILLAS, procesarCampanas, procesarMetricas, type FilaCampana, type FilaMetrica } from './plantillas';
+import { PLANTILLAS, procesarCampanas, procesarMetricas, procesarSeo, type FilaCampana, type FilaMetrica, type FilaSeo } from './plantillas';
 import { useDatosMarketing } from './comun';
 
 const select = 'px-2.5 py-1.5 text-xs bg-[var(--c-surface)] border border-[var(--c-line)] rounded text-[var(--c-text)]';
@@ -18,14 +18,17 @@ export const Importador: React.FC = () => {
   const [filasCsv, setFilasCsv] = useState<string[][] | null>(null);
   const [mensaje, setMensaje] = useState<{ ok: boolean; texto: string } | null>(null);
   const [guardando, setGuardando] = useState(false);
+  const [semanaArchivo, setSemanaArchivo] = useState(() => new Date().toISOString().slice(0, 10));
 
   const clienteId = clienteSel || clientes[0]?.id || '';
   const plantilla = PLANTILLAS.find((p) => p.id === plantillaId) ?? PLANTILLAS[0];
 
   const resultado = useMemo(() => {
     if (!filasCsv || filasCsv.length < 2) return null;
-    return plantilla.tipo === 'metricas' ? procesarMetricas(filasCsv, plantilla) : procesarCampanas(filasCsv, plantilla);
-  }, [filasCsv, plantilla]);
+    if (plantilla.tipo === 'metricas') return procesarMetricas(filasCsv, plantilla);
+    if (plantilla.tipo === 'seo') return procesarSeo(filasCsv, plantilla, semanaArchivo);
+    return procesarCampanas(filasCsv, plantilla);
+  }, [filasCsv, plantilla, semanaArchivo]);
 
   const leer = async (f: File | undefined) => {
     setMensaje(null);
@@ -41,7 +44,11 @@ export const Importador: React.FC = () => {
     setMensaje(null);
     const base = { empresa_id: clienteId, origen: 'csv', cargado_por: currentUser?.id ?? null, es_prueba: false, capturado_en: new Date().toISOString() };
     let error;
-    if (plantilla.tipo === 'metricas') {
+    if (plantilla.tipo === 'seo') {
+      ({ error } = await supabase
+        .from('seo_keywords')
+        .upsert((resultado.filas as FilaSeo[]).map((r) => ({ empresa_id: clienteId, origen: 'csv', cargado_por: currentUser?.id ?? null, ...r })), { onConflict: 'empresa_id,keyword,periodo' }));
+    } else if (plantilla.tipo === 'metricas') {
       ({ error } = await supabase
         .from('metricas_snapshot')
         .upsert((resultado.filas as FilaMetrica[]).map((r) => ({ ...base, ...r })), { onConflict: 'empresa_id,plataforma,metrica,periodo' }));
@@ -84,6 +91,12 @@ export const Importador: React.FC = () => {
             <Download className="w-3.5 h-3.5" /> Descargar ejemplo
           </button>
         </div>
+        {plantilla.tipo === 'seo' && (
+          <label className="flex items-center gap-2 text-[11px] text-[var(--c-muted)]">
+            Semana del archivo (si el export no trae fecha)
+            <input type="date" value={semanaArchivo} onChange={(e) => setSemanaArchivo(e.target.value)} className={select} />
+          </label>
+        )}
         <p className="text-[11px] text-[var(--c-muted)]">{plantilla.descripcion} Las fechas se agrupan al lunes de su semana. Si una fila ya existe, se actualiza.</p>
         <label className="flex items-center gap-2 px-3 py-6 border border-dashed border-[var(--c-line)] rounded cursor-pointer hover:border-[var(--c-accent)] text-xs text-[var(--c-text-2)] justify-center">
           <Upload className="w-4 h-4" />

@@ -1,6 +1,11 @@
 import { lunesDeSemana, normalizarEncabezado, parseNumero } from '../../lib/csv';
 
-export type TipoPlantilla = 'metricas' | 'campanas';
+export type TipoPlantilla = 'metricas' | 'campanas' | 'seo';
+
+export interface FilaSeo {
+  keyword: string; periodo: string; posicion: number | null; posicion_anterior: number | null;
+  volumen: number | null; dificultad: number | null; cpc_clp: number | null; url: string | null;
+}
 
 export interface FilaMetrica { plataforma: string; metrica: string; periodo: string; valor: number }
 export interface FilaCampana {
@@ -78,6 +83,26 @@ export const PLANTILLAS: Plantilla[] = [
       valor_conversion_clp: ['valordeconversiondecompras', 'purchaseconversionvalue'],
       presupuesto_diario_clp: ['presupuesto', 'budget'],
       canal: ['objetivo', 'objective'],
+    },
+  },
+  {
+    id: 'seo_keywords',
+    titulo: 'SEO · palabras clave (Semrush u otra herramienta)',
+    descripcion: 'Una fila por palabra clave y semana: posición, posición anterior, volumen, dificultad, CPC y URL. Reconoce encabezados en español e inglés. Si la misma palabra clave aparece dos veces en la semana, gana la última fila.',
+    tipo: 'seo',
+    ejemplo:
+      'Keyword,Position,Previous position,Search Volume,Keyword Difficulty,CPC,URL\n' +
+      'hotel cabo de hornos,3,5,720,31,850,https://cliente.cl/\n' +
+      'hoteles en puerto williams,8,8,140,18,420,https://cliente.cl/destinos\n',
+    alias: {
+      keyword: ['keyword', 'palabraclave', 'consulta', 'query'],
+      periodo: ['periodo', 'semana', 'fecha', 'date', 'week'],
+      posicion: ['position', 'posicion', 'pos', 'rank'],
+      posicion_anterior: ['previousposition', 'posicionanterior', 'previouspos', 'prevposition'],
+      volumen: ['searchvolume', 'volumendebusqueda', 'volumen', 'volume'],
+      dificultad: ['keyworddifficulty', 'dificultaddepalabraclave', 'dificultad', 'kd', 'difficulty'],
+      cpc_clp: ['cpc', 'cpcclp'],
+      url: ['url', 'pagina', 'landingpage'],
     },
   },
 ];
@@ -159,4 +184,35 @@ export function procesarCampanas(filas: string[][], p: Plantilla): Resultado<Fil
     }
   }
   return { filas: [...agregadas.values()], errores, faltantes, total: datos.length };
+}
+
+// Los exports de Semrush no traen fecha: se usa `periodoFijo` (semana del archivo) cuando no hay columna de periodo.
+export function procesarSeo(filas: string[][], p: Plantilla, periodoFijo?: string): Resultado<FilaSeo> {
+  const [cab, ...datos] = filas;
+  const idx = Object.fromEntries(Object.entries(p.alias).map(([k, a]) => [k, indiceDe(cab, a)]));
+  const faltantes = ['keyword', 'posicion'].filter((k) => idx[k] < 0);
+  if (idx.periodo < 0 && !periodoFijo) faltantes.push('periodo');
+  const out: FilaSeo[] = [];
+  const errores: string[] = [];
+  if (faltantes.length) return { filas: out, errores, faltantes, total: datos.length };
+  const num = (f: string[], k: string) => (idx[k] >= 0 && (f[idx[k]] ?? '').trim() !== '' ? parseNumero(f[idx[k]] ?? '') : null);
+  datos.forEach((f, n) => {
+    const linea = n + 2;
+    const keyword = (f[idx.keyword] ?? '').trim();
+    const periodo = lunesDeSemana(idx.periodo >= 0 ? f[idx.periodo] ?? '' : periodoFijo ?? '');
+    const posicion = num(f, 'posicion');
+    if (!keyword) errores.push(`Fila ${linea}: falta la palabra clave`);
+    else if (!periodo) errores.push(`Fila ${linea}: fecha «${f[idx.periodo] ?? ''}» no válida`);
+    else if (posicion === null) errores.push(`Fila ${linea}: posición «${f[idx.posicion] ?? ''}» no numérica`);
+    else out.push({
+      keyword: keyword.toLowerCase(), periodo, posicion,
+      posicion_anterior: num(f, 'posicion_anterior'),
+      volumen: num(f, 'volumen') === null ? null : Math.round(num(f, 'volumen') as number),
+      dificultad: num(f, 'dificultad'),
+      cpc_clp: num(f, 'cpc_clp'),
+      url: idx.url >= 0 ? (f[idx.url] ?? '').trim() || null : null,
+    });
+  });
+  const unicas = new Map(out.map((r) => [`${r.keyword}|${r.periodo}`, r]));
+  return { filas: [...unicas.values()], errores, faltantes, total: datos.length };
 }
