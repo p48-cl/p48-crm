@@ -11,6 +11,7 @@ import {
 import { useCRM } from '../context/CRMContext';
 import { formatCLP } from '../lib/formatters';
 import { AgencyDashboard, SeccionDashboard } from '../components/dashboard/AgencyDashboard';
+import { MetasMes } from '../components/dashboard/MetasMes';
 import { LoUrgenteHoy } from '../components/dashboard/LoUrgenteHoy';
 
 const PESTANAS: { id: SeccionDashboard; label: string }[] = [
@@ -116,6 +117,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </nav>
 
       {/* Grid de 5 KPIs Clave (Cifras en Blanco Aire #F5F5F5) */}
+      {pestana === 'resumen' && <MetasMes />}
+
       {pestana === 'resumen' && (
         <LoUrgenteHoy
           seguimientosAtrasados={kpis.seguimientos_atrasados_count}

@@ -11,6 +11,7 @@ Estado al 3 de noviembre de 2026. Cada entrada indica si ya está en `main`.
 - **PR #15** · Registro de cuentas y permisos por cliente y plataforma (7 plataformas, ID externo, estado, quién concedió el acceso, fecha). Reemplaza el checklist. Migra los checkboxes (migración `crm_10`). **En `main`** (2026-11-03).
 - **PR #18** · Estados visuales con tokens del tema: ámbar, cielo, esmeralda, rosa y rojo fijos pasan a `--c-warn`, `--c-info`, `--c-ok`, `--c-danger`. Corrige texto tenue en claro y fondos oscuros heredados. **En `main`** (2026-11-03).
 - **PR #20** · "Lo urgente hoy" en el resumen del dashboard: seguimientos atrasados, cuentas de conector sin lectura en más de 7 días y tareas de hoy. Sin migraciones. **Pendiente de unir a `main`.**
+- **PR #21** · Metas del mes en el resumen del dashboard (leads, reuniones, cierres; global del equipo y avance por persona). Metas iniciales del modelo financiero: 20, 6 y 2. Solo admin las edita. Migración `crm_12`. **Pendiente de unir a `main`.**
 - **PR #16** · Salud de datos por cuenta (última lectura del conector), columnas UTM en oportunidades y tabla `metricas_snapshot` (migración `crm_11`). **En `main`** (2026-11-03), a través del PR #15. Error de base: se unió a la rama del #15 y no directamente a `main`.
 
 ## v0.10.0 · 2026-11-03
@@ -67,6 +68,7 @@ Estado al 3 de noviembre de 2026. Cada entrada indica si ya está en `main`.
 | 20261103184016 | crm_09_mrr_calculado | MRR de cada empresa calculado desde `fee_mensual_clp` si es cliente activo; 0 en otro caso. |
 | 20261103184211 | crm_10_cuentas_cliente | Tabla `cuentas_cliente` (plataforma, ID externo, estado, concedido por, fecha) con RLS para miembros. Copia los checkboxes de `accesos_admin_marketing`. |
 | 20261103184757 | crm_11_marketing_base | Columnas `utm_fuente`, `utm_campana`, `utm_medio` en `oportunidades`; `ultima_lectura` en `cuentas_cliente`; tabla `metricas_snapshot` con RLS para miembros. |
+| (aplicada 2026-11-03) | crm_12_metas_comerciales | Tabla `metas_comerciales` (global y por persona) con RLS, meta global inicial 20/6/2, y vista `v_avance_mes` (leads, reuniones, cierres del mes en hora de Chile). |
 
 ## Pendiente de aplicar en base
 - Nada. Todas las migraciones de arriba están aplicadas en Supabase.
