@@ -302,7 +302,7 @@ const CRMAppContent: React.FC = () => {
               { id: 'empresas' as const, label: 'Empresas y clientes', icon: Building2 },
               { id: 'contactos' as const, label: 'Contactos', icon: Users },
               { id: 'actividades' as const, label: 'Actividades', icon: Activity },
-              { id: 'marketing' as const, label: 'Marketing', icon: BarChart3 },
+              { id: 'marketing' as const, label: 'Mkt Inteligence', icon: BarChart3 },
               { id: 'importar' as const, label: 'Importar CSV', icon: Upload },
               { id: 'administracion' as const, label: 'Administración', icon: Settings },
             ].map((item) => (

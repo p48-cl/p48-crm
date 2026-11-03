@@ -48,7 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'contactos', label: 'Contactos', icon: Users },
     { id: 'tareas', label: 'Tareas', icon: CheckSquare, badgeCount: kpis.tareas_hoy_count > 0 ? kpis.tareas_hoy_count : undefined },
     { id: 'actividades', label: 'Actividades', icon: Clock },
-    { id: 'marketing', label: 'Marketing', icon: BarChart3 },
+    { id: 'marketing', label: 'Mkt Inteligence', icon: BarChart3 },
     { id: 'importar', label: 'Importar CSV', icon: UploadCloud },
   ];
 
