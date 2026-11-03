@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { VOportunidad } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
+import { PipelineKpis } from '../components/crm/PipelineKpis';
 import { formatMoneda, formatFecha, esFechaAtrasada } from '../lib/formatters';
 import { ConfirmWonModal } from '../components/common/ConfirmWonModal';
 import { LossReasonModal } from '../components/common/LossReasonModal';
@@ -132,6 +133,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-5">
+      <PipelineKpis />
       {/* Header del CRM */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
