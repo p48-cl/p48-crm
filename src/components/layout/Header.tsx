@@ -34,7 +34,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Indicador de conexión / Modo */}
         <div className="hidden md:flex items-center gap-1.5 text-xs text-[var(--c-muted)] font-mono">
-          <span className="text-[#555]">/</span>
+          <span className="text-[var(--c-muted-2)]">/</span>
           {isSupabaseLive ? (
             <span className="text-[var(--c-accent)]">Supabase Conectado</span>
           ) : (
@@ -48,19 +48,19 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={onOpenSearch}
           type="button"
-          className="flex items-center justify-center sm:justify-between gap-3 w-9 sm:w-full max-w-xs shrink-0 px-2 sm:px-3 py-1.5 text-xs text-[var(--c-muted)] bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-surface-2)] border border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-line)] rounded hover:border-[#444] transition-colors"
+          className="flex items-center justify-center sm:justify-between gap-3 w-9 sm:w-full max-w-xs shrink-0 px-2 sm:px-3 py-1.5 text-xs text-[var(--c-muted)] bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-surface-2)] border border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-line)] rounded hover:border-[var(--c-line)] transition-colors"
         >
           <span className="flex items-center gap-2">
             <Search className="w-3.5 h-3.5 text-[var(--c-muted)]" />
             <span className="hidden sm:inline truncate">Buscar empresas, contactos o negocios...</span>
           </span>
-          <kbd className="hidden sm:inline-block font-mono text-[10px] bg-[#222] dark:bg-[#222] light:bg-[var(--c-line)] px-1.5 py-0.5 rounded text-[#AAA]">
+          <kbd className="hidden sm:inline-block font-mono text-[10px] bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-line)] px-1.5 py-0.5 rounded text-[var(--c-text-2)]">
             ⌘K
           </kbd>
         </button>
 
         {/* Filtro Mis Datos / Todo el Equipo */}
-        <div className="hidden lg:flex items-center p-0.5 bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-surface-3)] border border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[#D5D5D5] rounded text-xs">
+        <div className="hidden lg:flex items-center p-0.5 bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-surface-3)] border border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-line)] rounded text-xs">
           <button
             onClick={() => setFiltroAlcance('todo_el_equipo')}
             className={`px-2.5 py-1 rounded transition-colors whitespace-nowrap ${
@@ -98,7 +98,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="relative">
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-2 pl-2 pr-1.5 py-1 rounded bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-surface-2)] border border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-line)] text-xs text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] hover:border-[#444] transition-colors"
+            className="flex items-center gap-2 pl-2 pr-1.5 py-1 rounded bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-surface-2)] border border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-line)] text-xs text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] hover:border-[var(--c-line)] transition-colors"
           >
             <div className="w-5 h-5 rounded-full bg-[var(--c-accent)] text-[var(--c-on-accent)] font-bold text-[10px] flex items-center justify-center font-mono">
               {currentUser?.nombre ? currentUser.nombre.slice(0, 1) : 'U'}
@@ -140,7 +140,7 @@ export const Header: React.FC<HeaderProps> = ({
                       className={`w-full text-left px-2 py-1 rounded text-xs flex items-center justify-between transition-colors ${
                         currentUser?.email === m.email
                           ? 'bg-[var(--c-surface-3)] text-[var(--c-accent)]'
-                          : 'text-[#BBB] hover:bg-[var(--c-surface-3)]'
+                          : 'text-[var(--c-text-2)] hover:bg-[var(--c-surface-3)]'
                       }`}
                     >
                       <span className="truncate">{m.nombre}</span>

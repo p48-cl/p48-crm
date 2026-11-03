@@ -196,7 +196,7 @@ export const AgencyDashboard: React.FC<{ seccion: SeccionDashboard }> = ({ secci
           {tareas.length === 0 ? (
             <Vacio texto="Sin tareas." />
           ) : (
-            <div className="divide-y divide-[#222]">
+            <div className="divide-y divide-[var(--c-line)]">
               {tareas.map((t) => (
                 <div key={t.responsable_id} className="py-2 flex items-center justify-between text-[11px]">
                   <span className="text-[var(--c-text-2)] truncate pr-3">{t.responsable}</span>

@@ -253,7 +253,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                 }`}
               >
                 {/* Cabecera */}
-                <div className="p-3 border-b border-[#222] dark:border-[#222] light:border-[var(--c-line)] flex items-center justify-between">
+                <div className="p-3 border-b border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-line)] flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-1.5">
                       <span className="font-semibold text-xs text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
@@ -281,7 +281,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                 {/* Tarjetas */}
                 <div className="p-2 space-y-2.5 flex-1 min-h-[400px]">
                   {opsEtapa.length === 0 ? (
-                    <div className="h-24 border border-dashed border-[#222] rounded flex items-center justify-center text-[10px] text-[#555] font-mono">
+                    <div className="h-24 border border-dashed border-[var(--c-line)] rounded flex items-center justify-center text-[10px] text-[var(--c-muted-2)] font-mono">
                       Soltar aquí
                     </div>
                   ) : (
@@ -302,7 +302,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                           draggable
                           onDragStart={(e) => handleDragStart(e, op.id)}
                           onClick={() => onSelectOportunidad(op.id)}
-                          className={`p-3 rounded-lg border text-left cursor-grab active:cursor-grabbing hover:border-[#444] transition-all bg-[#171717] dark:bg-[#171717] light:bg-white shadow-sm ${
+                          className={`p-3 rounded-lg border text-left cursor-grab active:cursor-grabbing hover:border-[var(--c-line)] transition-all bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white shadow-sm ${
                             atrasada
                               ? 'border-[var(--c-danger)] ring-1 ring-[var(--c-danger)]/40'
                               : 'border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-line)]'
@@ -312,13 +312,13 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                             <p className="text-[11px] text-[var(--c-muted)] font-medium truncate">
                               {emp?.nombre ?? 'Sin empresa'}
                             </p>
-                            <h4 className="text-xs font-semibold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] hover:text-[#FFF] transition-colors leading-snug line-clamp-2">
+                            <h4 className="text-xs font-semibold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] hover:text-[var(--c-on-accent)] transition-colors leading-snug line-clamp-2">
                               {op.nombre}
                             </h4>
                           </div>
 
                           {/* Valor neto en Blanco Aire #F5F5F5 & Aviso USD */}
-                          <div className="flex items-center justify-between mb-2 pt-1 border-t border-[#222] dark:border-[#222] light:border-[var(--c-text)]">
+                          <div className="flex items-center justify-between mb-2 pt-1 border-t border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-text)]">
                             <div>
                               <span className="font-mono text-xs font-bold text-[var(--c-text)]">
                                 {formatMoneda(op.valor_neto, op.moneda)}
@@ -330,7 +330,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                               )}
                             </div>
 
-                            <span className="text-[11px] text-[#BBB] flex items-center gap-1">
+                            <span className="text-[11px] text-[var(--c-text-2)] flex items-center gap-1">
                               <User className="w-3 h-3 text-[var(--c-muted)]" />
                               <span className="truncate max-w-[80px]">
                                 {resp?.nombre.split(' ')[0] ?? 'Equipo'}
@@ -354,7 +354,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                           </div>
 
                           {/* Próxima Acción */}
-                          <div className="pt-1.5 border-t border-[#222] text-[11px]">
+                          <div className="pt-1.5 border-t border-[var(--c-line)] text-[11px]">
                             {atrasada ? (
                               <div className="text-[var(--c-danger)] space-y-0.5">
                                 <div className="flex items-center gap-1 font-semibold text-[10px] font-mono">
@@ -371,7 +371,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                                 <span>Sin próxima acción</span>
                               </div>
                             ) : (
-                              <div className="text-[#AAA] space-y-0.5">
+                              <div className="text-[var(--c-text-2)] space-y-0.5">
                                 <p className="text-[var(--c-muted)] font-mono text-[10px] flex items-center gap-1">
                                   <Calendar className="w-3 h-3 text-[var(--c-muted-2)]" />
                                   <span>{formatFecha(op.proxima_accion_fecha)}</span>
@@ -408,7 +408,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                   <th className="py-2.5 px-4 font-medium text-right">Cierre Est.</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#222]">
+              <tbody className="divide-y divide-[var(--c-line)]">
                 {filteredOportunidades.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="py-8 text-center text-xs text-[var(--c-muted)]">
@@ -429,7 +429,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                         key={op.id}
                         onClick={() => onSelectOportunidad(op.id)}
                         className={`hover:bg-[var(--c-surface-2)] cursor-pointer transition-colors ${
-                          atrasada ? 'bg-[#1D1014]/40' : ''
+                          atrasada ? 'bg-[var(--c-surface-2)]/40' : ''
                         }`}
                       >
                         <td className="py-2.5 px-4 font-semibold text-[var(--c-text)]">
@@ -446,7 +446,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                         <td className="py-2.5 px-3 font-mono text-xs text-[var(--c-text)] text-right">
                           {formatMoneda(op.valor_ponderado, op.moneda)}
                         </td>
-                        <td className="py-2.5 px-3 text-[#AAA]">{resp?.nombre ?? '—'}</td>
+                        <td className="py-2.5 px-3 text-[var(--c-text-2)]">{resp?.nombre ?? '—'}</td>
                         <td className="py-2.5 px-3 text-[var(--c-text-2)] truncate max-w-[180px]">
                           {op.proxima_accion_texto || <span className="text-[var(--c-muted-2)]">Sin definir</span>}
                         </td>

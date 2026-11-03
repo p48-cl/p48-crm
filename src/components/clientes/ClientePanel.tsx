@@ -226,7 +226,7 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
                 <input type="date" className={input} value={fp.fecha_inicio} onChange={(e) => setFp({ ...fp, fecha_inicio: e.target.value })} />
                 <input type="date" className={input} value={fp.fecha_fin} onChange={(e) => setFp({ ...fp, fecha_fin: e.target.value })} />
               </div>
-              <label className="flex items-center gap-2 text-[11px] text-[#AAA]">
+              <label className="flex items-center gap-2 text-[11px] text-[var(--c-text-2)]">
                 <input type="checkbox" checked={fp.visible_cliente} onChange={(e) => setFp({ ...fp, visible_cliente: e.target.checked })} /> Visible para el cliente
               </label>
               <button className={btnPrimario} disabled={guardando} onClick={crearProyecto}>Guardar proyecto</button>
@@ -260,7 +260,7 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
 
                   <div className="space-y-2 pt-1">
                     {ents.map((en) => (
-                      <div key={en.id} className="p-2 bg-[var(--c-surface)] rounded border border-[#222] space-y-1">
+                      <div key={en.id} className="p-2 bg-[var(--c-surface)] rounded border border-[var(--c-line)] space-y-1">
                         <div className="flex items-start justify-between gap-2">
                           <p className="text-[var(--c-text)] truncate">{en.titulo}</p>
                           <div className="flex items-center gap-2 shrink-0">
@@ -294,7 +294,7 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
                         </div>
                         <input className={input} placeholder="Enlace al documento (Drive)" value={fe.url_documento} onChange={(e) => setFe({ ...fe, url_documento: e.target.value })} />
                         <input className={input} placeholder="Nota interna (el cliente no la ve)" value={fe.notas_internas} onChange={(e) => setFe({ ...fe, notas_internas: e.target.value })} />
-                        <label className="flex items-center gap-2 text-[11px] text-[#AAA]">
+                        <label className="flex items-center gap-2 text-[11px] text-[var(--c-text-2)]">
                           <input type="checkbox" checked={fe.visible_cliente} onChange={(e) => setFe({ ...fe, visible_cliente: e.target.checked })} /> Visible para el cliente
                         </label>
                         <div className="flex gap-3">
@@ -331,7 +331,7 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
                 <input type="date" className={input} value={fr.periodo} onChange={(e) => setFr({ ...fr, periodo: e.target.value })} />
               </div>
               <input className={input} placeholder="Enlace (Drive o Looker)" value={fr.url} onChange={(e) => setFr({ ...fr, url: e.target.value })} />
-              <label className="flex items-center gap-2 text-[11px] text-[#AAA]">
+              <label className="flex items-center gap-2 text-[11px] text-[var(--c-text-2)]">
                 <input type="checkbox" checked={fr.visible_cliente} onChange={(e) => setFr({ ...fr, visible_cliente: e.target.checked })} /> Visible para el cliente
               </label>
               <button className={btnPrimario} disabled={guardando} onClick={crearReporte}>Guardar reporte</button>

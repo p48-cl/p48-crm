@@ -72,7 +72,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
               <p className="text-xs text-[var(--c-muted)]">Bitácora de contacto comercial</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-[var(--c-muted)] hover:text-white">
+          <button onClick={onClose} className="text-[var(--c-muted)] hover:text-[var(--c-text)]">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -95,7 +95,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
                 className={`py-2 px-2 rounded border text-xs font-medium flex flex-col items-center gap-1 transition-colors ${
                   active
                     ? 'bg-[var(--c-surface-2)] border-[var(--c-accent)] text-[var(--c-accent)]'
-                    : 'bg-[var(--c-surface)] border-[var(--c-surface-3)] text-[var(--c-muted)] hover:text-white'
+                    : 'bg-[var(--c-surface)] border-[var(--c-surface-3)] text-[var(--c-muted)] hover:text-[var(--c-text)]'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -116,7 +116,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
               placeholder="Ej: Llamada de alineación de presupuesto Google Ads"
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
-              className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
+              className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
             />
           </div>
 
@@ -126,7 +126,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
               <select
                 value={empresaId}
                 onChange={(e) => setEmpresaId(e.target.value)}
-                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
               >
                 <option value="">Selecciona empresa...</option>
                 {empresas.map((e) => (
@@ -142,7 +142,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
               <select
                 value={oportunidadId}
                 onChange={(e) => setOportunidadId(e.target.value)}
-                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
               >
                 <option value="">(Opcional) Asociar negocio...</option>
                 {oportunidadesFiltradas.map((o) => (
@@ -160,7 +160,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
               <select
                 value={contactoId}
                 onChange={(e) => setContactoId(e.target.value)}
-                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
               >
                 <option value="">(Opcional) Persona...</option>
                 {contactosFiltrados.map((c) => (
@@ -177,7 +177,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
                 type="datetime-local"
                 value={fechaActividad}
                 onChange={(e) => setFechaActividad(e.target.value)}
-                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-1.5 text-xs text-white font-mono"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-1.5 text-xs text-[var(--c-text)] font-mono"
               />
             </div>
           </div>
@@ -189,7 +189,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
               placeholder="Detalle de los puntos acordados o conclusiones..."
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
-              className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded p-2.5 text-xs text-white"
+              className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded p-2.5 text-xs text-[var(--c-text)]"
             />
           </div>
 
@@ -200,7 +200,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
               placeholder="Ej: Aceptaron auditoría técnica sin costo previo a fee"
               value={resultado}
               onChange={(e) => setResultado(e.target.value)}
-              className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
+              className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
             />
           </div>
 
@@ -208,7 +208,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-2 text-xs text-[var(--c-muted)] hover:text-white"
+              className="px-3 py-2 text-xs text-[var(--c-muted)] hover:text-[var(--c-text)]"
             >
               Cancelar
             </button>

@@ -68,7 +68,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
               <p className="text-xs text-[var(--c-muted)]">Compromiso comercial u operativo</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-[var(--c-muted)] hover:text-white">
+          <button onClick={onClose} className="text-[var(--c-muted)] hover:text-[var(--c-text)]">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -84,7 +84,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
               placeholder="Ej: Enviar propuesta de inversión en medios revisada"
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
-              className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
+              className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
             />
           </div>
 
@@ -94,7 +94,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
               <select
                 value={empresaId}
                 onChange={(e) => setEmpresaId(e.target.value)}
-                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
               >
                 <option value="">(Opcional) Empresa...</option>
                 {empresas.map((e) => (
@@ -110,7 +110,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
               <select
                 value={oportunidadId}
                 onChange={(e) => setOportunidadId(e.target.value)}
-                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
               >
                 <option value="">(Opcional) Negocio...</option>
                 {oportunidadesFiltradas.map((o) => (
@@ -128,7 +128,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
               <select
                 value={responsableId}
                 onChange={(e) => setResponsableId(e.target.value)}
-                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
               >
                 {miembros.map((m) => (
                   <option key={m.id} value={m.id}>
@@ -143,7 +143,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
               <select
                 value={prioridad}
                 onChange={(e) => setPrioridad(e.target.value as any)}
-                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
               >
                 <option value="alta">Alta</option>
                 <option value="media">Media</option>
@@ -161,7 +161,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
               required
               value={fechaVencimiento}
               onChange={(e) => setFechaVencimiento(e.target.value)}
-              className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-1.5 text-xs text-white font-mono"
+              className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-1.5 text-xs text-[var(--c-text)] font-mono"
             />
           </div>
 
@@ -174,7 +174,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
               placeholder="Detalle o enlaces de referencia..."
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
-              className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded p-2 text-xs text-white"
+              className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded p-2 text-xs text-[var(--c-text)]"
             />
           </div>
 
@@ -182,7 +182,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-2 text-xs text-[var(--c-muted)] hover:text-white"
+              className="px-3 py-2 text-xs text-[var(--c-muted)] hover:text-[var(--c-text)]"
             >
               Cancelar
             </button>

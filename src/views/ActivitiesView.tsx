@@ -110,7 +110,7 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
       </div>
 
       {/* Línea de tiempo cronológica */}
-      <div className="relative pl-6 space-y-4 before:content-[''] before:absolute before:left-2 before:top-3 before:bottom-3 before:w-[2px] before:bg-[#222]">
+      <div className="relative pl-6 space-y-4 before:content-[''] before:absolute before:left-2 before:top-3 before:bottom-3 before:w-[2px] before:bg-[var(--c-surface-2)]">
         {actividadesOrdenadas.length === 0 ? (
           <p className="text-xs text-[var(--c-muted)] py-8 text-center">No hay actividades registradas con estos filtros.</p>
         ) : (
@@ -123,7 +123,7 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
             return (
               <div key={act.id} className="relative group">
                 {/* Punto en la línea de tiempo */}
-                <div className="absolute -left-6 top-3 w-4 h-4 rounded-full bg-[var(--c-surface-2)] border border-[#333] flex items-center justify-center">
+                <div className="absolute -left-6 top-3 w-4 h-4 rounded-full bg-[var(--c-surface-2)] border border-[var(--c-line)] flex items-center justify-center">
                   <div className="w-1.5 h-1.5 rounded-full bg-[var(--c-accent)]" />
                 </div>
 
@@ -147,19 +147,19 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
                   </div>
 
                   {act.descripcion && (
-                    <p className="text-xs text-[#BBB] leading-relaxed whitespace-pre-line pl-8">
+                    <p className="text-xs text-[var(--c-text-2)] leading-relaxed whitespace-pre-line pl-8">
                       {act.descripcion}
                     </p>
                   )}
 
                   {act.resultado && (
-                    <div className="ml-8 p-2 bg-[#1B2217] border border-[#2D4521] rounded text-xs text-[var(--c-accent)]">
+                    <div className="ml-8 p-2 bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded text-xs text-[var(--c-accent)]">
                       <span className="font-semibold">Acuerdo:</span> {act.resultado}
                     </div>
                   )}
 
                   {/* Vínculos a Empresa, Oportunidad, Contacto y Autor */}
-                  <div className="pt-2 border-t border-[#222] flex flex-wrap items-center gap-3 text-[11px] text-[var(--c-muted)] font-mono pl-8">
+                  <div className="pt-2 border-t border-[var(--c-line)] flex flex-wrap items-center gap-3 text-[11px] text-[var(--c-muted)] font-mono pl-8">
                     {emp && (
                       <button
                         onClick={() => onSelectEmpresa(emp.id)}
