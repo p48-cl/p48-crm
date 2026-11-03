@@ -234,7 +234,7 @@ const CRMAppContent: React.FC = () => {
       />
 
       {/* Barra de navegación inferior móvil: prioriza tareas, fichas y registro rápido */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-[#0E0E0E] border-t border-[#262626] flex items-center justify-around py-1.5 px-1 pb-[max(0.375rem,env(safe-area-inset-bottom))] text-[10px] font-sans">
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 material-bar flex items-center justify-around py-1.5 px-1 pb-[max(0.375rem,env(safe-area-inset-bottom))] text-[10px] font-sans">
         <button
           onClick={() => setCurrentView('inicio')}
           className={`min-w-[56px] min-h-[52px] flex flex-col items-center justify-center gap-1 ${
