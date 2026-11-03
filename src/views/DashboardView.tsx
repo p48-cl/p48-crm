@@ -65,7 +65,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Cabecera & Selector de Alcance */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-sans text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
+          <h1 className="text-xl sm:text-3xl font-bold tracking-tight font-sans text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
             Panel de Rendimiento Comercial
           </h1>
           <p className="text-xs text-[var(--c-muted)] mt-0.5">
@@ -100,14 +100,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       {/* Pestañas de la vista */}
-      <nav className="surface p-1 inline-flex flex-wrap gap-1" aria-label="Secciones del panel">
+      <nav className="surface p-1 flex overflow-x-auto gap-1 max-w-full" aria-label="Secciones del panel">
         {PESTANAS.map((t) => (
           <button
             key={t.id}
             type="button"
             onClick={() => setPestana(t.id)}
             aria-pressed={pestana === t.id}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors min-h-[44px] ${
+            className={`shrink-0 whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium transition-colors min-h-[44px] ${
               pestana === t.id ? 'bg-[var(--c-surface-3)] text-[var(--c-text)]' : 'text-[var(--c-muted)] hover:text-[var(--c-text-2)]'
             }`}
           >

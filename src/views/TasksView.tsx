@@ -231,7 +231,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
                           <span>{op.nombre}</span>
                         </button>
                       )}
-                      <span>·</span>
+                      <span className="hidden sm:inline">·</span>
                       <span>Resp: {resp?.nombre ?? 'Equipo'}</span>
                     </div>
                   </div>
