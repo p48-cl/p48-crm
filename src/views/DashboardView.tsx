@@ -55,7 +55,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Cabecera & Selector de Alcance */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold font-sans text-[#F5F5F5] dark:text-[#F5F5F5] light:text-[#111]">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-sans text-[#F5F5F5] dark:text-[#F5F5F5] light:text-[#111]">
             Panel de Rendimiento Comercial
           </h1>
           <p className="text-xs text-[#8E8E93] mt-0.5">
@@ -92,7 +92,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Grid de 5 KPIs Clave (Cifras en Blanco Aire #F5F5F5) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
         {/* KPI 1: Pipeline Ponderado */}
-        <div className="p-4 bg-[#141414] dark:bg-[#141414] light:bg-white rounded-lg border border-[#262626] space-y-1">
+        <div className="surface p-4 space-y-1">
           <p className="text-[11px] font-mono text-[#8E8E93] uppercase tracking-wider">
             Pipeline Ponderado
           </p>
@@ -168,7 +168,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* KPI 5: MRR Clientes Activos */}
-        <div className="p-4 bg-[#141414] dark:bg-[#141414] light:bg-white rounded-lg border border-[#262626] space-y-1">
+        <div className="surface p-4 space-y-1">
           <p className="text-[11px] font-mono text-[#8E8E93] uppercase tracking-wider">
             MRR Clientes Activos
           </p>
@@ -182,7 +182,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Grid de Gráficos Nativos en Escala de Grises */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* GRÁFICO 1: Pipeline por Etapa (Solo etapas abiertas) */}
-        <div className="p-5 bg-[#141414] dark:bg-[#141414] light:bg-white rounded-lg border border-[#262626] space-y-4">
+        <div className="surface p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-xs font-semibold text-[#F5F5F5]">
@@ -236,7 +236,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* GRÁFICO 2: Oportunidades por Fuente (Dona en escala de grises y etiquetas) */}
-        <div className="p-5 bg-[#141414] dark:bg-[#141414] light:bg-white rounded-lg border border-[#262626] space-y-4">
+        <div className="surface p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-xs font-semibold text-[#F5F5F5]">
@@ -307,7 +307,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* GRÁFICO 3: Motivos de Pérdida (Barras en escala de gris) */}
-        <div className="p-5 bg-[#141414] dark:bg-[#141414] light:bg-white rounded-lg border border-[#262626] space-y-4">
+        <div className="surface p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-xs font-semibold text-[#F5F5F5]">

@@ -12,7 +12,7 @@ import {
   DashTareasResponsable,
 } from '../../types/crm';
 
-const card = 'p-5 bg-[#141414] rounded-lg border border-[#262626] space-y-4';
+const card = 'surface p-5 space-y-4';
 const titulo = 'text-xs font-semibold text-[#F5F5F5]';
 const subtitulo = 'text-[11px] text-[#8E8E93]';
 
@@ -84,7 +84,7 @@ export const AgencyDashboard: React.FC = () => {
   return (
     <section className="space-y-4" aria-label="Dashboard de agencia">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-[#F5F5F5]">Dashboard de agencia</h2>
+        <h2 className="text-lg font-semibold tracking-tight text-[#F5F5F5]">Dashboard de agencia</h2>
         <button
           type="button"
           onClick={cargar}
@@ -107,7 +107,7 @@ export const AgencyDashboard: React.FC = () => {
           { l: 'Valor ganado', v: formatCLP(Number(resultados?.valor_ganado_clp) || 0), s: 'Neto acumulado' },
           { l: 'Clientes activos', v: String(cartera.length), s: 'Estado cliente' },
         ].map((k) => (
-          <div key={k.l} className="p-4 bg-[#141414] rounded-lg border border-[#262626] space-y-1">
+          <div key={k.l} className="surface p-4 space-y-1">
             <p className="text-[11px] font-mono text-[#8E8E93] uppercase tracking-wider">{k.l}</p>
             <p className="text-lg font-mono font-bold text-[#F5F5F5] break-words">{k.v}</p>
             <p className="text-[10px] text-[#666]">{k.s}</p>

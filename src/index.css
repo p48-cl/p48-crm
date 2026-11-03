@@ -34,3 +34,44 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(140, 140, 140, 0.4);
 }
+
+/* ===== Sistema visual P48 · refinamiento ===== */
+/* Escala tipográfica: en móvil ningún texto baja de 12px; el cuerpo se lee a 15px */
+@media (max-width: 639px) {
+  body { font-size: 15px; line-height: 1.45; }
+  .text-\[9px\] { font-size: 12px !important; }
+  .text-\[10px\] { font-size: 12px !important; }
+  .text-\[11px\] { font-size: 13px !important; }
+  .text-xs { font-size: 13px !important; line-height: 1.4 !important; }
+}
+
+/* Áreas táctiles de al menos 44px en dispositivos táctiles */
+@media (pointer: coarse) {
+  button, [role="button"], select, input[type="checkbox"] {
+    min-height: 44px;
+  }
+  input[type="checkbox"] { min-width: 22px; }
+}
+
+/* Superficies: un solo nivel de elevación, bordes hairline, radios generosos */
+.surface {
+  background: #141414;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+}
+
+/* Material translúcido para barras flotantes */
+.material-bar {
+  background: rgba(14, 14, 14, 0.82);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Respeta la preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+
+/* Toque sin destello azul en iOS/Android */
+button, a { -webkit-tap-highlight-color: transparent; }
