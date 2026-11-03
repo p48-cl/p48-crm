@@ -42,6 +42,12 @@ const PLATAFORMAS: { id: Plataforma; nombre: string; conector: boolean; ayuda: s
   { id: 'otro', nombre: 'Otro activo digital', conector: false, ayuda: 'Nombre o URL del activo', multiple: true },
 ];
 
+const CATEGORIAS: { titulo: string; ids: Plataforma[] }[] = [
+  { titulo: 'Publicidad', ids: ['google_ads', 'meta_bm', 'tiktok', 'linkedin'] },
+  { titulo: 'Analítica y web', ids: ['ga4', 'gsc', 'gtm_cmp', 'sitio_web', 'landing'] },
+  { titulo: 'Negocio y redes', ids: ['gbp', 'merchant', 'instagram', 'facebook', 'otro'] },
+];
+
 const input =
   'w-full px-2.5 py-1.5 text-xs bg-[var(--c-surface)] border border-[var(--c-line)] rounded text-[var(--c-text)] placeholder:text-[var(--c-muted-2)] focus:outline-none focus:border-[var(--c-accent)]';
 
@@ -125,6 +131,94 @@ export const CuentasCliente: React.FC<{ empresaId: string; notas: string; onNota
 
   const concedidas = filas.filter((f) => f.c?.estado === 'concedido').length;
 
+  const registradas = filas.filter((f) => f.c);
+  const pendientes = PLATAFORMAS.filter((p) => !p.multiple && !cuentas.some((c) => c.plataforma === p.id));
+  const abiertaPendiente = abierta && !registradas.some((f) => f.key === abierta) ? PLATAFORMAS.find((p) => p.id === abierta && !p.multiple) : undefined;
+  const filasMostrar: Fila[] = [
+    ...registradas,
+    ...(abiertaPendiente ? [{ key: abiertaPendiente.id, def: abiertaPendiente, c: undefined } as Fila] : []),
+  ];
+  const pendientesVisibles = pendientes.filter((p) => p.id !== abierta);
+
+  const renderFila = (f: Fila) => {
+    const { c, def: p } = f;
+    const estado: Estado = c?.estado ?? 'pendiente';
+    const ui = ESTADO_UI[estado];
+    const abiertaEsta = abierta === f.key;
+    const titulo = c?.etiqueta ? `${p.nombre} · ${c.etiqueta}` : p.nombre;
+    return (
+      <div key={f.key} className="py-2.5">
+        <button
+          type="button"
+          onClick={() => setAbierta(abiertaEsta ? null : f.key)}
+          className="w-full min-h-[44px] flex items-center justify-between gap-3 text-left"
+        >
+          <span className="text-sm font-medium text-[var(--c-text)]">{titulo}</span>
+          <span className="flex items-center gap-2 text-xs">
+            {c?.cuenta_externa && <span className="font-mono text-[var(--c-muted)] truncate max-w-[140px]">{c.cuenta_externa}</span>}
+            <span className={`hidden sm:inline ${saludLectura(p.conector, c).color}`}>{saludLectura(p.conector, c).texto}</span>
+            <ui.Icono className={`w-4 h-4 ${ui.color}`} />
+            <span className={ui.color}>{ui.texto}</span>
+          </span>
+        </button>
+
+        {abiertaEsta && (
+          <div className="mt-2 space-y-2 pl-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <input
+                className={input}
+                placeholder={p.ayuda}
+                defaultValue={c?.cuenta_externa ?? ''}
+                onBlur={(e) => guardar(f, { cuenta_externa: e.target.value.trim() || null })}
+              />
+              <select
+                className={input}
+                value={estado}
+                onChange={(e) =>
+                  guardar(f, {
+                    estado: e.target.value as Estado,
+                    fecha_concedido: e.target.value === 'concedido' ? new Date().toISOString().slice(0, 10) : null,
+                  })
+                }
+              >
+                <option value="pendiente">Pendiente</option>
+                <option value="concedido">Concedido</option>
+                <option value="revocado">Revocado</option>
+              </select>
+            </div>
+            <input
+              className={input}
+              placeholder="¿Quién concedió el acceso? (nombre o correo del cliente)"
+              defaultValue={c?.concedido_por ?? ''}
+              onBlur={(e) => guardar(f, { concedido_por: e.target.value.trim() || null })}
+            />
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-[var(--c-muted)]">
+              <span>
+                {c?.fecha_concedido ? `Concedido el ${c.fecha_concedido}` : 'Sin fecha de concesión'}
+                {c?.ultima_lectura ? ` · Última lectura ${new Date(c.ultima_lectura).toLocaleDateString('es-CL')}` : ''}
+                {' · '}
+                {p.conector
+                  ? c?.verificado_automatico
+                    ? 'Verificado por conector'
+                    : 'Verificación automática pendiente de integrar'
+                  : 'Verificación manual'}
+              </span>
+              {c && (
+                <button
+                  type="button"
+                  onClick={() => guardar(f, { archivado: true })}
+                  className="inline-flex items-center gap-1 min-h-[44px] px-2 hover:text-[var(--c-danger)]"
+                >
+                  <Archive className="w-3.5 h-3.5" /> Quitar
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="surface p-4 space-y-3">
       <div className="flex items-center justify-between">
@@ -132,94 +226,50 @@ export const CuentasCliente: React.FC<{ empresaId: string; notas: string; onNota
           <h3 className="text-xs font-semibold text-[var(--c-text)]">Cuentas y permisos del cliente</h3>
           <p className="text-[11px] text-[var(--c-muted)]">Qué cuenta usamos y quién le dio acceso a P48</p>
         </div>
-        <span className="text-[11px] text-[var(--c-muted)]">{concedidas} de {filas.length} concedidos</span>
+        <span className="text-[11px] text-[var(--c-muted)]">{concedidas} de {registradas.length} concedidos</span>
       </div>
 
       {error && <p className="text-xs text-[var(--c-danger)] border border-[var(--c-danger)]/40 rounded p-2">{error}</p>}
 
-      <div className="divide-y divide-[var(--c-line)]">
-        {filas.map((f) => {
-          const { c, def: p } = f;
-          const estado: Estado = c?.estado ?? 'pendiente';
-          const ui = ESTADO_UI[estado];
-          const abiertaEsta = abierta === f.key;
-          const titulo = c?.etiqueta ? `${p.nombre} · ${c.etiqueta}` : p.nombre;
-          return (
-            <div key={f.key} className="py-2.5">
-              <button
-                type="button"
-                onClick={() => setAbierta(abiertaEsta ? null : f.key)}
-                className="w-full min-h-[44px] flex items-center justify-between gap-3 text-left"
-              >
-                <span className="text-sm font-medium text-[var(--c-text)]">{titulo}</span>
-                <span className="flex items-center gap-2 text-xs">
-                  {c?.cuenta_externa && <span className="font-mono text-[var(--c-muted)] truncate max-w-[140px]">{c.cuenta_externa}</span>}
-                  <span className={`hidden sm:inline ${saludLectura(p.conector, c).color}`}>{saludLectura(p.conector, c).texto}</span>
-                  <ui.Icono className={`w-4 h-4 ${ui.color}`} />
-                  <span className={ui.color}>{ui.texto}</span>
-                </span>
-              </button>
+      {error && <p className="text-xs text-[var(--c-danger)] border border-[var(--c-danger)]/40 rounded p-2">{error}</p>}
 
-              {abiertaEsta && (
-                <div className="mt-2 space-y-2 pl-1">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <input
-                      className={input}
-                      placeholder={p.ayuda}
-                      defaultValue={c?.cuenta_externa ?? ''}
-                      onBlur={(e) => guardar(f, { cuenta_externa: e.target.value.trim() || null })}
-                    />
-                    <select
-                      className={input}
-                      value={estado}
-                      onChange={(e) =>
-                        guardar(f, {
-                          estado: e.target.value as Estado,
-                          fecha_concedido: e.target.value === 'concedido' ? new Date().toISOString().slice(0, 10) : null,
-                        })
-                      }
-                    >
-                      <option value="pendiente">Pendiente</option>
-                      <option value="concedido">Concedido</option>
-                      <option value="revocado">Revocado</option>
-                    </select>
-                  </div>
-                  <input
-                    className={input}
-                    placeholder="¿Quién concedió el acceso? (nombre o correo del cliente)"
-                    defaultValue={c?.concedido_por ?? ''}
-                    onBlur={(e) => guardar(f, { concedido_por: e.target.value.trim() || null })}
-                  />
-                  <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-[var(--c-muted)]">
-                    <span>
-                      {c?.fecha_concedido ? `Concedido el ${c.fecha_concedido}` : 'Sin fecha de concesión'}
-                      {c?.ultima_lectura ? ` · Última lectura ${new Date(c.ultima_lectura).toLocaleDateString('es-CL')}` : ''}
-                      {' · '}
-                      {p.conector
-                        ? c?.verificado_automatico
-                          ? 'Verificado por conector'
-                          : 'Verificación automática pendiente de integrar'
-                        : 'Verificación manual'}
-                    </span>
-                    {c && (
-                      <button
-                        type="button"
-                        onClick={() => guardar(f, { archivado: true })}
-                        className="inline-flex items-center gap-1 min-h-[44px] px-2 hover:text-[var(--c-danger)]"
-                      >
-                        <Archive className="w-3.5 h-3.5" /> Quitar
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
+      {registradas.length === 0 && !abierta && (
+        <p className="text-xs text-[var(--c-muted)]">Todavía no hay cuentas registradas. Elige un activo abajo para empezar.</p>
+      )}
+
+      {CATEGORIAS.map((cat) => {
+        const items = filasMostrar.filter((f) => cat.ids.includes(f.def.id));
+        if (items.length === 0) return null;
+        return (
+          <div key={cat.titulo} className="space-y-1">
+            <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">{cat.titulo}</p>
+            <div className="divide-y divide-[var(--c-line)]">
+              {items.map((f) => renderFila(f))}
             </div>
-          );
-        })}
-      </div>
+          </div>
+        );
+      })}
+
+      {pendientesVisibles.length > 0 && (
+        <div className="border-t border-[var(--c-line)] pt-3 space-y-2">
+          <p className="text-[11px] font-medium text-[var(--c-muted)]">Sin registrar · haz clic para agregar</p>
+          <div className="flex flex-wrap gap-1.5">
+            {pendientesVisibles.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setAbierta(p.id)}
+                className="px-2.5 py-1 text-[11px] rounded-full border border-[var(--c-line)] text-[var(--c-text-2)] hover:border-[var(--c-accent)] hover:text-[var(--c-text)]"
+              >
+                + {p.nombre}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="border-t border-[var(--c-line)] pt-3 space-y-2">
-        <p className="text-[11px] font-medium text-[var(--c-muted)]">Agregar otro activo</p>
+        <p className="text-[11px] font-medium text-[var(--c-muted)]">Agregar otro activo (sitio, landing, otro)</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <select className={input} value={nuevoTipo} onChange={(e) => setNuevoTipo(e.target.value as Plataforma)}>
             {PLATAFORMAS.filter((p) => p.multiple).map((p) => (

@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import {
-  Clock,
   Phone,
   Video,
   FileText,

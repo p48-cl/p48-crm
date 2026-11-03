@@ -9,7 +9,6 @@ import {
   ChevronRight,
   Filter,
 } from 'lucide-react';
-import { Empresa } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
 import { formatCLP, formatRUT } from '../lib/formatters';
 

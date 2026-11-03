@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Search, Building2, User, Kanban, X, ArrowRight, Loader2 } from 'lucide-react';
+import { Search, Building2, User, Kanban, X, ArrowRight } from 'lucide-react';
 import { useCRM } from '../../context/CRMContext';
 import { formatMoneda, sanitizarQueryBusqueda } from '../../lib/formatters';
 import { supabase } from '../../lib/supabase';
@@ -23,7 +23,6 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [isSearchingServer, setIsSearchingServer] = useState(false);
   const [serverResults, setServerResults] = useState<Array<{
     id: string;
     tipo: 'empresa' | 'contacto' | 'oportunidad';
@@ -79,7 +78,6 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     if (!client) return;
 
     let cancel = false;
-    setIsSearchingServer(true);
 
     const ejecutarBusquedaRemota = async () => {
       try {
@@ -153,7 +151,6 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         // En caso de fallo o desconexión, fallback a memoria
         setServerResults(null);
       } finally {
-        if (!cancel) setIsSearchingServer(false);
       }
     };
 

@@ -4,7 +4,6 @@ import {
   Kanban,
   Building2,
   Calendar,
-  AlertTriangle,
   Clock,
   CheckSquare,
   ShieldAlert,
@@ -35,7 +34,6 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
   const {
     oportunidades,
     empresas,
-    contactos,
     etapas,
     miembros,
     plantilla,

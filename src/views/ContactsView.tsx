@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Users, Search, Plus, Mail, Phone, Linkedin, Building2, Pencil, Archive } from 'lucide-react';
+import { Search, Plus, Mail, Phone, Linkedin, Building2, Archive } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';
 import { formatFecha } from '../lib/formatters';
 

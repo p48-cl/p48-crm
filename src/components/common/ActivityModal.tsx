@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Clock, Phone, Video, FileText, Mail, X } from 'lucide-react';
 import { useCRM } from '../../context/CRMContext';
-import { useAuth } from '../../context/AuthContext';
 import { TipoActividad } from '../../types/crm';
 
 interface ActivityModalProps {
