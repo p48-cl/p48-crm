@@ -100,7 +100,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
       estado: newCompany.estado,
       plan: newCompany.plan || null,
       fee_mensual_clp: newCompany.fee_mensual_clp ? Number(newCompany.fee_mensual_clp) : null,
-      mrr_actual_clp: newCompany.estado === 'cliente' && newCompany.fee_mensual_clp ? Number(newCompany.fee_mensual_clp) : null,
+
       salud: newCompany.salud || null,
     });
 

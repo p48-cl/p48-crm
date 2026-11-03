@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Users, Search, Plus, Mail, Phone, Linkedin, Building2 } from 'lucide-react';
+import { Users, Search, Plus, Mail, Phone, Linkedin, Building2, Pencil, Archive } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';
 import { formatFecha } from '../lib/formatters';
 
@@ -8,7 +8,8 @@ interface ContactsViewProps {
 }
 
 export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) => {
-  const { contactos, empresas, crearContacto } = useCRM();
+  const { contactos, empresas, crearContacto, actualizarContacto, archivarContacto } = useCRM();
+  const [editId, setEditId] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showNewModal, setShowNewModal] = useState(false);
@@ -50,7 +51,12 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
     e.preventDefault();
     if (!newContact.nombre || !newContact.email || !newContact.empresa_id) return;
 
-    await crearContacto(newContact);
+    if (editId) {
+      await actualizarContacto(editId, newContact);
+    } else {
+      await crearContacto(newContact);
+    }
+    setEditId(null);
     setShowNewModal(false);
     setNewContact({
       empresa_id: '',
@@ -78,7 +84,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
         </div>
 
         <button
-          onClick={() => setShowNewModal(true)}
+          onClick={() => { setEditId(null); setNewContact({ empresa_id: '', nombre: '', apellido: '', cargo: '', email: '', telefono: '', linkedin_url: '', rol_decision: 'decisor', es_principal: false }); setShowNewModal(true); }}
           className="bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] active:scale-[0.98] text-[var(--c-on-accent)] font-semibold text-xs py-2 px-3.5 rounded flex items-center gap-1.5 transition-all shadow-sm font-sans"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
@@ -129,7 +135,22 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                   return (
                     <tr
                       key={con.id}
-                      className="hover:bg-[var(--c-surface-2)] transition-colors"
+                      className="hover:bg-[var(--c-surface-2)] transition-colors cursor-pointer"
+                      onClick={() => {
+                        setEditId(con.id);
+                        setNewContact({
+                          empresa_id: con.empresa_id,
+                          nombre: con.nombre,
+                          apellido: con.apellido || '',
+                          cargo: con.cargo || '',
+                          email: con.email,
+                          telefono: con.telefono || '',
+                          linkedin_url: con.linkedin_url || '',
+                          rol_decision: (con.rol_decision as 'decisor' | 'influenciador' | 'usuario') || 'decisor',
+                          es_principal: con.es_principal,
+                        });
+                        setShowNewModal(true);
+                      }}
                     >
                       <td className="py-2.5 px-4">
                         <div className="flex items-center gap-2">
@@ -216,7 +237,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
       {showNewModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-lg max-w-md w-full p-6 shadow-2xl">
-            <h2 className="text-base font-bold text-[var(--c-text)] mb-3">Nuevo Contacto</h2>
+            <h2 className="text-base font-bold text-[var(--c-text)] mb-3">{editId ? 'Editar contacto' : 'Nuevo Contacto'}</h2>
             <form onSubmit={handleCreateSubmit} className="space-y-3">
               <div>
                 <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Empresa *</label>
@@ -322,18 +343,34 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
               </div>
 
               <div className="flex justify-end gap-2 pt-3 border-t border-[var(--c-line)]">
+                {editId && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await archivarContacto(editId);
+                      setEditId(null);
+                      setShowNewModal(false);
+                    }}
+                    className="mr-auto inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-[var(--c-danger)] hover:underline"
+                  >
+                    <Archive className="w-3.5 h-3.5" /> Archivar
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={() => setShowNewModal(false)}
+                  onClick={() => {
+                    setEditId(null);
+                    setShowNewModal(false);
+                  }}
                   className="px-3 py-1.5 text-xs text-[var(--c-muted)] hover:text-[var(--c-text)]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-3.5 py-1.5 text-xs font-semibold bg-[var(--c-accent)] text-black rounded"
+                  className="px-3.5 py-1.5 text-xs font-semibold bg-[var(--c-accent)] text-[var(--c-on-accent)] rounded"
                 >
-                  Guardar Contacto
+                  {editId ? 'Guardar cambios' : 'Guardar Contacto'}
                 </button>
               </div>
             </form>
