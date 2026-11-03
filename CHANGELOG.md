@@ -62,9 +62,9 @@ Estado al 3 de noviembre de 2026. Cada entrada indica si ya está en `main`.
 | 20261103171821 | crm_06_portal_rls_clientes | Políticas de cliente en empresas, proyectos y reportes; vistas `portal_*` con `security_invoker`. |
 | 20261103173107 | crm_07_entregables_notas_internas | Tabla `entregables_internos` con RLS solo para miembros; copia de notas existentes. |
 | 20261103174025 | crm_08_entregables_portal | Borra `notas_internas` de entregables y agrega política de lectura de entregables para clientes. |
-| crm_09_mrr_calculado | 2026-11-03 | MRR de cada empresa calculado desde `fee_mensual_clp` si es cliente activo; 0 en otro caso. |
-| crm_10_cuentas_cliente | 2026-11-03 | Tabla `cuentas_cliente` (plataforma, ID externo, estado, concedido por, fecha) con RLS para miembros. Copia los checkboxes de `accesos_admin_marketing`. |
-| crm_11_marketing_base | 2026-11-03 | Columnas `utm_fuente`, `utm_campana`, `utm_medio` en `oportunidades`; `ultima_lectura` en `cuentas_cliente`; tabla `metricas_snapshot` con RLS para miembros. |
+| 20261103184016 | crm_09_mrr_calculado | MRR de cada empresa calculado desde `fee_mensual_clp` si es cliente activo; 0 en otro caso. |
+| 20261103184211 | crm_10_cuentas_cliente | Tabla `cuentas_cliente` (plataforma, ID externo, estado, concedido por, fecha) con RLS para miembros. Copia los checkboxes de `accesos_admin_marketing`. |
+| 20261103184757 | crm_11_marketing_base | Columnas `utm_fuente`, `utm_campana`, `utm_medio` en `oportunidades`; `ultima_lectura` en `cuentas_cliente`; tabla `metricas_snapshot` con RLS para miembros. |
 
 ## Pendiente de aplicar en base
 - Nada. Todas las migraciones de arriba están aplicadas en Supabase.
