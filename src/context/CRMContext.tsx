@@ -26,7 +26,6 @@ import {
   INITIAL_OPORTUNIDADES,
   INITIAL_ETAPAS,
   INITIAL_PLANTILLA,
-  INITIAL_EVALUACIONES,
   INITIAL_ACTIVIDADES,
   INITIAL_TAREAS,
   INITIAL_FUENTES,
@@ -138,7 +137,7 @@ interface CRMContextType {
 const CRMContext = createContext<CRMContextType | undefined>(undefined);
 
 export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { currentUser } = useAuth();
+  useAuth();
   const [filtroAlcance, setFiltroAlcance] = useState<'mis_datos' | 'todo_el_equipo'>('todo_el_equipo');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMensaje, setErrorMensaje] = useState<string | null>(null);
@@ -1076,7 +1075,6 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     // 2. Consultar empresas existentes por dominio o nombre
-    const dominiosArray = Array.from(mapaEmpresasArchivo.keys()).filter(Boolean);
     const { data: dbEmpresasExistentes } = await supabase
       .from('empresas')
       .select('id, nombre, dominio_web');

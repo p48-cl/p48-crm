@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Gauge, Layers, CalendarRange, Users, Briefcase, ListChecks } from 'lucide-react';
+import { Layers, CalendarRange, Users, Briefcase, ListChecks } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { parseSupabaseError } from '../../lib/errorHandler';
 import { formatCLP } from '../../lib/formatters';

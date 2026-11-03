@@ -4,18 +4,13 @@ import {
   Building2,
   ExternalLink,
   Folder,
-  CheckCircle,
-  XCircle,
   Plus,
   Archive,
   Phone,
   Mail,
   Linkedin,
-  Calendar,
-  CheckSquare,
-  DollarSign,
 } from 'lucide-react';
-import { Empresa, Contacto, Oportunidad, Actividad, Tarea, AccesosAdminMarketing } from '../types/crm';
+import { Empresa, AccesosAdminMarketing } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
 import { formatCLP, formatFecha, formatMoneda, formatRUT } from '../lib/formatters';
 import { ClientePanel } from '../components/clientes/ClientePanel';
@@ -98,14 +93,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
   const oportunidadesEmpresa = oportunidades.filter((o) => o.empresa_id === empresa.id && !o.archivado);
   const actividadesEmpresa = actividades.filter((a) => a.empresa_id === empresa.id);
   const tareasEmpresa = tareas.filter((t) => t.empresa_id === empresa.id);
-  const responsable = miembros.find((m) => m.id === empresa.responsable_id);
   const industria = industrias.find((i) => i.id === empresa.industria_id);
-
-  const handleToggleAcceso = (campo: keyof AccesosAdminMarketing) => {
-    actualizarAccesosAdmin(empresa.id, {
-      [campo]: !accesos[campo],
-    });
-  };
 
   const handleCreateContact = async (e: React.FormEvent) => {
     e.preventDefault();

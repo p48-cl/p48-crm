@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   UploadCloud,
-  FileSpreadsheet,
   AlertTriangle,
   CheckCircle2,
   ArrowRight,
@@ -10,13 +9,12 @@ import {
   Users,
 } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';
-import { Empresa, Contacto } from '../types/crm';
 
 export const ImportView: React.FC = () => {
   const { empresas, contactos, importarCSVRelacional } = useCRM();
 
   const [step, setStep] = useState<'upload' | 'mapping' | 'preview' | 'completed'>('upload');
-  const [csvContent, setCsvContent] = useState<string>('');
+  const [, setCsvContent] = useState<string>('');
   const [headers, setHeaders] = useState<string[]>([]);
   const [rows, setRows] = useState<string[][]>([]);
 

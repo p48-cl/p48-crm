@@ -3,7 +3,6 @@ import {
   Empresa,
   Contacto,
   Etapa,
-  Oportunidad,
   VOportunidad,
   PlantillaCalificacion,
   EvaluacionOportunidad,

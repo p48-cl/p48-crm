@@ -2,11 +2,9 @@ import React, { useState, useMemo } from 'react';
 import {
   CheckSquare,
   Plus,
-  AlertCircle,
   Calendar,
   Building2,
   Kanban,
-  User,
   Filter,
 } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';

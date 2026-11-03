@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Sun, Moon, LogOut, ShieldAlert, User, ChevronDown } from 'lucide-react';
+import { Search, Sun, Moon, LogOut, ShieldAlert, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCRM } from '../../context/CRMContext';
 
@@ -15,7 +15,7 @@ export const Header: React.FC<HeaderProps> = ({
   theme,
   setTheme,
 }) => {
-  const { currentUser, isAdmin, logout, switchDemoUser, isSupabaseLive } = useAuth();
+  const { currentUser, logout, switchDemoUser, isSupabaseLive } = useAuth();
   const { miembros, filtroAlcance, setFiltroAlcance } = useCRM();
   const [showUserMenu, setShowUserMenu] = React.useState(false);
 

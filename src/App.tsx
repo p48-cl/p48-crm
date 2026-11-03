@@ -181,7 +181,7 @@ const CRMAppContent: React.FC = () => {
         onClose={() => setIsSearchOpen(false)}
         onSelectOportunidad={(id) => setSelectedOpId(id)}
         onSelectEmpresa={(id) => setSelectedEmpId(id)}
-        onSelectContacto={(id) => {
+        onSelectContacto={() => {
           setCurrentView('contactos');
         }}
       />

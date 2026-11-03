@@ -5,6 +5,7 @@ Formato: versión, fecha de unión a `main`, PR, qué cambia y si toca base de d
 ## v0.11.0 · en curso (no publicada)
 Estado al 3 de noviembre de 2026. Cada entrada indica si ya está en `main`.
 
+- **PR #35** · Limpieza: 39 imports, variables y estados sin uso eliminados (incluido un estado de búsqueda en GlobalSearchModal que se escribía y nunca se leía). Cuentas y permisos: ya no lista las 14 plataformas; muestra solo las registradas agrupadas en Publicidad, Analítica y web, y Negocio y redes, con chips de «Sin registrar» para agregar. Sin cambios de datos ni migraciones. **Pendiente de unir a `main`.**
 - **PR #34** · Ficha de empresa, pestaña Datos y acceso: los parámetros comerciales y de contrato (estado, plan, salud, fee, setup, renovación, responsable, MRR) pasan arriba, antes de los enlaces y las cuentas. Sin cambios de datos ni migraciones. El rediseño de accesos queda para más adelante. **Pendiente de unir a `main`.**
 - **PR #12** · Identidad JAMP CRM: tema claro por defecto con tokens (`--c-*`), tipografía Inter, marca propia "JAMP CRM" separada de la agencia P48. **En `main`** (2026-11-03).
 - **PR #13** · Colores residuales a roles del tema y texto claro solo sobre acento o peligro. **En `main`** (2026-11-03).

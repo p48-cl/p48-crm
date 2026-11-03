@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Sliders,
   Users,
   Award,
   Layers,
@@ -8,15 +7,12 @@ import {
   CheckCircle,
   XCircle,
   AlertTriangle,
-  ArrowRight,
   ShieldAlert,
   Edit2,
-  Trash2,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCRM } from '../context/CRMContext';
 import { Miembro, CriterioCalificacion, CatalogoItem } from '../types/crm';
-import { formatFecha } from '../lib/formatters';
 
 export const AdminView: React.FC = () => {
   const { isAdmin } = useAuth();

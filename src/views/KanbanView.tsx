@@ -40,7 +40,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
   // Filtros
   const [filtroResponsable, setFiltroResponsable] = useState<string>('todos');
   const [filtroFuente, setFiltroFuente] = useState<string>('todos');
-  const [filtroEtapa, setFiltroEtapa] = useState<string>('todos');
+  const [filtroEtapa] = useState<string>('todos');
   const [filtroSeguimiento, setFiltroSeguimiento] = useState<string>('todos');
 
   // Drag and Drop
