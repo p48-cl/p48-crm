@@ -28,7 +28,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
   const [valorNeto, setValorNeto] = useState<number>(PLANES.A.valor);
   const [setupNeto, setSetupNeto] = useState<number>(SETUP_LISTA);
   const [probabilidad, setProbabilidad] = useState<number>(20);
-  const [etapaId] = useState(etapas[0]?.id || '');
+  const [etapaId] = useState(etapas.find((e) => e.activa)?.id || '');
   const [fuenteId, setFuenteId] = useState(fuentes[0]?.id || '');
   const [responsableId, setResponsableId] = useState(currentUser?.id || miembros[0]?.id || '');
   const [utm, setUtm] = useState({ fuente: '', campana: '', medio: '' });
@@ -91,7 +91,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
       const creada = await crearOportunidad({
         nombre: nombre.trim(),
         empresa_id: idEmpresa,
-        etapa_id: etapaId || etapas[0]?.id,
+        etapa_id: etapaId || etapas.find((e) => e.activa)?.id,
         responsable_id: responsableId || null,
         fuente_id: fuenteId || null,
         plan: plan || null,

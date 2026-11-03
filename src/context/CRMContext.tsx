@@ -110,6 +110,9 @@ interface CRMContextType {
   actualizarRolMiembro: (miembroId: string, nuevoRol: 'admin' | 'miembro') => Promise<void>;
   desactivarMiembro: (miembroId: string, reasignarAId: string) => Promise<void>;
   activarMiembro: (miembroId: string) => Promise<void>;
+  guardarEtapa: (etapaId: string, cambios: Partial<Etapa>) => Promise<string | null>;
+  crearEtapa: (nombre: string, probabilidad: number) => Promise<string | null>;
+  reordenarEtapas: (idsOrdenados: string[]) => Promise<string | null>;
   guardarCriterioPlantilla: (criterio: Partial<CriterioCalificacion>) => Promise<void>;
   agregarItemCatalogo: (tipo: 'fuentes' | 'motivos' | 'industrias', nombre: string) => Promise<void>;
   actualizarItemCatalogo: (tipo: 'fuentes' | 'motivos' | 'industrias', id: string, datos: Partial<CatalogoItem>) => Promise<void>;
@@ -863,6 +866,47 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
+  // ETAPAS DEL PIPELINE (admin escribe; miembros leen)
+  const refrescarEtapas = async (): Promise<void> => {
+    if (!supabase) return;
+    const { data } = await supabase.from('etapas').select('*').order('orden');
+    if (data) setEtapas(data as Etapa[]);
+  };
+
+  const guardarEtapa = async (etapaId: string, cambios: Partial<Etapa>): Promise<string | null> => {
+    if (!supabase) return null;
+    const { error } = await supabase.from('etapas').update(cambios).eq('id', etapaId);
+    if (error) return parseSupabaseError(error);
+    await refrescarEtapas();
+    return null;
+  };
+
+  const crearEtapa = async (nombre: string, probabilidad: number): Promise<string | null> => {
+    if (!supabase) return null;
+    const siguiente = Math.max(0, ...etapas.filter((e) => !e.es_ganada && !e.es_perdida).map((e) => e.orden)) + 1;
+    const { error } = await supabase.from('etapas').insert({
+      nombre, orden: siguiente, probabilidad_default: probabilidad, color: '#888888', es_ganada: false, es_perdida: false, activa: true,
+    });
+    if (error) return parseSupabaseError(error);
+    await refrescarEtapas();
+    return null;
+  };
+
+  // Reordena con dos pasos para no chocar con cualquier restricción de unicidad en `orden`
+  const reordenarEtapas = async (idsOrdenados: string[]): Promise<string | null> => {
+    if (!supabase) return null;
+    for (const [i, id] of idsOrdenados.entries()) {
+      const { error } = await supabase.from('etapas').update({ orden: 1000 + i }).eq('id', id);
+      if (error) return parseSupabaseError(error);
+    }
+    for (const [i, id] of idsOrdenados.entries()) {
+      const { error } = await supabase.from('etapas').update({ orden: i + 1 }).eq('id', id);
+      if (error) return parseSupabaseError(error);
+    }
+    await refrescarEtapas();
+    return null;
+  };
+
   const desactivarMiembro = async (miembroId: string, reasignarAId: string) => {
     if (!supabase) {
       if (isModoDemo) {
@@ -1254,6 +1298,9 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         actualizarRolMiembro,
         desactivarMiembro,
         activarMiembro,
+        guardarEtapa,
+        crearEtapa,
+        reordenarEtapas,
         guardarCriterioPlantilla,
         agregarItemCatalogo,
         actualizarItemCatalogo,
