@@ -17,6 +17,7 @@ interface Cuenta {
   fecha_concedido: string | null;
   notas: string | null;
   archivado?: boolean;
+  ultima_lectura?: string | null;
 }
 
 // Plataformas que el conector P48 Marketing puede leer. Solo estas pueden verificarse solas.
@@ -37,6 +38,17 @@ const ESTADO_UI: Record<Estado, { texto: string; color: string; Icono: React.Ele
   concedido: { texto: 'Concedido', color: 'text-[var(--c-ok)]', Icono: CheckCircle2 },
   pendiente: { texto: 'Pendiente', color: 'text-[var(--c-muted)]', Icono: Circle },
   revocado: { texto: 'Revocado', color: 'text-[var(--c-danger)]', Icono: CircleSlash },
+};
+
+
+// Salud de datos: solo aplica a plataformas que el conector puede leer
+const saludLectura = (conector: boolean, c?: Cuenta) => {
+  if (!conector) return { texto: 'Sin conector', color: 'text-[var(--c-muted-2)]' };
+  if (!c || !c.cuenta_externa) return { texto: 'Falta ID de cuenta', color: 'text-[var(--c-muted)]' };
+  if (!c.ultima_lectura) return { texto: 'Sin lecturas', color: 'text-[var(--c-muted)]' };
+  const dias = Math.floor((Date.now() - new Date(c.ultima_lectura).getTime()) / 86400000);
+  if (dias > 7) return { texto: `Atrasada · ${dias} días`, color: 'text-[var(--c-danger)]' };
+  return { texto: 'Al día', color: 'text-[var(--c-ok)]' };
 };
 
 export const CuentasCliente: React.FC<{ empresaId: string; notas: string; onNotas: (v: string) => void }> = ({
@@ -104,6 +116,7 @@ export const CuentasCliente: React.FC<{ empresaId: string; notas: string; onNota
                 <span className="text-sm font-medium text-[var(--c-text)]">{p.nombre}</span>
                 <span className="flex items-center gap-2 text-xs">
                   {c?.cuenta_externa && <span className="font-mono text-[var(--c-muted)] truncate max-w-[140px]">{c.cuenta_externa}</span>}
+                  <span className={`hidden sm:inline ${saludLectura(p.conector, c).color}`}>{saludLectura(p.conector, c).texto}</span>
                   <ui.Icono className={`w-4 h-4 ${ui.color}`} />
                   <span className={ui.color}>{ui.texto}</span>
                 </span>
@@ -142,6 +155,7 @@ export const CuentasCliente: React.FC<{ empresaId: string; notas: string; onNota
                   <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-[var(--c-muted)]">
                     <span>
                       {c?.fecha_concedido ? `Concedido el ${c.fecha_concedido}` : 'Sin fecha de concesión'}
+                      {c?.ultima_lectura ? ` · Última lectura ${new Date(c.ultima_lectura).toLocaleDateString('es-CL')}` : ''}
                       {' · '}
                       {p.conector
                         ? c?.verificado_automatico
