@@ -3,7 +3,9 @@ import { CheckCircle2, Circle, CircleSlash, Archive } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { parseSupabaseError } from '../../lib/errorHandler';
 
-type Plataforma = 'google_ads' | 'ga4' | 'meta_bm' | 'gtm_cmp' | 'gsc' | 'gbp' | 'merchant';
+type Plataforma =
+  | 'google_ads' | 'ga4' | 'meta_bm' | 'gtm_cmp' | 'gsc' | 'gbp' | 'merchant'
+  | 'instagram' | 'facebook' | 'tiktok' | 'linkedin' | 'sitio_web' | 'landing' | 'otro';
 type Estado = 'pendiente' | 'concedido' | 'revocado';
 
 interface Cuenta {
@@ -18,10 +20,12 @@ interface Cuenta {
   notas: string | null;
   archivado?: boolean;
   ultima_lectura?: string | null;
+  etiqueta?: string | null;
+  url?: string | null;
 }
 
 // Plataformas que el conector P48 Marketing puede leer. Solo estas pueden verificarse solas.
-const PLATAFORMAS: { id: Plataforma; nombre: string; conector: boolean; ayuda: string }[] = [
+const PLATAFORMAS: { id: Plataforma; nombre: string; conector: boolean; ayuda: string; multiple?: boolean }[] = [
   { id: 'google_ads', nombre: 'Google Ads', conector: true, ayuda: 'ID de cliente (123-456-7890)' },
   { id: 'ga4', nombre: 'Google Analytics 4', conector: true, ayuda: 'ID de propiedad GA4' },
   { id: 'meta_bm', nombre: 'Meta Business Manager', conector: false, ayuda: 'ID del Business Manager' },
@@ -29,6 +33,13 @@ const PLATAFORMAS: { id: Plataforma; nombre: string; conector: boolean; ayuda: s
   { id: 'gsc', nombre: 'Search Console', conector: true, ayuda: 'Dominio o URL de propiedad' },
   { id: 'gbp', nombre: 'Google Business Profile', conector: true, ayuda: 'ID de ubicación' },
   { id: 'merchant', nombre: 'Merchant Center', conector: true, ayuda: 'ID de cuenta Merchant' },
+  { id: 'facebook', nombre: 'Página de Facebook', conector: false, ayuda: 'Nombre o URL de la página' },
+  { id: 'instagram', nombre: 'Instagram', conector: false, ayuda: 'Usuario (@cuenta)' },
+  { id: 'tiktok', nombre: 'TikTok', conector: false, ayuda: 'Usuario o ID de cuenta' },
+  { id: 'linkedin', nombre: 'LinkedIn', conector: false, ayuda: 'URL de la página o ID' },
+  { id: 'sitio_web', nombre: 'Sitio web', conector: false, ayuda: 'Dominio (ej: cliente.cl)', multiple: true },
+  { id: 'landing', nombre: 'Landing page', conector: false, ayuda: 'URL de la landing', multiple: true },
+  { id: 'otro', nombre: 'Otro activo digital', conector: false, ayuda: 'Nombre o URL del activo', multiple: true },
 ];
 
 const input =
@@ -58,7 +69,9 @@ export const CuentasCliente: React.FC<{ empresaId: string; notas: string; onNota
 }) => {
   const [cuentas, setCuentas] = useState<Cuenta[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [abierta, setAbierta] = useState<Plataforma | null>(null);
+  const [abierta, setAbierta] = useState<string | null>(null);
+  const [nuevoTipo, setNuevoTipo] = useState<Plataforma>('sitio_web');
+  const [nuevaEtiqueta, setNuevaEtiqueta] = useState('');
 
   const cargar = useCallback(async () => {
     if (!isSupabaseConfigured || !supabase) return;
@@ -66,7 +79,8 @@ export const CuentasCliente: React.FC<{ empresaId: string; notas: string; onNota
       .from('cuentas_cliente')
       .select('*')
       .eq('empresa_id', empresaId)
-      .eq('archivado', false);
+      .eq('archivado', false)
+      .order('created_at', { ascending: true });
     if (err) setError(parseSupabaseError(err));
     setCuentas((data as Cuenta[]) ?? []);
   }, [empresaId]);
@@ -75,18 +89,41 @@ export const CuentasCliente: React.FC<{ empresaId: string; notas: string; onNota
     cargar();
   }, [cargar]);
 
-  const guardar = async (plataforma: Plataforma, cambios: Partial<Cuenta>) => {
+  // Filas: una por plataforma simple; para plataformas múltiples, una por cuenta registrada.
+  type Fila = { key: string; def: (typeof PLATAFORMAS)[number]; c?: Cuenta };
+  const filas: Fila[] = PLATAFORMAS.flatMap((p): Fila[] => {
+    const mis = cuentas.filter((c) => c.plataforma === p.id);
+    if (p.multiple) return mis.map((c): Fila => ({ key: c.id, def: p, c }));
+    return [{ key: p.id, def: p, c: mis[0] }];
+  });
+
+  const guardar = async (fila: Fila, cambios: Partial<Cuenta>) => {
     if (!supabase) return;
     setError(null);
-    const existente = cuentas.find((c) => c.plataforma === plataforma);
-    const { error: err } = existente
-      ? await supabase.from('cuentas_cliente').update(cambios).eq('id', existente.id)
-      : await supabase.from('cuentas_cliente').insert({ empresa_id: empresaId, plataforma, ...cambios });
+    const { error: err } = fila.c
+      ? await supabase.from('cuentas_cliente').update(cambios).eq('id', fila.c.id)
+      : await supabase.from('cuentas_cliente').insert({ empresa_id: empresaId, plataforma: fila.def.id, ...cambios });
     if (err) setError(parseSupabaseError(err));
     await cargar();
   };
 
-  const concedidas = PLATAFORMAS.filter((p) => cuentas.find((c) => c.plataforma === p.id)?.estado === 'concedido').length;
+  const agregarManual = async () => {
+    if (!supabase) return;
+    const etiqueta = nuevaEtiqueta.trim();
+    if (!etiqueta) {
+      setError('Pon un nombre para el acceso (ej: Landing campaña Navidad).');
+      return;
+    }
+    setError(null);
+    const { error: err } = await supabase
+      .from('cuentas_cliente')
+      .insert({ empresa_id: empresaId, plataforma: nuevoTipo, etiqueta });
+    if (err) setError(parseSupabaseError(err));
+    setNuevaEtiqueta('');
+    await cargar();
+  };
+
+  const concedidas = filas.filter((f) => f.c?.estado === 'concedido').length;
 
   return (
     <div className="surface p-4 space-y-3">
@@ -95,25 +132,26 @@ export const CuentasCliente: React.FC<{ empresaId: string; notas: string; onNota
           <h3 className="text-xs font-semibold text-[var(--c-text)]">Cuentas y permisos del cliente</h3>
           <p className="text-[11px] text-[var(--c-muted)]">Qué cuenta usamos y quién le dio acceso a P48</p>
         </div>
-        <span className="text-[11px] text-[var(--c-muted)]">{concedidas} de {PLATAFORMAS.length} concedidos</span>
+        <span className="text-[11px] text-[var(--c-muted)]">{concedidas} de {filas.length} concedidos</span>
       </div>
 
       {error && <p className="text-xs text-[var(--c-danger)] border border-[var(--c-danger)]/40 rounded p-2">{error}</p>}
 
       <div className="divide-y divide-[var(--c-line)]">
-        {PLATAFORMAS.map((p) => {
-          const c = cuentas.find((x) => x.plataforma === p.id);
+        {filas.map((f) => {
+          const { c, def: p } = f;
           const estado: Estado = c?.estado ?? 'pendiente';
           const ui = ESTADO_UI[estado];
-          const abiertaEsta = abierta === p.id;
+          const abiertaEsta = abierta === f.key;
+          const titulo = c?.etiqueta ? `${p.nombre} · ${c.etiqueta}` : p.nombre;
           return (
-            <div key={p.id} className="py-2.5">
+            <div key={f.key} className="py-2.5">
               <button
                 type="button"
-                onClick={() => setAbierta(abiertaEsta ? null : p.id)}
+                onClick={() => setAbierta(abiertaEsta ? null : f.key)}
                 className="w-full min-h-[44px] flex items-center justify-between gap-3 text-left"
               >
-                <span className="text-sm font-medium text-[var(--c-text)]">{p.nombre}</span>
+                <span className="text-sm font-medium text-[var(--c-text)]">{titulo}</span>
                 <span className="flex items-center gap-2 text-xs">
                   {c?.cuenta_externa && <span className="font-mono text-[var(--c-muted)] truncate max-w-[140px]">{c.cuenta_externa}</span>}
                   <span className={`hidden sm:inline ${saludLectura(p.conector, c).color}`}>{saludLectura(p.conector, c).texto}</span>
@@ -129,13 +167,13 @@ export const CuentasCliente: React.FC<{ empresaId: string; notas: string; onNota
                       className={input}
                       placeholder={p.ayuda}
                       defaultValue={c?.cuenta_externa ?? ''}
-                      onBlur={(e) => guardar(p.id, { cuenta_externa: e.target.value.trim() || null })}
+                      onBlur={(e) => guardar(f, { cuenta_externa: e.target.value.trim() || null })}
                     />
                     <select
                       className={input}
                       value={estado}
                       onChange={(e) =>
-                        guardar(p.id, {
+                        guardar(f, {
                           estado: e.target.value as Estado,
                           fecha_concedido: e.target.value === 'concedido' ? new Date().toISOString().slice(0, 10) : null,
                         })
@@ -150,7 +188,7 @@ export const CuentasCliente: React.FC<{ empresaId: string; notas: string; onNota
                     className={input}
                     placeholder="¿Quién concedió el acceso? (nombre o correo del cliente)"
                     defaultValue={c?.concedido_por ?? ''}
-                    onBlur={(e) => guardar(p.id, { concedido_por: e.target.value.trim() || null })}
+                    onBlur={(e) => guardar(f, { concedido_por: e.target.value.trim() || null })}
                   />
                   <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-[var(--c-muted)]">
                     <span>
@@ -166,7 +204,7 @@ export const CuentasCliente: React.FC<{ empresaId: string; notas: string; onNota
                     {c && (
                       <button
                         type="button"
-                        onClick={() => guardar(p.id, { archivado: true })}
+                        onClick={() => guardar(f, { archivado: true })}
                         className="inline-flex items-center gap-1 min-h-[44px] px-2 hover:text-[var(--c-danger)]"
                       >
                         <Archive className="w-3.5 h-3.5" /> Quitar
@@ -178,6 +216,32 @@ export const CuentasCliente: React.FC<{ empresaId: string; notas: string; onNota
             </div>
           );
         })}
+      </div>
+
+      <div className="border-t border-[var(--c-line)] pt-3 space-y-2">
+        <p className="text-[11px] font-medium text-[var(--c-muted)]">Agregar otro activo</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <select className={input} value={nuevoTipo} onChange={(e) => setNuevoTipo(e.target.value as Plataforma)}>
+            {PLATAFORMAS.filter((p) => p.multiple).map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.nombre}
+              </option>
+            ))}
+          </select>
+          <input
+            className={input}
+            placeholder="Nombre (ej: Landing Navidad)"
+            value={nuevaEtiqueta}
+            onChange={(e) => setNuevaEtiqueta(e.target.value)}
+          />
+          <button
+            type="button"
+            onClick={agregarManual}
+            className="min-h-[44px] px-3 text-xs font-semibold rounded border border-[var(--c-line)] text-[var(--c-text)] hover:bg-[var(--c-surface-2)]"
+          >
+            Agregar
+          </button>
+        </div>
       </div>
 
       <div>
