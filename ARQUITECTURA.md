@@ -71,7 +71,15 @@ Nunca usar la clave `service_role` en el frontend.
 - Login de clientes externos: OAuth en modo "Interno". Pendiente: cambiar a "Externo" y probarlo con un correo no registrado.
 - Funciones SECURITY DEFINER marcadas por el asesor de Supabase: intencionales, pero revisar cada una al agregar funciones nuevas.
 
-## 10. Lo que viene (sin construir)
+## 10. Cambios recientes (v0.11, en curso)
+- **MRR:** `empresas.mrr_actual_clp` se calcula en la base desde `fee_mensual_clp` solo para clientes activos. No es editable desde la interfaz.
+- **Cuentas por cliente:** tabla `cuentas_cliente`, una fila por cliente y plataforma. Estados: pendiente, concedido, revocado. La verificación automática existe solo para Google Ads, GA4, Search Console, Business Profile y Merchant, y todavía no está conectada: hoy es manual.
+- **Salud de datos:** cada cuenta muestra la fecha de su última lectura del conector. Más de 7 días sin lectura = atrasada.
+- **Origen de oportunidades:** `utm_fuente`, `utm_campana`, `utm_medio`. Base para atribuir ventas a campañas.
+- **Métricas semanales:** `metricas_snapshot` (cliente, plataforma, métrica, periodo). La escribirá una tarea programada; la interfaz solo lee.
+- **Contactos:** se editan y archivan desde la lista (`actualizarContacto` en el contexto).
+
+## 11. Lo que viene (sin construir)
 - Leads del sitio con deduplicación (entrada por función firmada).
 - Cotizaciones con planes A–E, setup, comisión de pauta e IVA.
 - Finanzas: facturas registradas, cobranza, MRR y flujo de caja.
