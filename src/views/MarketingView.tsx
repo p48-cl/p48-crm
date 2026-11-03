@@ -12,7 +12,7 @@ const SECCIONES = [
   { id: 'cliente', label: 'Cliente' },
 ] as const;
 
-export const MarketingView: React.FC = () => {
+export const MarketingView: React.FC<{ onAbrirFicha?: (empresaId: string) => void }> = ({ onAbrirFicha }) => {
   const [seccion, setSeccion] = useState<(typeof SECCIONES)[number]['id']>('dashboard');
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-5">
@@ -39,7 +39,7 @@ export const MarketingView: React.FC = () => {
       {seccion === 'dashboard' && <MktDashboard />}
       {seccion === 'estrategia' && <Estrategia />}
       {seccion === 'ads' && <Ads />}
-      {seccion === 'cliente' && <ClienteHub />}
+      {seccion === 'cliente' && <ClienteHub onAbrirFicha={onAbrirFicha} />}
     </div>
   );
 };

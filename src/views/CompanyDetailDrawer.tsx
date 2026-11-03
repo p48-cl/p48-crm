@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   X,
   Building2,
@@ -20,6 +20,9 @@ import { useCRM } from '../context/CRMContext';
 import { formatCLP, formatFecha, formatMoneda, formatRUT } from '../lib/formatters';
 import { ClientePanel } from '../components/clientes/ClientePanel';
 import { CuentasCliente } from '../components/clientes/CuentasCliente';
+import { FichaMarketing } from '../components/marketing/FichaMarketing';
+
+type Tab = 'info' | 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'cliente' | 'marketing';
 
 interface CompanyDetailDrawerProps {
   empresa: Empresa | null;
@@ -28,6 +31,7 @@ interface CompanyDetailDrawerProps {
   onSelectOportunidad: (id: string) => void;
   onOpenNewActivity: (empresaId: string) => void;
   onOpenNewTask: (empresaId: string) => void;
+  tabInicial?: Tab;
 }
 
 export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
@@ -37,6 +41,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
   onSelectOportunidad,
   onOpenNewActivity,
   onOpenNewTask,
+  tabInicial,
 }) => {
   const {
     contactos,
@@ -52,7 +57,11 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
     industrias,
   } = useCRM();
 
-  const [activeTab, setActiveTab] = useState<'info' | 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'cliente'>('info');
+  const [activeTab, setActiveTab] = useState<Tab>('info');
+
+  useEffect(() => {
+    if (isOpen) setActiveTab(tabInicial ?? 'info');
+  }, [isOpen, empresa?.id, tabInicial]);
   const [showAddContact, setShowAddContact] = useState(false);
   const [newContact, setNewContact] = useState<{
     nombre: string;
@@ -196,7 +205,12 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
               { id: 'oportunidades', label: `Negocios (${oportunidadesEmpresa.length})` },
               { id: 'actividades', label: `Actividades (${actividadesEmpresa.length})` },
               { id: 'tareas', label: `Tareas (${tareasEmpresa.length})` },
-              ...(empresa.estado === 'cliente' ? [{ id: 'cliente' as const, label: 'Cliente y portal' }] : []),
+              ...(empresa.estado === 'cliente'
+                ? [
+                    { id: 'marketing' as const, label: 'Marketing' },
+                    { id: 'cliente' as const, label: 'Cliente y portal' },
+                  ]
+                : []),
             ] as const
           ).map((tab) => (
             <button
@@ -714,6 +728,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
               )}
             </div>
           )}
+          {activeTab === 'marketing' && empresa.estado === 'cliente' && <FichaMarketing empresaId={empresa.id} />}
           {activeTab === 'cliente' && empresa.estado === 'cliente' && (
             <ClientePanel empresaId={empresa.id} />
           )}
