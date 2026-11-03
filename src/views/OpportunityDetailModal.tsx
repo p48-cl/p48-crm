@@ -166,7 +166,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                       onClose();
                       onSelectEmpresa(empresa.id);
                     }}
-                    className="hover:text-white flex items-center gap-1 font-sans"
+                    className="hover:text-[var(--c-text)] flex items-center gap-1 font-sans"
                   >
                     <Building2 className="w-3.5 h-3.5" />
                     <span>{empresa.nombre}</span>
@@ -188,7 +188,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
             >
               <Archive className="w-4 h-4" />
             </button>
-            <button onClick={onClose} className="p-1.5 text-[var(--c-muted)] hover:text-white rounded">
+            <button onClick={onClose} className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-text)] rounded">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -196,7 +196,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
 
         {/* Alerta de Criterio Eliminatorio (v_calificacion_oportunidad.falla_eliminatorio) */}
         {fallaEliminatorio && (
-          <div className="px-5 py-3 bg-[#241015] border-b border-[var(--c-danger)]/40 text-[#FFA0B5] text-xs flex items-center justify-between">
+          <div className="px-5 py-3 bg-[var(--c-surface-2)] border-b border-[var(--c-danger)]/40 text-[var(--c-danger)] text-xs flex items-center justify-between">
             <div className="flex items-center gap-2 font-medium">
               <ShieldAlert className="w-4 h-4 text-[var(--c-danger)]" />
               <span>
@@ -213,7 +213,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
             {/* Próxima Acción */}
             <div
               className={`p-4 rounded-lg border transition-colors ${
-                atrasada ? 'bg-[#1C1115] border-[var(--c-danger)]' : 'bg-[var(--c-surface-2)] border-[var(--c-line)]'
+                atrasada ? 'bg-[var(--c-surface-2)] border-[var(--c-danger)]' : 'bg-[var(--c-surface-2)] border-[var(--c-line)]'
               }`}
             >
               <div className="flex items-center justify-between mb-2">
@@ -225,7 +225,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                 {!editingAccion && (
                   <button
                     onClick={handleStartEditAccion}
-                    className="text-xs text-[#AAA] hover:underline font-mono"
+                    className="text-xs text-[var(--c-text-2)] hover:underline font-mono"
                   >
                     Actualizar
                   </button>
@@ -239,19 +239,19 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                     value={accionTexto}
                     onChange={(e) => setAccionTexto(e.target.value)}
                     placeholder="Próxima acción comercial..."
-                    className="w-full bg-[#111] border border-[#333] rounded px-3 py-1.5 text-xs text-white"
+                    className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-3 py-1.5 text-xs text-[var(--c-text)]"
                   />
                   <div className="flex items-center justify-between gap-3">
                     <input
                       type="date"
                       value={accionFecha}
                       onChange={(e) => setAccionFecha(e.target.value)}
-                      className="bg-[#111] border border-[#333] rounded px-3 py-1.5 text-xs text-white font-mono"
+                      className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-3 py-1.5 text-xs text-[var(--c-text)] font-mono"
                     />
                     <div className="flex gap-2">
                       <button
                         onClick={() => setEditingAccion(false)}
-                        className="px-2.5 py-1 text-xs text-[var(--c-muted)] hover:text-white"
+                        className="px-2.5 py-1 text-xs text-[var(--c-muted)] hover:text-[var(--c-text)]"
                       >
                         Cancelar
                       </button>
@@ -331,13 +331,13 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                           <div className="flex items-center gap-1 bg-[var(--c-surface-2)] p-0.5 rounded border border-[var(--c-line)]">
                             <button
                               onClick={() => handleRespuestaCriterio(crit, 'si')}
-                              className="px-2.5 py-1 rounded font-mono text-xs text-[#BBB] hover:text-white hover:bg-[#333]"
+                              className="px-2.5 py-1 rounded font-mono text-xs text-[var(--c-text-2)] hover:text-[var(--c-text)] hover:bg-[var(--c-surface-3)]"
                             >
                               Sí
                             </button>
                             <button
                               onClick={() => handleRespuestaCriterio(crit, 'no')}
-                              className="px-2.5 py-1 rounded font-mono text-xs text-[#BBB] hover:text-white hover:bg-[#333]"
+                              className="px-2.5 py-1 rounded font-mono text-xs text-[var(--c-text-2)] hover:text-[var(--c-text)] hover:bg-[var(--c-surface-3)]"
                             >
                               No
                             </button>
@@ -348,7 +348,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                               <button
                                 key={num}
                                 onClick={() => handleRespuestaCriterio(crit, num)}
-                                className="w-6 h-6 rounded font-mono text-xs flex items-center justify-center text-[#BBB] hover:text-white hover:bg-[#333]"
+                                className="w-6 h-6 rounded font-mono text-xs flex items-center justify-center text-[var(--c-text-2)] hover:text-[var(--c-text)] hover:bg-[var(--c-surface-3)]"
                               >
                                 {num}
                               </button>
@@ -371,7 +371,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
               <select
                 value={oportunidad.etapa_id}
                 onChange={(e) => moverOportunidadEtapa(oportunidad.id, e.target.value)}
-                className="w-full bg-[#111] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white font-mono"
+                className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)] font-mono"
               >
                 {etapas.map((et) => (
                   <option key={et.id} value={et.id}>
@@ -407,14 +407,14 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                   tareasOp.map((t) => (
                     <div
                       key={t.id}
-                      className="p-2 bg-[#111] rounded border border-[var(--c-line)] flex items-center justify-between text-xs"
+                      className="p-2 bg-[var(--c-surface)] rounded border border-[var(--c-line)] flex items-center justify-between text-xs"
                     >
                       <button
                         onClick={() => toggleTareaCompletada(t.id!, t.completada)}
                         className="flex items-center gap-2 text-left"
                       >
                         <CheckSquare
-                          className={`w-3.5 h-3.5 ${t.completada ? 'text-white' : 'text-[var(--c-muted-2)]'}`}
+                          className={`w-3.5 h-3.5 ${t.completada ? 'text-[var(--c-text)]' : 'text-[var(--c-muted-2)]'}`}
                         />
                         <span
                           className={`text-[11px] ${
@@ -455,7 +455,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                   actividadesOp.map((act) => (
                     <div
                       key={act.id}
-                      className="p-2 bg-[#111] rounded border border-[var(--c-line)] text-xs space-y-1"
+                      className="p-2 bg-[var(--c-surface)] rounded border border-[var(--c-line)] text-xs space-y-1"
                     >
                       <div className="flex items-center justify-between text-[11px]">
                         <span className="font-medium text-[var(--c-text)] capitalize">{act.tipo}</span>
@@ -463,7 +463,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                           {formatFecha(act.fecha_actividad)}
                         </span>
                       </div>
-                      <p className="text-[#AAA] text-[11px]">{act.titulo}</p>
+                      <p className="text-[var(--c-text-2)] text-[11px]">{act.titulo}</p>
                     </div>
                   ))
                 )}
@@ -478,7 +478,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
             <div className="bg-[var(--c-surface)] border border-[var(--c-danger)] rounded-lg max-w-md w-full p-6 shadow-2xl">
               <div className="flex items-center gap-2 mb-3 text-[var(--c-danger)]">
                 <ShieldAlert className="w-5 h-5" />
-                <h3 className="text-sm font-bold text-white">Excepción a Criterio Eliminatorio</h3>
+                <h3 className="text-sm font-bold text-[var(--c-text)]">Excepción a Criterio Eliminatorio</h3>
               </div>
 
               <p className="text-xs text-[var(--c-text-2)] mb-3">
@@ -496,7 +496,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                     placeholder="Fundamento obligatorio para autorizar el avance..."
                     value={motivoExcepcion}
                     onChange={(e) => setMotivoExcepcion(e.target.value)}
-                    className="w-full bg-[var(--c-surface-2)] border border-[#333] rounded p-2 text-xs text-white"
+                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded p-2 text-xs text-[var(--c-text)]"
                   />
                 </div>
 
@@ -509,7 +509,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                     required
                     value={fechaRevisionExcepcion}
                     onChange={(e) => setFechaRevisionExcepcion(e.target.value)}
-                    className="w-full bg-[var(--c-surface-2)] border border-[#333] rounded px-3 py-1.5 text-xs text-white font-mono"
+                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-1.5 text-xs text-[var(--c-text)] font-mono"
                   />
                 </div>
 
@@ -517,11 +517,11 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                   <p className="text-xs text-[var(--c-danger)] font-medium">{errorExcepcion}</p>
                 )}
 
-                <div className="flex justify-end gap-2 pt-3 border-t border-[#222]">
+                <div className="flex justify-end gap-2 pt-3 border-t border-[var(--c-line)]">
                   <button
                     type="button"
                     onClick={() => setExcepcionCriterio(null)}
-                    className="px-3 py-1.5 text-xs text-[var(--c-muted)] hover:text-white"
+                    className="px-3 py-1.5 text-xs text-[var(--c-muted)] hover:text-[var(--c-text)]"
                   >
                     Cancelar
                   </button>
@@ -542,7 +542,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
           <span className="font-mono text-[11px]">ID: {oportunidad.id}</span>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 bg-[#222] hover:bg-[var(--c-line)] text-white rounded transition-colors"
+            className="px-4 py-1.5 bg-[var(--c-surface-2)] hover:bg-[var(--c-line)] text-[var(--c-text)] rounded transition-colors"
           >
             Cerrar Ficha
           </button>

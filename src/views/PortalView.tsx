@@ -183,7 +183,7 @@ export const PortalView: React.FC = () => {
                   </div>
                   <p className="font-mono text-[10px] text-[var(--c-muted-2)]">{fecha(p.fecha_inicio)} → {fecha(p.fecha_fin)}</p>
                   {ents.length > 0 && (
-                    <div className="divide-y divide-[#222]">
+                    <div className="divide-y divide-[var(--c-line)]">
                       {ents.map((x) => {
                         const doc = urlSegura(x.url_documento);
                         return (
@@ -214,7 +214,7 @@ export const PortalView: React.FC = () => {
           {reportes.length === 0 ? (
             <p className="text-xs text-[var(--c-muted)]">Aún no hay reportes publicados.</p>
           ) : (
-            <div className={card + ' divide-y divide-[#222] !space-y-0'}>
+            <div className={card + ' divide-y divide-[var(--c-line)] !space-y-0'}>
               {reportes.map((r) => {
                 const url = urlSegura(r.url);
                 return (

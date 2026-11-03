@@ -36,28 +36,28 @@ export const LoginView: React.FC = () => {
           </div>
 
           {!isSupabaseLive && (
-            <div className="pt-5 border-t border-[#222] text-left">
+            <div className="pt-5 border-t border-[var(--c-line)] text-left">
               <p className="text-[11px] text-[var(--c-muted)] mb-2 font-mono">
                 Accesos rápidos de demostración:
               </p>
               <div className="space-y-1.5">
                 <button
                   onClick={() => switchDemoUser?.('rodrigo@p48.cl')}
-                  className="w-full text-left px-2.5 py-1.5 rounded bg-[var(--c-surface-2)] hover:bg-[var(--c-line)] text-xs text-[var(--c-line)] flex items-center justify-between border border-[#2C2C2C] transition-colors"
+                  className="w-full text-left px-2.5 py-1.5 rounded bg-[var(--c-surface-2)] hover:bg-[var(--c-line)] text-xs text-[var(--c-line)] flex items-center justify-between border border-[var(--c-line)] transition-colors"
                 >
                   <span className="font-medium">Rodrigo Silva</span>
                   <span className="text-[10px] text-[var(--c-accent)] font-mono">Admin</span>
                 </button>
                 <button
                   onClick={() => switchDemoUser?.('camila@p48.cl')}
-                  className="w-full text-left px-2.5 py-1.5 rounded bg-[var(--c-surface-2)] hover:bg-[var(--c-line)] text-xs text-[var(--c-line)] flex items-center justify-between border border-[#2C2C2C] transition-colors"
+                  className="w-full text-left px-2.5 py-1.5 rounded bg-[var(--c-surface-2)] hover:bg-[var(--c-line)] text-xs text-[var(--c-line)] flex items-center justify-between border border-[var(--c-line)] transition-colors"
                 >
                   <span className="font-medium">Camila Soto</span>
                   <span className="text-[10px] text-[var(--c-muted)] font-mono">Miembro</span>
                 </button>
                 <button
                   onClick={() => switchDemoUser?.('matias@p48.cl')}
-                  className="w-full text-left px-2.5 py-1.5 rounded bg-[var(--c-surface-2)] hover:bg-[var(--c-line)] text-xs text-[var(--c-danger)] flex items-center justify-between border border-[#2C2C2C] transition-colors"
+                  className="w-full text-left px-2.5 py-1.5 rounded bg-[var(--c-surface-2)] hover:bg-[var(--c-line)] text-xs text-[var(--c-danger)] flex items-center justify-between border border-[var(--c-line)] transition-colors"
                 >
                   <span>Matías Araya</span>
                   <span className="text-[10px] text-[var(--c-danger)] font-mono">Inactivo (Probar bloqueo)</span>

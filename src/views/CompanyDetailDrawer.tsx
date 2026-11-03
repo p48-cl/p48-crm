@@ -218,7 +218,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
           {activeTab === 'info' && (
             <div className="space-y-6">
               {/* Enlaces Operativos: Looker Studio & Google Drive */}
-              <div className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[#F9F9F9] p-4 rounded-lg border border-[var(--c-line)]">
+              <div className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-bg)] p-4 rounded-lg border border-[var(--c-line)]">
                 <h3 className="text-xs font-semibold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] mb-3">
                   Enlaces del Cliente P48
                 </h3>
@@ -241,7 +241,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                         Abrir
                       </a>
                     ) : (
-                      <span className="text-[11px] text-[#555] font-mono">Sin configurar</span>
+                      <span className="text-[11px] text-[var(--c-muted-2)] font-mono">Sin configurar</span>
                     )}
                   </div>
 
@@ -263,14 +263,14 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                         Abrir
                       </a>
                     ) : (
-                      <span className="text-[11px] text-[#555] font-mono">Sin configurar</span>
+                      <span className="text-[11px] text-[var(--c-muted-2)] font-mono">Sin configurar</span>
                     )}
                   </div>
                 </div>
               </div>
 
               {/* Checklist de Accesos Admin de Performance */}
-              <div className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[#F9F9F9] p-4 rounded-lg border border-[var(--c-line)]">
+              <div className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-bg)] p-4 rounded-lg border border-[var(--c-line)]">
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <h3 className="text-xs font-semibold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
@@ -299,8 +299,8 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                         onClick={() => handleToggleAcceso(item.key)}
                         className={`p-2.5 rounded border text-left flex items-center justify-between transition-colors ${
                           checked
-                            ? 'bg-[#122410] border-[#2A551E] text-[var(--c-accent)]'
-                            : 'bg-[#151515] border-[var(--c-surface-3)] text-[var(--c-muted)] hover:border-[#444]'
+                            ? 'bg-[var(--c-surface-2)] border-[var(--c-line)] text-[var(--c-accent)]'
+                            : 'bg-[var(--c-surface)] border-[var(--c-surface-3)] text-[var(--c-muted)] hover:border-[var(--c-line)]'
                         }`}
                       >
                         <span className="font-medium truncate pr-1">{item.label}</span>
@@ -325,13 +325,13 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                       actualizarAccesosAdmin(empresa.id, { notas_accesos: e.target.value })
                     }
                     placeholder="Ej: Partner ID invitado, falta confirmación por correo..."
-                    className="w-full bg-[var(--c-surface)] border border-[var(--c-surface-3)] rounded p-2 text-xs text-[var(--c-text)] placeholder:text-[#555] focus:outline-none focus:border-[var(--c-accent)]"
+                    className="w-full bg-[var(--c-surface)] border border-[var(--c-surface-3)] rounded p-2 text-xs text-[var(--c-text)] placeholder:text-[var(--c-muted-2)] focus:outline-none focus:border-[var(--c-accent)]"
                   />
                 </div>
               </div>
 
               {/* Parámetros Comerciales & Operativos */}
-              <div className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[#F9F9F9] p-4 rounded-lg border border-[var(--c-line)] space-y-3">
+              <div className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-bg)] p-4 rounded-lg border border-[var(--c-line)] space-y-3">
                 <h3 className="text-xs font-semibold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
                   Parámetros Comerciales & Contrato
                 </h3>
@@ -342,7 +342,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                     <select
                       value={empresa.estado}
                       onChange={(e) => actualizarEmpresa(empresa.id, { estado: e.target.value as any })}
-                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
+                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     >
                       <option value="prospecto">Prospecto</option>
                       <option value="cliente">Cliente activo</option>
@@ -359,7 +359,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                     <select
                       value={empresa.plan || ''}
                       onChange={(e) => actualizarEmpresa(empresa.id, { plan: (e.target.value as any) || null })}
-                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
+                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     >
                       <option value="">Sin plan</option>
                       <option value="A">Plan A</option>
@@ -375,7 +375,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                     <select
                       value={empresa.salud || ''}
                       onChange={(e) => actualizarEmpresa(empresa.id, { salud: (e.target.value as any) || null })}
-                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
+                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     >
                       <option value="">Sin definir</option>
                       <option value="verde">Verde (Saludable)</option>
@@ -398,7 +398,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                         })
                       }
                       placeholder="Ej: 1500000"
-                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white font-mono"
+                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] font-mono"
                     />
                   </div>
 
@@ -413,7 +413,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                         })
                       }
                       placeholder="Ej: 800000"
-                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white font-mono"
+                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] font-mono"
                     />
                   </div>
 
@@ -427,7 +427,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                           fecha_renovacion: e.target.value || null,
                         })
                       }
-                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white font-mono"
+                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] font-mono"
                     />
                   </div>
                 </div>
@@ -442,7 +442,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                           responsable_id: e.target.value || null,
                         })
                       }
-                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
+                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     >
                       <option value="">Sin asignar</option>
                       {miembros.map((m) => (
@@ -481,7 +481,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
               {showAddContact && (
                 <form
                   onSubmit={handleCreateContact}
-                  className="p-4 bg-[var(--c-surface-2)] rounded-lg border border-[#333] space-y-3"
+                  className="p-4 bg-[var(--c-surface-2)] rounded-lg border border-[var(--c-line)] space-y-3"
                 >
                   <div className="grid grid-cols-2 gap-2">
                     <input
@@ -490,14 +490,14 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                       value={newContact.nombre}
                       onChange={(e) => setNewContact({ ...newContact, nombre: e.target.value })}
                       required
-                      className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
+                      className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     />
                     <input
                       type="text"
                       placeholder="Apellido"
                       value={newContact.apellido}
                       onChange={(e) => setNewContact({ ...newContact, apellido: e.target.value })}
-                      className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
+                      className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
@@ -507,14 +507,14 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                       value={newContact.email}
                       onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
                       required
-                      className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
+                      className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     />
                     <input
                       type="text"
                       placeholder="Cargo (ej: Head of Growth)"
                       value={newContact.cargo}
                       onChange={(e) => setNewContact({ ...newContact, cargo: e.target.value })}
-                      className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
+                      className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
@@ -523,18 +523,18 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                       placeholder="Teléfono móvil"
                       value={newContact.telefono}
                       onChange={(e) => setNewContact({ ...newContact, telefono: e.target.value })}
-                      className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
+                      className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     />
                     <input
                       type="text"
                       placeholder="URL de LinkedIn"
                       value={newContact.linkedin_url}
                       onChange={(e) => setNewContact({ ...newContact, linkedin_url: e.target.value })}
-                      className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
+                      className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] text-[#AAA] mb-1">Rol de Decisión</label>
+                    <label className="block text-[11px] text-[var(--c-text-2)] mb-1">Rol de Decisión</label>
                     <select
                       value={newContact.rol_decision}
                       onChange={(e) =>
@@ -543,7 +543,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                           rol_decision: e.target.value as 'decisor' | 'influenciador' | 'usuario',
                         })
                       }
-                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
+                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     >
                       <option value="decisor">Decisor (Presupuesto y firma)</option>
                       <option value="influenciador">Influenciador (Líder técnico)</option>
@@ -554,7 +554,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                     <button
                       type="button"
                       onClick={() => setShowAddContact(false)}
-                      className="px-2.5 py-1 text-xs text-[var(--c-muted)] hover:text-white"
+                      className="px-2.5 py-1 text-xs text-[var(--c-muted)] hover:text-[var(--c-text)]"
                     >
                       Cancelar
                     </button>
@@ -588,7 +588,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                                 ? 'bg-[var(--c-accent)]/15 text-[var(--c-accent)]'
                                 : c.rol_decision === 'influenciador'
                                 ? 'bg-sky-950/60 text-sky-400'
-                                : 'bg-[#222] text-[#AAA]'
+                                : 'bg-[var(--c-surface-2)] text-[var(--c-text-2)]'
                             }`}
                           >
                             {c.rol_decision || 'decisor'}
@@ -602,15 +602,15 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                         <p className="text-[11px] text-[var(--c-muted)]">{c.cargo || 'Sin cargo'}</p>
                         <div className="flex items-center gap-3 text-xs text-[var(--c-muted)] mt-1 font-mono">
                           <span className="flex items-center gap-1">
-                            <Mail className="w-3 h-3 text-[#999]" />
-                            <a href={`mailto:${c.email}`} className="hover:text-white">
+                            <Mail className="w-3 h-3 text-[var(--c-muted)]" />
+                            <a href={`mailto:${c.email}`} className="hover:text-[var(--c-text)]">
                               {c.email}
                             </a>
                           </span>
                           {c.telefono && (
                             <span className="flex items-center gap-1">
-                              <Phone className="w-3 h-3 text-[#999]" />
-                              <a href={`tel:${c.telefono}`} className="hover:text-white">
+                              <Phone className="w-3 h-3 text-[var(--c-muted)]" />
+                              <a href={`tel:${c.telefono}`} className="hover:text-[var(--c-text)]">
                                 {c.telefono}
                               </a>
                             </span>
@@ -704,7 +704,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                             {formatFecha(act.fecha_actividad)}
                           </span>
                         </div>
-                        <p className="text-[#AAA]">{act.descripcion}</p>
+                        <p className="text-[var(--c-text-2)]">{act.descripcion}</p>
                         {act.resultado && (
                           <p className="text-[var(--c-accent)] text-[11px]">Resultado: {act.resultado}</p>
                         )}
@@ -777,7 +777,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
           <span className="font-mono text-[11px]">ID: {empresa.id}</span>
           <button
             onClick={onClose}
-            className="px-3 py-1.5 bg-[#222] hover:bg-[var(--c-line)] text-white rounded transition-colors"
+            className="px-3 py-1.5 bg-[var(--c-surface-2)] hover:bg-[var(--c-line)] text-[var(--c-text)] rounded transition-colors"
           >
             Cerrar Ficha
           </button>

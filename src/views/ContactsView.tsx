@@ -116,7 +116,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                 <th className="py-2.5 px-4 font-medium text-right">Registrado</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#222]">
+            <tbody className="divide-y divide-[var(--c-line)]">
               {filteredContactos.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="py-8 text-center text-xs text-[var(--c-muted)]">
@@ -153,10 +153,10 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                             <span className="truncate max-w-[160px]">{emp.nombre}</span>
                           </button>
                         ) : (
-                          <span className="text-[#555]">—</span>
+                          <span className="text-[var(--c-muted-2)]">—</span>
                         )}
                       </td>
-                      <td className="py-2.5 px-3 text-[#BBB]">{con.cargo || '—'}</td>
+                      <td className="py-2.5 px-3 text-[var(--c-text-2)]">{con.cargo || '—'}</td>
                       <td className="py-2.5 px-3">
                         <span
                           className={`font-mono text-[10px] px-2 py-0.5 rounded capitalize ${
@@ -164,26 +164,26 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                               ? 'bg-[var(--c-accent)]/15 text-[var(--c-accent)]'
                               : con.rol_decision === 'influenciador'
                               ? 'bg-sky-950/60 text-sky-400'
-                              : 'bg-[#222] text-[#AAA]'
+                              : 'bg-[var(--c-surface-2)] text-[var(--c-text-2)]'
                           }`}
                         >
                           {con.rol_decision || 'decisor'}
                         </span>
                       </td>
-                      <td className="py-2.5 px-3 font-mono text-[11px] text-[#AAA]">
-                        <a href={`mailto:${con.email}`} className="hover:text-white flex items-center gap-1">
+                      <td className="py-2.5 px-3 font-mono text-[11px] text-[var(--c-text-2)]">
+                        <a href={`mailto:${con.email}`} className="hover:text-[var(--c-text)] flex items-center gap-1">
                           <Mail className="w-3 h-3 text-[var(--c-muted-2)]" />
                           <span>{con.email}</span>
                         </a>
                       </td>
-                      <td className="py-2.5 px-3 font-mono text-[11px] text-[#AAA]">
+                      <td className="py-2.5 px-3 font-mono text-[11px] text-[var(--c-text-2)]">
                         {con.telefono ? (
-                          <a href={`tel:${con.telefono}`} className="hover:text-white flex items-center gap-1">
+                          <a href={`tel:${con.telefono}`} className="hover:text-[var(--c-text)] flex items-center gap-1">
                             <Phone className="w-3 h-3 text-[var(--c-muted-2)]" />
                             <span>{con.telefono}</span>
                           </a>
                         ) : (
-                          <span className="text-[#555]">—</span>
+                          <span className="text-[var(--c-muted-2)]">—</span>
                         )}
                       </td>
                       <td className="py-2.5 px-3 text-center">
@@ -197,7 +197,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                             <Linkedin className="w-3.5 h-3.5" />
                           </a>
                         ) : (
-                          <span className="text-[#444]">—</span>
+                          <span className="text-[var(--c-muted-2)]">—</span>
                         )}
                       </td>
                       <td className="py-2.5 px-4 font-mono text-[11px] text-[var(--c-muted)] text-right">
@@ -224,7 +224,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                   required
                   value={newContact.empresa_id}
                   onChange={(e) => setNewContact({ ...newContact, empresa_id: e.target.value })}
-                  className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
+                  className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
                 >
                   <option value="">Selecciona la empresa...</option>
                   {empresas.map((e) => (
@@ -242,14 +242,14 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                   placeholder="Nombre *"
                   value={newContact.nombre}
                   onChange={(e) => setNewContact({ ...newContact, nombre: e.target.value })}
-                  className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
+                  className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                 />
                 <input
                   type="text"
                   placeholder="Apellido"
                   value={newContact.apellido}
                   onChange={(e) => setNewContact({ ...newContact, apellido: e.target.value })}
-                  className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
+                  className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                 />
               </div>
 
@@ -260,14 +260,14 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                   placeholder="Email *"
                   value={newContact.email}
                   onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
-                  className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
+                  className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                 />
                 <input
                   type="text"
                   placeholder="Cargo"
                   value={newContact.cargo}
                   onChange={(e) => setNewContact({ ...newContact, cargo: e.target.value })}
-                  className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
+                  className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                 />
               </div>
 
@@ -277,19 +277,19 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                   placeholder="Teléfono"
                   value={newContact.telefono}
                   onChange={(e) => setNewContact({ ...newContact, telefono: e.target.value })}
-                  className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
+                  className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                 />
                 <input
                   type="text"
                   placeholder="LinkedIn URL"
                   value={newContact.linkedin_url}
                   onChange={(e) => setNewContact({ ...newContact, linkedin_url: e.target.value })}
-                  className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
+                  className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-[#AAA] mb-1">
+                <label className="block text-[11px] font-medium text-[var(--c-text-2)] mb-1">
                   Rol de Decisión Comercial
                 </label>
                 <select
@@ -300,7 +300,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                       rol_decision: e.target.value as 'decisor' | 'influenciador' | 'usuario',
                     })
                   }
-                  className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
+                  className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                 >
                   <option value="decisor">Decisor (Toma de decisión y presupuesto)</option>
                   <option value="influenciador">Influenciador (Líder técnico o de área)</option>
@@ -314,18 +314,18 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                   id="es_principal_chk"
                   checked={newContact.es_principal}
                   onChange={(e) => setNewContact({ ...newContact, es_principal: e.target.checked })}
-                  className="rounded border-[#444] bg-[#222] text-[var(--c-accent)]"
+                  className="rounded border-[var(--c-line)] bg-[var(--c-surface-2)] text-[var(--c-accent)]"
                 />
-                <label htmlFor="es_principal_chk" className="text-xs text-[#AAA]">
+                <label htmlFor="es_principal_chk" className="text-xs text-[var(--c-text-2)]">
                   Contacto principal para decisiones
                 </label>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-[#222]">
+              <div className="flex justify-end gap-2 pt-3 border-t border-[var(--c-line)]">
                 <button
                   type="button"
                   onClick={() => setShowNewModal(false)}
-                  className="px-3 py-1.5 text-xs text-[var(--c-muted)] hover:text-white"
+                  className="px-3 py-1.5 text-xs text-[var(--c-muted)] hover:text-[var(--c-text)]"
                 >
                   Cancelar
                 </button>

@@ -122,7 +122,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
                 className={`py-2 px-3 rounded-t border-b-2 flex items-center gap-1.5 transition-colors whitespace-nowrap ${
                   active
                     ? 'border-[var(--c-accent)] text-[var(--c-accent)] font-semibold'
-                    : 'border-transparent text-[var(--c-muted)] hover:text-white'
+                    : 'border-transparent text-[var(--c-muted)] hover:text-[var(--c-text)]'
                 }`}
               >
                 <span>{item.label}</span>
@@ -131,7 +131,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
                     item.alert
                       ? 'bg-[var(--c-danger)]/20 text-[var(--c-danger)]'
                       : active
-                      ? 'bg-[#222] text-[var(--c-accent)]'
+                      ? 'bg-[var(--c-surface-2)] text-[var(--c-accent)]'
                       : 'bg-[var(--c-surface-2)] text-[var(--c-muted)]'
                   }`}
                 >
@@ -178,10 +178,10 @@ export const TasksView: React.FC<TasksViewProps> = ({
                 key={t.id}
                 className={`p-3.5 rounded-lg border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors ${
                   t.completada
-                    ? 'bg-[var(--c-surface)] border-[#222] opacity-60'
+                    ? 'bg-[var(--c-surface)] border-[var(--c-line)] opacity-60'
                     : atrasada
-                    ? 'bg-[#1B1014] border-[var(--c-danger)]/50 ring-1 ring-[var(--c-danger)]/20'
-                    : 'bg-[var(--c-surface)] border-[var(--c-line)] hover:border-[#383838]'
+                    ? 'bg-[var(--c-surface-2)] border-[var(--c-danger)]/50 ring-1 ring-[var(--c-danger)]/20'
+                    : 'bg-[var(--c-surface)] border-[var(--c-line)] hover:border-[var(--c-line)]'
                 }`}
               >
                 <div className="flex items-start gap-3">
@@ -191,7 +191,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
                   >
                     <CheckSquare
                       className={`w-4 h-4 ${
-                        t.completada ? 'text-[var(--c-accent)]' : 'text-[#555]'
+                        t.completada ? 'text-[var(--c-accent)]' : 'text-[var(--c-muted-2)]'
                       }`}
                     />
                   </button>
@@ -220,7 +220,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
                           onClick={() => onSelectEmpresa(emp.id)}
                           className="hover:text-[var(--c-accent)] flex items-center gap-1 font-sans"
                         >
-                          <Building2 className="w-3 h-3 text-[#555]" />
+                          <Building2 className="w-3 h-3 text-[var(--c-muted-2)]" />
                           <span>{emp.nombre}</span>
                         </button>
                       )}
@@ -229,7 +229,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
                           onClick={() => onSelectOportunidad(op.id)}
                           className="hover:text-[var(--c-accent)] flex items-center gap-1 font-sans"
                         >
-                          <Kanban className="w-3 h-3 text-[#555]" />
+                          <Kanban className="w-3 h-3 text-[var(--c-muted-2)]" />
                           <span>{op.nombre}</span>
                         </button>
                       )}
@@ -257,7 +257,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
                       atrasada ? 'text-[var(--c-danger)] font-bold' : 'text-[var(--c-muted)]'
                     }`}
                   >
-                    <Calendar className="w-3.5 h-3.5 text-[#555]" />
+                    <Calendar className="w-3.5 h-3.5 text-[var(--c-muted-2)]" />
                     <span>{formatFecha(t.fecha_vencimiento)}</span>
                   </span>
                 </div>

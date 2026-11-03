@@ -130,7 +130,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* KPI 2: Oportunidades Abiertas */}
         <div
           onClick={onNavigateKanban}
-          className="p-4 bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white rounded-lg border border-[var(--c-line)] space-y-1 cursor-pointer hover:border-[#444] transition-colors"
+          className="p-4 bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white rounded-lg border border-[var(--c-line)] space-y-1 cursor-pointer hover:border-[var(--c-line)] transition-colors"
         >
           <div className="flex items-center justify-between">
             <p className="text-[11px] font-mono text-[var(--c-muted)] uppercase tracking-wider">
@@ -149,7 +149,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           onClick={onNavigateKanban}
           className={`p-4 rounded-lg border space-y-1 cursor-pointer transition-colors ${
             haySeguimientosAtrasados
-              ? 'bg-[#1C1014] border-[var(--c-danger)] text-[#FFA0B5]'
+              ? 'bg-[var(--c-surface-2)] border-[var(--c-danger)] text-[var(--c-danger)]'
               : 'bg-[var(--c-surface)] border-[var(--c-line)]'
           }`}
         >
@@ -178,7 +178,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* KPI 4: Tareas de Hoy */}
         <div
           onClick={onNavigateTasks}
-          className="p-4 bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white rounded-lg border border-[var(--c-line)] space-y-1 cursor-pointer hover:border-[#444] transition-colors"
+          className="p-4 bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white rounded-lg border border-[var(--c-line)] space-y-1 cursor-pointer hover:border-[var(--c-line)] transition-colors"
         >
           <div className="flex items-center justify-between">
             <p className="text-[11px] font-mono text-[var(--c-muted)] uppercase tracking-wider">
@@ -229,13 +229,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 );
                 return (
                   <div key={d.etapa_id} className="flex-1 min-w-0 h-full flex flex-col items-center gap-1.5 group">
-                    <span className="font-mono text-[9px] text-[#AAA] opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="font-mono text-[9px] text-[var(--c-text-2)] opacity-0 group-hover:opacity-100 transition-opacity">
                       ${Math.round((Number(d.valor_ponderado) || 0) / 1000000)}M
                     </span>
                     <div className="w-full flex-1 min-h-0 flex items-end justify-center">
                       <div
                         style={{ height: `${alturaPct}%` }}
-                        className="w-full max-w-[36px] bg-[var(--c-line)] border border-[#555555] group-hover:bg-[var(--c-line)] rounded-t transition-all"
+                        className="w-full max-w-[36px] bg-[var(--c-line)] border border-[var(--c-line)] group-hover:bg-[var(--c-line)] rounded-t transition-all"
                       />
                     </div>
                     <span className="font-mono text-[9px] sm:text-[10px] text-[var(--c-muted)] leading-tight break-words w-full text-center">
@@ -248,12 +248,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
 
           {/* Resumen separado de Ganadas y Perdidas */}
-          <div className="pt-2 border-t border-[#222] space-y-1 text-[11px] font-mono text-[var(--c-muted)]">
+          <div className="pt-2 border-t border-[var(--c-line)] space-y-1 text-[11px] font-mono text-[var(--c-muted)]">
             <p className="text-[10px] text-[var(--c-muted-2)] uppercase">Cierres Históricos:</p>
             <div className="flex justify-between">
               {etapasCerradas.map((c) => (
                 <span key={c.etapa_id} className="text-[var(--c-text-2)]">
-                  {c.nombre}: <strong className="text-white">{c.cantidad}</strong> negocios ({formatCLP(c.valor_ponderado)})
+                  {c.nombre}: <strong className="text-[var(--c-text)]">{c.cantidad}</strong> negocios ({formatCLP(c.valor_ponderado)})
                 </span>
               ))}
             </div>
@@ -323,7 +323,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   />
                   <span className="text-[var(--c-text-2)] truncate">{f.nombre}</span>
                 </div>
-                <span className="font-mono text-[#AAA]">
+                <span className="font-mono text-[var(--c-text-2)]">
                   {f.cantidad} ({Math.round(((Number(f.cantidad) || 0) / totalFuentes) * 100)}%)
                 </span>
               </div>

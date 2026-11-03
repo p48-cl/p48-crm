@@ -79,7 +79,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 className={`w-full flex items-center justify-between px-3 py-2 rounded text-xs font-medium transition-colors ${
                   isActive
                     ? 'bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-surface-3)] text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-surface)]'
-                    : 'text-[var(--c-muted)] hover:text-[var(--c-text)] hover:bg-[#151515] dark:hover:bg-[#151515] light:hover:bg-[var(--c-surface-2)]'
+                    : 'text-[var(--c-muted)] hover:text-[var(--c-text)] hover:bg-[var(--c-surface)] dark:hover:bg-[var(--c-surface)] light:hover:bg-[var(--c-surface-2)]'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
@@ -92,7 +92,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     className={`font-mono text-[10px] px-1.5 py-0.2 rounded font-bold ${
                       item.badgeAlert
                         ? 'bg-[var(--c-danger)]/20 text-[var(--c-danger)]'
-                        : 'bg-[var(--c-surface-3)] text-[#BBB]'
+                        : 'bg-[var(--c-surface-3)] text-[var(--c-text-2)]'
                     }`}
                   >
                     {item.badgeCount}
@@ -105,17 +105,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Acción rápida de registro de actividad */}
-      <div className="px-3 pt-4 border-t border-[#222]">
+      <div className="px-3 pt-4 border-t border-[var(--c-line)]">
         <button
           onClick={onOpenQuickActivity}
-          className="w-full bg-[var(--c-surface-2)] hover:bg-[var(--c-line)] text-[var(--c-text-2)] hover:text-white border border-[var(--c-line)] text-xs py-2 px-3 rounded flex items-center justify-center gap-1.5 transition-colors font-medium"
+          className="w-full bg-[var(--c-surface-2)] hover:bg-[var(--c-line)] text-[var(--c-text-2)] hover:text-[var(--c-text)] border border-[var(--c-line)] text-xs py-2 px-3 rounded flex items-center justify-center gap-1.5 transition-colors font-medium"
         >
           <Clock className="w-3.5 h-3.5 text-[var(--c-muted)]" />
           <span>Registrar Actividad</span>
         </button>
 
         <div className="mt-3 text-center">
-          <p className="text-[10px] text-[#555] font-mono">
+          <p className="text-[10px] text-[var(--c-muted-2)] font-mono">
             JAMP CRM · Multi-agente
           </p>
         </div>

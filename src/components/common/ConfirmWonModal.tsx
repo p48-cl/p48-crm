@@ -42,7 +42,7 @@ export const ConfirmWonModal: React.FC<ConfirmWonModalProps> = ({
           </div>
         </div>
 
-        <div className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[#F7F7F7] p-3 rounded border border-[var(--c-surface-3)] dark:border-[var(--c-surface-3)] light:border-[var(--c-text)] mb-4 space-y-1">
+        <div className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-bg)] p-3 rounded border border-[var(--c-surface-3)] dark:border-[var(--c-surface-3)] light:border-[var(--c-text)] mb-4 space-y-1">
           <p className="text-xs text-[var(--c-line)] font-medium truncate">{oportunidad.nombre}</p>
           <p className="text-xs text-[var(--c-muted)]">
             Empresa: <span className="text-[var(--c-text)] font-medium">{empresa?.nombre ?? 'Sin empresa'}</span>
@@ -56,13 +56,13 @@ export const ConfirmWonModal: React.FC<ConfirmWonModalProps> = ({
         </div>
 
         {/* Aviso de regla de negocio obligatorio */}
-        <div className="bg-[#242010] border border-[#665510] text-[#E5C158] p-3 rounded mb-5 text-xs flex gap-2.5 items-start">
+        <div className="bg-[var(--c-surface-2)] border border-[var(--c-line)] text-[var(--c-muted-2)] p-3 rounded mb-5 text-xs flex gap-2.5 items-start">
           <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-[var(--c-accent)]" />
           <div>
             <p className="font-semibold text-[var(--c-text)]">Acción irreversible en la base de datos:</p>
             <p className="mt-0.5 text-[var(--c-text-2)]">
               Al pasar a <strong>Ganado</strong>, la empresa{' '}
-              <span className="text-white font-medium">{empresa?.nombre}</span> pasará automáticamente a estado{' '}
+              <span className="text-[var(--c-text)] font-medium">{empresa?.nombre}</span> pasará automáticamente a estado{' '}
               <strong>Cliente</strong> en Supabase y se registrará el hito en su historial.
             </p>
           </div>
@@ -72,7 +72,7 @@ export const ConfirmWonModal: React.FC<ConfirmWonModalProps> = ({
           <button
             type="button"
             onClick={onCancel}
-            className="px-3 py-2 text-xs text-[var(--c-muted)] hover:text-[#FFF] hover:bg-[var(--c-surface-3)] rounded transition-colors"
+            className="px-3 py-2 text-xs text-[var(--c-muted)] hover:text-[var(--c-on-accent)] hover:bg-[var(--c-surface-3)] rounded transition-colors"
           >
             Cancelar
           </button>

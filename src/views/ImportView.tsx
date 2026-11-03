@@ -196,15 +196,15 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
         <span className={step === 'upload' ? 'text-[var(--c-accent)] font-bold' : 'text-[var(--c-muted-2)]'}>
           1. Subir CSV
         </span>
-        <ArrowRight className="w-3.5 h-3.5 text-[#444]" />
+        <ArrowRight className="w-3.5 h-3.5 text-[var(--c-muted-2)]" />
         <span className={step === 'mapping' ? 'text-[var(--c-accent)] font-bold' : 'text-[var(--c-muted-2)]'}>
           2. Mapear Columnas
         </span>
-        <ArrowRight className="w-3.5 h-3.5 text-[#444]" />
+        <ArrowRight className="w-3.5 h-3.5 text-[var(--c-muted-2)]" />
         <span className={step === 'preview' ? 'text-[var(--c-accent)] font-bold' : 'text-[var(--c-muted-2)]'}>
           3. Previsualizar & Duplicados
         </span>
-        <ArrowRight className="w-3.5 h-3.5 text-[#444]" />
+        <ArrowRight className="w-3.5 h-3.5 text-[var(--c-muted-2)]" />
         <span className={step === 'completed' ? 'text-[var(--c-accent)] font-bold' : 'text-[var(--c-muted-2)]'}>
           4. Confirmación
         </span>
@@ -255,20 +255,20 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             {/* Campos Empresa */}
-            <div className="p-4 bg-[#111] rounded border border-[var(--c-line)] space-y-3">
+            <div className="p-4 bg-[var(--c-surface)] rounded border border-[var(--c-line)] space-y-3">
               <h4 className="font-semibold text-[var(--c-accent)] flex items-center gap-1.5">
                 <Building2 className="w-3.5 h-3.5" />
                 <span>Datos de Empresa</span>
               </h4>
 
               <div>
-                <label className="block text-[11px] text-[#BBB] mb-1">
+                <label className="block text-[11px] text-[var(--c-text-2)] mb-1">
                   Nombre Empresa <span className="text-[var(--c-accent)]">*</span>
                 </label>
                 <select
                   value={mapping.nombreEmpresa}
                   onChange={(e) => setMapping({ ...mapping, nombreEmpresa: e.target.value })}
-                  className="w-full bg-[var(--c-surface-2)] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
+                  className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                 >
                   <option value="">Selecciona columna...</option>
                   {headers.map((h) => (
@@ -280,11 +280,11 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
               </div>
 
               <div>
-                <label className="block text-[11px] text-[#BBB] mb-1">RUT Empresa</label>
+                <label className="block text-[11px] text-[var(--c-text-2)] mb-1">RUT Empresa</label>
                 <select
                   value={mapping.rut}
                   onChange={(e) => setMapping({ ...mapping, rut: e.target.value })}
-                  className="w-full bg-[var(--c-surface-2)] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
+                  className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                 >
                   <option value="">(Opcional) Columna...</option>
                   {headers.map((h) => (
@@ -296,11 +296,11 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
               </div>
 
               <div>
-                <label className="block text-[11px] text-[#BBB] mb-1">Dominio Web</label>
+                <label className="block text-[11px] text-[var(--c-text-2)] mb-1">Dominio Web</label>
                 <select
                   value={mapping.dominioWeb}
                   onChange={(e) => setMapping({ ...mapping, dominioWeb: e.target.value })}
-                  className="w-full bg-[var(--c-surface-2)] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
+                  className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                 >
                   <option value="">(Opcional) Columna...</option>
                   {headers.map((h) => (
@@ -313,7 +313,7 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
             </div>
 
             {/* Campos Contacto */}
-            <div className="p-4 bg-[#111] rounded border border-[var(--c-line)] space-y-3">
+            <div className="p-4 bg-[var(--c-surface)] rounded border border-[var(--c-line)] space-y-3">
               <h4 className="font-semibold text-sky-400 flex items-center gap-1.5">
                 <Users className="w-3.5 h-3.5" />
                 <span>Contacto Asociado (Opcional)</span>
@@ -321,11 +321,11 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[11px] text-[#BBB] mb-1">Nombre</label>
+                  <label className="block text-[11px] text-[var(--c-text-2)] mb-1">Nombre</label>
                   <select
                     value={mapping.nombreContacto}
                     onChange={(e) => setMapping({ ...mapping, nombreContacto: e.target.value })}
-                    className="w-full bg-[var(--c-surface-2)] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
+                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                   >
                     <option value="">Columna...</option>
                     {headers.map((h) => (
@@ -336,11 +336,11 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[11px] text-[#BBB] mb-1">Apellido</label>
+                  <label className="block text-[11px] text-[var(--c-text-2)] mb-1">Apellido</label>
                   <select
                     value={mapping.apellidoContacto}
                     onChange={(e) => setMapping({ ...mapping, apellidoContacto: e.target.value })}
-                    className="w-full bg-[var(--c-surface-2)] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
+                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                   >
                     <option value="">Columna...</option>
                     {headers.map((h) => (
@@ -353,11 +353,11 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
               </div>
 
               <div>
-                <label className="block text-[11px] text-[#BBB] mb-1">Email</label>
+                <label className="block text-[11px] text-[var(--c-text-2)] mb-1">Email</label>
                 <select
                   value={mapping.emailContacto}
                   onChange={(e) => setMapping({ ...mapping, emailContacto: e.target.value })}
-                  className="w-full bg-[var(--c-surface-2)] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
+                  className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                 >
                   <option value="">Columna...</option>
                   {headers.map((h) => (
@@ -370,11 +370,11 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[11px] text-[#BBB] mb-1">Cargo</label>
+                  <label className="block text-[11px] text-[var(--c-text-2)] mb-1">Cargo</label>
                   <select
                     value={mapping.cargoContacto}
                     onChange={(e) => setMapping({ ...mapping, cargoContacto: e.target.value })}
-                    className="w-full bg-[var(--c-surface-2)] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
+                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                   >
                     <option value="">Columna...</option>
                     {headers.map((h) => (
@@ -385,11 +385,11 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[11px] text-[#BBB] mb-1">Teléfono</label>
+                  <label className="block text-[11px] text-[var(--c-text-2)] mb-1">Teléfono</label>
                   <select
                     value={mapping.telefonoContacto}
                     onChange={(e) => setMapping({ ...mapping, telefonoContacto: e.target.value })}
-                    className="w-full bg-[var(--c-surface-2)] border border-[#333] rounded px-2.5 py-1.5 text-xs text-white"
+                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                   >
                     <option value="">Columna...</option>
                     {headers.map((h) => (
@@ -403,10 +403,10 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
             </div>
           </div>
 
-          <div className="flex justify-between items-center pt-3 border-t border-[#222]">
+          <div className="flex justify-between items-center pt-3 border-t border-[var(--c-line)]">
             <button
               onClick={() => setStep('upload')}
-              className="text-xs text-[var(--c-muted)] hover:text-white"
+              className="text-xs text-[var(--c-muted)] hover:text-[var(--c-text)]"
             >
               ← Volver
             </button>
@@ -436,7 +436,7 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
             </div>
 
             {duplicadosTotales > 0 && (
-              <div className="flex items-center gap-1.5 text-xs font-mono text-[var(--c-danger)] bg-[#221014] px-2.5 py-1 rounded border border-[var(--c-danger)]/30">
+              <div className="flex items-center gap-1.5 text-xs font-mono text-[var(--c-danger)] bg-[var(--c-surface-2)] px-2.5 py-1 rounded border border-[var(--c-danger)]/30">
                 <AlertTriangle className="w-3.5 h-3.5" />
                 <span>{duplicadosTotales} duplicados detectados (se omitirán)</span>
               </div>
@@ -456,11 +456,11 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
                   <th className="py-2 px-3">Email</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#222]">
+              <tbody className="divide-y divide-[var(--c-line)]">
                 {registrosMapeados.map((r, i) => (
                   <tr
                     key={i}
-                    className={r.esDuplicado ? 'bg-[#1D1014]/50' : 'hover:bg-[var(--c-surface-2)]'}
+                    className={r.esDuplicado ? 'bg-[var(--c-surface-2)]/50' : 'hover:bg-[var(--c-surface-2)]'}
                   >
                     <td className="py-2 px-3 font-mono text-[11px]">
                       {r.esDuplicado ? (
@@ -475,23 +475,23 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
                         </span>
                       )}
                     </td>
-                    <td className="py-2 px-3 font-medium text-white">{r.empresa.nombre}</td>
-                    <td className="py-2 px-3 font-mono text-[#AAA]">{r.empresa.rut || '—'}</td>
-                    <td className="py-2 px-3 font-mono text-[#AAA]">{r.empresa.dominio_web || '—'}</td>
+                    <td className="py-2 px-3 font-medium text-[var(--c-text)]">{r.empresa.nombre}</td>
+                    <td className="py-2 px-3 font-mono text-[var(--c-text-2)]">{r.empresa.rut || '—'}</td>
+                    <td className="py-2 px-3 font-mono text-[var(--c-text-2)]">{r.empresa.dominio_web || '—'}</td>
                     <td className="py-2 px-3 text-[var(--c-line)]">
                       {r.contacto.nombre} {r.contacto.apellido}
                     </td>
-                    <td className="py-2 px-3 font-mono text-[#AAA]">{r.contacto.email || '—'}</td>
+                    <td className="py-2 px-3 font-mono text-[var(--c-text-2)]">{r.contacto.email || '—'}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          <div className="flex justify-between items-center pt-3 border-t border-[#222]">
+          <div className="flex justify-between items-center pt-3 border-t border-[var(--c-line)]">
             <button
               onClick={() => setStep('mapping')}
-              className="text-xs text-[var(--c-muted)] hover:text-white"
+              className="text-xs text-[var(--c-muted)] hover:text-[var(--c-text)]"
             >
               ← Modificar Mapeo
             </button>
@@ -535,7 +535,7 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
               <p className="text-[10px] text-[var(--c-muted)]">Contactos Creados</p>
             </div>
             <div className="p-3 bg-[var(--c-surface-2)] rounded border border-[var(--c-line)]">
-              <p className="font-mono text-lg font-bold text-[#AAA]">
+              <p className="font-mono text-lg font-bold text-[var(--c-text-2)]">
                 {resultadoImportacion.duplicadosSaltados}
               </p>
               <p className="text-[10px] text-[var(--c-muted)]">Duplicados Omitidos</p>
@@ -543,14 +543,14 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
           </div>
 
           {resultadoImportacion.erroresPorFila && resultadoImportacion.erroresPorFila.length > 0 && (
-            <div className="mt-4 p-4 bg-[var(--c-surface-2)] rounded-lg border border-[#333] text-left max-w-lg mx-auto">
+            <div className="mt-4 p-4 bg-[var(--c-surface-2)] rounded-lg border border-[var(--c-line)] text-left max-w-lg mx-auto">
               <div className="flex items-center gap-2 mb-2 text-[var(--c-danger)]">
                 <AlertTriangle className="w-4 h-4" />
                 <h4 className="text-xs font-semibold">Filas no procesadas ({resultadoImportacion.erroresPorFila.length})</h4>
               </div>
               <div className="max-h-40 overflow-y-auto space-y-1.5 text-xs">
                 {resultadoImportacion.erroresPorFila.map((err, i) => (
-                  <div key={i} className="flex items-start gap-2 text-[11px] p-2 bg-[#111] rounded border border-[#222]">
+                  <div key={i} className="flex items-start gap-2 text-[11px] p-2 bg-[var(--c-surface)] rounded border border-[var(--c-line)]">
                     <span className="font-mono font-bold text-[var(--c-danger)]">Fila {err.fila}:</span>
                     <span className="text-[var(--c-text-2)]">{err.error}</span>
                   </div>
@@ -565,7 +565,7 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
                 setStep('upload');
                 setCsvContent('');
               }}
-              className="bg-[#222] hover:bg-[#333] text-white text-xs py-2 px-4 rounded transition-colors"
+              className="bg-[var(--c-surface-2)] hover:bg-[var(--c-surface-3)] text-[var(--c-text)] text-xs py-2 px-4 rounded transition-colors"
             >
               Cargar Otro Archivo
             </button>

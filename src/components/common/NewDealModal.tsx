@@ -63,7 +63,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
       <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-xl max-w-lg w-full p-6 shadow-2xl">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded bg-[#222] flex items-center justify-center text-[var(--c-text)]">
+            <div className="w-8 h-8 rounded bg-[var(--c-surface-2)] flex items-center justify-center text-[var(--c-text)]">
               <Kanban className="w-4 h-4" />
             </div>
             <div>
@@ -71,7 +71,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
               <p className="text-xs text-[var(--c-muted)]">Pipeline comercial de performance marketing</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-[var(--c-muted)] hover:text-white">
+          <button onClick={onClose} className="text-[var(--c-muted)] hover:text-[var(--c-text)]">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -87,7 +87,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
               placeholder="Ej: Escalamiento PMax & Search B2B"
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
-              className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-1.5 text-xs text-white"
+              className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-1.5 text-xs text-[var(--c-text)]"
             />
           </div>
 
@@ -98,7 +98,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
                 required
                 value={empresaId}
                 onChange={(e) => setEmpresaId(e.target.value)}
-                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
               >
                 <option value="">Selecciona empresa...</option>
                 {empresas.map((e) => (
@@ -114,7 +114,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
               <select
                 value={plan}
                 onChange={(e) => setPlan(e.target.value as any)}
-                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white font-mono"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] font-mono"
               >
                 <option value="A">Plan A</option>
                 <option value="B">Plan B</option>
@@ -131,7 +131,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
               <select
                 value={moneda}
                 onChange={(e) => setMoneda(e.target.value as Moneda)}
-                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white font-mono"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] font-mono"
               >
                 <option value="CLP">CLP</option>
                 <option value="USD">USD</option>
@@ -146,7 +146,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
                 min={0}
                 value={valorNeto}
                 onChange={(e) => setValorNeto(Number(e.target.value))}
-                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white font-mono"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] font-mono"
               />
             </div>
 
@@ -157,7 +157,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
                 min={0}
                 value={setupNeto}
                 onChange={(e) => setSetupNeto(Number(e.target.value))}
-                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white font-mono"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] font-mono"
               />
             </div>
           </div>
@@ -171,7 +171,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
                 max={100}
                 value={probabilidad}
                 onChange={(e) => setProbabilidad(Number(e.target.value))}
-                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white font-mono"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] font-mono"
               />
             </div>
 
@@ -180,7 +180,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
               <select
                 value={fuenteId}
                 onChange={(e) => setFuenteId(e.target.value)}
-                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
               >
                 <option value="">Selecciona...</option>
                 {fuentes.map((f) => (
@@ -197,7 +197,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
                 type="date"
                 value={fechaCierreEstimada}
                 onChange={(e) => setFechaCierreEstimada(e.target.value)}
-                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2 py-1.5 text-xs text-white font-mono"
+                className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2 py-1.5 text-xs text-[var(--c-text)] font-mono"
               />
             </div>
           </div>
@@ -210,13 +210,13 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
                 placeholder="Ej: Enviar auditoría técnica..."
                 value={proximaAccionTexto}
                 onChange={(e) => setProximaAccionTexto(e.target.value)}
-                className="col-span-2 bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-white"
+                className="col-span-2 bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
               />
               <input
                 type="date"
                 value={proximaAccionFecha}
                 onChange={(e) => setProximaAccionFecha(e.target.value)}
-                className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2 py-1.5 text-xs text-white font-mono"
+                className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2 py-1.5 text-xs text-[var(--c-text)] font-mono"
               />
             </div>
           </div>
@@ -225,7 +225,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-1.5 text-xs text-[var(--c-muted)] hover:text-white"
+              className="px-3 py-1.5 text-xs text-[var(--c-muted)] hover:text-[var(--c-text)]"
             >
               Cancelar
             </button>

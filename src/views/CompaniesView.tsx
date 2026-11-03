@@ -225,7 +225,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                 <th className="py-2.5 px-3 text-right"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#222] dark:divide-[#222] light:divide-[var(--c-surface-3)]">
+            <tbody className="divide-y divide-[var(--c-line)] dark:divide-[var(--c-line)] light:divide-[var(--c-surface-3)]">
               {filteredEmpresas.length === 0 ? (
                 <tr>
                   <td colSpan={10} className="py-8 text-center text-xs text-[var(--c-muted)]">
@@ -244,10 +244,10 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                     cliente: { label: 'Cliente', color: 'text-[var(--c-accent)] font-medium' },
                     prospecto: { label: 'Prospecto', color: 'text-[var(--c-muted)]' },
                     ex_cliente: { label: 'Ex cliente', color: 'text-[var(--c-muted-2)] line-through' },
-                    descartado: { label: 'Descartado', color: 'text-[#555]' },
+                    descartado: { label: 'Descartado', color: 'text-[var(--c-muted-2)]' },
                     proveedor: { label: 'Proveedor', color: 'text-sky-400' },
                     interno: { label: 'Interno', color: 'text-amber-400' },
-                    archivado: { label: 'Archivado', color: 'text-[#444]' },
+                    archivado: { label: 'Archivado', color: 'text-[var(--c-muted-2)]' },
                   };
 
                   const estConfig = estadoLabels[emp.estado] || { label: emp.estado, color: 'text-[var(--c-muted)]' };
@@ -256,7 +256,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                     <tr
                       key={emp.id}
                       onClick={() => onSelectEmpresa(emp.id)}
-                      className="hover:bg-[var(--c-surface-2)] dark:hover:bg-[var(--c-surface-2)] light:hover:bg-[#F7F7F7] cursor-pointer transition-colors group"
+                      className="hover:bg-[var(--c-surface-2)] dark:hover:bg-[var(--c-surface-2)] light:hover:bg-[var(--c-bg)] cursor-pointer transition-colors group"
                     >
                       {/* Empresa */}
                       <td className="py-2.5 px-4">
@@ -288,8 +288,8 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                       </td>
 
                       {/* RUT / Web */}
-                      <td className="py-2.5 px-3 font-mono text-[11px] text-[#AAA]">
-                        {emp.rut ? <p>{formatRUT(emp.rut)}</p> : <p className="text-[#555]">—</p>}
+                      <td className="py-2.5 px-3 font-mono text-[11px] text-[var(--c-text-2)]">
+                        {emp.rut ? <p>{formatRUT(emp.rut)}</p> : <p className="text-[var(--c-muted-2)]">—</p>}
                         {emp.dominio_web && (
                           <p className="text-[10px] text-[var(--c-muted)] truncate max-w-[140px]">
                             {emp.dominio_web}
@@ -298,7 +298,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                       </td>
 
                       {/* Industria */}
-                      <td className="py-2.5 px-3 text-[#AAA] truncate max-w-[130px]">
+                      <td className="py-2.5 px-3 text-[var(--c-text-2)] truncate max-w-[130px]">
                         {ind?.nombre ?? 'General'}
                       </td>
 
@@ -314,12 +314,12 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                             Plan {emp.plan}
                           </span>
                         ) : (
-                          <span className="text-[#555]">—</span>
+                          <span className="text-[var(--c-muted-2)]">—</span>
                         )}
                       </td>
 
                       {/* Responsable */}
-                      <td className="py-2.5 px-3 text-[#BBB] text-xs">
+                      <td className="py-2.5 px-3 text-[var(--c-text-2)] text-xs">
                         {resp?.nombre ?? 'Sin asignar'}
                       </td>
 
@@ -349,7 +349,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                               <ExternalLink className="w-3.5 h-3.5" />
                             </a>
                           ) : (
-                            <span className="text-[#444] text-[10px]">—</span>
+                            <span className="text-[var(--c-muted-2)] text-[10px]">—</span>
                           )}
                           {emp.drive_folder_url ? (
                             <a
@@ -362,7 +362,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                               <Folder className="w-3.5 h-3.5" />
                             </a>
                           ) : (
-                            <span className="text-[#444] text-[10px]">—</span>
+                            <span className="text-[var(--c-muted-2)] text-[10px]">—</span>
                           )}
                         </div>
                       </td>
@@ -378,7 +378,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
 
                       {/* Flecha */}
                       <td className="py-2.5 px-3 text-right">
-                        <ChevronRight className="w-4 h-4 text-[#555] group-hover:text-[var(--c-accent)] inline-block transition-colors" />
+                        <ChevronRight className="w-4 h-4 text-[var(--c-muted-2)] group-hover:text-[var(--c-accent)] inline-block transition-colors" />
                       </td>
                     </tr>
                   );
@@ -411,7 +411,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                   placeholder="Ej: Retail Andino S.A."
                   value={newCompany.nombre}
                   onChange={(e) => setNewCompany({ ...newCompany, nombre: e.target.value })}
-                  className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
+                  className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
                 />
               </div>
 
@@ -423,7 +423,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                     placeholder="Ej: 76.123.456-K"
                     value={newCompany.rut}
                     onChange={(e) => setNewCompany({ ...newCompany, rut: e.target.value })}
-                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
+                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
                   />
                 </div>
                 <div>
@@ -433,7 +433,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                     placeholder="empresa.cl"
                     value={newCompany.dominio_web}
                     onChange={(e) => setNewCompany({ ...newCompany, dominio_web: e.target.value })}
-                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
+                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
                   />
                 </div>
               </div>
@@ -444,7 +444,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                   <select
                     value={newCompany.estado}
                     onChange={(e) => setNewCompany({ ...newCompany, estado: e.target.value as any })}
-                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
+                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
                   >
                     <option value="prospecto">Prospecto</option>
                     <option value="cliente">Cliente</option>
@@ -460,7 +460,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                   <select
                     value={newCompany.plan}
                     onChange={(e) => setNewCompany({ ...newCompany, plan: e.target.value as any })}
-                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
+                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
                   >
                     <option value="">Sin plan</option>
                     <option value="A">Plan A</option>
@@ -475,7 +475,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                   <select
                     value={newCompany.salud}
                     onChange={(e) => setNewCompany({ ...newCompany, salud: e.target.value as any })}
-                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
+                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
                   >
                     <option value="">Sin definir</option>
                     <option value="verde">Verde (Óptima)</option>
@@ -495,7 +495,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                     placeholder="Ej: 1500000"
                     value={newCompany.fee_mensual_clp}
                     onChange={(e) => setNewCompany({ ...newCompany, fee_mensual_clp: e.target.value })}
-                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white font-mono"
+                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)] font-mono"
                   />
                 </div>
                 <div>
@@ -503,7 +503,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                   <select
                     value={newCompany.industria_id}
                     onChange={(e) => setNewCompany({ ...newCompany, industria_id: e.target.value })}
-                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
+                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
                   >
                     {industrias.map((ind) => (
                       <option key={ind.id} value={ind.id}>
@@ -522,7 +522,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                     onChange={(e) =>
                       setNewCompany({ ...newCompany, responsable_id: e.target.value })
                     }
-                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
+                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
                   >
                     {miembros.map((m) => (
                       <option key={m.id} value={m.id}>
@@ -537,7 +537,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                     type="text"
                     value={newCompany.tamano}
                     onChange={(e) => setNewCompany({ ...newCompany, tamano: e.target.value })}
-                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
+                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
                   />
                 </div>
               </div>
@@ -554,7 +554,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                     onChange={(e) =>
                       setNewCompany({ ...newCompany, looker_dashboard_url: e.target.value })
                     }
-                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
+                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
                   />
                 </div>
                 <div>
@@ -568,16 +568,16 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                     onChange={(e) =>
                       setNewCompany({ ...newCompany, drive_folder_url: e.target.value })
                     }
-                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-white"
+                    className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2.5 pt-4 border-t border-[#222]">
+              <div className="flex justify-end gap-2.5 pt-4 border-t border-[var(--c-line)]">
                 <button
                   type="button"
                   onClick={() => setShowNewModal(false)}
-                  className="px-3 py-2 text-xs text-[var(--c-muted)] hover:text-white"
+                  className="px-3 py-2 text-xs text-[var(--c-muted)] hover:text-[var(--c-text)]"
                 >
                   Cancelar
                 </button>

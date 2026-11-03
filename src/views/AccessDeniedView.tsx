@@ -17,7 +17,7 @@ export const AccessDeniedView: React.FC = () => {
         </h1>
 
         {/* Mensaje exigido textualmente por las reglas */}
-        <div className="p-4 bg-[#1E1216] border border-[var(--c-danger)]/40 rounded-lg text-sm text-[#FFB3C7] mb-6 font-medium">
+        <div className="p-4 bg-[var(--c-surface-2)] border border-[var(--c-danger)]/40 rounded-lg text-sm text-[var(--c-muted-2)] mb-6 font-medium">
           {accessDeniedError || 'No tienes acceso. Pide acceso a un admin.'}
         </div>
 
@@ -45,13 +45,13 @@ export const AccessDeniedView: React.FC = () => {
             <div className="flex gap-2 justify-center">
               <button
                 onClick={() => switchDemoUser?.('rodrigo@p48.cl')}
-                className="px-2.5 py-1 text-[11px] bg-[#222] hover:bg-[#333] text-[var(--c-text-2)] rounded font-mono transition-colors"
+                className="px-2.5 py-1 text-[11px] bg-[var(--c-surface-2)] hover:bg-[var(--c-surface-3)] text-[var(--c-text-2)] rounded font-mono transition-colors"
               >
                 Entrar como Admin
               </button>
               <button
                 onClick={() => switchDemoUser?.('camila@p48.cl')}
-                className="px-2.5 py-1 text-[11px] bg-[#222] hover:bg-[#333] text-[var(--c-text-2)] rounded font-mono transition-colors"
+                className="px-2.5 py-1 text-[11px] bg-[var(--c-surface-2)] hover:bg-[var(--c-surface-3)] text-[var(--c-text-2)] rounded font-mono transition-colors"
               >
                 Entrar como Miembro
               </button>
