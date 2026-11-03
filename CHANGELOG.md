@@ -2,6 +2,15 @@
 
 Formato: versión, fecha de unión a `main`, PR, qué cambia y si toca base de datos. Las migraciones de Supabase se listan aparte porque se aplican en su propio momento.
 
+## v0.11.0 · en curso (no publicada)
+Estado al 3 de noviembre de 2026. Cada entrada indica si ya está en `main`.
+
+- **PR #12** · Identidad JAMP CRM: tema claro por defecto con tokens (`--c-*`), tipografía Inter, marca propia "JAMP CRM" separada de la agencia P48. **En `main`** (2026-11-03).
+- **PR #13** · Colores residuales a roles del tema y texto claro solo sobre acento o peligro. **En `main`** (2026-11-03).
+- **PR #14** · Contactos editables (fila → formulario con datos, guardar o archivar) y MRR calculado automáticamente (migración `crm_09`). **En `main`** (2026-11-03).
+- **PR #15** · Registro de cuentas y permisos por cliente y plataforma (7 plataformas, ID externo, estado, quién concedió el acceso, fecha). Reemplaza el checklist. Migra los checkboxes (migración `crm_10`). **Pendiente de unir a `main`** (sin conflictos desde el rebase de 2026-11-03).
+- **PR #16** · Salud de datos por cuenta (última lectura del conector), columnas UTM en oportunidades y tabla `metricas_snapshot` (migración `crm_11`). **Error de base:** se unió a la rama del PR #15 y no a `main`. Su código llega a `main` cuando se una el #15.
+
 ## v0.10.0 · 2026-11-03
 - **PR #9** · Inicio por pestañas: Resumen, Ventas, Clientes y Equipo.
 - Solo presentación. Sin cambios de datos ni de base.
@@ -53,6 +62,12 @@ Formato: versión, fecha de unión a `main`, PR, qué cambia y si toca base de d
 | 20261103171821 | crm_06_portal_rls_clientes | Políticas de cliente en empresas, proyectos y reportes; vistas `portal_*` con `security_invoker`. |
 | 20261103173107 | crm_07_entregables_notas_internas | Tabla `entregables_internos` con RLS solo para miembros; copia de notas existentes. |
 | 20261103174025 | crm_08_entregables_portal | Borra `notas_internas` de entregables y agrega política de lectura de entregables para clientes. |
+| crm_09_mrr_calculado | 2026-11-03 | MRR de cada empresa calculado desde `fee_mensual_clp` si es cliente activo; 0 en otro caso. |
+| crm_10_cuentas_cliente | 2026-11-03 | Tabla `cuentas_cliente` (plataforma, ID externo, estado, concedido por, fecha) con RLS para miembros. Copia los checkboxes de `accesos_admin_marketing`. |
+| crm_11_marketing_base | 2026-11-03 | Columnas `utm_fuente`, `utm_campana`, `utm_medio` en `oportunidades`; `ultima_lectura` en `cuentas_cliente`; tabla `metricas_snapshot` con RLS para miembros. |
 
 ## Pendiente de aplicar en base
-- Nada. Todo lo de arriba está aplicado.
+- Nada. Todas las migraciones de arriba están aplicadas en Supabase.
+
+## Regla de documentación
+Cada PR o migración agrega su línea a este archivo en el mismo PR. Si cambia la arquitectura, también se actualiza `ARQUITECTURA.md`.
