@@ -33,7 +33,10 @@ const Vacio: React.FC<{ texto: string }> = ({ texto }) => (
   <p className="text-xs text-[#666] text-center py-6">{texto}</p>
 );
 
-export const AgencyDashboard: React.FC = () => {
+export type SeccionDashboard = 'resumen' | 'ventas' | 'clientes' | 'equipo';
+
+export const AgencyDashboard: React.FC<{ seccion: SeccionDashboard }> = ({ seccion }) => {
+  const vis = (...ids: SeccionDashboard[]) => (ids.includes(seccion) ? '' : 'hidden');
   const [resultados, setResultados] = useState<DashResultados | null>(null);
   const [embudo, setEmbudo] = useState<DashEmbudoEtapa[]>([]);
   const [forecast, setForecast] = useState<DashForecastMes[]>([]);
@@ -84,7 +87,7 @@ export const AgencyDashboard: React.FC = () => {
   return (
     <section className="space-y-4" aria-label="Dashboard de agencia">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold tracking-tight text-[#F5F5F5]">Dashboard de agencia</h2>
+        <h2 className="text-lg font-semibold tracking-tight text-[#F5F5F5]">{{resumen:'Hoy',ventas:'Ventas',clientes:'Clientes',equipo:'Equipo'}[seccion]}</h2>
         <button
           type="button"
           onClick={cargar}
@@ -100,7 +103,7 @@ export const AgencyDashboard: React.FC = () => {
       )}
 
       {/* Resultados comerciales */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className={`grid grid-cols-2 lg:grid-cols-4 gap-3.5 ${vis('ventas')}`}>
         {[
           { l: 'Tasa de cierre', v: resultados?.tasa_cierre_pct != null ? `${resultados.tasa_cierre_pct}%` : '—', s: `${resultados?.ganadas ?? 0} ganadas · ${resultados?.perdidas ?? 0} perdidas` },
           { l: 'Ciclo de venta', v: resultados?.ciclo_venta_dias != null ? `${resultados.ciclo_venta_dias} días` : '—', s: 'Promedio en ganadas' },
@@ -117,7 +120,7 @@ export const AgencyDashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Embudo */}
-        <div className={card}>
+        <div className={`${card} ${vis('ventas')}`}>
           <Cabecera icon={<Layers className="w-4 h-4" />} title="Embudo comercial" sub="Aproximado: oportunidades que hoy están en esa etapa o más allá" />
           {embudo.length === 0 ? (
             <Vacio texto="Sin oportunidades todavía." />
@@ -142,7 +145,7 @@ export const AgencyDashboard: React.FC = () => {
         </div>
 
         {/* Forecast */}
-        <div className={card}>
+        <div className={`${card} ${vis('ventas')}`}>
           <Cabecera icon={<CalendarRange className="w-4 h-4" />} title="Forecast por mes de cierre" sub="Valor ponderado de oportunidades abiertas (CLP)" />
           {forecast.length === 0 ? (
             <Vacio texto="Sin fechas de cierre estimadas." />
@@ -165,7 +168,7 @@ export const AgencyDashboard: React.FC = () => {
         </div>
 
         {/* Pipeline por responsable */}
-        <div className={card}>
+        <div className={`${card} ${vis('equipo')}`}>
           <Cabecera icon={<Users className="w-4 h-4" />} title="Pipeline por responsable" sub="Oportunidades abiertas en CLP" />
           {porResponsable.length === 0 ? (
             <Vacio texto="Sin responsables activos." />
@@ -188,7 +191,7 @@ export const AgencyDashboard: React.FC = () => {
         </div>
 
         {/* Tareas por responsable */}
-        <div className={card}>
+        <div className={`${card} ${vis('resumen','equipo')}`}>
           <Cabecera icon={<ListChecks className="w-4 h-4" />} title="Tareas por responsable" sub="Pendientes, vencidas y de hoy" />
           {tareas.length === 0 ? (
             <Vacio texto="Sin tareas." />
@@ -208,7 +211,7 @@ export const AgencyDashboard: React.FC = () => {
       </div>
 
       {/* Cartera de clientes */}
-      <div className={card}>
+      <div className={`${card} ${vis('clientes')}`}>
         <Cabecera icon={<Briefcase className="w-4 h-4" />} title="Cartera de clientes" sub="MRR, plan y renovaciones (primero las más próximas)" />
         {cartera.length === 0 ? (
           <Vacio texto="Aún no hay clientes activos." />

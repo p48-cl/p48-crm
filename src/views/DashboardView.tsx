@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   TrendingUp,
   Kanban,
@@ -10,7 +10,14 @@ import {
 } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';
 import { formatCLP } from '../lib/formatters';
-import { AgencyDashboard } from '../components/dashboard/AgencyDashboard';
+import { AgencyDashboard, SeccionDashboard } from '../components/dashboard/AgencyDashboard';
+
+const PESTANAS: { id: SeccionDashboard; label: string }[] = [
+  { id: 'resumen', label: 'Resumen' },
+  { id: 'ventas', label: 'Ventas' },
+  { id: 'clientes', label: 'Clientes' },
+  { id: 'equipo', label: 'Equipo' },
+];
 
 interface DashboardViewProps {
   onNavigateKanban: () => void;
@@ -22,6 +29,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onNavigateKanban,
   onNavigateTasks,
 }) => {
+  const [pestana, setPestana] = useState<SeccionDashboard>('resumen');
   const {
     kpis,
     filtroAlcance,
@@ -89,8 +97,25 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </div>
 
+      {/* Pestañas de la vista */}
+      <nav className="surface p-1 inline-flex flex-wrap gap-1" aria-label="Secciones del panel">
+        {PESTANAS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => setPestana(t.id)}
+            aria-pressed={pestana === t.id}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors min-h-[44px] ${
+              pestana === t.id ? 'bg-[#2A2A2A] text-[#F5F5F5]' : 'text-[#8E8E93] hover:text-[#CCC]'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </nav>
+
       {/* Grid de 5 KPIs Clave (Cifras en Blanco Aire #F5F5F5) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+      <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 ${pestana === 'resumen' ? '' : 'hidden'}`}>
         {/* KPI 1: Pipeline Ponderado */}
         <div className="surface p-4 space-y-1">
           <p className="text-[11px] font-mono text-[#8E8E93] uppercase tracking-wider">
@@ -180,7 +205,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       {/* Grid de Gráficos Nativos en Escala de Grises */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${pestana === 'ventas' ? '' : 'hidden'}`}>
         {/* GRÁFICO 1: Pipeline por Etapa (Solo etapas abiertas) */}
         <div className="surface p-5 space-y-4">
           <div className="flex items-center justify-between">
@@ -345,7 +370,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </div>
 
-      <AgencyDashboard />
+      <AgencyDashboard seccion={pestana} />
     </div>
   );
 };
