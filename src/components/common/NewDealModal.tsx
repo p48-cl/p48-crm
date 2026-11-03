@@ -17,7 +17,7 @@ const label = 'block text-xs font-medium text-[var(--c-text-2)] mb-1';
 
 export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onCreated }) => {
   const { empresas, etapas, miembros, fuentes, crearOportunidad, crearEmpresa } = useCRM();
-  const { currentUser } = useAuth() as any;
+  const { currentUser } = useAuth();
 
   const [nombre, setNombre] = useState('');
   const [empresaId, setEmpresaId] = useState('');

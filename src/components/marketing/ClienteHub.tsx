@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { METRICAS, Variacion, Tendencia, fechaCorta, useDatosMarketing } from './comun';
 
 export const ClienteHub: React.FC = () => {
-  const { currentUser } = useAuth() as any;
+  const { currentUser } = useAuth();
   const { clientes, filas, cargando } = useDatosMarketing();
   const [clienteSel, setClienteSel] = useState<string>('');
   const [metricaGrafico, setMetricaGrafico] = useState<string>('ses');
