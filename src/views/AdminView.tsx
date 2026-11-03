@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { PipelineEditor } from '../components/admin/PipelineEditor';
 import {
   Users,
   Award,
@@ -34,7 +35,7 @@ export const AdminView: React.FC = () => {
     empresas,
   } = useCRM();
 
-  const [activeTab, setActiveTab] = useState<'miembros' | 'calificacion' | 'catalogos'>('miembros');
+  const [activeTab, setActiveTab] = useState<'miembros' | 'calificacion' | 'catalogos' | 'pipeline'>('miembros');
 
   // Estado para nuevo miembro
   const [showNewMemberModal, setShowNewMemberModal] = useState(false);
@@ -175,6 +176,7 @@ export const AdminView: React.FC = () => {
         {[
           { id: 'miembros' as const, label: 'Miembros del Equipo', icon: Users },
           { id: 'calificacion' as const, label: 'Criterios de Calificación', icon: Award },
+          { id: 'pipeline' as const, label: 'Pipeline', icon: Layers },
           { id: 'catalogos' as const, label: 'Catálogos Comerciales', icon: Layers },
         ].map((item) => {
           const Icon = item.icon;
@@ -527,6 +529,8 @@ export const AdminView: React.FC = () => {
       )}
 
       {/* TAB 3: CATÁLOGOS */}
+      {activeTab === 'pipeline' && <PipelineEditor />}
+
       {activeTab === 'catalogos' && (
         <div className="space-y-6">
           <div className="flex gap-2 text-xs">
