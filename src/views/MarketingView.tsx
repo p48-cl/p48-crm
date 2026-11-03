@@ -5,12 +5,14 @@ import { Estrategia } from '../components/marketing/Estrategia';
 import { Ads } from '../components/marketing/Ads';
 import { Importador } from '../components/marketing/Importador';
 import { SEO } from '../components/marketing/SEO';
+import { Organico } from '../components/marketing/Organico';
 
 // Secciones de Mkt Inteligence.
 const SECCIONES = [
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'estrategia', label: 'Estrategia' },
   { id: 'seo', label: 'SEO' },
+  { id: 'organico', label: 'Orgánico' },
   { id: 'ads', label: 'Ads' },
   { id: 'cliente', label: 'Cliente' },
   { id: 'cargar', label: 'Cargar datos' },
@@ -43,6 +45,7 @@ export const MarketingView: React.FC<{ onAbrirFicha?: (empresaId: string) => voi
       {seccion === 'dashboard' && <MktDashboard />}
       {seccion === 'estrategia' && <Estrategia />}
       {seccion === 'seo' && <SEO />}
+      {seccion === 'organico' && <Organico />}
       {seccion === 'ads' && <Ads />}
       {seccion === 'cargar' && <Importador />}
       {seccion === 'cliente' && <ClienteHub onAbrirFicha={onAbrirFicha} />}
