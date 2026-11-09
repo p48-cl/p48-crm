@@ -9,6 +9,7 @@ import {
   Phone,
   Mail,
   Linkedin,
+  Check,
 } from 'lucide-react';
 import { Empresa, AccesosAdminMarketing } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
@@ -29,6 +30,45 @@ interface CompanyDetailDrawerProps {
   tabInicial?: Tab;
 }
 
+// Enlace editable: solo acepta http(s) o vacío. Guarda al salir del campo.
+const EnlaceEditable: React.FC<{ valor?: string | null; placeholder: string; onGuardar: (url: string | null) => void }> = ({ valor, placeholder, onGuardar }) => {
+  const [texto, setTexto] = useState(valor ?? '');
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => { setTexto(valor ?? ''); setError(null); }, [valor]);
+
+  const guardar = () => {
+    const limpio = texto.trim();
+    if (limpio === (valor ?? '')) return;
+    if (limpio && !/^https?:\/\/\S+$/i.test(limpio)) {
+      setError('Debe empezar con https://');
+      return;
+    }
+    setError(null);
+    onGuardar(limpio || null);
+  };
+
+  return (
+    <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
+      <input
+        type="url"
+        value={texto}
+        onChange={(e) => setTexto(e.target.value)}
+        onBlur={guardar}
+        onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+        placeholder={placeholder}
+        aria-label={placeholder}
+        className="w-full min-w-0 max-w-[180px] bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2 py-1 text-[11px] text-[var(--c-text)] font-mono"
+      />
+      {valor && !error && (
+        <a href={valor} target="_blank" rel="noopener noreferrer" aria-label="Abrir enlace" className="shrink-0 text-[var(--c-accent)]">
+          <ExternalLink className="w-3.5 h-3.5" />
+        </a>
+      )}
+      {error && <span className="text-[10px] text-[var(--c-danger)] shrink-0">{error}</span>}
+    </div>
+  );
+};
+
 export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
   empresa,
   isOpen,
@@ -47,6 +87,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
     actualizarAccesosAdmin,
     archivarEmpresa,
     actualizarEmpresa,
+    toggleTareaCompletada,
     crearContacto,
     miembros,
     industrias,
@@ -259,6 +300,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                       <option value="C">Plan C</option>
                       <option value="D">Plan D</option>
                       <option value="E">Plan E</option>
+                      <option value="personalizado">Personalizado</option>
                     </select>
                   </div>
 
@@ -324,6 +366,18 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                       className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] font-mono"
                     />
                   </div>
+
+                  <div>
+                    <label className="block text-[11px] text-[var(--c-muted)] mb-1">Tipo de renovación</label>
+                    <select
+                      value={empresa.renovacion_tipo || 'manual'}
+                      onChange={(e) => actualizarEmpresa(empresa.id, { renovacion_tipo: e.target.value as 'manual' | 'automatica' })}
+                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
+                    >
+                      <option value="manual">Manual (se renueva con firma)</option>
+                      <option value="automatica">Automática</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div className="h-px bg-[var(--c-line)]" />
@@ -372,18 +426,11 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                         <p className="text-[10px] text-[var(--c-muted)] font-mono">Reportes de Performance</p>
                       </div>
                     </div>
-                    {empresa.looker_dashboard_url ? (
-                      <a
-                        href={empresa.looker_dashboard_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-xs text-[var(--c-accent)] hover:underline flex items-center gap-1 font-mono"
-                      >
-                        Abrir
-                      </a>
-                    ) : (
-                      <span className="text-[11px] text-[var(--c-muted-2)] font-mono">Sin configurar</span>
-                    )}
+                    <EnlaceEditable
+                      valor={empresa.looker_dashboard_url}
+                      placeholder="Pegar URL de Looker Studio"
+                      onGuardar={(url) => actualizarEmpresa(empresa.id, { looker_dashboard_url: url })}
+                    />
                   </div>
 
                   <div className="p-3 bg-[var(--c-surface)] rounded border border-[var(--c-surface-3)] flex items-center justify-between">
@@ -394,18 +441,11 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                         <p className="text-[10px] text-[var(--c-muted)] font-mono">Estrategia, Creativos & Contratos</p>
                       </div>
                     </div>
-                    {empresa.drive_folder_url ? (
-                      <a
-                        href={empresa.drive_folder_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-xs text-[var(--c-info)] hover:underline flex items-center gap-1 font-mono"
-                      >
-                        Abrir
-                      </a>
-                    ) : (
-                      <span className="text-[11px] text-[var(--c-muted-2)] font-mono">Sin configurar</span>
-                    )}
+                    <EnlaceEditable
+                      valor={empresa.drive_folder_url}
+                      placeholder="Pegar URL de carpeta Drive"
+                      onGuardar={(url) => actualizarEmpresa(empresa.id, { drive_folder_url: url })}
+                    />
                   </div>
                 </div>
               </div>
@@ -678,7 +718,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
           {activeTab === 'tareas' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-semibold text-[var(--c-text)]">Tareas Pendientes</h3>
+                <h3 className="text-xs font-semibold text-[var(--c-text)]">Tareas</h3>
                 <button
                   onClick={() => onOpenNewTask(empresa.id)}
                   className="text-xs text-[var(--c-on-accent)] bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] px-2.5 py-1 rounded font-medium flex items-center gap-1 transition-colors"
@@ -695,9 +735,18 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                   {tareasEmpresa.map((tar) => (
                     <div
                       key={tar.id}
-                      className="p-3 bg-[var(--c-surface-2)] rounded border border-[var(--c-line)] flex items-center justify-between text-xs"
+                      className="p-3 bg-[var(--c-surface-2)] rounded border border-[var(--c-line)] flex items-center justify-between gap-3 text-xs"
                     >
-                      <div>
+                      <button
+                        type="button"
+                        onClick={() => toggleTareaCompletada(tar.id, tar.completada)}
+                        aria-label={tar.completada ? 'Marcar como pendiente' : 'Marcar como completada'}
+                        aria-pressed={tar.completada}
+                        className="shrink-0 w-5 h-5 rounded border border-[var(--c-line)] flex items-center justify-center hover:border-[var(--c-accent)]"
+                      >
+                        {tar.completada && <Check className="w-3.5 h-3.5 text-[var(--c-accent)]" />}
+                      </button>
+                      <div className="flex-1 min-w-0">
                         <p
                           className={`font-medium ${
                             tar.completada ? 'line-through text-[var(--c-muted-2)]' : 'text-[var(--c-text)]'
