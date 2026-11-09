@@ -1,5 +1,5 @@
 -- crm_23 · Plan "personalizado" y tipo de renovación.
--- Estado: PREPARADA, pendiente de aplicar tras confirmación.
+-- Estado: APLICADA y verificada.
 
 alter table public.empresas drop constraint if exists empresas_plan_check;
 alter table public.empresas add constraint empresas_plan_check
