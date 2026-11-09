@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { CheckSquare, X } from 'lucide-react';
 import { useCRM } from '../../context/CRMContext';
 import { useAuth } from '../../context/AuthContext';
+import { Tarea } from '../../types/crm';
 
 interface NewTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
   empresaIdInicial?: string;
   oportunidadIdInicial?: string;
+  tareaEditar?: Tarea | null;
 }
 
 export const NewTaskModal: React.FC<NewTaskModalProps> = ({
@@ -15,19 +17,20 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
   onClose,
   empresaIdInicial,
   oportunidadIdInicial,
+  tareaEditar,
 }) => {
-  const { empresas, oportunidades, miembros, crearTarea } = useCRM();
+  const { empresas, oportunidades, miembros, crearTarea, actualizarTarea } = useCRM();
   const { currentUser } = useAuth();
 
-  const [titulo, setTitulo] = useState('');
-  const [descripcion, setDescripcion] = useState('');
-  const [empresaId, setEmpresaId] = useState(empresaIdInicial || '');
-  const [oportunidadId, setOportunidadId] = useState(oportunidadIdInicial || '');
-  const [responsableId, setResponsableId] = useState(currentUser?.id || miembros[0]?.id || 'm-1');
+  const [titulo, setTitulo] = useState(tareaEditar?.titulo ?? '');
+  const [descripcion, setDescripcion] = useState(tareaEditar?.descripcion ?? '');
+  const [empresaId, setEmpresaId] = useState(tareaEditar?.empresa_id ?? empresaIdInicial ?? '');
+  const [oportunidadId, setOportunidadId] = useState(tareaEditar?.oportunidad_id ?? oportunidadIdInicial ?? '');
+  const [responsableId, setResponsableId] = useState(tareaEditar?.responsable_id ?? currentUser?.id ?? miembros[0]?.id ?? '');
   const [fechaVencimiento, setFechaVencimiento] = useState(
-    new Date().toISOString().slice(0, 10)
+    tareaEditar?.fecha_vencimiento?.slice(0, 10) ?? new Date().toISOString().slice(0, 10)
   );
-  const [prioridad, setPrioridad] = useState<'alta' | 'media' | 'baja'>('media');
+  const [prioridad, setPrioridad] = useState<'alta' | 'media' | 'baja'>(tareaEditar?.prioridad ?? 'media');
 
   if (!isOpen) return null;
 
@@ -35,16 +38,28 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
     e.preventDefault();
     if (!titulo.trim()) return;
 
-    await crearTarea({
-      titulo,
-      descripcion,
-      empresa_id: empresaId || undefined,
-      oportunidad_id: oportunidadId || undefined,
-      responsable_id: responsableId,
-      fecha_vencimiento: fechaVencimiento,
-      prioridad,
-      completada: false,
-    });
+    if (tareaEditar) {
+      await actualizarTarea(tareaEditar.id, {
+        titulo: titulo.trim(),
+        descripcion,
+        empresa_id: empresaId || null,
+        oportunidad_id: oportunidadId || null,
+        responsable_id: responsableId,
+        fecha_vencimiento: fechaVencimiento,
+        prioridad,
+      });
+    } else {
+      await crearTarea({
+        titulo: titulo.trim(),
+        descripcion,
+        empresa_id: empresaId || undefined,
+        oportunidad_id: oportunidadId || undefined,
+        responsable_id: responsableId,
+        fecha_vencimiento: fechaVencimiento,
+        prioridad,
+        completada: false,
+      });
+    }
 
     onClose();
     setTitulo('');
@@ -64,7 +79,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
               <CheckSquare className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-[var(--c-text)]">Nueva Tarea</h2>
+              <h2 className="text-base font-bold text-[var(--c-text)]">{tareaEditar ? 'Editar tarea' : 'Nueva Tarea'}</h2>
               <p className="text-xs text-[var(--c-muted)]">Compromiso comercial u operativo</p>
             </div>
           </div>
@@ -190,7 +205,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
               type="submit"
               className="px-4 py-2 text-xs font-semibold bg-[var(--c-accent)] text-black rounded"
             >
-              Guardar Tarea
+              {tareaEditar ? 'Guardar cambios' : 'Guardar Tarea'}
             </button>
           </div>
         </form>

@@ -22,6 +22,7 @@ import { NewDealModal } from './components/common/NewDealModal';
 import { ActivityModal } from './components/common/ActivityModal';
 import { CheckSquare, Kanban, Clock, Building2, LayoutDashboard, MoreHorizontal, Users, Upload, Settings, Activity, BarChart3 } from 'lucide-react';
 import { NewTaskModal } from './components/common/NewTaskModal';
+import { Tarea } from './types/crm';
 
 const CRMAppContent: React.FC = () => {
   const { isLoggedIn, isLoading, accessDeniedError, isAdmin } = useAuth();
@@ -49,6 +50,8 @@ const CRMAppContent: React.FC = () => {
     isOpen: boolean;
     empresaId?: string;
     oportunidadId?: string;
+    tarea?: Tarea | null;
+    k?: number;
   }>({ isOpen: false });
 
   // Manejo de tema claro/oscuro en documento HTML
@@ -153,7 +156,8 @@ const CRMAppContent: React.FC = () => {
 
           {currentView === 'tareas' && (
             <TasksView
-              onOpenNewTask={() => setTaskModalState({ isOpen: true })}
+              onOpenNewTask={() => setTaskModalState({ isOpen: true, k: Date.now() })}
+              onEditTask={(t) => setTaskModalState({ isOpen: true, tarea: t, k: Date.now() })}
               onSelectEmpresa={(id) => setSelectedEmpId(id)}
               onSelectOportunidad={(id) => setSelectedOpId(id)}
             />
@@ -196,7 +200,7 @@ const CRMAppContent: React.FC = () => {
           setActivityModalState({ isOpen: true, empresaId: empId, oportunidadId: opId })
         }
         onOpenNewTask={(empId, opId) =>
-          setTaskModalState({ isOpen: true, empresaId: empId, oportunidadId: opId })
+          setTaskModalState({ isOpen: true, empresaId: empId, oportunidadId: opId, k: Date.now() })
         }
       />
 
@@ -211,8 +215,9 @@ const CRMAppContent: React.FC = () => {
           setActivityModalState({ isOpen: true, empresaId: empId })
         }
         onOpenNewTask={(empId) =>
-          setTaskModalState({ isOpen: true, empresaId: empId })
+          setTaskModalState({ isOpen: true, empresaId: empId, k: Date.now() })
         }
+        onEditTask={(t) => setTaskModalState({ isOpen: true, tarea: t, k: Date.now() })}
       />
 
       {/* Modal Nueva Oportunidad */}
@@ -232,6 +237,8 @@ const CRMAppContent: React.FC = () => {
 
       {/* Modal Nueva Tarea Rápida */}
       <NewTaskModal
+        key={taskModalState.k ?? 0}
+        tareaEditar={taskModalState.tarea}
         isOpen={taskModalState.isOpen}
         empresaIdInicial={taskModalState.empresaId}
         oportunidadIdInicial={taskModalState.oportunidadId}
