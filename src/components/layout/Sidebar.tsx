@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  FileText,
   LayoutDashboard,
   Kanban,
   Building2,
@@ -19,6 +20,7 @@ export type ViewType =
   | 'crm'
   | 'empresas'
   | 'contactos'
+  | 'cotizaciones'
   | 'tareas'
   | 'actividades'
   | 'marketing'
@@ -46,6 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'crm', label: 'CRM', icon: Kanban },
     { id: 'empresas', label: 'Empresas', icon: Building2 },
     { id: 'contactos', label: 'Contactos', icon: Users },
+    { id: 'cotizaciones', label: 'Cotizaciones', icon: FileText },
     { id: 'tareas', label: 'Tareas', icon: CheckSquare, badgeCount: kpis.tareas_hoy_count > 0 ? kpis.tareas_hoy_count : undefined },
     { id: 'actividades', label: 'Actividades', icon: Clock },
     { id: 'marketing', label: 'Mkt Inteligence', icon: BarChart3 },

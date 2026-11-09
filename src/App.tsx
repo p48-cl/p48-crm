@@ -19,8 +19,9 @@ import { GlobalSearchModal } from './components/common/GlobalSearchModal';
 import { OpportunityDetailModal } from './views/OpportunityDetailModal';
 import { CompanyDetailDrawer } from './views/CompanyDetailDrawer';
 import { NewDealModal } from './components/common/NewDealModal';
+import { CotizacionesView } from './views/CotizacionesView';
 import { ActivityModal } from './components/common/ActivityModal';
-import { CheckSquare, Kanban, Clock, Building2, LayoutDashboard, MoreHorizontal, Users, Upload, Settings, Activity, BarChart3 } from 'lucide-react';
+import { CheckSquare, Kanban, Clock, Building2, LayoutDashboard, MoreHorizontal, Users, Upload, Settings, Activity, BarChart3, FileText } from 'lucide-react';
 import { NewTaskModal } from './components/common/NewTaskModal';
 import { Tarea } from './types/crm';
 
@@ -37,7 +38,7 @@ const CRMAppContent: React.FC = () => {
   const [isNewDealOpen, setIsNewDealOpen] = useState(false);
   const [selectedOpId, setSelectedOpId] = useState<string | null>(null);
   const [selectedEmpId, setSelectedEmpId] = useState<string | null>(null);
-  const [fichaTab, setFichaTab] = useState<'marketing' | undefined>(undefined);
+  const [fichaTab, setFichaTab] = useState<'marketing' | 'cotizaciones' | undefined>(undefined);
 
   // Modales rápidos de creación
   const [activityModalState, setActivityModalState] = useState<{
@@ -146,6 +147,10 @@ const CRMAppContent: React.FC = () => {
               onSelectEmpresa={(id) => setSelectedEmpId(id)}
               onSelectOportunidad={(id) => setSelectedOpId(id)}
             />
+          )}
+
+          {currentView === 'cotizaciones' && (
+            <CotizacionesView onAbrirFicha={(id) => { setFichaTab('cotizaciones'); setSelectedEmpId(id); }} />
           )}
 
           {currentView === 'contactos' && (
@@ -310,6 +315,7 @@ const CRMAppContent: React.FC = () => {
             {[
               { id: 'empresas' as const, label: 'Empresas y clientes', icon: Building2 },
               { id: 'contactos' as const, label: 'Contactos', icon: Users },
+              { id: 'cotizaciones' as const, label: 'Cotizaciones', icon: FileText },
               { id: 'actividades' as const, label: 'Actividades', icon: Activity },
               { id: 'marketing' as const, label: 'Mkt Inteligence', icon: BarChart3 },
               { id: 'importar' as const, label: 'Importar CSV', icon: Upload },
