@@ -15,10 +15,12 @@ import { Empresa, AccesosAdminMarketing, Tarea } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
 import { formatCLP, formatFecha, formatMoneda, formatRUT } from '../lib/formatters';
 import { ClientePanel } from '../components/clientes/ClientePanel';
+import { CotizacionesCliente } from '../components/clientes/CotizacionesCliente';
+import { DatosFacturacion } from '../components/clientes/DatosFacturacion';
 import { CuentasCliente } from '../components/clientes/CuentasCliente';
 import { FichaMarketing } from '../components/marketing/FichaMarketing';
 
-type Tab = 'info' | 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'cliente' | 'marketing';
+type Tab = 'info' | 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'cotizaciones' | 'cliente' | 'marketing';
 
 interface CompanyDetailDrawerProps {
   empresa: Empresa | null;
@@ -236,6 +238,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
               { id: 'oportunidades', label: `Negocios (${oportunidadesEmpresa.length})` },
               { id: 'actividades', label: `Actividades (${actividadesEmpresa.length})` },
               { id: 'tareas', label: `Tareas (${tareasEmpresa.length})` },
+              { id: 'cotizaciones' as const, label: 'Cotizaciones' },
               ...(empresa.estado === 'cliente'
                 ? [
                     { id: 'marketing' as const, label: 'Marketing' },
@@ -774,6 +777,12 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                   ))}
                 </div>
               )}
+            </div>
+          )}
+          {activeTab === 'cotizaciones' && (
+            <div className="space-y-5">
+              <DatosFacturacion empresa={empresa} onGuardar={(c) => actualizarEmpresa(empresa.id, c)} />
+              <CotizacionesCliente empresa={empresa} />
             </div>
           )}
           {activeTab === 'marketing' && empresa.estado === 'cliente' && <FichaMarketing empresaId={empresa.id} />}
