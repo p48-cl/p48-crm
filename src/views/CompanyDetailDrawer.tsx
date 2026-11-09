@@ -11,7 +11,7 @@ import {
   Linkedin,
   Check,
 } from 'lucide-react';
-import { Empresa, AccesosAdminMarketing } from '../types/crm';
+import { Empresa, AccesosAdminMarketing, Tarea } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
 import { formatCLP, formatFecha, formatMoneda, formatRUT } from '../lib/formatters';
 import { ClientePanel } from '../components/clientes/ClientePanel';
@@ -29,6 +29,7 @@ interface CompanyDetailDrawerProps {
   onSelectOportunidad: (id: string) => void;
   onOpenNewActivity: (empresaId: string) => void;
   onOpenNewTask: (empresaId: string) => void;
+  onEditTask: (t: Tarea) => void;
   tabInicial?: Tab;
 }
 
@@ -78,6 +79,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
   onSelectOportunidad,
   onOpenNewActivity,
   onOpenNewTask,
+  onEditTask,
   tabInicial,
 }) => {
   const {
@@ -753,13 +755,16 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                         {tar.completada && <Check className="w-3.5 h-3.5 text-[var(--c-accent)]" />}
                       </button>
                       <div className="flex-1 min-w-0">
-                        <p
-                          className={`font-medium ${
-                            tar.completada ? 'line-through text-[var(--c-muted-2)]' : 'text-[var(--c-text)]'
+                        <button
+                          type="button"
+                          onClick={() => onEditTask(tar)}
+                          aria-label={`Editar tarea ${tar.titulo}`}
+                          className={`text-left font-medium hover:underline ${
+                            tar.completada ? 'line-through text-[var(--c-muted)]' : 'text-[var(--c-text)]'
                           }`}
                         >
                           {tar.titulo}
-                        </p>
+                        </button>
                         <p className="text-[11px] text-[var(--c-muted)] font-mono">
                           Vence: {formatFecha(tar.fecha_vencimiento)}
                         </p>

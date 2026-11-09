@@ -7,17 +7,20 @@ import {
   Kanban,
   Filter,
 } from 'lucide-react';
+import { Tarea } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
 import { formatFecha, esFechaAtrasada, esFechaHoy } from '../lib/formatters';
 
 interface TasksViewProps {
   onOpenNewTask: () => void;
+  onEditTask: (t: Tarea) => void;
   onSelectEmpresa: (id: string) => void;
   onSelectOportunidad: (id: string) => void;
 }
 
 export const TasksView: React.FC<TasksViewProps> = ({
   onOpenNewTask,
+  onEditTask,
   onSelectEmpresa,
   onSelectOportunidad,
 }) => {
@@ -195,15 +198,18 @@ export const TasksView: React.FC<TasksViewProps> = ({
                   </button>
 
                   <div>
-                    <p
-                      className={`text-xs font-semibold ${
+                    <button
+                      type="button"
+                      onClick={() => onEditTask(t)}
+                      aria-label={`Editar tarea ${t.titulo}`}
+                      className={`text-left text-xs font-semibold hover:underline ${
                         t.completada
                           ? 'line-through text-[var(--c-muted-2)]'
                           : 'text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]'
                       }`}
                     >
                       {t.titulo}
-                    </p>
+                    </button>
 
                     {t.descripcion && (
                       <p className="text-[11px] text-[var(--c-muted)] mt-0.5 line-clamp-1">
