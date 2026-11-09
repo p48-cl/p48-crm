@@ -91,6 +91,9 @@ Caso a vigilar: reabrir una oportunidad ganada no revierte la empresa a prospect
 | crm_18 | auditoria_indices_politicas | Índices de llaves foráneas y políticas de escritura separadas |
 | crm_19 | origen_dato_y_cargas | Origen, `cargado_por` y `cargas_datos` |
 | crm_20 | seo_keywords | Palabras clave SEO por semana |
+| crm_21 | portal_sin_fuga_empresas | Quita la lectura directa de `empresas` para clientes; `portal_empresa` se ejecuta con privilegios del dueño, filtrada por `empresas_del_cliente()` |
+| crm_22 | keepalive_pg_cron | Job diario `crm_keepalive_diario` (pg_cron, 12:00 UTC) para evitar la pausa por inactividad del plan gratis |
+| crm_23 | plan_personalizado_renovacion | Plan `personalizado` en empresas y oportunidades; `empresas.renovacion_tipo` (manual o automática) |
 
 ## 8. Frontend: estructura
 - `src/context/AuthContext.tsx`: sesión, vinculación de miembro o cliente.
