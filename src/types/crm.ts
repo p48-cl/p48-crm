@@ -28,6 +28,11 @@ export interface Empresa {
   id: string; // uuid
   nombre: string;
   rut?: string | null;
+  razon_social?: string | null;
+  giro?: string | null;
+  direccion_facturacion?: string | null;
+  email_facturacion?: string | null;
+  dias_pago?: number | null;
   dominio_web?: string | null;
   industria_id?: string | null;
   tamano?: string | null;
