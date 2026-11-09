@@ -3,9 +3,10 @@
 Formato: versión, fecha de unión a `main`, PR, qué cambia y si toca base de datos. Las migraciones de Supabase se listan aparte porque se aplican en su propio momento.
 
 ## v0.11.0 · en curso (no publicada)
-Estado al 3 de noviembre de 2026. Cada entrada indica si ya está en `main`.
+Estado al 9 de noviembre de 2026. Cada entrada indica si ya está en `main`.
 
-- **PR #48** · Ficha de cliente como ventana centrada (ancho completo, pestañas visibles sin desplazar), datos legales y tributarios (razón social, RUT, giro, dirección) dentro de «Datos & Accesos» con aviso si faltan, y módulo «Cotizaciones» en el menú lateral con listado global por estado. Apilado sobre #47, sin migración. **Pendiente de unir a `main`.**
+- **PR #50** · Responsivo: grids de la ficha y de datos tributarios apilados en móvil, fila de líneas de cotización adaptada a pantallas pequeñas, botones de cotizaciones a ancho completo en móvil y encabezado de la ficha ajustado.
+- **PR #49** · Ficha de cliente como ventana centrada (ancho completo, pestañas visibles sin desplazar), datos legales y tributarios (razón social, RUT, giro, dirección) dentro de «Datos & Accesos» con aviso si faltan, y módulo «Cotizaciones» en el menú lateral con listado global por estado. Apilado sobre #47, sin migración. **Pendiente de unir a `main`.**
 - **PR #46** · Tareas editables: se abren desde el título (lista de Tareas y pestaña Tareas de la ficha) y permiten cambiar título, vínculos, responsable, vencimiento, prioridad y notas. Corrige además que el modal de tarea no tomaba la empresa o negocio inicial al reabrirlo. Sin migraciones.
 - **PR #47** · Cotizaciones: pestaña «Cotizaciones» en la ficha con datos de facturación (razón social, RUT, giro, dirección, correo, días de pago), listado y editor de cotizaciones con líneas (mensual o único), IVA, comisión de pauta y condiciones comerciales editables, y vista imprimible. Migración `crm_24` ya aplicada. **Pendiente de unir a `main`.**
 - **PR #45** · Ficha de cliente: plan «Personalizado» (precio a medida), tipo de renovación (manual o automática), enlaces Looker y Drive editables (solo https), y tareas completables desde la pestaña Tareas. Migración `crm_23` preparada, pendiente de aplicar. **Pendiente de unir a `main`.**

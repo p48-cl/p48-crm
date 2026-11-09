@@ -173,7 +173,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
     <div className="fixed inset-0 z-40 flex items-center justify-center sm:p-6 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150" onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} className="bg-[var(--c-surface)] w-full max-w-5xl h-full sm:h-auto sm:max-h-[92vh] sm:rounded-xl border border-[var(--c-line)] shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="p-5 border-b border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-text)] flex items-start justify-between">
+        <div className="p-4 sm:p-5 border-b border-[var(--c-line)] flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded bg-[var(--c-surface-2)] border border-[var(--c-surface-3)] flex items-center justify-center text-[var(--c-accent)]">
               <Building2 className="w-5 h-5" />
@@ -230,7 +230,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
         </div>
 
         {/* Navigation Tabs */}
-        <div className="px-5 border-b border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-text)] flex flex-wrap gap-x-5 text-xs font-medium">
+        <div className="px-5 border-b border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-text)] flex flex-wrap gap-x-4 sm:gap-x-5 text-xs font-medium">
           {(
             [
               { id: 'info', label: 'Datos & Accesos' },
@@ -262,7 +262,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
         </div>
 
         {/* Body content */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-6">
           {/* TAB 1: INFO & ACCESOS */}
           {activeTab === 'info' && (
             <div className="space-y-6">
@@ -274,7 +274,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                 </div>
 
                 <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)] -mb-1">Estado</p>
-                <div className="grid grid-cols-3 gap-3 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                   <div>
                     <label className="block text-[11px] text-[var(--c-muted)] mb-1">Estado Empresa</label>
                     <select
@@ -326,7 +326,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
 
                 <div className="h-px bg-[var(--c-line)]" />
                 <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)] -mb-1">Económico</p>
-                <div className="grid grid-cols-3 gap-3 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                   <div>
                     <label className="block text-[11px] text-[var(--c-muted)] mb-1">Fee Mensual (CLP)</label>
                     <input
@@ -387,7 +387,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
 
                 <div className="h-px bg-[var(--c-line)]" />
                 <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)] -mb-1">Responsable</p>
-                <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div>
                     <label className="block text-[11px] text-[var(--c-muted)] mb-1">Responsable Comercial</label>
                     <select
@@ -486,7 +486,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                   onSubmit={handleCreateContact}
                   className="p-4 bg-[var(--c-surface-2)] rounded-lg border border-[var(--c-line)] space-y-3"
                 >
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <input
                       type="text"
                       placeholder="Nombre *"
@@ -503,7 +503,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                       className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <input
                       type="email"
                       placeholder="Email corporativo *"
@@ -520,7 +520,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                       className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <input
                       type="text"
                       placeholder="Teléfono móvil"
