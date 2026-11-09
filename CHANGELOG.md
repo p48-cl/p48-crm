@@ -5,6 +5,7 @@ Formato: versión, fecha de unión a `main`, PR, qué cambia y si toca base de d
 ## v0.11.0 · en curso (no publicada)
 Estado al 3 de noviembre de 2026. Cada entrada indica si ya está en `main`.
 
+- **PR #46** · Tareas editables: se abren desde el título (lista de Tareas y pestaña Tareas de la ficha) y permiten cambiar título, vínculos, responsable, vencimiento, prioridad y notas. Corrige además que el modal de tarea no tomaba la empresa o negocio inicial al reabrirlo. Sin migraciones.
 - **PR #45** · Ficha de cliente: plan «Personalizado» (precio a medida), tipo de renovación (manual o automática), enlaces Looker y Drive editables (solo https), y tareas completables desde la pestaña Tareas. Migración `crm_23` preparada, pendiente de aplicar. **Pendiente de unir a `main`.**
 - **PR #44** · Móvil y contraste: texto inactivo del menú «Más secciones» legible; barra del Kanban compacta ("Tablero", "Tabla", "+ Nueva"); filtros del Kanban en dos columnas; título y pestañas de Inicio en una fila con desplazamiento; separador de tareas solo en escritorio. Sin migraciones.
 - **PR #43** · Seguridad: un cliente ya no puede leer la fila completa de su empresa por REST (fee, MRR, salud, responsable). `portal_empresa` pasa a ejecutarse con privilegios del dueño y filtrado por `empresas_del_cliente()`. Migración `crm_21` preparada en `supabase/migrations/`, pendiente de aplicar. **Pendiente de unir a `main`.**

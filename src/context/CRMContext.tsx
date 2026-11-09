@@ -104,6 +104,7 @@ interface CRMContextType {
   registrarActividad: (datos: Omit<Actividad, 'id' | 'created_at' | 'autor_id'>) => Promise<void>;
   crearTarea: (datos: Omit<Tarea, 'id' | 'created_at'>) => Promise<void>;
   toggleTareaCompletada: (tareaId: string, completadaActual: boolean) => Promise<void>;
+  actualizarTarea: (tareaId: string, datos: Partial<Tarea>) => Promise<void>;
 
   // Administración
   crearMiembro: (email: string, nombre: string, rol: 'admin' | 'miembro') => Promise<void>;
@@ -808,6 +809,20 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
+  const actualizarTarea = async (tareaId: string, datos: Partial<Tarea>) => {
+    if (!supabase) {
+      if (isModoDemo) setTareas((prev) => prev.map((t) => (t.id === tareaId ? { ...t, ...datos } : t)));
+      return;
+    }
+    const { error } = await supabase.from('tareas').update(datos).eq('id', tareaId);
+    if (error) {
+      setErrorMensaje(parseSupabaseError(error));
+      return;
+    }
+    const { data } = await supabase.from('tareas').select('*').order('fecha_vencimiento', { ascending: true });
+    if (data) setTareas(data as Tarea[]);
+  };
+
   // ADMINISTRACIÓN: Miembros, Roles, Desactivación por RPC y Catálogos
   const crearMiembro = async (email: string, nombre: string, rol: 'admin' | 'miembro') => {
     const emailNorm = email.trim().toLowerCase();
@@ -1294,6 +1309,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         registrarActividad,
         crearTarea,
         toggleTareaCompletada,
+        actualizarTarea,
         crearMiembro,
         actualizarRolMiembro,
         desactivarMiembro,
