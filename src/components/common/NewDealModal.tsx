@@ -194,7 +194,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
                 <option value="">Sin plan</option>
                 {(Object.keys(PLANES) as PlanEmpresa[]).map((p) => (
                   <option key={p} value={p}>
-                    Plan {p} · {PLANES[p].nombre}
+                    {p === 'personalizado' ? PLANES[p].nombre : `Plan ${p} · ${PLANES[p].nombre}`}
                   </option>
                 ))}
               </select>

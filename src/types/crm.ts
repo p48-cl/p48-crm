@@ -20,7 +20,8 @@ export type EstadoEmpresa =
   | 'interno'
   | 'archivado';
 
-export type PlanEmpresa = 'A' | 'B' | 'C' | 'D' | 'E';
+export type PlanEmpresa = 'A' | 'B' | 'C' | 'D' | 'E' | 'personalizado';
+export type RenovacionTipo = 'manual' | 'automatica';
 export type SaludCliente = 'verde' | 'amarillo' | 'rojo';
 
 export interface Empresa {
@@ -38,6 +39,7 @@ export interface Empresa {
   setup_fee_clp?: number | null;
   mrr_actual_clp?: number | null;
   fecha_renovacion?: string | null;
+  renovacion_tipo?: RenovacionTipo | null;
   salud?: SaludCliente | null;
   responsable_id?: string | null;
   archivado?: boolean;

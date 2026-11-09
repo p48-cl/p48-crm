@@ -7,6 +7,7 @@ export const PLANES: Record<PlanEmpresa, { nombre: string; valor: number }> = {
   C: { nombre: 'Plan B + Contenido orgánico', valor: 2250000 },
   D: { nombre: 'Full Stack', valor: 3050000 },
   E: { nombre: 'Branding (lump sum)', valor: 2500000 },
+  personalizado: { nombre: 'Personalizado (precio a medida)', valor: 0 },
 };
 
 export const SETUP_LISTA = 650000;

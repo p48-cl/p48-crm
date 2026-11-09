@@ -39,7 +39,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
     looker_dashboard_url: string;
     drive_folder_url: string;
     estado: 'prospecto' | 'cliente' | 'ex_cliente' | 'descartado' | 'proveedor' | 'interno' | 'archivado';
-    plan: '' | 'A' | 'B' | 'C' | 'D' | 'E';
+    plan: '' | 'A' | 'B' | 'C' | 'D' | 'E' | 'personalizado';
     fee_mensual_clp: string;
     salud: '' | 'verde' | 'amarillo' | 'rojo';
   }>({
