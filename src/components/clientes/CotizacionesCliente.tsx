@@ -292,15 +292,15 @@ const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creada
               </select>
               <input className={campo} placeholder="Concepto" value={l.concepto} onChange={(e) => cambiar(i, { concepto: e.target.value })} />
             </div>
-            <div className="grid grid-cols-[70px_1fr_auto_auto] gap-2 items-center">
+            <div className="grid grid-cols-[64px_1fr_auto] sm:grid-cols-[70px_1fr_auto_auto] gap-2 items-center">
               <input type="number" min={0} step="any" className={`${campo} font-mono`} value={l.cantidad} onChange={(e) => cambiar(i, { cantidad: Number(e.target.value) })} aria-label="Cantidad" />
               <input type="number" min={0} className={`${campo} font-mono`} value={l.precio_neto} onChange={(e) => cambiar(i, { precio_neto: Number(e.target.value) })} aria-label="Precio neto" />
-              <label className="text-[11px] text-[var(--c-muted)] flex items-center gap-1"><input type="checkbox" checked={l.recurrente} onChange={(e) => cambiar(i, { recurrente: e.target.checked })} /> Mensual</label>
-              <button onClick={() => setLineas((p) => p.filter((_, k) => k !== i))} aria-label="Quitar línea" className="text-[var(--c-muted)] hover:text-[var(--c-danger)]"><Trash2 className="w-4 h-4" /></button>
+              <label className="col-span-2 sm:col-span-1 text-[11px] text-[var(--c-muted)] flex items-center gap-1"><input type="checkbox" checked={l.recurrente} onChange={(e) => cambiar(i, { recurrente: e.target.checked })} /> Mensual</label>
+              <button onClick={() => setLineas((p) => p.filter((_, k) => k !== i))} aria-label="Quitar línea" className="justify-self-end text-[var(--c-muted)] hover:text-[var(--c-danger)] p-1"><Trash2 className="w-4 h-4" /></button>
             </div>
           </div>
         ))}
-        <div className="text-xs font-mono text-right space-y-0.5 text-[var(--c-text-2)]">
+        <div className="text-[11px] sm:text-xs font-mono text-right space-y-0.5 text-[var(--c-text-2)] break-words">
           <p>Mensual: {formatMoneda(t.mensual, moneda)} neto · <b className="text-[var(--c-text)]">{formatMoneda(t.mensualIva, moneda)}</b> con IVA</p>
           <p>Único: {formatMoneda(t.unico, moneda)} neto · <b className="text-[var(--c-text)]">{formatMoneda(t.unicoIva, moneda)}</b> con IVA</p>
         </div>
@@ -311,7 +311,7 @@ const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creada
       <div><label className={etiqueta}>Notas internas (no salen en la cotización)</label><textarea rows={2} className={campo} value={notas} onChange={(e) => setNotas(e.target.value)} /></div>
 
       {error && <p className="text-xs text-[var(--c-danger)]">{error}</p>}
-      <div className="flex justify-end gap-2 pt-2 border-t border-[var(--c-line)]">
+      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2 border-t border-[var(--c-line)]">
         <button onClick={imprimir} className="px-3 py-2 text-xs border border-[var(--c-line)] rounded flex items-center gap-1.5 text-[var(--c-text-2)] hover:text-[var(--c-text)]"><Printer className="w-3.5 h-3.5" /> Vista imprimible</button>
         <button onClick={guardar} disabled={guardando} className="px-4 py-2 text-xs font-semibold bg-[var(--c-accent)] text-[var(--c-on-accent)] rounded disabled:opacity-50">{guardando ? 'Guardando…' : 'Guardar'}</button>
       </div>
