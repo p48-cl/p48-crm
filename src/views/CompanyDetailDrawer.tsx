@@ -168,8 +168,8 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white w-full max-w-2xl h-full border-l border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-line)] shadow-2xl flex flex-col justify-between overflow-hidden">
+    <div className="fixed inset-0 z-40 flex items-center justify-center sm:p-6 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="bg-[var(--c-surface)] w-full max-w-5xl h-full sm:h-auto sm:max-h-[92vh] sm:rounded-xl border border-[var(--c-line)] shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
         <div className="p-5 border-b border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-text)] flex items-start justify-between">
           <div className="flex items-start gap-3">
@@ -228,7 +228,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
         </div>
 
         {/* Navigation Tabs */}
-        <div className="px-5 border-b border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-text)] flex gap-4 text-xs font-medium overflow-x-auto">
+        <div className="px-5 border-b border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-text)] flex flex-wrap gap-x-5 text-xs font-medium">
           {(
             [
               { id: 'info', label: 'Datos & Accesos' },
@@ -452,6 +452,9 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                   </div>
                 </div>
               </div>
+
+              {/* Datos legales y tributarios */}
+              <DatosFacturacion empresa={empresa} onGuardar={(c) => actualizarEmpresa(empresa.id, c)} />
 
               {/* Cuentas y permisos del cliente (registro por plataforma) */}
               <CuentasCliente
@@ -775,10 +778,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
             </div>
           )}
           {activeTab === 'cotizaciones' && (
-            <div className="space-y-5">
-              <DatosFacturacion empresa={empresa} onGuardar={(c) => actualizarEmpresa(empresa.id, c)} />
-              <CotizacionesCliente empresa={empresa} />
-            </div>
+            <CotizacionesCliente empresa={empresa} />
           )}
           {activeTab === 'marketing' && empresa.estado === 'cliente' && <FichaMarketing empresaId={empresa.id} />}
           {activeTab === 'cliente' && empresa.estado === 'cliente' && (
