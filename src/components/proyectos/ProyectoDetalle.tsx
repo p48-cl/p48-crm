@@ -29,7 +29,7 @@ interface Props {
 
 export const ProyectoDetalle: React.FC<Props> = ({ proyecto, fases, miembrosProyecto, dependencias, onVolver, onCambio }) => {
   const { currentUser, isAdmin } = useAuth();
-  const { tareas, empresas, miembros, toggleTareaCompletada } = useCRM();
+  const { tareas, empresasTodas: empresas, miembros, toggleTareaCompletada } = useCRM();
   const [modal, setModal] = useState<{ tarea?: Tarea; fase?: string } | null>(null);
   const [nuevaFase, setNuevaFase] = useState('');
   const [agregando, setAgregando] = useState(false);

@@ -48,7 +48,7 @@ interface DashboardViewProps {
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
-  const { oportunidades, etapas, empresas, tareas, miembros, fuentes, motivosPerdida, filtroAlcance, setFiltroAlcance, refetchTodo } = useCRM();
+  const { oportunidades, etapas, empresas, empresasTodas, tareas, miembros, fuentes, motivosPerdida, filtroAlcance, setFiltroAlcance, refetchTodo } = useCRM();
   const { currentUser } = useAuth();
   const { proyectos, recargar: recargarProyectos } = useProyectos();
   const [periodo, setPeriodo] = useState<Periodo | 'personalizado'>('mes');
@@ -118,7 +118,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   }, [ini, fin]);
 
   const idsVisibles = useMemo(() => new Set(d.empresas.map((e) => e.id)), [d.empresas]);
-  const nombreEmpresa = (id: string) => empresas.find((e) => e.id === id)?.nombre ?? 'Cliente';
+  const nombreEmpresa = (id: string) => empresasTodas.find((e) => e.id === id)?.nombre ?? 'Cliente';
   const pautaVis = pauta.filter((p) => idsVisibles.has(p.empresa_id));
   const analisisVis = analisis.filter((a) => idsVisibles.has(a.empresa_id));
   const alertas = analisisVis

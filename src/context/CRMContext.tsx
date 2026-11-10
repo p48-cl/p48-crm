@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Empresa,
   Contacto,
@@ -37,7 +37,12 @@ import { useAuth } from './AuthContext';
 
 interface CRMContextType {
   // Entidades principales
+  /** Clientes y prospectos. Excluye la cuenta interna de la agencia (estado 'interno'). */
   empresas: Empresa[];
+  /** Todas las empresas, incluida la agencia. Úsala solo para resolver nombres por id. */
+  empresasTodas: Empresa[];
+  /** Cuenta interna de la agencia (P48), o null si no existe. */
+  agencia: Empresa | null;
   contactos: Contacto[];
   accesosAdmin: Record<string, AccesosAdminMarketing>;
   oportunidades: VOportunidad[];
@@ -140,7 +145,9 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [errorMensaje, setErrorMensaje] = useState<string | null>(null);
 
   // Estados en memoria (NUNCA en localStorage)
-  const [empresas, setEmpresas] = useState<Empresa[]>([]);
+  const [empresasTodas, setEmpresas] = useState<Empresa[]>([]);
+  const empresas = useMemo(() => empresasTodas.filter((e) => e.estado !== 'interno'), [empresasTodas]);
+  const agencia = useMemo(() => empresasTodas.find((e) => e.estado === 'interno') ?? null, [empresasTodas]);
   const [contactos, setContactos] = useState<Contacto[]>([]);
   const [accesosAdmin, setAccesosAdmin] = useState<Record<string, AccesosAdminMarketing>>({});
   const [oportunidades, setOportunidades] = useState<VOportunidad[]>([]);
@@ -1261,6 +1268,8 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     <CRMContext.Provider
       value={{
         empresas,
+        empresasTodas,
+        agencia,
         contactos,
         accesosAdmin,
         oportunidades,

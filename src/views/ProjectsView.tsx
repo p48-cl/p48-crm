@@ -15,16 +15,18 @@ const select = 'px-2.5 py-1.5 text-xs bg-[var(--c-surface)] border border-[var(-
 
 interface Props {
   onEditTask: (t: Tarea) => void;
+  /** 'agencia': solo proyectos internos de la agencia (sin selector de tipo). */
+  ambito?: 'agencia';
 }
 
-export const ProjectsView: React.FC<Props> = ({ onEditTask }) => {
+export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
   const { isAdmin } = useAuth();
-  const { tareas, empresas, miembros, refetchTodo } = useCRM();
+  const { tareas, empresasTodas: empresas, miembros, refetchTodo } = useCRM();
   const { proyectos, fases, miembrosProyecto, dependencias, cargando, error, recargar } = useProyectos();
   const [pestana, setPestana] = useState<'proyectos' | 'calendario'>('proyectos');
   const [abierto, setAbierto] = useState<string | null>(null);
   const [nuevo, setNuevo] = useState(false);
-  const [tipo, setTipo] = useState<'todos' | 'interno' | 'cliente'>('todos');
+  const [tipo, setTipo] = useState<'todos' | 'interno' | 'cliente'>(ambito === 'agencia' ? 'interno' : 'todos');
   const [estado, setEstado] = useState<'activos' | EstadoProyecto | 'todos'>('activos');
   const hoy = hoyIso();
 
@@ -85,11 +87,13 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask }) => {
           ) : (
             <>
               <div className="flex flex-wrap items-center gap-2">
-                <select className={select} value={tipo} onChange={(e) => setTipo(e.target.value as typeof tipo)} aria-label="Tipo">
-                  <option value="todos">Internos y de clientes</option>
-                  <option value="interno">Internos</option>
-                  <option value="cliente">De clientes</option>
-                </select>
+                {ambito !== 'agencia' && (
+                  <select className={select} value={tipo} onChange={(e) => setTipo(e.target.value as typeof tipo)} aria-label="Tipo">
+                    <option value="todos">Internos y de clientes</option>
+                    <option value="interno">Internos</option>
+                    <option value="cliente">De clientes</option>
+                  </select>
+                )}
                 <select className={select} value={estado} onChange={(e) => setEstado(e.target.value as typeof estado)} aria-label="Estado">
                   <option value="activos">Activos</option>
                   <option value="todos">Todos</option>
@@ -131,7 +135,7 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask }) => {
         </>
       )}
 
-      {nuevo && <NuevoProyectoModal onCerrar={() => setNuevo(false)} onCreado={async (id) => { setNuevo(false); await cambio(); setAbierto(id); setPestana('proyectos'); }} />}
+      {nuevo && <NuevoProyectoModal tipoFijo={ambito === 'agencia' ? 'interno' : undefined} onCerrar={() => setNuevo(false)} onCreado={async (id) => { setNuevo(false); await cambio(); setAbierto(id); setPestana('proyectos'); }} />}
     </div>
   );
 };

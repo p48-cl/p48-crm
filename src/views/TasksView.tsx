@@ -27,7 +27,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
   onSelectEmpresa,
   onSelectOportunidad,
 }) => {
-  const { tareas, empresas, oportunidades, miembros, toggleTareaCompletada } = useCRM();
+  const { tareas, empresasTodas: empresas, oportunidades, miembros, toggleTareaCompletada } = useCRM();
   const { proyectos } = useProyectos();
 
   const [tab, setTab] = useState<'hoy' | 'semana' | 'atrasadas' | 'todas'>('hoy');
