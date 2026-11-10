@@ -274,9 +274,17 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                 }`}
               >
                 {/* Cabecera */}
-                <div className="p-3 border-b border-[var(--c-line)] flex items-center justify-between">
+                <div
+                  className="p-3 border-b border-[var(--c-line)] flex items-center justify-between rounded-t-lg"
+                  style={{ borderTop: `3px solid ${etapa.color || 'var(--c-line)'}` }}
+                >
                   <div>
                     <div className="flex items-center gap-1.5">
+                      <span
+                        className="w-2 h-2 rounded-full shrink-0"
+                        style={{ background: etapa.color || 'var(--c-muted-2)' }}
+                        aria-hidden
+                      />
                       <span className="font-semibold text-xs text-[var(--c-text)]">
                         {etapa.nombre}
                       </span>
@@ -544,7 +552,12 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                           </div>
                         </td>
                         <td className="py-2.5 px-3 text-[var(--c-text-2)]">{emp?.nombre ?? '—'}</td>
-                        <td className="py-2.5 px-3 font-mono text-[11px] text-[var(--c-line)]">{et?.nombre ?? '—'}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-[var(--c-text-2)]">
+                          <span className="inline-flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: et?.color || 'var(--c-muted-2)' }} aria-hidden />
+                            {et?.nombre ?? '—'}
+                          </span>
+                        </td>
                         <td className="py-2.5 px-3 font-mono text-xs font-bold text-[var(--c-text)] text-right">
                           {formatMoneda(op.valor_neto, op.moneda)}
                         </td>
