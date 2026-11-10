@@ -157,3 +157,13 @@ export function formatCorrelativo(prefijo: 'COT' | 'NEG', numero?: number | null
   if (numero == null) return '';
   return `${prefijo}-${String(numero).padStart(4, '0')}`;
 }
+
+// Días desde hoy hasta una fecha YYYY-MM-DD (negativo = vencida)
+export function diasHastaFecha(fechaStr?: string | null): number | null {
+  if (!fechaStr) return null;
+  const [y, m, d] = fechaStr.slice(0, 10).split('-').map(Number);
+  if (!y || !m || !d) return null;
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  return Math.round((new Date(y, m - 1, d).getTime() - hoy.getTime()) / 86400000);
+}

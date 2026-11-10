@@ -11,7 +11,7 @@ import {
 import { VOportunidad } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
 import { PipelineKpis } from '../components/crm/PipelineKpis';
-import { formatMoneda, formatFecha, esFechaAtrasada, formatCorrelativo } from '../lib/formatters';
+import { formatMoneda, formatFecha, esFechaAtrasada, formatCorrelativo, diasHastaFecha } from '../lib/formatters';
 import { ConfirmWonModal } from '../components/common/ConfirmWonModal';
 import { LossReasonModal } from '../components/common/LossReasonModal';
 
@@ -32,16 +32,6 @@ const SEGUIMIENTO_UI: Record<string, { label: string; tono: string }> = {
     label: 'Al día',
     tono: 'text-[var(--c-ok)] border-[var(--c-ok)]/40 bg-[var(--c-ok)]/10',
   },
-};
-
-// Días desde hoy hasta una fecha YYYY-MM-DD (negativo = vencida)
-const diasHasta = (fecha?: string | null): number | null => {
-  if (!fecha) return null;
-  const [y, m, d] = fecha.slice(0, 10).split('-').map(Number);
-  if (!y || !m || !d) return null;
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
-  return Math.round((new Date(y, m - 1, d).getTime() - hoy.getTime()) / 86400000);
 };
 
 const iniciales = (nombre?: string | null): string => {
@@ -344,7 +334,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                         (!op.proxima_accion_texto?.trim() && !op.proxima_accion_fecha);
                       const esUSD = op.moneda !== 'CLP';
                       const seguimiento = op.estado_seguimiento ? SEGUIMIENTO_UI[op.estado_seguimiento] : undefined;
-                      const diasCierre = diasHasta(op.fecha_cierre_estimada);
+                      const diasCierre = diasHastaFecha(op.fecha_cierre_estimada);
                       const cierreTexto =
                         diasCierre === null
                           ? null

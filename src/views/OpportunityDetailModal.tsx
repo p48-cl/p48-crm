@@ -12,7 +12,8 @@ import {
 } from 'lucide-react';
 import { CriterioCalificacion } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
-import { formatFecha, formatMoneda, esFechaAtrasada, formatCorrelativo } from '../lib/formatters';
+import { formatFecha, formatMoneda, esFechaAtrasada, formatCorrelativo, diasHastaFecha } from '../lib/formatters';
+import { useConfiguracionCRM } from '../lib/configuracion';
 import { DatosNegocio } from '../components/crm/DatosNegocio';
 import { CotizacionesCliente } from '../components/clientes/CotizacionesCliente';
 
@@ -49,7 +50,10 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
     moverOportunidadEtapa,
     archivarOportunidad,
     toggleTareaCompletada,
+    fuentes,
   } = useCRM();
+
+  const { config: configCRM } = useConfiguracionCRM(isOpen);
 
   const oportunidad = oportunidades.find((o) => o.id === oportunidadId);
 
@@ -79,10 +83,36 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
   const responsable = miembros.find((m) => m.id === oportunidad.responsable_id);
   const actividadesOp = actividades.filter((a) => a.oportunidad_id === oportunidad.id);
   const tareasOp = tareas.filter((t) => t.oportunidad_id === oportunidad.id);
+  const etapa = etapas.find((et) => et.id === oportunidad.etapa_id);
+  const fuente = fuentes.find((f) => f.id === oportunidad.fuente_id);
+  const diasCierre = diasHastaFecha(oportunidad.fecha_cierre_estimada);
+  const diasAccion = diasHastaFecha(oportunidad.proxima_accion_fecha);
+  const ultimaActividad = actividadesOp.reduce<string | null>(
+    (max, a) => (!max || a.fecha_actividad > max ? a.fecha_actividad : max),
+    null,
+  );
+  const diasSinActividad = ultimaActividad
+    ? Math.floor((Date.now() - new Date(ultimaActividad).getTime()) / 86400000)
+    : null;
+  const cierreTexto =
+    diasCierre === null
+      ? null
+      : diasCierre < 0
+        ? `Cierre vencido hace ${-diasCierre} d`
+        : diasCierre === 0
+          ? 'Cierra hoy'
+          : `Faltan ${diasCierre} d`;
+  const cierreTono =
+    diasCierre !== null && diasCierre < 0
+      ? 'text-[var(--c-danger)]'
+      : diasCierre !== null && diasCierre <= 14
+        ? 'text-[var(--c-warn)]'
+        : 'text-[var(--c-muted)]';
 
   // Calificación desde vista v_calificacion_oportunidad
   const calificacion = calificaciones[oportunidad.id];
   const fallaEliminatorio = Boolean(calificacion?.falla_eliminatorio);
+  const tieneCalificacion = Boolean(calificacion && calificacion.puntaje_maximo > 0);
 
   const criteriosOrdenados = [...criterios].sort((a, b) => a.orden - b.orden);
 
@@ -143,53 +173,51 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
       <div className="bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white border border-[var(--c-line)] rounded-xl max-w-6xl w-full h-[92vh] shadow-2xl flex flex-col justify-between overflow-hidden">
-        {/* Header Ficha */}
-        <div className="p-5 border-b border-[var(--c-line)] flex items-start justify-between bg-[var(--c-surface-2)]">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded bg-[var(--c-surface-2)] border border-[var(--c-surface-3)] flex items-center justify-center text-[var(--c-text)]">
+        {/* Encabezado de la ficha (mismo patrón que la ficha de cliente) */}
+        <div className="px-5 py-4 border-b border-[var(--c-line)] flex items-start justify-between gap-4 bg-[var(--c-surface-2)]">
+          <div className="flex items-start gap-3 min-w-0">
+            <div className="w-10 h-10 shrink-0 rounded bg-[var(--c-surface)] border border-[var(--c-line)] flex items-center justify-center text-[var(--c-text)]">
               <Kanban className="w-5 h-5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-[11px] text-[var(--c-muted)]">{formatCorrelativo('NEG', oportunidad.numero)}</span>
-                <h2 className="text-lg font-bold text-[var(--c-text)]">{oportunidad.nombre}</h2>
-                <span className="font-mono text-xs text-[var(--c-text)] font-bold">
-                  {formatMoneda(oportunidad.valor_neto, oportunidad.moneda)}
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--c-muted)]">
+                  Oportunidad · {formatCorrelativo('NEG', oportunidad.numero)}
                 </span>
-                {oportunidad.moneda !== 'CLP' && (
-                  <span className="text-[10px] text-[var(--c-muted)] font-mono">(No suma a CLP)</span>
+                {etapa && (
+                  <span className="px-2 py-0.5 rounded-full bg-[var(--c-accent)]/15 text-[var(--c-text)] text-[10px] font-semibold uppercase tracking-wide">
+                    {etapa.nombre}
+                  </span>
                 )}
               </div>
-              <div className="flex items-center gap-3 text-xs text-[var(--c-muted)] mt-1 font-mono">
-                {empresa && (
-                  <button
-                    onClick={() => {
-                      onClose();
-                      onSelectEmpresa(empresa.id);
-                    }}
-                    className="hover:text-[var(--c-text)] flex items-center gap-1 font-sans"
-                  >
-                    <Building2 className="w-3.5 h-3.5" />
-                    <span>{empresa.nombre}</span>
-                  </button>
-                )}
-                <span>·</span>
-                <span>Responsable: {responsable?.nombre ?? 'Sin asignar'}</span>
-                <span>·</span>
-                <span>Cierre est: {formatFecha(oportunidad.fecha_cierre_estimada)}</span>
-              </div>
+              <h2 className="text-lg font-bold text-[var(--c-text)] leading-tight truncate">{oportunidad.nombre}</h2>
+              {empresa && (
+                <button
+                  onClick={() => {
+                    onClose();
+                    onSelectEmpresa(empresa.id);
+                  }}
+                  className="mt-0.5 text-xs text-[var(--c-muted)] hover:text-[var(--c-text)] flex items-center gap-1"
+                >
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span>{empresa.nombre}</span>
+                </button>
+              )}
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleArchive}
-              className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-danger)] rounded transition-colors"
+              className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-danger)] hover:bg-[var(--c-surface-3)] rounded transition-colors"
               title="Archivar"
             >
               <Archive className="w-4 h-4" />
             </button>
-            <button onClick={onClose} className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-text)] rounded">
+            <button
+              onClick={onClose}
+              className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-text)] hover:bg-[var(--c-surface-3)] rounded transition-colors"
+            >
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -208,6 +236,47 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
           </div>
         )}
 
+        {/* Franja de decisión: visible siempre */}
+        <div className="grid grid-cols-2 md:grid-cols-4 border-b border-[var(--c-line)] bg-[var(--c-surface)]">
+          <div className="px-4 sm:px-5 py-3 border-r border-[var(--c-line)]">
+            <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">Valor neto</p>
+            <p className="text-sm font-semibold mt-0.5 font-mono text-[var(--c-text)]">
+              {formatMoneda(oportunidad.valor_neto, oportunidad.moneda)}
+            </p>
+            <p className="text-[10px] font-mono text-[var(--c-muted)] mt-0.5">
+              Pond. {formatMoneda(oportunidad.valor_ponderado, oportunidad.moneda)} · {oportunidad.probabilidad}%
+            </p>
+          </div>
+          <div className="px-4 sm:px-5 py-3 md:border-r border-[var(--c-line)]">
+            <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">Cierre estimado</p>
+            <p className="text-sm font-semibold mt-0.5 font-mono text-[var(--c-text)]">
+              {formatFecha(oportunidad.fecha_cierre_estimada)}
+            </p>
+            {cierreTexto && <p className={`text-[10px] font-mono mt-0.5 ${cierreTono}`}>{cierreTexto}</p>}
+          </div>
+          <div className="px-4 sm:px-5 py-3 border-r border-t md:border-t-0 border-[var(--c-line)]">
+            <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">Próxima acción</p>
+            <p
+              className={`text-sm font-semibold mt-0.5 font-mono ${
+                atrasada ? 'text-[var(--c-danger)]' : 'text-[var(--c-text)]'
+              }`}
+            >
+              {oportunidad.proxima_accion_fecha ? formatFecha(oportunidad.proxima_accion_fecha) : 'Sin fecha'}
+            </p>
+            {diasAccion !== null && (
+              <p className={`text-[10px] font-mono mt-0.5 ${atrasada ? 'text-[var(--c-danger)]' : 'text-[var(--c-muted)]'}`}>
+                {diasAccion < 0 ? `atrasada hace ${-diasAccion} d` : diasAccion === 0 ? 'vence hoy' : `en ${diasAccion} d`}
+              </p>
+            )}
+          </div>
+          <div className="px-4 sm:px-5 py-3 border-t md:border-t-0 border-[var(--c-line)]">
+            <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">Responsable</p>
+            <p className="text-sm font-semibold mt-0.5 text-[var(--c-text)] truncate">
+              {responsable ? responsable.nombre : 'Sin asignar'}
+            </p>
+          </div>
+        </div>
+
         {/* Contenido */}
         <div className="flex-1 overflow-y-auto p-5 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           {/* Izquierda: datos del negocio, cliente y contactos */}
@@ -219,6 +288,36 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
           {/* Derecha: gestión comercial */}
           <div className="space-y-6">
             <h2 className="text-[11px] font-mono uppercase tracking-wider text-[var(--c-muted)]">Gestión comercial</h2>
+
+            {/* Señales de la oportunidad */}
+            <div className="flex flex-wrap gap-1.5">
+              {atrasada && (
+                <span className="px-1.5 py-0.5 rounded border border-[var(--c-danger)]/40 bg-[var(--c-danger)]/10 text-[var(--c-danger)] text-[10px] font-semibold">
+                  Acción atrasada
+                </span>
+              )}
+              {!tieneCalificacion && (
+                <span className="px-1.5 py-0.5 rounded border border-[var(--c-warn)]/40 bg-[var(--c-warn)]/10 text-[var(--c-warn)] text-[10px] font-semibold">
+                  Sin calificar
+                </span>
+              )}
+              {diasSinActividad === null ? (
+                <span className="px-1.5 py-0.5 rounded border border-[var(--c-warn)]/40 bg-[var(--c-warn)]/10 text-[var(--c-warn)] text-[10px] font-semibold">
+                  Sin actividades registradas
+                </span>
+              ) : (
+                diasSinActividad >= configCRM.dias_sin_actividad && (
+                  <span className="px-1.5 py-0.5 rounded border border-[var(--c-warn)]/40 bg-[var(--c-warn)]/10 text-[var(--c-warn)] text-[10px] font-semibold">
+                    Sin actividad hace {diasSinActividad} d
+                  </span>
+                )
+              )}
+              {fuente && (
+                <span className="px-1.5 py-0.5 rounded border border-[var(--c-line)] bg-[var(--c-surface-2)] text-[var(--c-text-2)] text-[10px]">
+                  Origen: {fuente.nombre}
+                </span>
+              )}
+            </div>
 
             {/* Etapa */}
             <div className="p-4 bg-[var(--c-surface-2)] rounded-lg border border-[var(--c-line)] space-y-3">
@@ -242,7 +341,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
             {/* Próxima Acción */}
             <div
               className={`p-4 rounded-lg border transition-colors ${
-                atrasada ? 'bg-[var(--c-surface-2)] border-[var(--c-danger)]' : 'bg-[var(--c-surface-2)] border-[var(--c-line)]'
+                atrasada ? 'bg-[var(--c-danger)]/10 border-[var(--c-danger)]/60' : 'bg-[var(--c-surface-2)] border-[var(--c-line)]'
               }`}
             >
               <div className="flex items-center justify-between mb-2">
@@ -294,14 +393,22 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                   </div>
                 </div>
               ) : (
-                <div className="text-xs space-y-1">
-                  <p className="text-[var(--c-line)] font-medium">
+                <div className="space-y-1.5">
+                  <p
+                    className={`text-sm font-medium ${
+                      oportunidad.proxima_accion_texto ? 'text-[var(--c-text)]' : 'text-[var(--c-muted)] italic'
+                    }`}
+                  >
                     {oportunidad.proxima_accion_texto || 'Sin próxima acción definida.'}
                   </p>
-                  <p className="text-[11px] font-mono text-[var(--c-muted)] flex items-center gap-1">
+                  <p className="text-[11px] font-mono text-[var(--c-muted)] flex items-center gap-1.5 flex-wrap">
                     <Calendar className="w-3.5 h-3.5 text-[var(--c-muted-2)]" />
-                    <span>Fecha: {formatFecha(oportunidad.proxima_accion_fecha)}</span>
-                    {atrasada && <span className="text-[var(--c-danger)] font-bold ml-2">¡ATRASADO!</span>}
+                    <span>{formatFecha(oportunidad.proxima_accion_fecha)}</span>
+                    {atrasada && (
+                      <span className="px-1.5 py-0.5 rounded bg-[var(--c-danger)]/15 text-[var(--c-danger)] font-semibold uppercase">
+                        Atrasada
+                      </span>
+                    )}
                   </p>
                 </div>
               )}
