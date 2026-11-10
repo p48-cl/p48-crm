@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useCRM } from '../../context/CRMContext';
 import { formatCLP } from '../../lib/formatters';
-import { Kpi, BarraApilada, estilos } from '../dashboard/ui';
+import { Kpi, Dona, estilos } from '../dashboard/ui';
 import { metricasPipeline, resultadosPeriodo } from '../dashboard/metricas';
 
 export const PipelineKpis: React.FC = () => {
@@ -39,8 +39,14 @@ export const PipelineKpis: React.FC = () => {
         {p.abiertas.length === 0 ? (
           <p className={estilos.nota}>Sin negocios abiertos</p>
         ) : (
-          <BarraApilada
+          <Dona
             rotulo="Distribución del pipeline por etapa"
+            centro={
+              <>
+                <span className="text-lg font-bold font-mono text-[var(--c-text)] leading-none">{p.abiertas.length}</span>
+                <span className="text-[9px] font-mono uppercase text-[var(--c-muted)] mt-0.5">negocios</span>
+              </>
+            }
             segmentos={p.porEtapa.map((e) => ({ clave: e.id, etiqueta: e.nombre, n: e.n, color: e.color }))}
           />
         )}
