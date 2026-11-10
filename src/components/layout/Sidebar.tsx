@@ -51,12 +51,6 @@ interface NavItem {
   badgeCount?: number;
 }
 
-const AGENTES = [
-  { color: 'var(--sales)', label: 'JAMP/S · Sales' },
-  { color: 'var(--media)', label: 'JAMP/M · Media' },
-  { color: 'var(--organic)', label: 'JAMP/O · Organic' },
-];
-
 export const Sidebar: React.FC<SidebarProps> = ({
   currentView,
   marketingSection,
@@ -164,18 +158,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <Clock className="w-3.5 h-3.5 text-[var(--c-muted)]" />
           <span>Registrar Actividad</span>
         </button>
-
-        <div className="px-1">
-          <p className="pb-1.5 text-[10px] font-mono uppercase tracking-[0.16em] text-[var(--c-muted-2)]">Agentes</p>
-          <ul className="space-y-1.5">
-            {AGENTES.map((a) => (
-              <li key={a.label} className="flex items-center gap-2 text-[11px] font-mono text-[var(--c-text-2)]">
-                <span className="w-1.5 h-1.5 rounded-full" style={{ background: a.color }} aria-hidden />
-                {a.label}
-              </li>
-            ))}
-          </ul>
-        </div>
       </div>
     </aside>
   );
