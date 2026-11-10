@@ -3,6 +3,7 @@ import { RefreshCw } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { formatFechaHora } from '../../lib/formatters';
+import { mensajeEnCola, proximaCorrida } from './proximaCorrida';
 
 interface Solicitud { estado: string; created_at: string; procesado_en: string | null; error: string | null }
 
@@ -31,7 +32,7 @@ export const SincronizacionBar: React.FC = () => {
   const actualizar = async () => {
     if (!supabase || !currentUser?.id) return;
     const { error } = await supabase.from('analisis_solicitudes').insert({ solicitado_por: currentUser.id, origen: 'manual' });
-    setMensaje(error ? 'No se pudo registrar la solicitud.' : 'En cola: Claude la procesa en la próxima revisión (cada hora, 9 a 21 h).');
+    setMensaje(error ? 'No se pudo registrar la solicitud.' : mensajeEnCola());
     if (!error) cargar();
   };
 
@@ -43,7 +44,7 @@ export const SincronizacionBar: React.FC = () => {
           {ultima ? `${formatFechaHora(ultima.procesado_en ?? ultima.created_at)}${ultima.estado === 'error' ? ` · error: ${ultima.error ?? 'sin detalle'}` : ''}` : 'Aún no hay sincronizaciones'}
         </p>
       </div>
-      <p className="text-[11px] text-[var(--c-muted)]">Automática: domingo 20:00</p>
+      <p className="text-[11px] text-[var(--c-muted)]">Próxima corrida: {proximaCorrida()}</p>
       <button
         onClick={actualizar}
         disabled={enCola > 0}
