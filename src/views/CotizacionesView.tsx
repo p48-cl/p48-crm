@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ChevronRight, Filter, Plus, Search, X } from 'lucide-react';
+import { ChevronRight, Filter, Plus, Search } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { parseSupabaseError } from '../lib/errorHandler';
 import { formatFecha, formatMoneda } from '../lib/formatters';
 import { useCRM } from '../context/CRMContext';
+import { SelectorCliente } from '../components/common/SelectorCliente';
 
 interface Fila {
   id: string;
@@ -33,7 +34,7 @@ const selectClase =
   'bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2 py-1.5 text-xs text-[var(--c-text)] focus:outline-none focus:border-[var(--c-accent)]';
 
 export const CotizacionesView: React.FC<{ onAbrirFicha: (empresaId: string, nueva?: boolean) => void }> = ({ onAbrirFicha }) => {
-  const { empresas } = useCRM();
+  const { empresas, crearEmpresa } = useCRM();
   const [filas, setFilas] = useState<Fila[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -200,7 +201,13 @@ export const CotizacionesView: React.FC<{ onAbrirFicha: (empresaId: string, nuev
 
       {mostrarNueva && (
         <SelectorCliente
+          titulo="Nueva cotización · elige el cliente"
+          etiquetaBoton="Continuar"
           clientes={clientesActivos}
+          onCrear={async (nombre) => {
+            const creada = await crearEmpresa({ nombre, estado: 'prospecto' });
+            return creada?.id ?? null;
+          }}
           onCerrar={() => setMostrarNueva(false)}
           onElegir={(id) => {
             setMostrarNueva(false);
@@ -208,76 +215,6 @@ export const CotizacionesView: React.FC<{ onAbrirFicha: (empresaId: string, nuev
           }}
         />
       )}
-    </div>
-  );
-};
-
-// Mismo patrón que «Nuevo cliente»: un diálogo para elegir a quién cotizar.
-const SelectorCliente: React.FC<{
-  clientes: { id: string; nombre: string }[];
-  onCerrar: () => void;
-  onElegir: (id: string) => void;
-}> = ({ clientes, onCerrar, onElegir }) => {
-  const [q, setQ] = useState('');
-  const [elegido, setElegido] = useState('');
-  const lista = clientes.filter((c) => c.nombre.toLowerCase().includes(q.trim().toLowerCase()));
-
-  return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/60" onClick={onCerrar}>
-      <div
-        className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-xl shadow-2xl w-full max-w-md flex flex-col max-h-[80vh]"
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-label="Elegir cliente para la cotización"
-      >
-        <div className="p-4 border-b border-[var(--c-line)] flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-[var(--c-text)]">Nueva cotización · elige el cliente</h2>
-          <button onClick={onCerrar} className="p-1 text-[var(--c-muted)] hover:text-[var(--c-text)]" aria-label="Cerrar">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-        <div className="p-4 space-y-3 overflow-hidden flex flex-col">
-          <input
-            type="text"
-            autoFocus
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Buscar cliente…"
-            className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-1.5 text-xs text-[var(--c-text)] focus:outline-none focus:border-[var(--c-accent)]"
-          />
-          <div className="overflow-y-auto border border-[var(--c-line)] rounded divide-y divide-[var(--c-line)]">
-            {lista.length === 0 ? (
-              <p className="p-4 text-center text-xs text-[var(--c-muted)]">No hay clientes con ese nombre.</p>
-            ) : (
-              lista.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => setElegido(c.id)}
-                  className={`w-full text-left px-3 py-2 text-xs transition-colors ${
-                    elegido === c.id
-                      ? 'bg-[var(--c-surface-3)] text-[var(--c-accent)] font-medium'
-                      : 'text-[var(--c-text-2)] hover:bg-[var(--c-surface-2)]'
-                  }`}
-                >
-                  {c.nombre}
-                </button>
-              ))
-            )}
-          </div>
-        </div>
-        <div className="p-4 border-t border-[var(--c-line)] flex justify-end gap-2">
-          <button onClick={onCerrar} className="px-3 py-1.5 text-xs text-[var(--c-muted)] hover:text-[var(--c-text)]">
-            Cancelar
-          </button>
-          <button
-            disabled={!elegido}
-            onClick={() => onElegir(elegido)}
-            className="px-3.5 py-1.5 text-xs font-semibold bg-[var(--c-accent)] text-[var(--c-on-accent)] rounded disabled:opacity-40"
-          >
-            Continuar
-          </button>
-        </div>
-      </div>
     </div>
   );
 };
