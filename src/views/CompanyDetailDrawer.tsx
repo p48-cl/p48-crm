@@ -235,10 +235,10 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center sm:p-6 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="bg-[var(--c-bg)] w-full max-w-5xl h-full sm:h-auto sm:max-h-[92vh] sm:rounded-xl border border-[var(--c-line)] shadow-2xl flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-40 flex items-stretch sm:items-center justify-center sm:p-6 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="bg-[var(--c-bg)] w-full max-w-5xl h-dvh sm:h-auto sm:max-h-[92dvh] sm:rounded-xl min-h-0 border border-[var(--c-line)] shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-[var(--c-line)] bg-[var(--c-surface)] flex items-start justify-between gap-3">
+        <div className="shrink-0 p-4 sm:p-5 border-b border-[var(--c-line)] bg-[var(--c-surface)] flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
             <SubirLogo empresaId={empresa.id} nombre={empresa.nombre} logoPath={empresa.logo_path} size={48} />
             <div>
@@ -312,7 +312,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
         </div>
 
         {/* Franja de decisión: visible en todas las pestañas */}
-        <FranjaDecision
+        <div className="shrink-0"><FranjaDecision
           items={[
             { etiqueta: 'Salud de cuenta', valor: salud ? salud.texto : 'Sin definir', tonoValor: salud?.tono ?? 'muted' },
             {
@@ -334,10 +334,10 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
             },
             { etiqueta: 'Responsable', valor: responsable ? responsable.nombre : 'Sin asignar' },
           ]}
-        />
+        /></div>
 
         {/* Navigation Tabs */}
-        <div className="px-5 border-b border-[var(--c-line)] bg-[var(--c-surface)] flex flex-nowrap overflow-x-auto gap-x-4 sm:gap-x-5 text-xs font-medium [scrollbar-width:none]">
+        <div className="shrink-0 px-5 border-b border-[var(--c-line)] bg-[var(--c-surface)] flex flex-nowrap overflow-x-auto gap-x-4 sm:gap-x-5 text-xs font-medium [scrollbar-width:none]">
           {(
             [
               { id: 'resumen' as const, label: 'Resumen' },
@@ -366,7 +366,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
         </div>
 
         {/* Body content */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-6">
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 space-y-6">
           {/* TAB RESUMEN: revisión rápida antes de una reunión o para priorizar */}
           {activeTab === 'resumen' && (
             <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)] gap-5 items-start">

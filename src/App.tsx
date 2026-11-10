@@ -111,7 +111,7 @@ const CRMAppContent: React.FC = () => {
   const selectedEmpresaObj = empresas.find((e) => e.id === selectedEmpId) || null;
 
   return (
-    <div className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col font-sans transition-colors">
+    <div className="h-dvh overflow-hidden bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col font-sans transition-colors">
       {/* Top Bar Header */}
       <Header
         onOpenSearch={() => setIsSearchOpen(true)}
@@ -120,7 +120,7 @@ const CRMAppContent: React.FC = () => {
       />
 
       {/* Workspace: Sidebar + Main View */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 min-h-0 flex overflow-hidden">
         {/* Barra lateral de navegación */}
         <Sidebar
           currentView={currentView}
@@ -137,7 +137,7 @@ const CRMAppContent: React.FC = () => {
         {/* Viewport Principal */}
         <main
           data-module={currentView === 'marketing' ? (mktSeccion === 'seo' || mktSeccion === 'organico' ? 'organic' : mktSeccion === 'ads' ? 'media' : 'sales') : 'sales'}
-          className="flex-1 overflow-y-auto pb-24 lg:pb-0 bg-[var(--c-bg)] border-t-2 border-[var(--module)]"
+          className="flex-1 min-h-0 overflow-y-auto pb-24 lg:pb-0 bg-[var(--c-bg)] border-t-2 border-[var(--module)]"
         >
           {currentView === 'inicio' && (
             <DashboardView
