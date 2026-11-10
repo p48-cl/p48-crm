@@ -9,6 +9,7 @@ import { KanbanView } from './views/KanbanView';
 import { CompaniesView } from './views/CompaniesView';
 import { ContactsView } from './views/ContactsView';
 import { TasksView } from './views/TasksView';
+import { ProjectsView } from './views/ProjectsView';
 import { ActivitiesView } from './views/ActivitiesView';
 import { MarketingView } from './views/MarketingView';
 import { canalDe } from './components/marketing/canales';
@@ -23,7 +24,7 @@ import { CompanyDetailDrawer } from './views/CompanyDetailDrawer';
 import { NewDealModal } from './components/common/NewDealModal';
 import { CotizacionesView } from './views/CotizacionesView';
 import { ActivityModal } from './components/common/ActivityModal';
-import { CheckSquare, Kanban, Clock, Building2, LayoutDashboard, MoreHorizontal, Users, Upload, Settings, Activity, BarChart3, FileText } from 'lucide-react';
+import { CheckSquare, Kanban, Clock, Building2, LayoutDashboard, MoreHorizontal, Users, Upload, Settings, Activity, BarChart3, FileText, FolderKanban } from 'lucide-react';
 import { NewTaskModal } from './components/common/NewTaskModal';
 import { Tarea } from './types/crm';
 import { useConfiguracionCRM } from './lib/configuracion';
@@ -181,6 +182,10 @@ const CRMAppContent: React.FC = () => {
             />
           )}
 
+          {currentView === 'proyectos' && (
+            <ProjectsView onEditTask={(t) => setTaskModalState({ isOpen: true, tarea: t, k: Date.now() })} />
+          )}
+
           {currentView === 'actividades' && (
             <ActivitiesView
               onOpenNewActivity={() => setActivityModalState({ isOpen: true })}
@@ -331,6 +336,7 @@ const CRMAppContent: React.FC = () => {
               { id: 'empresas' as const, label: 'Clientes', icon: Building2 },
               { id: 'contactos' as const, label: 'Contactos', icon: Users },
               { id: 'cotizaciones' as const, label: 'Cotizaciones', icon: FileText },
+              { id: 'proyectos' as const, label: 'Proyectos', icon: FolderKanban },
               { id: 'actividades' as const, label: 'Actividades', icon: Activity },
               { id: 'marketing' as const, label: 'Marketing', icon: BarChart3 },
               { id: 'importar' as const, label: 'Importar CSV', icon: Upload },

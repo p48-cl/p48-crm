@@ -5,11 +5,13 @@ import {
   Plus,
   Calendar,
   Building2,
+  FolderKanban,
   Kanban,
   Filter,
 } from 'lucide-react';
 import { Tarea } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
+import { useProyectos } from '../components/proyectos/useProyectos';
 import { formatFecha, esFechaAtrasada, esFechaHoy } from '../lib/formatters';
 
 interface TasksViewProps {
@@ -26,6 +28,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
   onSelectOportunidad,
 }) => {
   const { tareas, empresas, oportunidades, miembros, toggleTareaCompletada } = useCRM();
+  const { proyectos } = useProyectos();
 
   const [tab, setTab] = useState<'hoy' | 'semana' | 'atrasadas' | 'todas'>('hoy');
   const [filtroResponsable, setFiltroResponsable] = useState<string>('todos');
@@ -172,6 +175,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
           tareasFiltradas.map((t) => {
             const emp = empresas.find((e) => e.id === t.empresa_id);
             const op = oportunidades.find((o) => o.id === t.oportunidad_id);
+            const proy = t.proyecto_id ? proyectos.find((p) => p.id === t.proyecto_id) : undefined;
             const resp = miembros.find((m) => m.id === t.responsable_id);
             const atrasada = esFechaAtrasada(t.fecha_vencimiento) && !t.completada;
 
@@ -237,6 +241,12 @@ export const TasksView: React.FC<TasksViewProps> = ({
                           <Kanban className="w-3 h-3 text-[var(--c-muted-2)]" />
                           <span>{op.nombre}</span>
                         </button>
+                      )}
+                      {proy && (
+                        <span className="flex items-center gap-1 font-sans" title="Tarea de proyecto">
+                          <FolderKanban className="w-3 h-3 text-[var(--c-muted-2)]" />
+                          <span>{proy.nombre}</span>
+                        </span>
                       )}
                       <span className="hidden sm:inline">·</span>
                       <span>Resp: {resp?.nombre ?? 'Equipo'}</span>
