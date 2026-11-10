@@ -13,6 +13,7 @@ import {
 import { useCRM } from '../context/CRMContext';
 import { useConfiguracionCRM } from '../lib/configuracion';
 import { LogoEmpresa } from '../components/clientes/Logo';
+import { ClientesKpis } from '../components/clientes/ClientesKpis';
 import { LayoutList, LayoutGrid } from 'lucide-react';
 import { formatCLP, formatRUT, formatRUTInput } from '../lib/formatters';
 
@@ -132,6 +133,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-5">
+      <ClientesKpis />
       {/* Barra superior de título y acción principal */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
