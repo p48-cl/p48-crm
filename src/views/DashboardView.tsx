@@ -10,6 +10,7 @@ import { LoUrgenteHoy } from '../components/dashboard/LoUrgenteHoy';
 import { useProyectos } from '../components/proyectos/useProyectos';
 import { Kpi, Bloque, Dona, BarraApilada, FilaBarra, Vacio, COLOR_SALUD } from '../components/dashboard/ui';
 import {
+  hoyIso,
   PERIODOS,
   Periodo,
   inicioPeriodo,
@@ -50,29 +51,37 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   const { oportunidades, etapas, empresas, tareas, miembros, fuentes, motivosPerdida, filtroAlcance, setFiltroAlcance, refetchTodo } = useCRM();
   const { currentUser } = useAuth();
   const { proyectos, recargar: recargarProyectos } = useProyectos();
-  const [periodo, setPeriodo] = useState<Periodo>('mes');
+  const [periodo, setPeriodo] = useState<Periodo | 'personalizado'>('mes');
+  const [rango, setRango] = useState({ desde: inicioPeriodo('mes'), hasta: hoyIso() });
+  const [empId, setEmpId] = useState<string>('todas');
   const [seccion, setSeccion] = useState<Seccion>('todo');
   const [analisis, setAnalisis] = useState<Analisis[]>([]);
   const [pauta, setPauta] = useState<PautaCliente[]>([]);
   const [actualizando, setActualizando] = useState(false);
 
-  const desde = inicioPeriodo(periodo);
+  const personalizado = periodo === 'personalizado';
+  // Rango cerrado [ini, fin]; si el usuario invierte las fechas, se corrige solo.
+  const [ini, fin] = personalizado
+    ? rango.desde <= rango.hasta ? [rango.desde, rango.hasta] : [rango.hasta, rango.desde]
+    : [inicioPeriodo(periodo as Periodo), hoyIso()];
+  const desde = ini;
   const ver = (s: Seccion) => seccion === 'todo' || seccion === s;
 
   // Alcance "Mis datos": todo se filtra por responsable = usuario actual.
   const mios = filtroAlcance === 'mis_datos' && currentUser ? currentUser.id : null;
   const d = useMemo(() => {
     const deMi = <T extends { responsable_id?: string | null }>(xs: T[]) => (mios ? xs.filter((x) => x.responsable_id === mios) : xs);
+    const deEmpresa = <T extends { empresa_id?: string | null }>(xs: T[]) => (empId === 'todas' ? xs : xs.filter((x) => x.empresa_id === empId));
     return {
-      oportunidades: deMi(oportunidades),
-      empresas: deMi(empresas),
-      tareas: deMi(tareas),
-      proyectos: deMi(proyectos),
+      oportunidades: deEmpresa(deMi(oportunidades)),
+      empresas: deMi(empresas).filter((e) => empId === 'todas' || e.id === empId),
+      tareas: deEmpresa(deMi(tareas)),
+      proyectos: deEmpresa(deMi(proyectos)),
     };
-  }, [mios, oportunidades, empresas, tareas, proyectos]);
+  }, [mios, empId, oportunidades, empresas, tareas, proyectos]);
 
   const pipe = useMemo(() => metricasPipeline(d.oportunidades, etapas), [d.oportunidades, etapas]);
-  const res = useMemo(() => resultadosPeriodo(d.oportunidades, etapas, desde), [d.oportunidades, etapas, desde]);
+  const res = useMemo(() => resultadosPeriodo(d.oportunidades, etapas, ini, fin), [d.oportunidades, etapas, ini, fin]);
   const fc = useMemo(() => forecastMensual(pipe.abiertas), [pipe.abiertas]);
   const cart = useMemo(() => metricasCartera(d.empresas, d.oportunidades, etapas), [d.empresas, d.oportunidades, etapas]);
   const tar = useMemo(() => metricasTareas(d.tareas), [d.tareas]);
@@ -85,7 +94,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
     let vivo = true;
     Promise.all([
       supabase.from('analisis_cliente').select('empresa_id,resumen,hallazgos,created_at').order('created_at', { ascending: false }).limit(200),
-      supabase.from('metricas_campanas').select('empresa_id,costo_clp,valor_conversion_clp,conversiones').eq('es_prueba', false).gte('periodo', desde).limit(5000),
+      supabase.from('metricas_campanas').select('empresa_id,costo_clp,valor_conversion_clp,conversiones').eq('es_prueba', false).gte('periodo', ini).lte('periodo', fin).limit(5000),
     ]).then(([a, m]) => {
       if (!vivo) return;
       if (!a.error) {
@@ -106,12 +115,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       }
     });
     return () => { vivo = false; };
-  }, [desde]);
+  }, [ini, fin]);
 
   const idsVisibles = useMemo(() => new Set(d.empresas.map((e) => e.id)), [d.empresas]);
   const nombreEmpresa = (id: string) => empresas.find((e) => e.id === id)?.nombre ?? 'Cliente';
-  const pautaVis = mios ? pauta.filter((p) => idsVisibles.has(p.empresa_id)) : pauta;
-  const analisisVis = mios ? analisis.filter((a) => idsVisibles.has(a.empresa_id)) : analisis;
+  const pautaVis = pauta.filter((p) => idsVisibles.has(p.empresa_id));
+  const analisisVis = analisis.filter((a) => idsVisibles.has(a.empresa_id));
   const alertas = analisisVis
     .flatMap((a) => (a.hallazgos ?? []).filter((h) => h.tipo === 'alerta').map((h) => ({ ...h, empresa_id: a.empresa_id, fecha: a.created_at })))
     .slice(0, 8);
@@ -143,7 +152,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   const maxForecast = Math.max(...fc.meses.map((m) => m.ponderado), fc.atrasado.ponderado, 1);
   const maxEtapa = Math.max(...pipe.porEtapa.map((e) => e.valor), 1);
   const maxEquipo = Math.max(...equipo.map((e) => e.ponderado), 1);
-  const etiquetaPeriodo = PERIODOS.find((p) => p.id === periodo)!.label.toLowerCase();
+  const etiquetaPeriodo = personalizado
+    ? `${ini.split('-').reverse().join('/')} – ${fin.split('-').reverse().join('/')}`
+    : PERIODOS.find((p) => p.id === periodo)!.label.toLowerCase();
+  const clientesOrdenados = useMemo(
+    () => empresas.filter((e) => !e.archivado).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
+    [empresas],
+  );
+  const nombreCliente = empId === 'todas' ? null : empresas.find((e) => e.id === empId)?.nombre ?? null;
   const pctPonderado = pipe.valorCLP > 0 ? (pipe.ponderadoCLP / pipe.valorCLP) * 100 : null;
   const proyectosActivos = proy.activos.length;
 
@@ -170,7 +186,26 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
             {PERIODOS.map((p) => (
               <button key={p.id} type="button" className={chip(periodo === p.id)} onClick={() => setPeriodo(p.id)}>{p.label}</button>
             ))}
+            <button type="button" className={chip(personalizado)} onClick={() => setPeriodo('personalizado')}>Personalizado</button>
           </div>
+          {personalizado && (
+            <div className="surface px-3 py-2 flex items-center gap-2 text-xs" role="group" aria-label="Rango de fechas">
+              <input type="date" aria-label="Desde" value={rango.desde} max={rango.hasta}
+                onChange={(e) => setRango({ ...rango, desde: e.target.value })}
+                className="bg-transparent text-[var(--c-text)] focus:outline-none" />
+              <span className="text-[var(--c-muted)]">a</span>
+              <input type="date" aria-label="Hasta" value={rango.hasta} min={rango.desde}
+                onChange={(e) => setRango({ ...rango, hasta: e.target.value })}
+                className="bg-transparent text-[var(--c-text)] focus:outline-none" />
+            </div>
+          )}
+          <select aria-label="Cliente" value={empId} onChange={(e) => setEmpId(e.target.value)}
+            className="surface px-3 py-2 text-xs text-[var(--c-text)] bg-[var(--c-surface)] max-w-[220px] focus:outline-none">
+            <option value="todas">Todos los clientes</option>
+            {clientesOrdenados.map((e) => (
+              <option key={e.id} value={e.id}>{e.nombre}</option>
+            ))}
+          </select>
           <button type="button" onClick={actualizar} disabled={actualizando} title="Actualizar datos"
             className="surface p-2 text-[var(--c-muted)] hover:text-[var(--c-accent)] disabled:opacity-50">
             <RefreshCw className={`w-4 h-4 ${actualizando ? 'animate-spin' : ''}`} />
@@ -190,12 +225,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         <LoUrgenteHoy
           seguimientosAtrasados={pipe.atrasados}
           tareasHoy={tar.hoy}
+          empresaId={empId === 'todas' ? null : empId}
           onNavigateKanban={() => onNavigate('crm')}
           onNavigateTasks={() => onNavigate('tareas')}
         />
       )}
 
-      {(seccion === 'todo' || seccion === 'comercial') && <MetasMes />}
+      {(seccion === 'todo' || seccion === 'comercial') && periodo === 'mes' && empId === 'todas' && <MetasMes />}
 
       {/* Indicadores globales */}
       {seccion === 'todo' && (

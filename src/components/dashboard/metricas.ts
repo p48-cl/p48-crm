@@ -77,13 +77,14 @@ export function metricasPipeline(oportunidades: VOportunidad[], etapas: Etapa[])
 const fechaCierre = (o: VOportunidad) => (o.fecha_cierre_real ?? o.updated_at ?? o.created_at ?? '').slice(0, 10);
 
 /** Resultados de cierre dentro del período (desde inclusive). */
-export function resultadosPeriodo(oportunidades: VOportunidad[], etapas: Etapa[], desde: string | null) {
+export function resultadosPeriodo(oportunidades: VOportunidad[], etapas: Etapa[], desde: string | null, hasta: string | null = null) {
   const { ganada, perdida } = clasificarEtapas(etapas);
-  const enRango = (o: VOportunidad) => !desde || fechaCierre(o) >= desde;
+  const enRango = (o: VOportunidad) => (!desde || fechaCierre(o) >= desde) && (!hasta || fechaCierre(o) <= hasta);
   const vivas = oportunidades.filter((o) => !o.archivado);
   const ganadas = vivas.filter((o) => ganada.has(o.etapa_id) && enRango(o));
   const perdidas = vivas.filter((o) => perdida.has(o.etapa_id) && enRango(o));
-  const nuevas = vivas.filter((o) => !desde || (o.created_at ?? '').slice(0, 10) >= desde);
+  const creada = (o: VOportunidad) => (o.created_at ?? '').slice(0, 10);
+  const nuevas = vivas.filter((o) => (!desde || creada(o) >= desde) && (!hasta || creada(o) <= hasta));
   const cerradas = ganadas.length + perdidas.length;
   const ciclos = ganadas
     .filter((o) => o.created_at)

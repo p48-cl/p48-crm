@@ -16,6 +16,7 @@ const NOMBRES: Record<string, string> = {
 
 interface CuentaAtrasada {
   id: string;
+  empresaId: string;
   empresa: string;
   plataforma: string;
   dias: number | null;
@@ -23,6 +24,7 @@ interface CuentaAtrasada {
 
 interface Props {
   seguimientosAtrasados: number;
+  empresaId?: string | null;
   tareasHoy: number;
   onNavigateKanban: () => void;
   onNavigateTasks: () => void;
@@ -30,6 +32,7 @@ interface Props {
 
 export const LoUrgenteHoy: React.FC<Props> = ({
   seguimientosAtrasados,
+  empresaId,
   tareasHoy,
   onNavigateKanban,
   onNavigateTasks,
@@ -41,7 +44,7 @@ export const LoUrgenteHoy: React.FC<Props> = ({
     let vivo = true;
     supabase
       .from('cuentas_cliente')
-      .select('id, plataforma, ultima_lectura, empresas(nombre)')
+      .select('id, empresa_id, plataforma, ultima_lectura, empresas(nombre)')
       .eq('estado', 'concedido')
       .eq('archivado', false)
       .in('plataforma', [...PLATAFORMAS_CONECTOR])
@@ -57,6 +60,7 @@ export const LoUrgenteHoy: React.FC<Props> = ({
             const emp = Array.isArray(c.empresas) ? c.empresas[0] : c.empresas;
             lista.push({
               id: c.id,
+              empresaId: c.empresa_id,
               empresa: emp?.nombre ?? 'Cliente',
               plataforma: NOMBRES[c.plataforma] ?? c.plataforma,
               dias,
@@ -70,7 +74,8 @@ export const LoUrgenteHoy: React.FC<Props> = ({
     };
   }, []);
 
-  const hayAlgo = seguimientosAtrasados > 0 || atrasadas.length > 0 || tareasHoy > 0;
+  const visibles = empresaId ? atrasadas.filter((c) => c.empresaId === empresaId) : atrasadas;
+  const hayAlgo = seguimientosAtrasados > 0 || visibles.length > 0 || tareasHoy > 0;
   if (!hayAlgo) return null;
 
   return (
@@ -88,7 +93,7 @@ export const LoUrgenteHoy: React.FC<Props> = ({
             </button>
           </li>
         )}
-        {atrasadas.map((c) => (
+        {visibles.map((c) => (
           <li key={c.id} className="text-[var(--c-text-2)]">
             <span className="font-medium text-[var(--c-text)]">{c.empresa}</span> · {c.plataforma} ·{' '}
             <span className="text-[var(--c-danger)] font-mono">
