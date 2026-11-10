@@ -16,13 +16,20 @@ interface Alerta {
 export const MktDashboard: React.FC = () => {
   const { clientes, filas, cuentas, cargando } = useDatosMarketing();
   const [filtroCliente, setFiltroCliente] = useState('todos');
-  const [semanas, setSemanas] = useState(8);
+  const [semanas, setSemanas] = useState<number | 'personalizado'>(8);
+  const [desde, setDesde] = useState('');
+  const [hasta, setHasta] = useState('');
   const [conPrueba, setConPrueba] = useState(false);
 
   const datos = useMemo(() => {
     const ids = new Set(filtroCliente === 'todos' ? clientes.map((c) => c.id) : [filtroCliente]);
     const base = filas.filter((f) => ids.has(f.empresa_id) && (conPrueba || !f.es_prueba));
-    const periodos = [...new Set(base.map((f) => f.periodo))].sort().slice(-semanas);
+    const todos = [...new Set(base.map((f) => f.periodo))].sort();
+    // Personalizado: semanas cuyo inicio cae entre las fechas elegidas (ambas incluidas).
+    const periodos =
+      semanas === 'personalizado'
+        ? todos.filter((p) => (!desde || p >= desde) && (!hasta || p <= hasta))
+        : todos.slice(-semanas);
     const enRango = base.filter((f) => periodos.includes(f.periodo));
     const val = (emp: string, pl: string, me: string, per: string) =>
       enRango.find((f) => f.empresa_id === emp && f.plataforma === pl && f.metrica === me && f.periodo === per)?.valor;
@@ -84,8 +91,8 @@ export const MktDashboard: React.FC = () => {
         return { c, ses, sesPrev, inv, roas, clics, pos };
       });
 
-    return { periodos, porSemana, tabla, alertas, ultima, penultima };
-  }, [clientes, filas, cuentas, filtroCliente, semanas, conPrueba]);
+    return { periodos, porSemana, tabla, alertas, ultima, penultima, todos };
+  }, [clientes, filas, cuentas, filtroCliente, semanas, desde, hasta, conPrueba]);
 
   if (cargando) return <p className="text-sm text-[var(--c-muted)]">Cargando...</p>;
   if (clientes.length === 0) return <div className="surface p-6 text-sm text-[var(--c-muted)]">No hay clientes activos todavía.</div>;
@@ -110,11 +117,35 @@ export const MktDashboard: React.FC = () => {
             <option key={c.id} value={c.id}>{c.nombre}</option>
           ))}
         </select>
-        <select className={select} value={semanas} onChange={(e) => setSemanas(Number(e.target.value))} aria-label="Rango">
+        <select
+          className={select}
+          value={semanas}
+          aria-label="Rango"
+          onChange={(e) => {
+            if (e.target.value !== 'personalizado') {
+              setSemanas(Number(e.target.value));
+              return;
+            }
+            setSemanas('personalizado');
+            // Al elegir personalizado, precarga las últimas 8 semanas disponibles.
+            if (!desde) setDesde(datos.todos[Math.max(0, datos.todos.length - 8)] ?? '');
+            if (!hasta) setHasta(datos.todos[datos.todos.length - 1] ?? '');
+          }}
+        >
           <option value={4}>Últimas 4 semanas</option>
           <option value={8}>Últimas 8 semanas</option>
           <option value={12}>Últimas 12 semanas</option>
+          <option value="personalizado">Personalizado</option>
         </select>
+        {semanas === 'personalizado' && (
+          <>
+            <input type="date" className={select} value={desde} onChange={(e) => setDesde(e.target.value)} aria-label="Desde" />
+            <input type="date" className={select} value={hasta} onChange={(e) => setHasta(e.target.value)} aria-label="Hasta" />
+            {desde && hasta && desde > hasta && (
+              <span className="text-[11px] text-[var(--c-danger)]">La fecha de inicio es posterior a la de término.</span>
+            )}
+          </>
+        )}
         <label className="flex items-center gap-1.5 text-xs text-[var(--c-text-2)]">
           <input type="checkbox" checked={conPrueba} onChange={(e) => setConPrueba(e.target.checked)} />
           Incluir datos de prueba
