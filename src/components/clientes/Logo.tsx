@@ -66,6 +66,26 @@ async function redimensionar(file: File): Promise<Blob> {
   return png;
 }
 
+// Valida el archivo antes de procesarlo. Devuelve el mensaje de error o null si es válido.
+export function validarArchivoLogo(file: File): string | null {
+  if (!TIPOS.includes(file.type)) return 'Usa PNG, JPG o WebP';
+  if (file.size > 5 * 1024 * 1024) return 'La imagen original es muy pesada (máx. 5 MB)';
+  return null;
+}
+
+// Reduce, sube al bucket «logos» y devuelve la ruta. No toca la base: quien llama guarda logo_path.
+export async function subirLogoEmpresa(empresaId: string, file: File): Promise<string> {
+  if (!supabase) throw new Error('Sin conexión a la base de datos');
+  const error = validarArchivoLogo(file);
+  if (error) throw new Error(error);
+  const blob = await redimensionar(file);
+  if (blob.size > MAX_BYTES) throw new Error('La imagen sigue siendo muy pesada tras reducirla');
+  const path = `${empresaId}/${Date.now()}.${blob.type === 'image/webp' ? 'webp' : 'png'}`;
+  const { error: upErr } = await supabase.storage.from('logos').upload(path, blob, { contentType: blob.type, upsert: false });
+  if (upErr) throw upErr;
+  return path;
+}
+
 interface SubirLogoProps {
   empresaId: string;
   nombre: string;
@@ -89,15 +109,11 @@ export const SubirLogo: React.FC<SubirLogoProps> = ({ empresaId, nombre, logoPat
     e.target.value = '';
     if (!file || !supabase) return;
     setError(null);
-    if (!TIPOS.includes(file.type)) return setError('Usa PNG, JPG o WebP');
-    if (file.size > 5 * 1024 * 1024) return setError('La imagen original es muy pesada (máx. 5 MB)');
+    const invalido = validarArchivoLogo(file);
+    if (invalido) return setError(invalido);
     setSubiendo(true);
     try {
-      const blob = await redimensionar(file);
-      if (blob.size > MAX_BYTES) throw new Error('La imagen sigue siendo muy pesada tras reducirla');
-      const path = `${empresaId}/${Date.now()}.${blob.type === 'image/webp' ? 'webp' : 'png'}`;
-      const { error: upErr } = await supabase.storage.from('logos').upload(path, blob, { contentType: blob.type, upsert: false });
-      if (upErr) throw upErr;
+      const path = await subirLogoEmpresa(empresaId, file);
       await actualizarEmpresa(empresaId, { logo_path: path });
       if (logoPath) await supabase.storage.from('logos').remove([logoPath]); // limpia el anterior
     } catch (err) {

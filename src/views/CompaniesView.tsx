@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';
 import { useConfiguracionCRM } from '../lib/configuracion';
-import { LogoEmpresa } from '../components/clientes/Logo';
+import { LogoEmpresa, subirLogoEmpresa, validarArchivoLogo } from '../components/clientes/Logo';
 import { ClientesKpis } from '../components/clientes/ClientesKpis';
 import { LayoutList, LayoutGrid } from 'lucide-react';
 import { formatCLP, formatRUT, formatRUTInput } from '../lib/formatters';
@@ -24,7 +24,7 @@ interface CompaniesViewProps {
 export const CompaniesView: React.FC<CompaniesViewProps> = ({
   onSelectEmpresa,
 }) => {
-  const { empresas, accesosAdmin, miembros, industrias, crearEmpresa, oportunidades } = useCRM();
+  const { empresas, accesosAdmin, miembros, industrias, crearEmpresa, actualizarEmpresa, oportunidades } = useCRM();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filtroEstado, setFiltroEstado] = useState<string>('todos');
@@ -33,6 +33,13 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
 
   // Modal para nueva empresa
   const [showNewModal, setShowNewModal] = useState(false);
+  // Logo elegido al crear el cliente: se sube una vez exista la empresa.
+  const [logoNuevo, setLogoNuevo] = useState<File | null>(null);
+  const [logoError, setLogoError] = useState<string | null>(null);
+  const logoPreview = useMemo(() => (logoNuevo ? URL.createObjectURL(logoNuevo) : null), [logoNuevo]);
+  useEffect(() => () => {
+    if (logoPreview) URL.revokeObjectURL(logoPreview);
+  }, [logoPreview]);
   const { config: configCRM } = useConfiguracionCRM();
   const [vista, setVista] = useState<'tabla' | 'tarjetas'>(configCRM.vista_clientes_defecto);
   useEffect(() => {
@@ -112,6 +119,17 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
       salud: newCompany.salud || null,
     });
 
+    if (creada && logoNuevo) {
+      try {
+        const path = await subirLogoEmpresa(creada.id, logoNuevo);
+        await actualizarEmpresa(creada.id, { logo_path: path });
+      } catch (err) {
+        window.alert(
+          `El cliente se creó, pero el logo no se pudo subir: ${err instanceof Error ? err.message : 'error desconocido'}. Puedes subirlo desde la ficha.`
+        );
+      }
+    }
+    setLogoNuevo(null);
     setShowNewModal(false);
     setNewCompany({
       nombre: '',
@@ -146,7 +164,11 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
 
         {/* Botón Principal (Lima P48) */}
         <button
-          onClick={() => setShowNewModal(true)}
+          onClick={() => {
+            setLogoNuevo(null);
+            setLogoError(null);
+            setShowNewModal(true);
+          }}
           className="bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] active:scale-[0.98] text-[var(--c-on-accent)] font-semibold text-xs py-2 px-3.5 rounded flex items-center gap-1.5 transition-all shadow-sm font-sans"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
@@ -479,6 +501,35 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                   onChange={(e) => setNewCompany({ ...newCompany, nombre: e.target.value })}
                   className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
                 />
+              </div>
+
+              <div className="flex items-center gap-3">
+                {logoPreview ? (
+                  <img src={logoPreview} alt="Vista previa del logo" className="w-12 h-12 rounded bg-white object-contain border border-[var(--c-line)] shrink-0" />
+                ) : (
+                  <div className="w-12 h-12 rounded bg-[var(--c-surface-3)] shrink-0" aria-hidden />
+                )}
+                <div className="flex flex-col gap-1 min-w-0">
+                  <span className="text-xs font-medium text-[var(--c-text-2)]">Logo (opcional)</span>
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    className="text-[11px] text-[var(--c-muted)] max-w-full"
+                    onChange={(e) => {
+                      const archivo = e.target.files?.[0] ?? null;
+                      e.target.value = '';
+                      if (!archivo) {
+                        setLogoNuevo(null);
+                        setLogoError(null);
+                        return;
+                      }
+                      const error = validarArchivoLogo(archivo);
+                      setLogoError(error);
+                      setLogoNuevo(error ? null : archivo);
+                    }}
+                  />
+                  {logoError && <span className="text-[10px] text-[var(--c-danger)]">{logoError}</span>}
+                </div>
               </div>
 
               <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-3">
