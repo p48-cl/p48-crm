@@ -11,6 +11,7 @@ import { ContactsView } from './views/ContactsView';
 import { TasksView } from './views/TasksView';
 import { ActivitiesView } from './views/ActivitiesView';
 import { MarketingView } from './views/MarketingView';
+import { canalDe } from './components/marketing/canales';
 import { ImportView } from './views/ImportView';
 import { AdminView } from './views/AdminView';
 import { LoginView } from './views/LoginView';
@@ -33,7 +34,7 @@ const CRMAppContent: React.FC = () => {
 
   const [currentView, setCurrentView] = useState<ViewType>('inicio');
   const [masAbierto, setMasAbierto] = useState(false);
-  const [mktSeccion, setMktSeccion] = useState<SeccionMarketing>('dashboard');
+  const [mktSeccion, setMktSeccion] = useState<SeccionMarketing>('resumen');
   const abrirMarketing = (s: SeccionMarketing) => { setMktSeccion(s); setCurrentView('marketing'); };
   const { config: configCRM } = useConfiguracionCRM(isLoggedIn);
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
@@ -136,7 +137,7 @@ const CRMAppContent: React.FC = () => {
 
         {/* Viewport Principal */}
         <main
-          data-module={currentView === 'marketing' ? (mktSeccion === 'seo' || mktSeccion === 'organico' ? 'organic' : mktSeccion === 'ads' ? 'media' : 'sales') : 'sales'}
+          data-module={currentView === 'marketing' ? (canalDe(mktSeccion)?.tipo === 'organico' ? 'organic' : canalDe(mktSeccion)?.tipo === 'pago' ? 'media' : 'sales') : 'sales'}
           className="flex-1 min-h-0 overflow-y-auto pb-24 lg:pb-0 bg-[var(--c-bg)] border-t-2 border-[var(--module)]"
         >
           {currentView === 'inicio' && (
@@ -188,7 +189,7 @@ const CRMAppContent: React.FC = () => {
             />
           )}
 
-          {currentView === 'marketing' && <MarketingView seccion={mktSeccion} onSeccion={setMktSeccion} onAbrirFicha={(id) => { setFichaTab('marketing'); setSelectedEmpId(id); }} />}
+          {currentView === 'marketing' && <MarketingView seccion={mktSeccion} onSeccion={setMktSeccion} />}
 
           {currentView === 'importar' && <ImportView />}
 
