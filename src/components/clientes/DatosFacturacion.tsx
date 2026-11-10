@@ -8,7 +8,7 @@ interface Props {
   onGuardar: (cambios: Partial<Empresa>) => void;
 }
 
-const input = 'w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]';
+const input = 'w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]';
 const label = 'block text-[11px] text-[var(--c-muted)] mb-1';
 
 // Datos que necesita una cotización o factura. Se guarda al salir de cada campo.

@@ -63,7 +63,7 @@ const EnlaceEditable: React.FC<{ valor?: string | null; placeholder: string; onG
         onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
         placeholder={placeholder}
         aria-label={placeholder}
-        className="w-full min-w-0 max-w-[180px] bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2 py-1 text-[11px] text-[var(--c-text)] font-mono"
+        className="w-full min-w-0 max-w-[180px] bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2 py-1 text-[11px] text-[var(--c-text)] font-mono"
       />
       {valor && !error && (
         <a href={valor} target="_blank" rel="noopener noreferrer" aria-label="Abrir enlace" className="shrink-0 text-[var(--c-accent)]">
@@ -176,9 +176,9 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center sm:p-6 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="bg-[var(--c-surface)] w-full max-w-5xl h-full sm:h-auto sm:max-h-[92vh] sm:rounded-xl border border-[var(--c-line)] shadow-2xl flex flex-col overflow-hidden">
+      <div onClick={(e) => e.stopPropagation()} className="bg-[var(--c-bg)] w-full max-w-5xl h-full sm:h-auto sm:max-h-[92vh] sm:rounded-xl border border-[var(--c-line)] shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-[var(--c-line)] flex items-start justify-between gap-3">
+        <div className="p-4 sm:p-5 border-b border-[var(--c-line)] bg-[var(--c-surface)] flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
             <SubirLogo empresaId={empresa.id} nombre={empresa.nombre} logoPath={empresa.logo_path} size={48} />
             <div>
@@ -186,9 +186,20 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                 <h2 className="text-lg font-bold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
                   {empresa.nombre}
                 </h2>
-                <span className="font-mono text-[10px] text-[var(--c-muted)] uppercase">
-                  {empresa.estado}
+                <span className={`font-mono text-[10px] uppercase px-2 py-0.5 rounded-full border border-[var(--c-line)] ${empresa.estado === 'cliente' ? 'text-[var(--c-ok)]' : 'text-[var(--c-muted)]'}`}>
+                  {empresa.estado === 'cliente' ? 'Cliente activo' : empresa.estado}
                 </span>
+                {empresa.plan && (
+                  <span className="font-mono text-[10px] uppercase px-2 py-0.5 rounded-full bg-[var(--c-surface-3)] text-[var(--c-text-2)]">
+                    Plan {empresa.plan}
+                  </span>
+                )}
+                {empresa.salud && (
+                  <span className="flex items-center gap-1 font-mono text-[10px] uppercase text-[var(--c-muted)]">
+                    <span className={`w-2 h-2 rounded-full ${empresa.salud === 'verde' ? 'bg-[var(--c-ok)]' : empresa.salud === 'amarillo' ? 'bg-[var(--c-warn)]' : 'bg-[var(--c-danger)]'}`} />
+                    {empresa.salud}
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-3 text-xs text-[var(--c-muted)] mt-0.5 font-mono">
                 {empresa.rut && <span>RUT {formatRUT(empresa.rut)}</span>}
@@ -233,7 +244,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
         </div>
 
         {/* Navigation Tabs */}
-        <div className="px-5 border-b border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-text)] flex flex-wrap gap-x-4 sm:gap-x-5 text-xs font-medium">
+        <div className="px-5 border-b border-[var(--c-line)] bg-[var(--c-surface)] flex flex-wrap gap-x-4 sm:gap-x-5 text-xs font-medium">
           {(
             [
               { id: 'info', label: 'Datos & Accesos' },
@@ -269,8 +280,37 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
           {/* TAB 1: INFO & ACCESOS */}
           {activeTab === 'info' && (
             <div className="space-y-6">
+              {/* Resumen rápido */}
+              {(() => {
+                const diasRenov = empresa.fecha_renovacion
+                  ? Math.ceil((new Date(empresa.fecha_renovacion).getTime() - Date.now()) / 86400000)
+                  : null;
+                const kpis = [
+                  { label: 'MRR', valor: empresa.mrr_actual_clp ? formatCLP(empresa.mrr_actual_clp) : '—' },
+                  { label: 'Fee mensual', valor: empresa.fee_mensual_clp ? formatCLP(empresa.fee_mensual_clp) : '—' },
+                  {
+                    label: 'Renovación',
+                    valor: empresa.fecha_renovacion ? formatFecha(empresa.fecha_renovacion) : '—',
+                    sub: diasRenov === null ? '' : diasRenov < 0 ? `vencida hace ${-diasRenov} d` : `en ${diasRenov} d`,
+                    alerta: diasRenov !== null && diasRenov <= 30,
+                  },
+                  { label: 'Negocios abiertos', valor: String(oportunidadesEmpresa.length), sub: `${contactosEmpresa.length} contactos` },
+                ];
+                return (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {kpis.map((k) => (
+                      <div key={k.label} className="ficha-card p-3">
+                        <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">{k.label}</p>
+                        <p className={`text-sm font-semibold mt-1 font-mono ${k.alerta ? 'text-[var(--c-warn)]' : 'text-[var(--c-text)]'}`}>{k.valor}</p>
+                        {k.sub && <p className="text-[10px] font-mono text-[var(--c-muted)] mt-0.5">{k.sub}</p>}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+
               {/* Parámetros Comerciales & Operativos */}
-              <div className="surface p-4 space-y-4">
+              <div className="ficha-card p-4 space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-semibold text-[var(--c-text)]">Contrato y estado</h3>
                   <span className="text-[10px] font-mono text-[var(--c-muted)]">Lo que define la relación</span>
@@ -283,7 +323,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                     <select
                       value={empresa.estado}
                       onChange={(e) => actualizarEmpresa(empresa.id, { estado: e.target.value as any })}
-                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
+                      className="w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     >
                       <option value="prospecto">Prospecto</option>
                       <option value="cliente">Cliente activo</option>
@@ -300,7 +340,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                     <select
                       value={empresa.plan || ''}
                       onChange={(e) => actualizarEmpresa(empresa.id, { plan: (e.target.value as any) || null })}
-                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
+                      className="w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     >
                       <option value="">Sin plan</option>
                       <option value="A">Plan A</option>
@@ -317,7 +357,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                     <select
                       value={empresa.salud || ''}
                       onChange={(e) => actualizarEmpresa(empresa.id, { salud: (e.target.value as any) || null })}
-                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
+                      className="w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     >
                       <option value="">Sin definir</option>
                       <option value="verde">Verde (Saludable)</option>
@@ -342,7 +382,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                         })
                       }
                       placeholder="Ej: 1500000"
-                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] font-mono"
+                      className="w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] font-mono"
                     />
                   </div>
 
@@ -357,7 +397,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                         })
                       }
                       placeholder="Ej: 800000"
-                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] font-mono"
+                      className="w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] font-mono"
                     />
                   </div>
 
@@ -371,7 +411,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                           fecha_renovacion: e.target.value || null,
                         })
                       }
-                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] font-mono"
+                      className="w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] font-mono"
                     />
                   </div>
 
@@ -380,7 +420,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                     <select
                       value={empresa.renovacion_tipo || 'manual'}
                       onChange={(e) => actualizarEmpresa(empresa.id, { renovacion_tipo: e.target.value as 'manual' | 'automatica' })}
-                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
+                      className="w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     >
                       <option value="manual">Manual (se renueva con firma)</option>
                       <option value="automatica">Automática</option>
@@ -400,7 +440,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                           responsable_id: e.target.value || null,
                         })
                       }
-                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
+                      className="w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     >
                       <option value="">Sin asignar</option>
                       {miembros.map((m) => (
@@ -420,13 +460,18 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+              {/* Datos legales y tributarios */}
+              <DatosFacturacion empresa={empresa} onGuardar={(c) => actualizarEmpresa(empresa.id, c)} />
+
+              <div className="space-y-6">
               {/* Enlaces Operativos: Looker Studio & Google Drive */}
-              <div className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-bg)] p-4 rounded-lg border border-[var(--c-line)]">
+              <div className="ficha-card p-4 rounded-xl border border-[var(--c-line)]">
                 <h3 className="text-xs font-semibold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] mb-3">
                   Enlaces del Cliente P48
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="p-3 bg-[var(--c-surface)] rounded border border-[var(--c-surface-3)] flex items-center justify-between">
+                  <div className="p-3 bg-[var(--c-field)] rounded-lg border border-[var(--c-line)] flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <ExternalLink className="w-4 h-4 text-[var(--c-accent)]" />
                       <div>
@@ -441,7 +486,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                     />
                   </div>
 
-                  <div className="p-3 bg-[var(--c-surface)] rounded border border-[var(--c-surface-3)] flex items-center justify-between">
+                  <div className="p-3 bg-[var(--c-field)] rounded-lg border border-[var(--c-line)] flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Folder className="w-4 h-4 text-[var(--c-info)]" />
                       <div>
@@ -458,15 +503,14 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                 </div>
               </div>
 
-              {/* Datos legales y tributarios */}
-              <DatosFacturacion empresa={empresa} onGuardar={(c) => actualizarEmpresa(empresa.id, c)} />
-
               {/* Cuentas y permisos del cliente (registro por plataforma) */}
               <CuentasCliente
                 empresaId={empresa.id}
                 notas={accesos.notas_accesos || ''}
                 onNotas={(v) => actualizarAccesosAdmin(empresa.id, { notas_accesos: v })}
               />
+              </div>
+              </div>
             </div>
           )}
 
@@ -487,7 +531,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
               {showAddContact && (
                 <form
                   onSubmit={handleCreateContact}
-                  className="p-4 bg-[var(--c-surface-2)] rounded-lg border border-[var(--c-line)] space-y-3"
+                  className="p-4 ficha-card rounded-xl border border-[var(--c-line)] space-y-3"
                 >
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <input
@@ -496,14 +540,14 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                       value={newContact.nombre}
                       onChange={(e) => setNewContact({ ...newContact, nombre: e.target.value })}
                       required
-                      className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
+                      className="bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     />
                     <input
                       type="text"
                       placeholder="Apellido"
                       value={newContact.apellido}
                       onChange={(e) => setNewContact({ ...newContact, apellido: e.target.value })}
-                      className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
+                      className="bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -513,14 +557,14 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                       value={newContact.email}
                       onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
                       required
-                      className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
+                      className="bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     />
                     <input
                       type="text"
                       placeholder="Cargo (ej: Head of Growth)"
                       value={newContact.cargo}
                       onChange={(e) => setNewContact({ ...newContact, cargo: e.target.value })}
-                      className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
+                      className="bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -529,14 +573,14 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                       placeholder="Celular +569"
                       value={newContact.telefono}
                       onChange={(e) => setNewContact({ ...newContact, telefono: formatTelefonoCL(e.target.value) })}
-                      className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
+                      className="bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     />
                     <input
                       type="text"
                       placeholder="URL de LinkedIn"
                       value={newContact.linkedin_url}
                       onChange={(e) => setNewContact({ ...newContact, linkedin_url: e.target.value })}
-                      className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
+                      className="bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     />
                   </div>
                   <div>
@@ -549,7 +593,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                           rol_decision: e.target.value as 'decisor' | 'influenciador' | 'usuario',
                         })
                       }
-                      className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
+                      className="w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     >
                       <option value="decisor">Decisor (Presupuesto y firma)</option>
                       <option value="influenciador">Influenciador (Líder técnico)</option>
@@ -581,7 +625,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                   contactosEmpresa.map((c) => (
                     <div
                       key={c.id}
-                      className="p-3 bg-[var(--c-surface-2)] rounded border border-[var(--c-line)] flex items-center justify-between"
+                      className="p-3 bg-[var(--c-field)] rounded-lg border border-[var(--c-line)] flex items-center justify-between"
                     >
                       <div>
                         <div className="flex items-center gap-2">
@@ -700,7 +744,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                     return (
                       <div
                         key={act.id}
-                        className="p-3 bg-[var(--c-surface-2)] rounded border border-[var(--c-line)] text-xs space-y-1"
+                        className="p-3 bg-[var(--c-field)] rounded-lg border border-[var(--c-line)] text-xs space-y-1"
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-semibold text-[var(--c-text)] capitalize">
@@ -746,7 +790,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                   {tareasEmpresa.map((tar) => (
                     <div
                       key={tar.id}
-                      className="p-3 bg-[var(--c-surface-2)] rounded border border-[var(--c-line)] flex items-center justify-between gap-3 text-xs"
+                      className="p-3 bg-[var(--c-field)] rounded-lg border border-[var(--c-line)] flex items-center justify-between gap-3 text-xs"
                     >
                       <button
                         type="button"
