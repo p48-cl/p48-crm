@@ -21,7 +21,10 @@ import { CuentasCliente } from '../components/clientes/CuentasCliente';
 import { SubirLogo } from '../components/clientes/Logo';
 import { FichaMarketing } from '../components/marketing/FichaMarketing';
 
-type Tab = 'info' | 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'cotizaciones' | 'cliente' | 'marketing';
+type Tab = 'resumen' | 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'cotizaciones' | 'marketing' | 'info' | 'cliente';
+
+const DIAS_ALERTA_RENOVACION = 60;
+const DIAS_SIN_ACTIVIDAD = 30;
 
 interface CompanyDetailDrawerProps {
   empresa: Empresa | null;
@@ -102,10 +105,10 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
     industrias,
   } = useCRM();
 
-  const [activeTab, setActiveTab] = useState<Tab>('info');
+  const [activeTab, setActiveTab] = useState<Tab>('resumen');
 
   useEffect(() => {
-    if (isOpen) setActiveTab(tabInicial ?? 'info');
+    if (isOpen) setActiveTab(tabInicial ?? 'resumen');
   }, [isOpen, empresa?.id, tabInicial]);
   const [showAddContact, setShowAddContact] = useState(false);
   const [newContact, setNewContact] = useState<{
@@ -144,6 +147,61 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
   const actividadesEmpresa = actividades.filter((a) => a.empresa_id === empresa.id);
   const tareasEmpresa = tareas.filter((t) => t.empresa_id === empresa.id);
   const industria = industrias.find((i) => i.id === empresa.industria_id);
+  const responsable = miembros.find((m) => m.id === empresa.responsable_id);
+
+  const hoyMs = Date.now();
+  const diasRenov = empresa.fecha_renovacion
+    ? Math.ceil((new Date(empresa.fecha_renovacion).getTime() - hoyMs) / 86400000)
+    : null;
+  const tareasPendientes = tareasEmpresa
+    .filter((t) => !t.completada)
+    .sort((a, b) => (a.fecha_vencimiento || '').localeCompare(b.fecha_vencimiento || ''));
+  const tareasAtrasadas = tareasPendientes.filter((t) => t.fecha_vencimiento && new Date(t.fecha_vencimiento).getTime() < hoyMs - 86400000);
+  const ultimaActividad = actividadesEmpresa.reduce<number | null>((max, a) => {
+    const ts = new Date(a.fecha_actividad).getTime();
+    return max === null || ts > max ? ts : max;
+  }, null);
+  const diasSinActividad = ultimaActividad === null ? null : Math.floor((hoyMs - ultimaActividad) / 86400000);
+  const saludEtiqueta: Record<string, { texto: string; clase: string }> = {
+    verde: { texto: 'Saludable', clase: 'text-[var(--c-ok)]' },
+    amarillo: { texto: 'En alerta', clase: 'text-[var(--c-warn)]' },
+    rojo: { texto: 'En riesgo', clase: 'text-[var(--c-danger)]' },
+  };
+  const salud = empresa.salud ? saludEtiqueta[empresa.salud] : null;
+
+  // Riesgos y oportunidades derivados de datos reales (no se inventan señales)
+  const riesgos: { texto: string; tono: 'alerta' | 'info' }[] = [];
+  if (diasRenov !== null && diasRenov <= DIAS_ALERTA_RENOVACION) {
+    riesgos.push({
+      texto: diasRenov < 0 ? `Renovación vencida hace ${-diasRenov} días` : `Renovación en ${diasRenov} días`,
+      tono: 'alerta',
+    });
+  }
+  if (empresa.salud === 'rojo' || empresa.salud === 'amarillo') {
+    riesgos.push({ texto: `Salud de cuenta: ${salud?.texto ?? ''}`, tono: 'alerta' });
+  }
+  if (tareasAtrasadas.length > 0) {
+    riesgos.push({ texto: `${tareasAtrasadas.length} tarea(s) atrasada(s)`, tono: 'alerta' });
+  }
+  if (diasSinActividad === null || diasSinActividad > DIAS_SIN_ACTIVIDAD) {
+    riesgos.push({
+      texto: diasSinActividad === null ? 'Sin actividad registrada' : `Sin actividad hace ${diasSinActividad} días`,
+      tono: 'info',
+    });
+  }
+  if (empresa.estado === 'cliente' && oportunidadesEmpresa.length === 0) {
+    riesgos.push({ texto: 'Sin negocio abierto de renovación o expansión', tono: 'info' });
+  }
+
+  // Acción principal del encabezado según la pestaña activa
+  const accionPrincipal: { label: string; onClick: () => void } | null =
+    activeTab === 'contactos'
+      ? { label: '+ Contacto', onClick: () => setShowAddContact(true) }
+      : activeTab === 'actividades'
+      ? { label: '+ Actividad', onClick: () => onOpenNewActivity(empresa.id) }
+      : activeTab === 'tareas'
+      ? { label: '+ Tarea', onClick: () => onOpenNewTask(empresa.id) }
+      : null;
 
   const handleCreateContact = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -227,6 +285,14 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            {accionPrincipal && (
+              <button
+                onClick={accionPrincipal.onClick}
+                className="text-xs text-[var(--c-on-accent)] bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] px-3 py-1.5 rounded font-medium transition-colors"
+              >
+                {accionPrincipal.label}
+              </button>
+            )}
             <button
               onClick={handleArchive}
               className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-danger)] hover:bg-[var(--c-surface-3)] rounded transition-colors"
@@ -243,22 +309,52 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
           </div>
         </div>
 
+        {/* Franja de decisión: visible en todas las pestañas */}
+        <div className="grid grid-cols-2 md:grid-cols-4 border-b border-[var(--c-line)] bg-[var(--c-surface)]">
+          <div className="px-4 sm:px-5 py-3 border-r border-[var(--c-line)]">
+            <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">Salud de cuenta</p>
+            <p className={`text-sm font-semibold mt-0.5 ${salud?.clase ?? 'text-[var(--c-muted)]'}`}>
+              {salud ? salud.texto : 'Sin definir'}
+            </p>
+          </div>
+          <div className="px-4 sm:px-5 py-3 md:border-r border-[var(--c-line)]">
+            <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">MRR contratado</p>
+            <p className="text-sm font-semibold mt-0.5 font-mono text-[var(--c-text)]">
+              {empresa.mrr_actual_clp ? `${formatCLP(empresa.mrr_actual_clp)} CLP` : 'Sin MRR'}
+            </p>
+          </div>
+          <div className="px-4 sm:px-5 py-3 border-r border-t md:border-t-0 border-[var(--c-line)]">
+            <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">Próxima renovación</p>
+            <p className="text-sm font-semibold mt-0.5 font-mono text-[var(--c-text)]">
+              {empresa.fecha_renovacion ? formatFecha(empresa.fecha_renovacion) : 'Sin fecha'}
+            </p>
+            {diasRenov !== null && diasRenov <= DIAS_ALERTA_RENOVACION && (
+              <p className="text-[10px] font-mono text-[var(--c-warn)] mt-0.5">
+                {diasRenov < 0 ? `vencida hace ${-diasRenov} d` : `quedan ${diasRenov} d`}
+              </p>
+            )}
+          </div>
+          <div className="px-4 sm:px-5 py-3 border-t md:border-t-0 border-[var(--c-line)]">
+            <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">Responsable</p>
+            <p className="text-sm font-semibold mt-0.5 text-[var(--c-text)] truncate">
+              {responsable ? responsable.nombre : 'Sin asignar'}
+            </p>
+          </div>
+        </div>
+
         {/* Navigation Tabs */}
         <div className="px-5 border-b border-[var(--c-line)] bg-[var(--c-surface)] flex flex-wrap gap-x-4 sm:gap-x-5 text-xs font-medium">
           {(
             [
-              { id: 'info', label: 'Datos & Accesos' },
-              { id: 'contactos', label: `Contactos (${contactosEmpresa.length})` },
-              { id: 'oportunidades', label: `Negocios (${oportunidadesEmpresa.length})` },
-              { id: 'actividades', label: `Actividades (${actividadesEmpresa.length})` },
-              { id: 'tareas', label: `Tareas (${tareasEmpresa.length})` },
+              { id: 'resumen' as const, label: 'Resumen' },
+              { id: 'contactos' as const, label: `Contactos (${contactosEmpresa.length})` },
+              { id: 'oportunidades' as const, label: `Negocios (${oportunidadesEmpresa.length})` },
+              { id: 'actividades' as const, label: 'Actividad' },
+              { id: 'tareas' as const, label: `Tareas (${tareasPendientes.length})` },
               { id: 'cotizaciones' as const, label: 'Cotizaciones' },
-              ...(empresa.estado === 'cliente'
-                ? [
-                    { id: 'marketing' as const, label: 'Marketing' },
-                    { id: 'cliente' as const, label: 'Cliente y portal' },
-                  ]
-                : []),
+              ...(empresa.estado === 'cliente' ? [{ id: 'marketing' as const, label: 'Marketing' }] : []),
+              { id: 'info' as const, label: 'Contrato y datos' },
+              ...(empresa.estado === 'cliente' ? [{ id: 'cliente' as const, label: 'Portal y activos' }] : []),
             ] as const
           ).map((tab) => (
             <button
@@ -277,38 +373,114 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
 
         {/* Body content */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-6">
-          {/* TAB 1: INFO & ACCESOS */}
+          {/* TAB RESUMEN: revisión rápida antes de una reunión o para priorizar */}
+          {activeTab === 'resumen' && (
+            <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)] gap-5 items-start">
+              <div className="space-y-5">
+                <div className="ficha-card p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-xs font-semibold text-[var(--c-text)]">Prioridades abiertas</h3>
+                    <button onClick={() => setActiveTab('tareas')} className="text-[11px] text-[var(--c-accent)] hover:underline">
+                      Ver tareas
+                    </button>
+                  </div>
+                  {tareasPendientes.length === 0 ? (
+                    <p className="text-xs text-[var(--c-muted)] py-3 text-center">Sin tareas pendientes para esta cuenta.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {tareasPendientes.slice(0, 3).map((t) => {
+                        const atrasada = !!t.fecha_vencimiento && new Date(t.fecha_vencimiento).getTime() < hoyMs - 86400000;
+                        return (
+                          <div key={t.id} className="flex items-center justify-between gap-3 p-3 bg-[var(--c-field)] rounded-lg border border-[var(--c-line)] text-xs">
+                            <span className="font-medium text-[var(--c-text)] truncate">{t.titulo}</span>
+                            <span className={`shrink-0 font-mono text-[10px] ${atrasada ? 'text-[var(--c-danger)]' : 'text-[var(--c-muted)]'}`}>
+                              {atrasada ? 'Atrasada' : t.fecha_vencimiento ? formatFecha(t.fecha_vencimiento) : 'Sin fecha'}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                <div className="ficha-card p-4">
+                  <h3 className="text-xs font-semibold text-[var(--c-text)] mb-3">Riesgos y oportunidades</h3>
+                  {riesgos.length === 0 ? (
+                    <p className="text-xs text-[var(--c-muted)] py-3 text-center">Sin alertas abiertas.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {riesgos.map((r) => (
+                        <div key={r.texto} className="flex items-start gap-2.5 text-xs text-[var(--c-text-2)]">
+                          <span className={`mt-1 w-2 h-2 rounded-full shrink-0 ${r.tono === 'alerta' ? 'bg-[var(--c-warn)]' : 'bg-[var(--c-info)]'}`} />
+                          <span>{r.texto}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-5">
+                <div className="ficha-card p-4 space-y-3">
+                  <h3 className="text-xs font-semibold text-[var(--c-text)]">Perfil comercial</h3>
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div>
+                      <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Plan</p>
+                      <p className="text-[var(--c-text)] mt-0.5">{empresa.plan ? (empresa.plan === 'personalizado' ? 'Personalizado' : `Plan ${empresa.plan}`) : 'Sin plan'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Renovación</p>
+                      <p className="text-[var(--c-text)] mt-0.5">{empresa.renovacion_tipo === 'automatica' ? 'Automática' : 'Manual'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Fee mensual</p>
+                      <p className="font-mono text-[var(--c-text)] mt-0.5">{empresa.fee_mensual_clp ? formatCLP(empresa.fee_mensual_clp) : '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Contactos</p>
+                      <p className="font-mono text-[var(--c-text)] mt-0.5">{contactosEmpresa.length}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="ficha-card p-4 space-y-3">
+                  <h3 className="text-xs font-semibold text-[var(--c-text)]">Enlaces rápidos</h3>
+                  <div className="p-3 bg-[var(--c-field)] rounded-lg border border-[var(--c-line)] flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <ExternalLink className="w-4 h-4 shrink-0 text-[var(--c-accent)]" />
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium text-[var(--c-text)]">Dashboard Looker</p>
+                        <p className="text-[10px] text-[var(--c-muted)] font-mono">Reportes de performance</p>
+                      </div>
+                    </div>
+                    <EnlaceEditable
+                      valor={empresa.looker_dashboard_url}
+                      placeholder="Pegar URL de Looker Studio"
+                      onGuardar={(url) => actualizarEmpresa(empresa.id, { looker_dashboard_url: url })}
+                    />
+                  </div>
+                  <div className="p-3 bg-[var(--c-field)] rounded-lg border border-[var(--c-line)] flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Folder className="w-4 h-4 shrink-0 text-[var(--c-info)]" />
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium text-[var(--c-text)]">Carpeta Drive</p>
+                        <p className="text-[10px] text-[var(--c-muted)] font-mono">Estrategia, creativos y contratos</p>
+                      </div>
+                    </div>
+                    <EnlaceEditable
+                      valor={empresa.drive_folder_url}
+                      placeholder="Pegar URL de carpeta Drive"
+                      onGuardar={(url) => actualizarEmpresa(empresa.id, { drive_folder_url: url })}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB CONTRATO Y DATOS: administrativo, legal y facturable */}
           {activeTab === 'info' && (
             <div className="space-y-6">
-              {/* Resumen rápido */}
-              {(() => {
-                const diasRenov = empresa.fecha_renovacion
-                  ? Math.ceil((new Date(empresa.fecha_renovacion).getTime() - Date.now()) / 86400000)
-                  : null;
-                const kpis = [
-                  { label: 'MRR', valor: empresa.mrr_actual_clp ? formatCLP(empresa.mrr_actual_clp) : '—' },
-                  { label: 'Fee mensual', valor: empresa.fee_mensual_clp ? formatCLP(empresa.fee_mensual_clp) : '—' },
-                  {
-                    label: 'Renovación',
-                    valor: empresa.fecha_renovacion ? formatFecha(empresa.fecha_renovacion) : '—',
-                    sub: diasRenov === null ? '' : diasRenov < 0 ? `vencida hace ${-diasRenov} d` : `en ${diasRenov} d`,
-                    alerta: diasRenov !== null && diasRenov <= 30,
-                  },
-                  { label: 'Negocios abiertos', valor: String(oportunidadesEmpresa.length), sub: `${contactosEmpresa.length} contactos` },
-                ];
-                return (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {kpis.map((k) => (
-                      <div key={k.label} className="ficha-card p-3">
-                        <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">{k.label}</p>
-                        <p className={`text-sm font-semibold mt-1 font-mono ${k.alerta ? 'text-[var(--c-warn)]' : 'text-[var(--c-text)]'}`}>{k.valor}</p>
-                        {k.sub && <p className="text-[10px] font-mono text-[var(--c-muted)] mt-0.5">{k.sub}</p>}
-                      </div>
-                    ))}
-                  </div>
-                );
-              })()}
-
               {/* Parámetros Comerciales & Operativos */}
               <div className="ficha-card p-4 space-y-4">
                 <div className="flex items-center justify-between">
@@ -465,44 +637,6 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
               <DatosFacturacion empresa={empresa} onGuardar={(c) => actualizarEmpresa(empresa.id, c)} />
 
               <div className="space-y-6">
-              {/* Enlaces Operativos: Looker Studio & Google Drive */}
-              <div className="ficha-card p-4 rounded-xl border border-[var(--c-line)]">
-                <h3 className="text-xs font-semibold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] mb-3">
-                  Enlaces del Cliente P48
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="p-3 bg-[var(--c-field)] rounded-lg border border-[var(--c-line)] flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <ExternalLink className="w-4 h-4 text-[var(--c-accent)]" />
-                      <div>
-                        <p className="text-xs font-medium text-[var(--c-text)]">Dashboard Looker</p>
-                        <p className="text-[10px] text-[var(--c-muted)] font-mono">Reportes de Performance</p>
-                      </div>
-                    </div>
-                    <EnlaceEditable
-                      valor={empresa.looker_dashboard_url}
-                      placeholder="Pegar URL de Looker Studio"
-                      onGuardar={(url) => actualizarEmpresa(empresa.id, { looker_dashboard_url: url })}
-                    />
-                  </div>
-
-                  <div className="p-3 bg-[var(--c-field)] rounded-lg border border-[var(--c-line)] flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Folder className="w-4 h-4 text-[var(--c-info)]" />
-                      <div>
-                        <p className="text-xs font-medium text-[var(--c-text)]">Carpeta Drive</p>
-                        <p className="text-[10px] text-[var(--c-muted)] font-mono">Estrategia, Creativos & Contratos</p>
-                      </div>
-                    </div>
-                    <EnlaceEditable
-                      valor={empresa.drive_folder_url}
-                      placeholder="Pegar URL de carpeta Drive"
-                      onGuardar={(url) => actualizarEmpresa(empresa.id, { drive_folder_url: url })}
-                    />
-                  </div>
-                </div>
-              </div>
-
               {/* Cuentas y permisos del cliente (registro por plataforma) */}
               <CuentasCliente
                 empresaId={empresa.id}
@@ -812,8 +946,11 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                         >
                           {tar.titulo}
                         </button>
-                        <p className="text-[11px] text-[var(--c-muted)] font-mono">
+                        <p className="text-[11px] font-mono text-[var(--c-muted)]">
                           Vence: {formatFecha(tar.fecha_vencimiento)}
+                          {!tar.completada && tar.fecha_vencimiento && new Date(tar.fecha_vencimiento).getTime() < hoyMs - 86400000 && (
+                            <span className="ml-2 text-[var(--c-danger)]">· Atrasada</span>
+                          )}
                         </p>
                       </div>
                       <span
