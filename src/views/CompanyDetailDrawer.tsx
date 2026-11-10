@@ -22,6 +22,7 @@ import { FichaMarketing } from '../components/marketing/FichaMarketing';
 import { EstrategiaEditor, ResumenEstrategia } from '../components/clientes/EstrategiaCliente';
 import { useConfiguracionCRM } from '../lib/configuracion';
 import { FranjaDecision, TonoFranja } from '../components/common/FranjaDecision';
+import { ResumenCuenta, AlertaResumen } from '../components/clientes/ResumenCuenta';
 
 type Tab = 'resumen' | 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'cotizaciones' | 'estrategia' | 'marketing' | 'info' | 'cliente';
 
@@ -172,27 +173,32 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
   const salud = empresa.salud ? saludEtiqueta[empresa.salud] : null;
 
   // Riesgos y oportunidades derivados de datos reales (no se inventan señales)
-  const riesgos: { texto: string; tono: 'alerta' | 'info' }[] = [];
+  const riesgos: AlertaResumen[] = [];
   if (diasRenov !== null && diasRenov <= DIAS_ALERTA_RENOVACION) {
     riesgos.push({
       texto: diasRenov < 0 ? `Renovación vencida hace ${-diasRenov} días` : `Renovación en ${diasRenov} días`,
       tono: 'alerta',
+      destino: 'info',
     });
   }
   if (empresa.salud === 'rojo' || empresa.salud === 'amarillo') {
-    riesgos.push({ texto: `Salud de cuenta: ${salud?.texto ?? ''}`, tono: 'alerta' });
+    riesgos.push({ texto: `Salud de cuenta: ${salud?.texto ?? ''}`, tono: 'alerta', destino: 'info' });
   }
   if (tareasAtrasadas.length > 0) {
-    riesgos.push({ texto: `${tareasAtrasadas.length} tarea(s) atrasada(s)`, tono: 'alerta' });
+    riesgos.push({ texto: `${tareasAtrasadas.length} tarea(s) atrasada(s)`, tono: 'alerta', destino: 'tareas' });
   }
   if (diasSinActividad === null || diasSinActividad > DIAS_SIN_ACTIVIDAD) {
     riesgos.push({
       texto: diasSinActividad === null ? 'Sin actividad registrada' : `Sin actividad hace ${diasSinActividad} días`,
       tono: 'info',
+      destino: 'actividades',
     });
   }
   if (empresa.estado === 'cliente' && oportunidadesEmpresa.length === 0) {
-    riesgos.push({ texto: 'Sin negocio abierto de renovación o expansión', tono: 'info' });
+    riesgos.push({ texto: 'Sin negocio abierto de renovación o expansión', tono: 'info', destino: 'oportunidades' });
+  }
+  if (empresa.estado === 'cliente' && [accesos.google_ads, accesos.ga4, accesos.meta_bm, accesos.gtm_cmp].filter(Boolean).length < 4) {
+    riesgos.push({ texto: 'Accesos admin incompletos', tono: 'info', destino: 'info' });
   }
 
   // Acción principal del encabezado según la pestaña activa
@@ -368,110 +374,35 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
 
         {/* Body content */}
         <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 space-y-6">
-          {/* TAB RESUMEN: revisión rápida antes de una reunión o para priorizar */}
+          {/* TAB RESUMEN: ficha y alertas a la izquierda; lo accionable a la derecha */}
           {activeTab === 'resumen' && (
-            <div className="grid grid-cols-[minmax(0,1fr)] xl:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)] gap-5 items-start">
-              <div className="space-y-5">
-                <ResumenEstrategia empresaId={empresa.id} onVerTodo={() => setActiveTab('estrategia')} />
-                <div className="ficha-card p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xs font-semibold text-[var(--c-text)]">Prioridades abiertas</h3>
-                    <button onClick={() => setActiveTab('tareas')} className="text-[11px] text-[var(--c-accent)] hover:underline">
-                      Ver tareas
-                    </button>
+            <ResumenCuenta
+              empresa={empresa}
+              industria={industria?.nombre}
+              responsable={responsable?.nombre}
+              contactoPrincipal={contactosEmpresa.find((c) => c.es_principal) ?? contactosEmpresa[0]}
+              oportunidadesAbiertas={oportunidadesEmpresa.filter((o) => !o.fecha_cierre_real)}
+              actividades={actividadesEmpresa}
+              tareasPendientes={tareasPendientes}
+              alertas={riesgos}
+              accesosConcedidos={[accesos.google_ads, accesos.ga4, accesos.meta_bm, accesos.gtm_cmp].filter(Boolean).length}
+              accesosTotal={empresa.estado === 'cliente' ? 4 : 0}
+                            onIr={(d) => setActiveTab(d)}
+              onAbrirNegocio={onSelectOportunidad}
+              estrategia={<ResumenEstrategia empresaId={empresa.id} onVerTodo={() => setActiveTab('estrategia')} />}
+              enlaces={
+                <>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-mono uppercase text-[var(--c-muted)] flex items-center gap-1.5"><ExternalLink className="w-3 h-3 text-[var(--c-accent)]" />Dashboard Looker</p>
+                    <EnlaceEditable valor={empresa.looker_dashboard_url} placeholder="Pegar URL de Looker Studio" onGuardar={(url) => actualizarEmpresa(empresa.id, { looker_dashboard_url: url })} />
                   </div>
-                  {tareasPendientes.length === 0 ? (
-                    <p className="text-xs text-[var(--c-muted)] py-3 text-center">Sin tareas pendientes para esta cuenta.</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {tareasPendientes.slice(0, 3).map((t) => {
-                        const atrasada = !!t.fecha_vencimiento && new Date(t.fecha_vencimiento).getTime() < hoyMs - 86400000;
-                        return (
-                          <div key={t.id} className="flex items-center justify-between gap-3 p-3 bg-[var(--c-field)] rounded-lg border border-[var(--c-line)] text-xs">
-                            <span className="font-medium text-[var(--c-text)] truncate">{t.titulo}</span>
-                            <span className={`shrink-0 font-mono text-[10px] ${atrasada ? 'text-[var(--c-danger)]' : 'text-[var(--c-muted)]'}`}>
-                              {atrasada ? 'Atrasada' : t.fecha_vencimiento ? formatFecha(t.fecha_vencimiento) : 'Sin fecha'}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                <div className="ficha-card p-4">
-                  <h3 className="text-xs font-semibold text-[var(--c-text)] mb-3">Riesgos y oportunidades</h3>
-                  {riesgos.length === 0 ? (
-                    <p className="text-xs text-[var(--c-muted)] py-3 text-center">Sin alertas abiertas.</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {riesgos.map((r) => (
-                        <div key={r.texto} className="flex items-start gap-2.5 text-xs text-[var(--c-text-2)]">
-                          <span className={`mt-1 w-2 h-2 rounded-full shrink-0 ${r.tono === 'alerta' ? 'bg-[var(--c-warn)]' : 'bg-[var(--c-info)]'}`} />
-                          <span>{r.texto}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-5">
-                <div className="ficha-card p-4 space-y-3">
-                  <h3 className="text-xs font-semibold text-[var(--c-text)]">Perfil comercial</h3>
-                  <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div>
-                      <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Plan</p>
-                      <p className="text-[var(--c-text)] mt-0.5">{empresa.plan ? (empresa.plan === 'personalizado' ? 'Personalizado' : `Plan ${empresa.plan}`) : 'Sin plan'}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Renovación</p>
-                      <p className="text-[var(--c-text)] mt-0.5">{empresa.renovacion_tipo === 'automatica' ? 'Automática' : 'Manual'}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Fee mensual</p>
-                      <p className="font-mono text-[var(--c-text)] mt-0.5">{empresa.fee_mensual_clp ? formatCLP(empresa.fee_mensual_clp) : '—'}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Contactos</p>
-                      <p className="font-mono text-[var(--c-text)] mt-0.5">{contactosEmpresa.length}</p>
-                    </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-mono uppercase text-[var(--c-muted)] flex items-center gap-1.5"><Folder className="w-3 h-3 text-[var(--c-info)]" />Carpeta Drive</p>
+                    <EnlaceEditable valor={empresa.drive_folder_url} placeholder="Pegar URL de carpeta Drive" onGuardar={(url) => actualizarEmpresa(empresa.id, { drive_folder_url: url })} />
                   </div>
-                </div>
-
-                <div className="ficha-card p-4 space-y-3">
-                  <h3 className="text-xs font-semibold text-[var(--c-text)]">Enlaces rápidos</h3>
-                  <div className="p-3 bg-[var(--c-field)] rounded-lg border border-[var(--c-line)] flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <ExternalLink className="w-4 h-4 shrink-0 text-[var(--c-accent)]" />
-                      <div className="min-w-0">
-                        <p className="text-xs font-medium text-[var(--c-text)]">Dashboard Looker</p>
-                        <p className="text-[10px] text-[var(--c-muted)] font-mono">Reportes de performance</p>
-                      </div>
-                    </div>
-                    <EnlaceEditable
-                      valor={empresa.looker_dashboard_url}
-                      placeholder="Pegar URL de Looker Studio"
-                      onGuardar={(url) => actualizarEmpresa(empresa.id, { looker_dashboard_url: url })}
-                    />
-                  </div>
-                  <div className="p-3 bg-[var(--c-field)] rounded-lg border border-[var(--c-line)] flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Folder className="w-4 h-4 shrink-0 text-[var(--c-info)]" />
-                      <div className="min-w-0">
-                        <p className="text-xs font-medium text-[var(--c-text)]">Carpeta Drive</p>
-                        <p className="text-[10px] text-[var(--c-muted)] font-mono">Estrategia, creativos y contratos</p>
-                      </div>
-                    </div>
-                    <EnlaceEditable
-                      valor={empresa.drive_folder_url}
-                      placeholder="Pegar URL de carpeta Drive"
-                      onGuardar={(url) => actualizarEmpresa(empresa.id, { drive_folder_url: url })}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
+                </>
+              }
+            />
           )}
 
           {/* TAB CONTRATO Y DATOS: administrativo, legal y facturable */}
