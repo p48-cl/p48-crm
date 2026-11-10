@@ -20,11 +20,9 @@ import { DatosFacturacion } from '../components/clientes/DatosFacturacion';
 import { CuentasCliente } from '../components/clientes/CuentasCliente';
 import { SubirLogo } from '../components/clientes/Logo';
 import { FichaMarketing } from '../components/marketing/FichaMarketing';
+import { useConfiguracionCRM } from '../lib/configuracion';
 
 type Tab = 'resumen' | 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'cotizaciones' | 'marketing' | 'info' | 'cliente';
-
-const DIAS_ALERTA_RENOVACION = 60;
-const DIAS_SIN_ACTIVIDAD = 30;
 
 interface CompanyDetailDrawerProps {
   empresa: Empresa | null;
@@ -104,6 +102,9 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
     miembros,
     industrias,
   } = useCRM();
+  const { config: cfg } = useConfiguracionCRM();
+  const DIAS_ALERTA_RENOVACION = cfg.dias_alerta_renovacion;
+  const DIAS_SIN_ACTIVIDAD = cfg.dias_sin_actividad;
 
   const [activeTab, setActiveTab] = useState<Tab>('resumen');
 

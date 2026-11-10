@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { PipelineEditor } from '../components/admin/PipelineEditor';
 import {
   Users,
@@ -10,7 +10,9 @@ import {
   AlertTriangle,
   ShieldAlert,
   Edit2,
+  Settings,
 } from 'lucide-react';
+import { useConfiguracionCRM, guardarConfiguracion, ConfiguracionCRM } from '../lib/configuracion';
 import { useAuth } from '../context/AuthContext';
 import { useCRM } from '../context/CRMContext';
 import { Miembro, CriterioCalificacion, CatalogoItem } from '../types/crm';
@@ -34,8 +36,15 @@ export const AdminView: React.FC = () => {
     oportunidades,
     empresas,
   } = useCRM();
+  const { config: configCRM } = useConfiguracionCRM();
+  const [draftCfg, setDraftCfg] = useState<ConfiguracionCRM>(configCRM);
+  const [guardandoCfg, setGuardandoCfg] = useState(false);
+  const [mensajeCfg, setMensajeCfg] = useState<{ tipo: 'ok' | 'error'; texto: string } | null>(null);
+  useEffect(() => {
+    setDraftCfg(configCRM);
+  }, [configCRM]);
 
-  const [activeTab, setActiveTab] = useState<'miembros' | 'calificacion' | 'catalogos' | 'pipeline'>('miembros');
+  const [activeTab, setActiveTab] = useState<'miembros' | 'calificacion' | 'catalogos' | 'pipeline' | 'preferencias'>('miembros');
 
   // Estado para nuevo miembro
   const [showNewMemberModal, setShowNewMemberModal] = useState(false);
@@ -73,6 +82,20 @@ export const AdminView: React.FC = () => {
       </div>
     );
   }
+
+  const handleGuardarConfiguracion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const dAlerta = Number(draftCfg.dias_alerta_renovacion);
+    const dSin = Number(draftCfg.dias_sin_actividad);
+    if (!Number.isInteger(dAlerta) || dAlerta < 1 || dAlerta > 365 || !Number.isInteger(dSin) || dSin < 1 || dSin > 365) {
+      setMensajeCfg({ tipo: 'error', texto: 'Los días deben ser enteros entre 1 y 365.' });
+      return;
+    }
+    setGuardandoCfg(true);
+    const error = await guardarConfiguracion({ ...draftCfg, dias_alerta_renovacion: dAlerta, dias_sin_actividad: dSin });
+    setGuardandoCfg(false);
+    setMensajeCfg(error ? { tipo: 'error', texto: `No se pudo guardar: ${error}` } : { tipo: 'ok', texto: 'Preferencias guardadas para todo el equipo.' });
+  };
 
   // Desactivar miembro con flujo de reasignación
   const handleToggleActivo = (m: Miembro) => {
@@ -178,6 +201,7 @@ export const AdminView: React.FC = () => {
           { id: 'calificacion' as const, label: 'Criterios de Calificación', icon: Award },
           { id: 'pipeline' as const, label: 'Pipeline', icon: Layers },
           { id: 'catalogos' as const, label: 'Catálogos Comerciales', icon: Layers },
+          { id: 'preferencias' as const, label: 'Preferencias', icon: Settings },
         ].map((item) => {
           const Icon = item.icon;
           const active = activeTab === item.id;
@@ -197,6 +221,85 @@ export const AdminView: React.FC = () => {
           );
         })}
       </div>
+
+      {/* TAB PREFERENCIAS: valores por defecto del sistema */}
+      {activeTab === 'preferencias' && (
+        <div className="space-y-4 max-w-2xl">
+          <div>
+            <h3 className="text-xs font-semibold text-[var(--c-text)]">Preferencias del sistema</h3>
+            <p className="text-[11px] text-[var(--c-muted)]">
+              Valores por defecto para todo el equipo. Cada persona puede cambiar el tema desde el encabezado.
+            </p>
+          </div>
+
+          <form onSubmit={handleGuardarConfiguracion} className="bg-[var(--c-surface)] rounded-lg border border-[var(--c-line)] p-4 space-y-4 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[11px] text-[var(--c-muted)] mb-1">Tema por defecto</label>
+                <select
+                  value={draftCfg.tema_defecto}
+                  onChange={(e) => setDraftCfg({ ...draftCfg, tema_defecto: e.target.value as 'claro' | 'oscuro' })}
+                  className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
+                >
+                  <option value="oscuro">Oscuro</option>
+                  <option value="claro">Claro</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] text-[var(--c-muted)] mb-1">Vista por defecto de Clientes</label>
+                <select
+                  value={draftCfg.vista_clientes_defecto}
+                  onChange={(e) => setDraftCfg({ ...draftCfg, vista_clientes_defecto: e.target.value as 'tabla' | 'tarjetas' })}
+                  className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
+                >
+                  <option value="tabla">Tabla</option>
+                  <option value="tarjetas">Tarjetas</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] text-[var(--c-muted)] mb-1">Alerta de renovación (días antes)</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={365}
+                  value={draftCfg.dias_alerta_renovacion}
+                  onChange={(e) => setDraftCfg({ ...draftCfg, dias_alerta_renovacion: Number(e.target.value) })}
+                  className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] text-[var(--c-muted)] mb-1">Alerta sin actividad (días)</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={365}
+                  value={draftCfg.dias_sin_actividad}
+                  onChange={(e) => setDraftCfg({ ...draftCfg, dias_sin_actividad: Number(e.target.value) })}
+                  className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] font-mono"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[var(--c-line)]">
+              {mensajeCfg && (
+                <span className={`text-[11px] ${mensajeCfg.tipo === 'ok' ? 'text-[var(--c-ok)]' : 'text-[var(--c-danger)]'}`}>
+                  {mensajeCfg.texto}
+                </span>
+              )}
+              <button
+                type="submit"
+                disabled={guardandoCfg}
+                className="px-4 py-1.5 text-xs font-semibold bg-[var(--c-accent)] text-[var(--c-on-accent)] rounded disabled:opacity-50"
+              >
+                {guardandoCfg ? 'Guardando…' : 'Guardar preferencias'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* TAB 1: MIEMBROS */}
       {activeTab === 'miembros' && (
