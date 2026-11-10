@@ -31,6 +31,8 @@ interface CompanyDetailDrawerProps {
   onOpenNewTask: (empresaId: string) => void;
   onEditTask: (t: Tarea) => void;
   tabInicial?: Tab;
+  iniciarNuevaCotizacion?: boolean;
+  onNuevaCotizacionUsada?: () => void;
 }
 
 // Enlace editable: solo acepta http(s) o vacío. Guarda al salir del campo.
@@ -81,6 +83,8 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
   onOpenNewTask,
   onEditTask,
   tabInicial,
+  iniciarNuevaCotizacion,
+  onNuevaCotizacionUsada,
 }) => {
   const {
     contactos,
@@ -276,7 +280,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                 <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)] -mb-1">Estado</p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                   <div>
-                    <label className="block text-[11px] text-[var(--c-muted)] mb-1">Estado Empresa</label>
+                    <label className="block text-[11px] text-[var(--c-muted)] mb-1">Estado del cliente</label>
                     <select
                       value={empresa.estado}
                       onChange={(e) => actualizarEmpresa(empresa.id, { estado: e.target.value as any })}
@@ -783,7 +787,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
             </div>
           )}
           {activeTab === 'cotizaciones' && (
-            <CotizacionesCliente empresa={empresa} />
+            <CotizacionesCliente empresa={empresa} iniciarNueva={!!iniciarNuevaCotizacion} onNuevaUsada={onNuevaCotizacionUsada} />
           )}
           {activeTab === 'marketing' && empresa.estado === 'cliente' && <FichaMarketing empresaId={empresa.id} />}
           {activeTab === 'cliente' && empresa.estado === 'cliente' && (

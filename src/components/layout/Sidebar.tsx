@@ -46,7 +46,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const navItems: Array<{ id: ViewType; label: string; icon: React.ElementType; badgeCount?: number; badgeAlert?: boolean }> = [
     { id: 'inicio', label: 'Inicio', icon: LayoutDashboard },
     { id: 'crm', label: 'CRM', icon: Kanban },
-    { id: 'empresas', label: 'Empresas', icon: Building2 },
+    { id: 'empresas', label: 'Clientes', icon: Building2 },
     { id: 'contactos', label: 'Contactos', icon: Users },
     { id: 'cotizaciones', label: 'Cotizaciones', icon: FileText },
     { id: 'tareas', label: 'Tareas', icon: CheckSquare, badgeCount: kpis.tareas_hoy_count > 0 ? kpis.tareas_hoy_count : undefined },

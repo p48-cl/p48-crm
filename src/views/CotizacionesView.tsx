@@ -22,7 +22,7 @@ interface Fila {
 const ESTADOS = ['todas', 'borrador', 'enviada', 'aceptada', 'rechazada', 'vencida'] as const;
 const campo = 'bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]';
 
-export const CotizacionesView: React.FC<{ onAbrirFicha: (empresaId: string) => void }> = ({ onAbrirFicha }) => {
+export const CotizacionesView: React.FC<{ onAbrirFicha: (empresaId: string, nueva?: boolean) => void }> = ({ onAbrirFicha }) => {
   const { empresas } = useCRM();
   const [filas, setFilas] = useState<Fila[]>([]);
   const [estado, setEstado] = useState<(typeof ESTADOS)[number]>('todas');
@@ -45,22 +45,27 @@ export const CotizacionesView: React.FC<{ onAbrirFicha: (empresaId: string) => v
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-end justify-between gap-3">
-        <div>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="min-w-0">
           <h1 className="text-xl font-semibold text-[var(--c-text)]">Cotizaciones</h1>
-          <p className="text-xs text-[var(--c-muted)]">Todas las cotizaciones por cuenta. Totales con IVA.</p>
+          <p className="text-xs text-[var(--c-muted)]">Todas las cotizaciones por cliente. Totales con IVA.</p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <select className={`${campo} w-full sm:w-auto`} value={nuevaEmpresa} onChange={(e) => setNuevaEmpresa(e.target.value)} aria-label="Cuenta para nueva cotización">
-            <option value="">Elegir cuenta…</option>
+        <div className="flex w-full sm:w-auto items-center gap-2">
+          <select
+            className={`${campo} flex-1 min-w-0 sm:flex-none sm:w-64`}
+            value={nuevaEmpresa}
+            onChange={(e) => setNuevaEmpresa(e.target.value)}
+            aria-label="Cliente para nueva cotización"
+          >
+            <option value="">Elegir cliente…</option>
             {activas.map((e) => <option key={e.id} value={e.id}>{e.nombre}</option>)}
           </select>
           <button
             disabled={!nuevaEmpresa}
-            onClick={() => onAbrirFicha(nuevaEmpresa)}
-            className="text-xs font-medium bg-[var(--c-accent)] text-[var(--c-on-accent)] px-3 py-2 sm:py-1.5 rounded flex items-center justify-center gap-1 disabled:opacity-40"
+            onClick={() => onAbrirFicha(nuevaEmpresa, true)}
+            className="shrink-0 whitespace-nowrap text-xs font-medium bg-[var(--c-accent)] text-[var(--c-on-accent)] px-3 py-2 rounded flex items-center gap-1 disabled:opacity-40"
           >
-            <Plus className="w-3.5 h-3.5" /> Nueva
+            <Plus className="w-3.5 h-3.5" /> Nueva cotización
           </button>
         </div>
       </div>
@@ -75,7 +80,7 @@ export const CotizacionesView: React.FC<{ onAbrirFicha: (empresaId: string) => v
       {cargando ? (
         <p className="text-xs text-[var(--c-muted)]">Cargando…</p>
       ) : visibles.length === 0 ? (
-        <p className="text-xs text-[var(--c-muted)] py-8 text-center">No hay cotizaciones{estado !== 'todas' ? ` en estado ${estado}` : ''}. Elige una cuenta y pulsa Nueva.</p>
+        <p className="text-xs text-[var(--c-muted)] py-8 text-center">No hay cotizaciones{estado !== 'todas' ? ` en estado ${estado}` : ''}. Elige un cliente y pulsa Nueva.</p>
       ) : (
         <div className="divide-y divide-[var(--c-line)] border border-[var(--c-line)] rounded-lg overflow-hidden">
           {visibles.map((c) => {
@@ -84,7 +89,7 @@ export const CotizacionesView: React.FC<{ onAbrirFicha: (empresaId: string) => v
               <button key={c.id} onClick={() => onAbrirFicha(c.empresa_id)} className="w-full text-left p-3 hover:bg-[var(--c-surface-2)] flex items-center justify-between gap-3 text-xs">
                 <div className="min-w-0">
                   <p className="font-medium text-[var(--c-text)] break-words">N° {c.numero} · {c.titulo}</p>
-                  <p className="text-[11px] text-[var(--c-muted)]">{nombre.get(c.empresa_id) ?? 'Cuenta'} · emitida {formatFecha(c.fecha_emision)} · vence {formatFecha(c.vence_el)}</p>
+                  <p className="text-[11px] text-[var(--c-muted)]">{nombre.get(c.empresa_id) ?? 'Cliente'} · emitida {formatFecha(c.fecha_emision)} · vence {formatFecha(c.vence_el)}</p>
                 </div>
                 <div className="text-right shrink-0 whitespace-nowrap">
                   <p className="font-mono text-[var(--c-text)]">{formatMoneda(Math.round(c.neto_mensual * f), c.moneda)} /mes</p>

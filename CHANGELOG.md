@@ -5,6 +5,8 @@ Formato: versión, fecha de unión a `main`, PR, qué cambia y si toca base de d
 ## v0.11.0 · en curso (no publicada)
 Estado al 9 de noviembre de 2026. Cada entrada indica si ya está en `main`.
 
+- **PR #54** · Cotizaciones: el encabezado ya no se corta en escritorio, el botón dice «Nueva cotización» y abre directamente el formulario del cliente elegido (antes solo abría la ficha). Apilado sobre #51.
+- **PR #51** · Etiquetas: «Empresa» pasa a «Cliente» en toda la interfaz (menú, directorio, fichas, formularios, importador, búsqueda). Solo textos visibles; el código y la base de datos no cambian.
 - **PR #50** · Responsivo: grids de la ficha y de datos tributarios apilados en móvil, fila de líneas de cotización adaptada a pantallas pequeñas, botones de cotizaciones a ancho completo en móvil y encabezado de la ficha ajustado.
 - **PR #49** · Ficha de cliente como ventana centrada (ancho completo, pestañas visibles sin desplazar), datos legales y tributarios (razón social, RUT, giro, dirección) dentro de «Datos & Accesos» con aviso si faltan, y módulo «Cotizaciones» en el menú lateral con listado global por estado. Apilado sobre #47, sin migración. **Pendiente de unir a `main`.**
 - **PR #46** · Tareas editables: se abren desde el título (lista de Tareas y pestaña Tareas de la ficha) y permiten cambiar título, vínculos, responsable, vencimiento, prioridad y notas. Corrige además que el modal de tarea no tomaba la empresa o negocio inicial al reabrirlo. Sin migraciones.

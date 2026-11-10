@@ -113,7 +113,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
             <thead className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-surface-2)] border-b border-[var(--c-line)] text-[var(--c-muted)] uppercase font-mono text-[11px]">
               <tr>
                 <th className="py-2.5 px-4 font-medium">Nombre</th>
-                <th className="py-2.5 px-3 font-medium">Empresa</th>
+                <th className="py-2.5 px-3 font-medium">Cliente</th>
                 <th className="py-2.5 px-3 font-medium">Cargo</th>
                 <th className="py-2.5 px-3 font-medium">Rol Decisión</th>
                 <th className="py-2.5 px-3 font-medium">Email</th>
@@ -240,7 +240,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
             <h2 className="text-base font-bold text-[var(--c-text)] mb-3">{editId ? 'Editar contacto' : 'Nuevo Contacto'}</h2>
             <form onSubmit={handleCreateSubmit} className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Empresa *</label>
+                <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Cliente *</label>
                 <select
                   required
                   value={newContact.empresa_id}

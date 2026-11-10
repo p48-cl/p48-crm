@@ -121,7 +121,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Empresa</label>
+              <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Cliente</label>
               <select
                 value={empresaId}
                 onChange={(e) => setEmpresaId(e.target.value)}

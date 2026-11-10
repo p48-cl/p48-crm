@@ -39,6 +39,7 @@ const CRMAppContent: React.FC = () => {
   const [selectedOpId, setSelectedOpId] = useState<string | null>(null);
   const [selectedEmpId, setSelectedEmpId] = useState<string | null>(null);
   const [fichaTab, setFichaTab] = useState<'marketing' | 'cotizaciones' | undefined>(undefined);
+  const [fichaNuevaCotizacion, setFichaNuevaCotizacion] = useState(false);
 
   // Modales rápidos de creación
   const [activityModalState, setActivityModalState] = useState<{
@@ -150,7 +151,7 @@ const CRMAppContent: React.FC = () => {
           )}
 
           {currentView === 'cotizaciones' && (
-            <CotizacionesView onAbrirFicha={(id) => { setFichaTab('cotizaciones'); setSelectedEmpId(id); }} />
+            <CotizacionesView onAbrirFicha={(id, nueva) => { setFichaTab('cotizaciones'); setFichaNuevaCotizacion(!!nueva); setSelectedEmpId(id); }} />
           )}
 
           {currentView === 'contactos' && (
@@ -213,8 +214,10 @@ const CRMAppContent: React.FC = () => {
       <CompanyDetailDrawer
         empresa={selectedEmpresaObj}
         isOpen={Boolean(selectedEmpId)}
-        onClose={() => { setSelectedEmpId(null); setFichaTab(undefined); }}
+        onClose={() => { setSelectedEmpId(null); setFichaTab(undefined); setFichaNuevaCotizacion(false); }}
         tabInicial={fichaTab}
+        iniciarNuevaCotizacion={fichaNuevaCotizacion}
+        onNuevaCotizacionUsada={() => setFichaNuevaCotizacion(false)}
         onSelectOportunidad={(opId) => setSelectedOpId(opId)}
         onOpenNewActivity={(empId) =>
           setActivityModalState({ isOpen: true, empresaId: empId })
@@ -313,7 +316,7 @@ const CRMAppContent: React.FC = () => {
           >
             <p className="text-[10px] font-mono uppercase text-[var(--c-muted)] px-2 pb-2">Más secciones</p>
             {[
-              { id: 'empresas' as const, label: 'Empresas y clientes', icon: Building2 },
+              { id: 'empresas' as const, label: 'Clientes', icon: Building2 },
               { id: 'contactos' as const, label: 'Contactos', icon: Users },
               { id: 'cotizaciones' as const, label: 'Cotizaciones', icon: FileText },
               { id: 'actividades' as const, label: 'Actividades', icon: Activity },

@@ -127,7 +127,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold font-sans text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
-            Directorio de Empresas
+            Directorio de Clientes
           </h1>
           <p className="text-xs text-[var(--c-muted)] mt-0.5">
             {filteredEmpresas.length} empresas registradas · Prospectos y Clientes activos
@@ -140,7 +140,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
           className="bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] active:scale-[0.98] text-[var(--c-on-accent)] font-semibold text-xs py-2 px-3.5 rounded flex items-center gap-1.5 transition-all shadow-sm font-sans"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
-          <span>Nueva Empresa</span>
+          <span>Nuevo cliente</span>
         </button>
       </div>
 
@@ -212,7 +212,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
           <table className="w-full text-left text-xs">
             <thead className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-surface-2)] border-b border-[var(--c-line)] text-[var(--c-muted)] uppercase font-mono text-[11px]">
               <tr>
-                <th className="py-2.5 px-4 font-medium">Empresa</th>
+                <th className="py-2.5 px-4 font-medium">Cliente</th>
                 <th className="py-2.5 px-3 font-medium">RUT / Web</th>
                 <th className="py-2.5 px-3 font-medium">Industria</th>
                 <th className="py-2.5 px-3 font-medium">Estado</th>
@@ -281,7 +281,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                                 />
                               )}
                             </div>
-                            <p className="text-[10px] text-[var(--c-muted)] font-mono">{emp.tamano || 'Empresa'}</p>
+                            <p className="text-[10px] text-[var(--c-muted)] font-mono">{emp.tamano || 'Cliente'}</p>
                           </div>
                         </div>
                       </td>
@@ -393,7 +393,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white border border-[var(--c-line)] rounded-lg max-w-lg w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <h2 className="text-base font-bold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] mb-1">
-              Nueva Empresa
+              Nuevo cliente
             </h2>
             <p className="text-xs text-[var(--c-muted)] mb-4">
               Registrar cuenta comercial en CRM P48
@@ -402,7 +402,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
             <form onSubmit={handleCreateSubmit} className="space-y-3">
               <div>
                 <label className="block text-xs font-medium text-[var(--c-text)] mb-1">
-                  Nombre de Empresa <span className="text-[var(--c-accent)]">*</span>
+                  Nombre del cliente <span className="text-[var(--c-accent)]">*</span>
                 </label>
                 <input
                   type="text"
@@ -416,7 +416,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">RUT Empresa</label>
+                  <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">RUT</label>
                   <input
                     type="text"
                     placeholder="Ej: 76.123.456-K"
@@ -584,7 +584,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                   type="submit"
                   className="px-4 py-2 text-xs font-semibold bg-[var(--c-accent)] text-black rounded"
                 >
-                  Guardar Empresa
+                  Guardar cliente
                 </button>
               </div>
             </form>

@@ -401,7 +401,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
               <thead className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-surface-2)] border-b border-[var(--c-line)] text-[var(--c-muted)] uppercase font-mono text-[11px]">
                 <tr>
                   <th className="py-2.5 px-4 font-medium">Oportunidad</th>
-                  <th className="py-2.5 px-3 font-medium">Empresa</th>
+                  <th className="py-2.5 px-3 font-medium">Cliente</th>
                   <th className="py-2.5 px-3 font-medium">Etapa</th>
                   <th className="py-2.5 px-3 font-medium text-right">Valor Neto</th>
                   <th className="py-2.5 px-3 font-medium text-right">Ponderado (Base)</th>

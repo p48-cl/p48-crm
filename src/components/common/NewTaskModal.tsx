@@ -105,13 +105,13 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Empresa</label>
+              <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Cliente</label>
               <select
                 value={empresaId}
                 onChange={(e) => setEmpresaId(e.target.value)}
                 className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
               >
-                <option value="">(Opcional) Empresa...</option>
+                <option value="">(Opcional) Cliente...</option>
                 {empresas.map((e) => (
                   <option key={e.id} value={e.id}>
                     {e.nombre}
