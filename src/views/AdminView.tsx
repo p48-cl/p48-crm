@@ -1,5 +1,7 @@
 import { fondoCerrable } from '../lib/fondo';
 import React, { useEffect, useState } from 'react';
+import { ThOrdenable } from '../components/common/ThOrdenable';
+import { useOrden } from '../lib/orden';
 import { PipelineEditor } from '../components/admin/PipelineEditor';
 import {
   Users,
@@ -71,6 +73,16 @@ export const AdminView: React.FC = () => {
   const [nuevoItemTexto, setNuevoItemTexto] = useState('');
   const [catalogoActivo, setCatalogoActivo] = useState<'fuentes' | 'motivos' | 'industrias'>('fuentes');
   const [editandoItemCatalogo, setEditandoItemCatalogo] = useState<{ id: string; nombre: string } | null>(null);
+
+  // Orden de tablas (hooks antes del return condicional)
+  const ordMiembros = useOrden<'nombre' | 'email' | 'rol' | 'estado'>('nombre', 'asc');
+  const miembrosOrdenados = ordMiembros.ordenar(miembros, (m, k) =>
+    k === 'nombre' ? m.nombre : k === 'email' ? m.email : k === 'rol' ? m.rol : m.activo ? 1 : 0
+  );
+  const ordCriterios = useOrden<'orden' | 'pregunta' | 'tipo' | 'peso' | 'eliminatorio'>('orden', 'asc');
+  const criteriosOrdenados = ordCriterios.ordenar(criterios, (c, k) =>
+    k === 'orden' ? c.orden : k === 'pregunta' ? c.pregunta : k === 'tipo' ? c.tipo : k === 'peso' ? c.peso : c.es_eliminatorio ? 1 : 0
+  );
 
   if (!isAdmin) {
     return (
@@ -328,15 +340,15 @@ export const AdminView: React.FC = () => {
             <table className="w-full text-left text-xs">
               <thead className="bg-[var(--c-surface-2)] border-b border-[var(--c-line)] text-[var(--c-muted)] uppercase font-mono text-[10px]">
                 <tr>
-                  <th className="py-2.5 px-4 font-medium">Miembro</th>
-                  <th className="py-2.5 px-3 font-medium">Email</th>
-                  <th className="py-2.5 px-3 font-medium">Rol</th>
-                  <th className="py-2.5 px-3 font-medium">Estado</th>
+                  <ThOrdenable etiqueta="Miembro" className="py-2.5 px-4 font-medium" activa={ordMiembros.clave === 'nombre'} dir={ordMiembros.dir} onClick={() => ordMiembros.alternar('nombre')} />
+                  <ThOrdenable etiqueta="Email" className="py-2.5 px-3 font-medium" activa={ordMiembros.clave === 'email'} dir={ordMiembros.dir} onClick={() => ordMiembros.alternar('email')} />
+                  <ThOrdenable etiqueta="Rol" className="py-2.5 px-3 font-medium" activa={ordMiembros.clave === 'rol'} dir={ordMiembros.dir} onClick={() => ordMiembros.alternar('rol')} />
+                  <ThOrdenable etiqueta="Estado" className="py-2.5 px-3 font-medium" activa={ordMiembros.clave === 'estado'} dir={ordMiembros.dir} onClick={() => ordMiembros.alternar('estado')} />
                   <th className="py-2.5 px-3 text-right font-medium">Acción</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--c-line)]">
-                {miembros.map((m) => (
+                {miembrosOrdenados.map((m) => (
                   <tr key={m.id} className="hover:bg-[var(--c-surface-2)] transition-colors">
                     <td className="py-2.5 px-4">
                       <div className="flex items-center gap-2.5">
@@ -581,11 +593,11 @@ export const AdminView: React.FC = () => {
             <table className="w-full text-left text-xs">
               <thead className="bg-[var(--c-surface-2)] border-b border-[var(--c-line)] text-[var(--c-muted)] uppercase font-mono text-[10px]">
                 <tr>
-                  <th className="py-2.5 px-3">Orden</th>
-                  <th className="py-2.5 px-4">Criterio / Pregunta</th>
-                  <th className="py-2.5 px-3">Tipo</th>
-                  <th className="py-2.5 px-3">Peso</th>
-                  <th className="py-2.5 px-3">Eliminatorio</th>
+                  <ThOrdenable etiqueta="Orden" className="py-2.5 px-3" activa={ordCriterios.clave === 'orden'} dir={ordCriterios.dir} onClick={() => ordCriterios.alternar('orden')} />
+                  <ThOrdenable etiqueta="Criterio / Pregunta" className="py-2.5 px-4" activa={ordCriterios.clave === 'pregunta'} dir={ordCriterios.dir} onClick={() => ordCriterios.alternar('pregunta')} />
+                  <ThOrdenable etiqueta="Tipo" className="py-2.5 px-3" activa={ordCriterios.clave === 'tipo'} dir={ordCriterios.dir} onClick={() => ordCriterios.alternar('tipo')} />
+                  <ThOrdenable etiqueta="Peso" className="py-2.5 px-3" activa={ordCriterios.clave === 'peso'} dir={ordCriterios.dir} onClick={() => ordCriterios.alternar('peso')} />
+                  <ThOrdenable etiqueta="Eliminatorio" className="py-2.5 px-3" activa={ordCriterios.clave === 'eliminatorio'} dir={ordCriterios.dir} onClick={() => ordCriterios.alternar('eliminatorio')} />
                   <th className="py-2.5 px-3 text-right">Acción</th>
                 </tr>
               </thead>
@@ -597,7 +609,7 @@ export const AdminView: React.FC = () => {
                     </td>
                   </tr>
                 ) : (
-                  criterios.map((c) => (
+                  criteriosOrdenados.map((c) => (
                     <tr key={c.id} className="hover:bg-[var(--c-surface-2)]">
                       <td className="py-2.5 px-3 font-mono text-[11px] text-[var(--c-muted)]">0{c.orden}</td>
                       <td className="py-2.5 px-4 font-medium text-[var(--c-text)]">{c.pregunta}</td>

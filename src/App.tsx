@@ -51,6 +51,8 @@ const CRMAppContent: React.FC = () => {
   const [selectedEmpId, setSelectedEmpId] = useState<string | null>(null);
   const [fichaTab, setFichaTab] = useState<'marketing' | 'cotizaciones' | undefined>(undefined);
   const [fichaNuevaCotizacion, setFichaNuevaCotizacion] = useState(false);
+  // Sube al cerrar la ficha de un cliente para que la vista de Cotizaciones recargue sus datos
+  const [cotizacionesVersion, setCotizacionesVersion] = useState(0);
 
   // Modales rápidos de creación
   const [activityModalState, setActivityModalState] = useState<{
@@ -161,7 +163,7 @@ const CRMAppContent: React.FC = () => {
           )}
 
           {currentView === 'cotizaciones' && (
-            <CotizacionesView onAbrirFicha={(id, nueva) => { setFichaTab('cotizaciones'); setFichaNuevaCotizacion(!!nueva); setSelectedEmpId(id); }} />
+            <CotizacionesView version={cotizacionesVersion} onAbrirFicha={(id, nueva) => { setFichaTab('cotizaciones'); setFichaNuevaCotizacion(!!nueva); setSelectedEmpId(id); }} />
           )}
 
           {currentView === 'contactos' && (
@@ -235,7 +237,7 @@ const CRMAppContent: React.FC = () => {
       <CompanyDetailDrawer
         empresa={selectedEmpresaObj}
         isOpen={Boolean(selectedEmpId)}
-        onClose={() => { setSelectedEmpId(null); setFichaTab(undefined); setFichaNuevaCotizacion(false); }}
+        onClose={() => { setSelectedEmpId(null); setFichaTab(undefined); setFichaNuevaCotizacion(false); setCotizacionesVersion((v) => v + 1); }}
         tabInicial={fichaTab}
         iniciarNuevaCotizacion={fichaNuevaCotizacion}
         onNuevaCotizacionUsada={() => setFichaNuevaCotizacion(false)}

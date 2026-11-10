@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { FiltroPeriodo, KpisCanal, Rango, Variacion, fechaCorta, useDatosMarketing, useMetricasCliente, ventanas } from './comun';
 import { KPIS_CANAL } from './canales';
+import { ThOrdenable } from '../common/ThOrdenable';
+import { useOrden } from '../../lib/orden';
 
 interface Kw {
   keyword: string;
@@ -73,12 +75,22 @@ export const SEO: React.FC = () => {
   const rA = resumen(actual);
   const rP = resumen(anterior);
 
+  const ordKw = useOrden<'keyword' | 'posicion' | 'cambio' | 'volumen' | 'dificultad' | 'url'>('posicion', 'asc');
   const tabla = useMemo(() => {
     const q = busqueda.trim().toLowerCase();
-    return actual
-      .filter((r) => !q || r.keyword.includes(q))
-      .sort((a, b) => (a.posicion ?? 999) - (b.posicion ?? 999));
-  }, [actual, busqueda]);
+    const filtradas = actual.filter((r) => !q || r.keyword.includes(q));
+    return ordKw.ordenar(filtradas, (r, k) => {
+      switch (k) {
+        case 'keyword': return r.keyword;
+        case 'posicion': return r.posicion ?? 999;
+        case 'cambio': return r.posicion !== null && r.posicion_anterior !== null ? r.posicion_anterior - r.posicion : -999;
+        case 'volumen': return r.volumen ?? -1;
+        case 'dificultad': return r.dificultad ?? -1;
+        case 'url': return r.url ?? '';
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actual, busqueda, ordKw.clave, ordKw.dir]);
 
   if (cargando) return <p className="text-sm text-[var(--c-muted)]">Cargando...</p>;
   if (clientes.length === 0) return <div className="surface p-6 text-sm text-[var(--c-muted)]">No hay clientes activos todavía.</div>;
@@ -149,12 +161,12 @@ export const SEO: React.FC = () => {
             <table className="w-full text-xs">
               <thead>
                 <tr className="text-left text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">
-                  <th className="py-2 pr-3 font-normal">Palabra clave</th>
-                  <th className="py-2 pr-3 font-normal text-right">Pos.</th>
-                  <th className="py-2 pr-3 font-normal text-right">Cambio</th>
-                  <th className="py-2 pr-3 font-normal text-right">Volumen</th>
-                  <th className="py-2 pr-3 font-normal text-right">Dificultad</th>
-                  <th className="py-2 pr-3 font-normal">URL</th>
+                  <ThOrdenable etiqueta="Palabra clave" className="py-2 pr-3 font-normal" activa={ordKw.clave === 'keyword'} dir={ordKw.dir} onClick={() => ordKw.alternar('keyword')} />
+                  <ThOrdenable etiqueta="Pos." className="py-2 pr-3 font-normal" alinear="right" activa={ordKw.clave === 'posicion'} dir={ordKw.dir} onClick={() => ordKw.alternar('posicion')} />
+                  <ThOrdenable etiqueta="Cambio" className="py-2 pr-3 font-normal" alinear="right" activa={ordKw.clave === 'cambio'} dir={ordKw.dir} onClick={() => ordKw.alternar('cambio')} />
+                  <ThOrdenable etiqueta="Volumen" className="py-2 pr-3 font-normal" alinear="right" activa={ordKw.clave === 'volumen'} dir={ordKw.dir} onClick={() => ordKw.alternar('volumen')} />
+                  <ThOrdenable etiqueta="Dificultad" className="py-2 pr-3 font-normal" alinear="right" activa={ordKw.clave === 'dificultad'} dir={ordKw.dir} onClick={() => ordKw.alternar('dificultad')} />
+                  <ThOrdenable etiqueta="URL" className="py-2 pr-3 font-normal" activa={ordKw.clave === 'url'} dir={ordKw.dir} onClick={() => ordKw.alternar('url')} />
                 </tr>
               </thead>
               <tbody>

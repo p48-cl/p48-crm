@@ -15,6 +15,10 @@ import { LogoEmpresa, subirLogoEmpresa, validarArchivoLogo } from '../components
 import { ClientesKpis } from '../components/clientes/ClientesKpis';
 import { LayoutList, LayoutGrid } from 'lucide-react';
 import { formatCLP, formatRUT, formatRUTInput } from '../lib/formatters';
+import { ThOrdenable } from '../components/common/ThOrdenable';
+import { useOrden } from '../lib/orden';
+
+type ClaveOrdenEmpresa = 'cliente' | 'rut' | 'industria' | 'estado' | 'plan' | 'responsable' | 'accesos' | 'mrr';
 
 interface CompaniesViewProps {
   onSelectEmpresa: (id: string) => void;
@@ -98,6 +102,40 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
       return true;
     });
   }, [empresas, searchQuery, filtroEstado, filtroResponsable, filtroIndustria]);
+
+  const { clave: sortKey, dir: sortDir, alternar: alternarOrden, ordenar } = useOrden<ClaveOrdenEmpresa>('cliente', 'asc');
+  const empresasOrdenadas = useMemo(
+    () =>
+      ordenar(filteredEmpresas, (emp, clave) => {
+        switch (clave) {
+          case 'cliente': return emp.nombre;
+          case 'rut': return emp.rut || emp.dominio_web || '';
+          case 'industria': return industrias.find((i) => i.id === emp.industria_id)?.nombre ?? '';
+          case 'estado': return emp.estado;
+          case 'plan': return emp.plan ?? '';
+          case 'responsable': return miembros.find((m) => m.id === emp.responsable_id)?.nombre ?? '';
+          case 'accesos': {
+            const acc = accesosAdmin[emp.id];
+            return acc ? [acc.google_ads, acc.ga4, acc.meta_bm, acc.gtm_cmp].filter(Boolean).length : 0;
+          }
+          case 'mrr': return Number(emp.mrr_actual_clp ?? 0);
+        }
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [filteredEmpresas, sortKey, sortDir, industrias, miembros, accesosAdmin]
+  );
+
+  const cabeceraEmpresa = (clave: ClaveOrdenEmpresa, etiqueta: string, alinear: 'left' | 'right' | 'center' = 'left', extra = 'px-3') => (
+    <ThOrdenable
+      key={clave}
+      etiqueta={etiqueta}
+      activa={sortKey === clave}
+      dir={sortDir}
+      onClick={() => alternarOrden(clave)}
+      alinear={alinear}
+      className={`py-2.5 ${extra} font-medium`}
+    />
+  );
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -303,15 +341,15 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
           <table className="w-full text-left text-xs">
             <thead className="bg-[var(--c-surface-2)] border-b border-[var(--c-line)] text-[var(--c-muted)] uppercase font-mono text-[11px]">
               <tr>
-                <th className="py-2.5 px-4 font-medium">Cliente</th>
-                <th className="py-2.5 px-3 font-medium">RUT / Web</th>
-                <th className="py-2.5 px-3 font-medium">Industria</th>
-                <th className="py-2.5 px-3 font-medium">Estado</th>
-                <th className="py-2.5 px-3 font-medium">Plan</th>
-                <th className="py-2.5 px-3 font-medium">Responsable</th>
-                <th className="py-2.5 px-3 font-medium text-center">Accesos Admin</th>
+                {cabeceraEmpresa('cliente', 'Cliente', 'left', 'px-4')}
+                {cabeceraEmpresa('rut', 'RUT / Web')}
+                {cabeceraEmpresa('industria', 'Industria')}
+                {cabeceraEmpresa('estado', 'Estado')}
+                {cabeceraEmpresa('plan', 'Plan')}
+                {cabeceraEmpresa('responsable', 'Responsable')}
+                {cabeceraEmpresa('accesos', 'Accesos Admin', 'center')}
                 <th className="py-2.5 px-3 font-medium">Enlaces</th>
-                <th className="py-2.5 px-4 text-right font-medium">Fee / MRR</th>
+                {cabeceraEmpresa('mrr', 'Fee / MRR', 'right', 'px-4')}
                 <th className="py-2.5 px-3 text-right"></th>
               </tr>
             </thead>
@@ -323,7 +361,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                   </td>
                 </tr>
               ) : (
-                filteredEmpresas.map((emp) => {
+                empresasOrdenadas.map((emp) => {
                   const resp = miembros.find((m) => m.id === emp.responsable_id);
                   const ind = industrias.find((i) => i.id === emp.industria_id);
                   const acc = accesosAdmin[emp.id];

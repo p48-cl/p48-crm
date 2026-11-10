@@ -3,6 +3,8 @@ import { AlertTriangle } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { formatCLP } from '../../lib/formatters';
 import { Barras, FiltroPeriodo, Rango, Variacion, fechaCorta, useDatosMarketing, ventanas } from './comun';
+import { ThOrdenable } from '../common/ThOrdenable';
+import { useOrden } from '../../lib/orden';
 
 interface Campana {
   empresa_id: string;
@@ -133,6 +135,21 @@ export const Ads: React.FC<{ plataforma?: string }> = ({ plataforma }) => {
     };
   }, [campanas, clienteSel, plataformaSel, conPrueba, rango, nombres]);
 
+  // Orden de la tabla de campañas (hook antes del return condicional)
+  const ordAds = useOrden<'campana' | 'cliente' | 'inversion' | 'ejec' | 'clics' | 'ctr' | 'cpa' | 'roas'>('inversion', 'desc');
+  const tablaOrdenada = ordAds.ordenar(d.tabla, (r, k) => {
+    switch (k) {
+      case 'campana': return r.nombre;
+      case 'cliente': return r.cliente;
+      case 'inversion': return r.costo;
+      case 'ejec': return r.ejec ?? -1;
+      case 'clics': return r.clics;
+      case 'ctr': return r.ctr ?? -1;
+      case 'cpa': return r.cpa ?? -1;
+      case 'roas': return r.roas ?? -1;
+    }
+  });
+
   if (cargando) return <p className="text-sm text-[var(--c-muted)]">Cargando...</p>;
 
   const k = [
@@ -201,13 +218,18 @@ export const Ads: React.FC<{ plataforma?: string }> = ({ plataforma }) => {
             <table className="w-full text-xs">
               <thead>
                 <tr className="text-left text-[var(--c-muted)] border-b border-[var(--c-line)]">
-                  {['Campaña', 'Cliente', 'Inversión', 'Ejecución', 'Clics', 'CTR', 'CPA', 'ROAS'].map((h) => (
-                    <th key={h} className="p-3 font-medium whitespace-nowrap">{h}</th>
-                  ))}
+                  <ThOrdenable etiqueta="Campaña" className="p-3 font-medium whitespace-nowrap" activa={ordAds.clave === 'campana'} dir={ordAds.dir} onClick={() => ordAds.alternar('campana')} />
+                  <ThOrdenable etiqueta="Cliente" className="p-3 font-medium whitespace-nowrap" activa={ordAds.clave === 'cliente'} dir={ordAds.dir} onClick={() => ordAds.alternar('cliente')} />
+                  <ThOrdenable etiqueta="Inversión" className="p-3 font-medium whitespace-nowrap" activa={ordAds.clave === 'inversion'} dir={ordAds.dir} onClick={() => ordAds.alternar('inversion')} />
+                  <ThOrdenable etiqueta="Ejecución" className="p-3 font-medium whitespace-nowrap" activa={ordAds.clave === 'ejec'} dir={ordAds.dir} onClick={() => ordAds.alternar('ejec')} />
+                  <ThOrdenable etiqueta="Clics" className="p-3 font-medium whitespace-nowrap" activa={ordAds.clave === 'clics'} dir={ordAds.dir} onClick={() => ordAds.alternar('clics')} />
+                  <ThOrdenable etiqueta="CTR" className="p-3 font-medium whitespace-nowrap" activa={ordAds.clave === 'ctr'} dir={ordAds.dir} onClick={() => ordAds.alternar('ctr')} />
+                  <ThOrdenable etiqueta="CPA" className="p-3 font-medium whitespace-nowrap" activa={ordAds.clave === 'cpa'} dir={ordAds.dir} onClick={() => ordAds.alternar('cpa')} />
+                  <ThOrdenable etiqueta="ROAS" className="p-3 font-medium whitespace-nowrap" activa={ordAds.clave === 'roas'} dir={ordAds.dir} onClick={() => ordAds.alternar('roas')} />
                 </tr>
               </thead>
               <tbody>
-                {d.tabla.map((r) => (
+                {tablaOrdenada.map((r) => (
                   <tr key={r.key} className="border-b border-[var(--c-line)] last:border-0">
                     <td className="p-3 font-medium text-[var(--c-text)]">
                       {r.nombre}

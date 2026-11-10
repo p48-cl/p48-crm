@@ -2,8 +2,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Plus, Printer, Trash2, ArrowLeft } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { parseSupabaseError } from '../../lib/errorHandler';
-import { formatFecha, formatMoneda, formatRUT, formatCorrelativo, formatCLP, MonedaCRM } from '../../lib/formatters';
+import { formatFecha, formatMoneda, formatRUT, formatCorrelativo, formatCLP } from '../../lib/formatters';
 import { PLANES, SETUP_LISTA } from '../../lib/planes';
+import { estadoEfectivo, convertirMoneda, redondear, MonedaCotizacion } from '../../lib/cotizaciones';
 import { useCRM } from '../../context/CRMContext';
 import { urlLogo } from './Logo';
 import { useAuth } from '../../context/AuthContext';
@@ -20,7 +21,7 @@ interface CotizacionFila {
   estado: Estado;
   fecha_emision: string;
   validez_dias: number;
-  moneda: MonedaCRM;
+  moneda: MonedaCotizacion;
   uf_valor?: number | null;
   uf_fecha?: string | null;
   iva_pct: number;
@@ -59,11 +60,16 @@ const etiqueta = 'block text-[11px] text-[var(--c-muted)] mb-1';
 const esc = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/\n/g, '<br>');
 
-const totales = (lineas: Linea[], ivaPct: number) => {
+const totales = (lineas: Linea[], ivaPct: number, moneda: MonedaCotizacion) => {
   const mensual = lineas.filter((l) => l.recurrente).reduce((a, l) => a + l.cantidad * l.precio_neto, 0);
   const unico = lineas.filter((l) => !l.recurrente).reduce((a, l) => a + l.cantidad * l.precio_neto, 0);
   const f = 1 + ivaPct / 100;
-  return { mensual, unico, mensualIva: Math.round(mensual * f), unicoIva: Math.round(unico * f) };
+  return {
+    mensual,
+    unico,
+    mensualIva: redondear(mensual * f, moneda),
+    unicoIva: redondear(unico * f, moneda),
+  };
 };
 
 interface CotizacionesClienteProps {
@@ -137,7 +143,8 @@ export const CotizacionesCliente: React.FC<CotizacionesClienteProps> = ({ empres
       ) : (
         <div className="divide-y divide-[var(--c-line)] border border-[var(--c-line)] rounded-lg">
           {filas.map((c) => {
-            const t = totales([{ concepto: '', plan: '', cantidad: 1, precio_neto: c.neto_mensual, recurrente: true }, { concepto: '', plan: '', cantidad: 1, precio_neto: c.neto_unico, recurrente: false }], c.iva_pct);
+            const estado = estadoEfectivo(c) as Estado;
+            const t = totales([{ concepto: '', plan: '', cantidad: 1, precio_neto: c.neto_mensual, recurrente: true }, { concepto: '', plan: '', cantidad: 1, precio_neto: c.neto_unico, recurrente: false }], c.iva_pct, c.moneda);
             return (
               <button key={c.id} onClick={() => setEditando(c)} className="w-full text-left p-3 hover:bg-[var(--c-surface-2)] flex items-center justify-between gap-3 text-xs">
                 <div className="min-w-0">
@@ -147,14 +154,14 @@ export const CotizacionesCliente: React.FC<CotizacionesClienteProps> = ({ empres
                 <div className="text-right shrink-0">
                   <p className="font-mono text-[var(--c-text)]">{formatMoneda(t.mensualIva, c.moneda)} /mes</p>
                   {c.neto_unico > 0 && <p className="font-mono text-[11px] text-[var(--c-muted)]">+ {formatMoneda(t.unicoIva, c.moneda)} único</p>}
-                  <p className={`text-[10px] font-mono uppercase ${COLOR_ESTADO[c.estado]}`}>{c.estado}</p>
+                  <p className={`text-[10px] font-mono uppercase ${COLOR_ESTADO[estado]}`}>{estado}</p>
                 </div>
               </button>
             );
           })}
         </div>
       )}
-      <p className="text-[10px] text-[var(--c-muted)]">Totales con IVA. Las facturas se registran aparte (etapa siguiente).</p>
+      <p className="text-[10px] text-[var(--c-muted)]">Totales con IVA. Cotización de referencia en CLP; las facturas se emiten en CLP y se registran aparte (etapa siguiente).</p>
     </div>
   );
 };
@@ -174,7 +181,7 @@ const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creada
   const [oportunidadId, setOportunidadId] = useState(inicial?.oportunidad_id ?? oportunidadInicial ?? '');
   const [validez, setValidez] = useState(String(inicial?.validez_dias ?? 15));
   const [ivaPct, setIvaPct] = useState(String(inicial?.iva_pct ?? 19));
-  const [moneda, setMoneda] = useState<MonedaCRM>(inicial?.moneda ?? 'CLP');
+  const [moneda, setMoneda] = useState<MonedaCotizacion>(inicial?.moneda ?? 'CLP');
   // Valor UF congelado en la cotización (snapshot). Si es nueva, se toma el último valor de uf_diaria.
   const [uf, setUf] = useState<{ valor: number; fecha: string } | null>(
     inicial?.uf_valor && inicial?.uf_fecha ? { valor: Number(inicial.uf_valor), fecha: inicial.uf_fecha } : null
@@ -190,6 +197,7 @@ const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creada
     return { valor: Number(data.valor), fecha: data.fecha as string };
   }, []);
 
+  // Carga la UF solo si la cotización está en UF y aún no tiene snapshot
   useEffect(() => {
     if (moneda !== 'UF' || uf) return;
     cargarUfActual().then((v) => {
@@ -198,8 +206,26 @@ const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creada
     });
   }, [moneda, uf, cargarUfActual]);
 
-  // Convierte un precio de lista en CLP a la moneda de la cotización
-  const aMoneda = (clp: number) => (moneda === 'UF' && uf ? Math.round((clp / uf.valor) * 100) / 100 : clp);
+  // Precio de lista (CLP) → moneda de la cotización. En UF sin valor cargado no hay conversión posible.
+  const ufListo = moneda === 'CLP' || uf !== null;
+  const aMoneda = (clp: number) => (moneda === 'UF' && uf ? redondear(clp / uf.valor, 'UF') : clp);
+
+  // Cambiar moneda convierte los precios de las líneas (no solo la etiqueta)
+  const cambiarMoneda = async (nueva: MonedaCotizacion) => {
+    if (nueva === moneda) return;
+    let valor: number | null = uf?.valor ?? null;
+    if (valor === null) {
+      const v = await cargarUfActual();
+      if (!v) { setUfError('No hay valor UF disponible. Revisa la carga diaria de UF.'); return; }
+      setUf(v);
+      setUfError(null);
+      valor = v.valor;
+    }
+    const valorFinal = valor;
+    setLineas((prev) => prev.map((l) => ({ ...l, precio_neto: convertirMoneda(l.precio_neto, moneda, nueva, valorFinal) })));
+    setMoneda(nueva);
+  };
+
   const [comision, setComision] = useState(inicial?.condicion_comision ?? COMISION_BASE);
   const [condiciones, setCondiciones] = useState(inicial?.condiciones_comerciales ?? CONDICIONES_BASE);
   const [notas, setNotas] = useState(inicial?.notas_internas ?? '');
@@ -219,12 +245,13 @@ const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creada
   }, [inicial]);
 
   const iva = Number(ivaPct);
-  const t = useMemo(() => totales(lineas, Number.isFinite(iva) ? iva : 19), [lineas, iva]);
+  const t = useMemo(() => totales(lineas, Number.isFinite(iva) ? iva : 19, moneda), [lineas, iva, moneda]);
 
   const cambiar = (i: number, cambios: Partial<Linea>) => setLineas((prev) => prev.map((l, k) => (k === i ? { ...l, ...cambios } : l)));
 
   const elegirPlan = (i: number, plan: PlanEmpresa | '') => {
     if (!plan) return cambiar(i, { plan: '' });
+    if (!ufListo) return setError('Espera a que cargue el valor UF antes de elegir un plan');
     const p = PLANES[plan];
     cambiar(i, { plan, concepto: plan === 'personalizado' ? lineas[i].concepto : `Plan ${plan} · ${p.nombre}`, precio_neto: plan === 'personalizado' ? lineas[i].precio_neto : aMoneda(p.valor), recurrente: plan !== 'E' });
   };
@@ -266,23 +293,23 @@ const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creada
       condicion_comision: comision,
       condiciones_comerciales: condiciones,
       notas_internas: notas || null,
+      creada_por: creadaPor,
     };
-    let id = inicial?.id;
-    if (inicial) {
-      const { error: e1 } = await supabase.from('cotizaciones').update(cab).eq('id', inicial.id);
-      if (e1) { setError(parseSupabaseError(e1)); setGuardando(false); return; }
-      const { error: e2 } = await supabase.from('cotizacion_items').delete().eq('cotizacion_id', inicial.id);
-      if (e2) { setError(parseSupabaseError(e2)); setGuardando(false); return; }
-    } else {
-      const { data, error: e1 } = await supabase.from('cotizaciones').insert({ ...cab, creada_por: creadaPor }).select('id').single();
-      if (e1 || !data) { setError(parseSupabaseError(e1)); setGuardando(false); return; }
-      id = data.id;
-    }
-    const { error: e3 } = await supabase.from('cotizacion_items').insert(
-      lineas.map((l, k) => ({ cotizacion_id: id, orden: k + 1, concepto: l.concepto.trim(), plan: l.plan || null, cantidad: l.cantidad, precio_neto: l.precio_neto, recurrente: l.recurrente }))
-    );
+    // Cabecera + líneas en una sola transacción (función guardar_cotizacion)
+    const { error: e1 } = await supabase.rpc('guardar_cotizacion', {
+      p_id: inicial?.id ?? null,
+      p_cab: cab,
+      p_items: lineas.map((l, k) => ({
+        orden: k + 1,
+        concepto: l.concepto.trim(),
+        plan: l.plan || null,
+        cantidad: l.cantidad,
+        precio_neto: l.precio_neto,
+        recurrente: l.recurrente,
+      })),
+    });
     setGuardando(false);
-    if (e3) { setError(`Se guardó la cabecera pero fallaron las líneas: ${parseSupabaseError(e3)}`); return; }
+    if (e1) { setError(parseSupabaseError(e1)); return; }
     onVolver();
   };
 
@@ -336,7 +363,11 @@ ${urlLogo(empresa.logo_path) ? `<img src="${urlLogo(empresa.logo_path)}" alt="" 
         <div><label className={etiqueta}>Validez (días)</label><input type="number" className={`${campo} font-mono`} value={validez} onChange={(e) => setValidez(e.target.value)} /></div>
         <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-3">
           <div><label className={etiqueta}>Moneda</label>
-            <select className={campo} value={moneda} onChange={(e) => setMoneda(e.target.value as MonedaCRM)}><option value="CLP">CLP</option><option value="UF">UF</option><option value="USD">USD</option></select>{ufError && <p className="text-[11px] text-[var(--c-danger)] mt-1">{ufError}</p>}</div>
+            <select className={campo} value={moneda} onChange={(e) => cambiarMoneda(e.target.value as MonedaCotizacion)}>
+              <option value="CLP">CLP</option>
+              <option value="UF">UF</option>
+            </select>
+            {ufError && <p className="text-[11px] text-[var(--c-danger)] mt-1">{ufError}</p>}</div>
           <div><label className={etiqueta}>IVA %</label><input type="number" className={`${campo} font-mono`} value={ivaPct} onChange={(e) => setIvaPct(e.target.value)} /></div>
         </div>
       </div>
@@ -345,14 +376,14 @@ ${urlLogo(empresa.logo_path) ? `<img src="${urlLogo(empresa.logo_path)}" alt="" 
         <div className="flex items-center justify-between">
           <p className="text-[11px] font-mono uppercase text-[var(--c-muted)]">Líneas</p>
           <div className="flex gap-2">
-            <button onClick={() => setLineas((p) => [...p, { concepto: 'Setup inicial', plan: '', cantidad: 1, precio_neto: aMoneda(SETUP_LISTA), recurrente: false }])} className="text-[11px] text-[var(--c-accent)]">+ Setup</button>
+            <button disabled={!ufListo} onClick={() => setLineas((p) => [...p, { concepto: 'Setup inicial', plan: '', cantidad: 1, precio_neto: aMoneda(SETUP_LISTA), recurrente: false }])} className="text-[11px] text-[var(--c-accent)] disabled:opacity-40">+ Setup</button>
             <button onClick={() => setLineas((p) => [...p, { concepto: '', plan: '', cantidad: 1, precio_neto: 0, recurrente: true }])} className="text-[11px] text-[var(--c-accent)]">+ Línea</button>
           </div>
         </div>
         {lineas.map((l, i) => (
           <div key={i} className="border border-[var(--c-line)] rounded p-2.5 space-y-2">
             <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-[140px_1fr] gap-2">
-              <select className={campo} value={l.plan} onChange={(e) => elegirPlan(i, e.target.value as PlanEmpresa | '')} aria-label="Plan de la línea">
+              <select className={campo} value={l.plan} disabled={!ufListo} onChange={(e) => elegirPlan(i, e.target.value as PlanEmpresa | '')} aria-label="Plan de la línea">
                 <option value="">Libre</option>
                 {(Object.keys(PLANES) as PlanEmpresa[]).map((p) => <option key={p} value={p}>{p === 'personalizado' ? 'Personalizado' : `Plan ${p}`}</option>)}
               </select>
@@ -367,7 +398,7 @@ ${urlLogo(empresa.logo_path) ? `<img src="${urlLogo(empresa.logo_path)}" alt="" 
           </div>
         ))}
         <div className="text-[11px] sm:text-xs font-mono text-right space-y-0.5 text-[var(--c-text-2)] break-words">
-          {moneda === 'UF' && uf && <p className="text-[11px] font-mono text-[var(--c-muted)]">UF del {uf.fecha}: {formatCLP(uf.valor)} · Total mensual ≈ {formatCLP(t.mensualIva * uf.valor)}</p>}
+          {moneda === 'UF' && uf && <p className="text-[11px] font-mono text-[var(--c-muted)]">UF del {uf.fecha}: {formatCLP(uf.valor)} · Total mensual ≈ {formatCLP(Math.round(t.mensualIva * uf.valor))}</p>}
           <p>Mensual: {formatMoneda(t.mensual, moneda)} neto · <b className="text-[var(--c-text)]">{formatMoneda(t.mensualIva, moneda)}</b> con IVA</p>
           <p>Único: {formatMoneda(t.unico, moneda)} neto · <b className="text-[var(--c-text)]">{formatMoneda(t.unicoIva, moneda)}</b> con IVA</p>
         </div>
