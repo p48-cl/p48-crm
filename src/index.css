@@ -15,6 +15,8 @@
 
 /* Tokens JAMP (claro por defecto). El modo oscuro usa los mismos nombres. */
 :root {
+  --c-card: #FFFFFF;   /* tarjetas de información: más claras que el fondo */
+  --c-field: #F9FAFB;  /* campos dentro de una tarjeta */
   --c-bg: #F9FAFB;
   --c-surface: #FFFFFF;
   --c-surface-2: #F3F4F6;
@@ -36,6 +38,8 @@
 }
 .dark {
   /* JAMP CRM · sistema visual (azul noche) */
+  --c-card: #112741;   /* tarjetas: más claras que el fondo #020617 */
+  --c-field: #020617;  /* campos: más oscuros que la tarjeta */
   --c-bg: #020617;
   --c-sidebar: #071424;
   --c-surface: #0D1D31;
@@ -114,7 +118,7 @@ body { background: var(--c-bg); color: var(--c-text); -webkit-font-smoothing: an
 
 /* Superficies: un solo nivel de elevación, bordes hairline, radios generosos */
 .surface {
-  background: var(--c-surface);
+  background: var(--c-card);
   border: 1px solid var(--c-line);
   border-radius: 16px;
   box-shadow: 0 1px 3px rgba(2, 6, 23, 0.18);
@@ -135,3 +139,11 @@ body { background: var(--c-bg); color: var(--c-text); -webkit-font-smoothing: an
 
 /* Toque sin destello azul en iOS/Android */
 button, a { -webkit-tap-highlight-color: transparent; }
+
+/* Tarjetas de información de la ficha: contraste propio frente al fondo */
+.ficha-card {
+  background: var(--c-card);
+  border: 1px solid var(--c-line);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(2, 6, 23, 0.12);
+}

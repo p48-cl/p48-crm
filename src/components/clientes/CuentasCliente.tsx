@@ -49,7 +49,7 @@ const CATEGORIAS: { titulo: string; ids: Plataforma[] }[] = [
 ];
 
 const input =
-  'w-full px-2.5 py-1.5 text-xs bg-[var(--c-surface)] border border-[var(--c-line)] rounded text-[var(--c-text)] placeholder:text-[var(--c-muted-2)] focus:outline-none focus:border-[var(--c-accent)]';
+  'w-full px-2.5 py-1.5 text-xs bg-[var(--c-field)] border border-[var(--c-line)] rounded text-[var(--c-text)] placeholder:text-[var(--c-muted-2)] focus:outline-none focus:border-[var(--c-accent)]';
 
 const ESTADO_UI: Record<Estado, { texto: string; color: string; Icono: React.ElementType }> = {
   concedido: { texto: 'Concedido', color: 'text-[var(--c-ok)]', Icono: CheckCircle2 },
