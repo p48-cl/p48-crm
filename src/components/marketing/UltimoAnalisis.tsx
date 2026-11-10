@@ -4,6 +4,7 @@ import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { formatFecha, formatFechaHora } from '../../lib/formatters';
 import { ChipSenal, TonoChip } from '../common/ChipSenal';
+import { mensajeEnCola } from './proximaCorrida';
 
 interface Hallazgo { tipo: 'alerta' | 'oportunidad' | 'ok'; canal?: string; texto: string }
 interface Analisis {
@@ -57,7 +58,7 @@ export const UltimoAnalisis: React.FC<{ empresaId: string }> = ({ empresaId }) =
     const { error } = await supabase
       .from('analisis_solicitudes')
       .insert({ solicitado_por: currentUser.id, empresa_id: empresaId, origen: 'manual' });
-    setMensaje(error ? 'No se pudo registrar la solicitud.' : 'Solicitud registrada. Se procesa en la revisión diaria o el domingo 20:00.');
+    setMensaje(error ? 'No se pudo registrar la solicitud.' : mensajeEnCola());
     if (!error) cargar();
   };
 
