@@ -11,7 +11,6 @@ import {
   Sliders,
   Plus,
   Radio,
-  Search,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCRM } from '../../context/CRMContext';
@@ -67,14 +66,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const { kpis } = useCRM();
 
   const enMkt = currentView === 'marketing';
-  const esSeo = enMkt && (marketingSection === 'seo' || marketingSection === 'organico');
-  const esMedia = enMkt && !esSeo;
 
   const principales: NavItem[] = [
     { key: 'inicio', label: 'Overview', icon: LayoutDashboard, active: currentView === 'inicio', onClick: () => onChangeView('inicio') },
     { key: 'crm', label: 'Pipeline', icon: Kanban, active: currentView === 'crm', onClick: () => onChangeView('crm') },
-    { key: 'media', label: 'Media', icon: Radio, active: esMedia, onClick: () => onOpenMarketing('ads') },
-    { key: 'seo', label: 'Search & GEO', icon: Search, active: esSeo, onClick: () => onOpenMarketing('seo') },
+    { key: 'marketing', label: 'Marketing', icon: Radio, active: enMkt, onClick: () => onOpenMarketing('dashboard') },
     { key: 'empresas', label: 'Clientes', icon: Building2, active: currentView === 'empresas', onClick: () => onChangeView('empresas') },
   ];
 

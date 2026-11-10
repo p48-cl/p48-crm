@@ -1,15 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import { Play, IdCard } from 'lucide-react';
+import { IdCard } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../context/AuthContext';
+import { UltimoAnalisis } from './UltimoAnalisis';
 import { METRICAS, Variacion, Tendencia, fechaCorta, useDatosMarketing } from './comun';
 
 export const ClienteHub: React.FC<{ onAbrirFicha?: (empresaId: string) => void }> = ({ onAbrirFicha }) => {
-  const { currentUser } = useAuth();
   const { clientes, filas, cargando } = useDatosMarketing();
   const [clienteSel, setClienteSel] = useState<string>('');
   const [metricaGrafico, setMetricaGrafico] = useState<string>('ses');
-  const [solicitud, setSolicitud] = useState<string | null>(null);
 
   const clienteId = clienteSel || clientes[0]?.id || '';
   const cliente = clientes.find((c) => c.id === clienteId);
@@ -31,15 +29,7 @@ export const ClienteHub: React.FC<{ onAbrirFicha?: (empresaId: string) => void }
     valor: f.valor,
   }));
 
-  const pedirAnalisis = async () => {
-    if (!supabase || !currentUser?.id) return;
-    const { error } = await supabase.from('analisis_solicitudes').insert({ solicitado_por: currentUser.id });
-    setSolicitud(
-      error
-        ? 'No se pudo registrar la solicitud.'
-        : 'Solicitud registrada. El análisis se ejecuta los lunes o cuando lo corras desde Claude.',
-    );
-  };
+
 
   if (cargando) return <p className="text-sm text-[var(--c-muted)]">Cargando...</p>;
   if (clientes.length === 0) return <div className="surface p-6 text-sm text-[var(--c-muted)]">No hay clientes activos todavía.</div>;
@@ -67,14 +57,8 @@ export const ClienteHub: React.FC<{ onAbrirFicha?: (empresaId: string) => void }
             <IdCard className="w-3.5 h-3.5" /> Abrir ficha
           </button>
         )}
-        <button
-          onClick={pedirAnalisis}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded bg-[var(--c-accent)] text-[var(--c-on-accent)]"
-        >
-          <Play className="w-3.5 h-3.5" /> Ejecutar análisis
-        </button>
       </div>
-      {solicitud && <p className="text-xs text-[var(--c-text-2)]">{solicitud}</p>}
+      {clienteId && <UltimoAnalisis empresaId={clienteId} />}
       {esPrueba && <p className="text-[11px] font-mono text-[var(--c-warn)]">Datos de prueba: no son métricas reales del cliente.</p>}
 
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">

@@ -331,7 +331,7 @@ const CRMAppContent: React.FC = () => {
               { id: 'contactos' as const, label: 'Contactos', icon: Users },
               { id: 'cotizaciones' as const, label: 'Cotizaciones', icon: FileText },
               { id: 'actividades' as const, label: 'Actividades', icon: Activity },
-              { id: 'marketing' as const, label: 'Mkt Inteligence', icon: BarChart3 },
+              { id: 'marketing' as const, label: 'Marketing', icon: BarChart3 },
               { id: 'importar' as const, label: 'Importar CSV', icon: Upload },
               { id: 'administracion' as const, label: 'Administración', icon: Settings },
             ].map((item) => (

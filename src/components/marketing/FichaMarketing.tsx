@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { formatCLP } from '../../lib/formatters';
 import { METRICAS, Variacion } from './comun';
+import { UltimoAnalisis } from './UltimoAnalisis';
 
 interface Punto { plataforma: string; metrica: string; periodo: string; valor: number }
 interface Camp { campana_nombre: string; periodo: string; costo_clp: number; conversiones: number; valor_conversion_clp: number }
@@ -51,6 +52,7 @@ export const FichaMarketing: React.FC<{ empresaId: string }> = ({ empresaId }) =
 
   return (
     <div className="space-y-5">
+      <UltimoAnalisis empresaId={empresaId} />
       <section className="space-y-2">
         <h3 className="text-xs font-semibold text-[var(--c-text)]">Métricas de la última semana</h3>
         <div className="grid grid-cols-2 gap-2">
