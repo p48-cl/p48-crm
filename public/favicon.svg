@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 128 128" role="img" aria-label="JAMP Agent J favicon">
+  <defs><linearGradient id="bg" x1="14" y1="10" x2="117" y2="121" gradientUnits="userSpaceOnUse"><stop stop-color="#102B43"/><stop offset="1" stop-color="#020617"/></linearGradient></defs>
+  <rect width="128" height="128" rx="36" fill="url(#bg)"/>
+  <g fill="none" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M84 25v31" stroke="#38BDF8"/>
+    <path d="M84 56v20c0 18-12 28-29 28" stroke="#14B8A6"/>
+    <path d="M55 104c-17 0-27-10-27-25" stroke="#F59E0B"/>
+  </g>
+</svg>

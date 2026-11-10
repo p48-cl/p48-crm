@@ -1,5 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --shadow-2xl: 0 12px 32px rgba(2, 6, 23, 0.45);
+}
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
@@ -29,25 +35,40 @@
   color-scheme: light;
 }
 .dark {
+  /* JAMP CRM · sistema visual (azul noche) */
   --c-bg: #020617;
-  --c-surface: #0F172A;
-  --c-surface-2: #1E293B;
-  --c-surface-3: #334155;
-  --c-line: #1E293B;
+  --c-sidebar: #071424;
+  --c-surface: #0D1D31;
+  --c-surface-2: #112741;
+  --c-surface-3: #1A3556;
+  --c-line: #233D5F;
   --c-text: #F8FAFC;
-  --c-text-2: #CBD5E1;
-  --c-text-inv: #0F172A;
-  --c-muted: #94A3B8;
-  --c-muted-2: #64748B;
-  --c-accent: #3B82F6;
-  --c-accent-hover: #60A5FA;
-  --c-on-accent: #FFFFFF;
-  --c-danger: #F87171;
-  --c-ok: #34D399;
-  --c-warn: #FBBF24;
+  --c-text-2: #D5DFEC;
+  --c-text-inv: #020617;
+  --c-muted: #99ABC2;
+  --c-muted-2: #7389A3;
+  --c-accent: #38BDF8;
+  --c-accent-hover: #7DD3FC;
+  --c-on-accent: #04111F;
+  --c-danger: #FB7185;
+  --c-ok: #14B8A6;
+  --c-warn: #F59E0B;
   --c-info: #38BDF8;
   color-scheme: dark;
 }
+
+/* Agentes JAMP: color = módulo o señal real, no decoración */
+:root, .dark {
+  --sales: #38BDF8;   --sales-soft: rgba(56, 189, 248, 0.14);
+  --media: #14B8A6;   --media-soft: rgba(20, 184, 166, 0.14);
+  --organic: #F59E0B; --organic-soft: rgba(245, 158, 11, 0.14);
+  --danger-soft: rgba(251, 113, 133, 0.14);
+  --module: var(--sales);
+  --module-soft: var(--sales-soft);
+}
+[data-module='media'] { --module: var(--media); --module-soft: var(--media-soft); }
+[data-module='organic'] { --module: var(--organic); --module-soft: var(--organic-soft); }
+
 
 :root { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
 body { background: var(--c-bg); color: var(--c-text); -webkit-font-smoothing: antialiased; }
@@ -96,7 +117,7 @@ body { background: var(--c-bg); color: var(--c-text); -webkit-font-smoothing: an
   background: var(--c-surface);
   border: 1px solid var(--c-line);
   border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 1px 3px rgba(2, 6, 23, 0.18);
 }
 
 /* Material translúcido para barras flotantes */

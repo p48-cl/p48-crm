@@ -1,3 +1,4 @@
+import { JampMark } from '../components/brand/Jamp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { LogOut, ExternalLink, FolderOpen, FileText, CalendarClock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -85,7 +86,7 @@ export const PortalView: React.FC = () => {
     <div className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] font-sans selection:bg-[var(--c-accent)] selection:text-[var(--c-on-accent)]">
       <header className="sticky top-0 z-20 bg-[var(--c-bg)]/95 border-b border-[var(--c-line)] px-4 py-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 bg-[var(--c-accent)] text-[var(--c-on-accent)] font-black flex items-center justify-center text-xs font-mono rounded shrink-0">J</div>
+          <JampMark size={32} className="shrink-0" />
           <div className="min-w-0">
             <p className="text-sm font-bold truncate">{empresa.nombre}</p>
             <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Portal de clientes</p>
