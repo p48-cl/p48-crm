@@ -43,7 +43,7 @@ export const SelectorCliente: React.FC<Props> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/60" onClick={onCerrar}>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60" onClick={onCerrar}>
       <div
         className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-xl shadow-2xl w-full max-w-md flex flex-col max-h-[80vh]"
         onClick={(e) => e.stopPropagation()}
