@@ -1,3 +1,4 @@
+import { fondoCerrable } from '../../lib/fondo';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Search, Building2, User, Kanban, X, ArrowRight } from 'lucide-react';
 import { useCRM } from '../../context/CRMContext';
@@ -259,7 +260,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-100">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-100" {...fondoCerrable(onClose)}>
       <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-xl max-w-xl w-full shadow-2xl overflow-hidden">
         {/* Input */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--c-line)]">

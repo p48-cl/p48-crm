@@ -1,3 +1,4 @@
+import { fondoCerrable } from '../lib/fondo';
 import React, { useEffect, useState } from 'react';
 import { PipelineEditor } from '../components/admin/PipelineEditor';
 import {
@@ -387,7 +388,7 @@ export const AdminView: React.FC = () => {
 
           {/* Modal Nuevo Miembro */}
           {showNewMemberModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" {...fondoCerrable(() => setShowNewMemberModal(false))}>
               <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-lg max-w-md w-full p-6 shadow-2xl">
                 <h3 className="text-base font-bold text-[var(--c-text)] mb-1">Registrar Nuevo Miembro</h3>
                 <p className="text-xs text-[var(--c-muted)] mb-4">
