@@ -140,7 +140,7 @@ export const MktDashboard: React.FC = () => {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-[minmax(0,1fr)] lg:grid-cols-2 gap-4">
             <div className="surface p-4 space-y-2">
               <p className="text-sm font-semibold text-[var(--c-text)]">Inversión Ads por semana</p>
               <Barras puntos={porSemana.map((s) => ({ etiqueta: fechaCorta(s.per), valor: s.inv }))} formato={formatCLP} />

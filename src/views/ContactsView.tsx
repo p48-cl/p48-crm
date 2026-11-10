@@ -286,7 +286,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                 )}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-2">
                 <input
                   type="text"
                   required
@@ -304,7 +304,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-2">
                 <input
                   type="email"
                   required
@@ -322,7 +322,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-2">
                 <input
                   type="text"
                   placeholder="Celular +569"

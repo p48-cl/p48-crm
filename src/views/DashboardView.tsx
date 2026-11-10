@@ -128,7 +128,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         />
       )}
 
-      <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3.5 ${pestana === 'resumen' ? '' : 'hidden'}`}>
+      <div className={`grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3.5 ${pestana === 'resumen' ? '' : 'hidden'}`}>
         {/* KPI 1: Pipeline Ponderado */}
         <div className="surface p-4 space-y-1">
           <p className="text-[11px] font-mono text-[var(--c-muted)] uppercase tracking-wider">
@@ -218,7 +218,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       {/* Grid de Gráficos Nativos en Escala de Grises */}
-      <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${pestana === 'ventas' ? '' : 'hidden'}`}>
+      <div className={`grid grid-cols-[minmax(0,1fr)] lg:grid-cols-3 gap-6 ${pestana === 'ventas' ? '' : 'hidden'}`}>
         {/* GRÁFICO 1: Pipeline por Etapa (Solo etapas abiertas) */}
         <div className="surface p-5 space-y-4">
           <div className="flex items-center justify-between">

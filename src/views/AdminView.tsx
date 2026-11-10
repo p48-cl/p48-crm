@@ -233,7 +233,7 @@ export const AdminView: React.FC = () => {
           </div>
 
           <form onSubmit={handleGuardarConfiguracion} className="bg-[var(--c-surface)] rounded-lg border border-[var(--c-line)] p-4 space-y-4 text-xs">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-[11px] text-[var(--c-muted)] mb-1">Tema por defecto</label>
                 <select

@@ -164,7 +164,7 @@ export const CuentasCliente: React.FC<{ empresaId: string; notas: string; onNota
 
         {abiertaEsta && (
           <div className="mt-2 space-y-2 pl-1">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-2">
               <input
                 className={input}
                 placeholder={p.ayuda}
@@ -270,7 +270,7 @@ export const CuentasCliente: React.FC<{ empresaId: string; notas: string; onNota
 
       <div className="border-t border-[var(--c-line)] pt-3 space-y-2">
         <p className="text-[11px] font-medium text-[var(--c-muted)]">Agregar otro activo (sitio, landing, otro)</p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-3 gap-2">
           <select className={input} value={nuevoTipo} onChange={(e) => setNuevoTipo(e.target.value as Plataforma)}>
             {PLATAFORMAS.filter((p) => p.multiple).map((p) => (
               <option key={p.id} value={p.id}>
