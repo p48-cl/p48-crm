@@ -5,8 +5,6 @@ import {
   Table as TableIcon,
   Plus,
   AlertCircle,
-  Clock,
-  User,
   Filter,
   Calendar,
 } from 'lucide-react';
@@ -16,6 +14,46 @@ import { PipelineKpis } from '../components/crm/PipelineKpis';
 import { formatMoneda, formatFecha, esFechaAtrasada, formatCorrelativo } from '../lib/formatters';
 import { ConfirmWonModal } from '../components/common/ConfirmWonModal';
 import { LossReasonModal } from '../components/common/LossReasonModal';
+
+const SEGUIMIENTO_UI: Record<string, { label: string; tono: string }> = {
+  atrasado: {
+    label: 'Atrasado',
+    tono: 'text-[var(--c-danger)] border-[var(--c-danger)]/40 bg-[var(--c-danger)]/10',
+  },
+  sin_accion: {
+    label: 'Sin acción',
+    tono: 'text-[var(--c-warn)] border-[var(--c-warn)]/40 bg-[var(--c-warn)]/10',
+  },
+  por_vencer: {
+    label: 'Vence hoy',
+    tono: 'text-[var(--c-warn)] border-[var(--c-warn)]/40 bg-[var(--c-warn)]/10',
+  },
+  al_dia: {
+    label: 'Al día',
+    tono: 'text-[var(--c-ok)] border-[var(--c-ok)]/40 bg-[var(--c-ok)]/10',
+  },
+};
+
+// Días desde hoy hasta una fecha YYYY-MM-DD (negativo = vencida)
+const diasHasta = (fecha?: string | null): number | null => {
+  if (!fecha) return null;
+  const [y, m, d] = fecha.slice(0, 10).split('-').map(Number);
+  if (!y || !m || !d) return null;
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  return Math.round((new Date(y, m - 1, d).getTime() - hoy.getTime()) / 86400000);
+};
+
+const iniciales = (nombre?: string | null): string => {
+  if (!nombre) return '—';
+  return nombre
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join('')
+    .toUpperCase();
+};
 
 interface KanbanViewProps {
   onSelectOportunidad: (id: string) => void;
@@ -34,6 +72,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
     fuentes,
     motivosPerdida,
     moverOportunidadEtapa,
+    calificaciones,
   } = useCRM();
 
   const [vistaModo, setVistaModo] = useState<'kanban' | 'tabla'>('kanban');
@@ -291,6 +330,12 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                     opsEtapa.map((op) => {
                       const emp = empresas.find((e) => e.id === op.empresa_id);
                       const resp = miembros.find((m) => m.id === op.responsable_id);
+                      const fuente = fuentes.find((f) => f.id === op.fuente_id);
+                      const calificacion = calificaciones[op.id];
+                      const tieneCalificacion = Boolean(calificacion && calificacion.puntaje_maximo > 0);
+                      const pctCalificacion = tieneCalificacion
+                        ? Math.round((calificacion!.puntaje_total / calificacion!.puntaje_maximo) * 100)
+                        : 0;
                       const atrasada =
                         op.estado_seguimiento === 'atrasado' ||
                         (op.proxima_accion_fecha && esFechaAtrasada(op.proxima_accion_fecha));
@@ -298,6 +343,22 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                         op.estado_seguimiento === 'sin_accion' ||
                         (!op.proxima_accion_texto?.trim() && !op.proxima_accion_fecha);
                       const esUSD = op.moneda !== 'CLP';
+                      const seguimiento = op.estado_seguimiento ? SEGUIMIENTO_UI[op.estado_seguimiento] : undefined;
+                      const diasCierre = diasHasta(op.fecha_cierre_estimada);
+                      const cierreTexto =
+                        diasCierre === null
+                          ? null
+                          : diasCierre < 0
+                            ? `Cierre vencido hace ${-diasCierre} d`
+                            : diasCierre === 0
+                              ? 'Cierra hoy'
+                              : `Faltan ${diasCierre} d`;
+                      const cierreTono =
+                        diasCierre !== null && diasCierre < 0
+                          ? 'text-[var(--c-danger)]'
+                          : diasCierre !== null && diasCierre <= 14
+                            ? 'text-[var(--c-warn)]'
+                            : 'text-[var(--c-muted)]';
 
                       return (
                         <div
@@ -305,47 +366,104 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                           draggable
                           onDragStart={(e) => handleDragStart(e, op.id)}
                           onClick={() => onSelectOportunidad(op.id)}
-                          className={`p-3 rounded-lg border text-left cursor-grab active:cursor-grabbing hover:border-[var(--c-line)] transition-all bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white shadow-sm ${
+                          className={`p-3 rounded-lg border text-left cursor-grab active:cursor-grabbing hover:border-[var(--c-muted)] transition-all bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white shadow-sm space-y-2.5 ${
                             atrasada
                               ? 'border-[var(--c-danger)] ring-1 ring-[var(--c-danger)]/40'
-                              : 'border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-line)]'
+                              : 'border-[var(--c-line)]'
                           }`}
                         >
-                          <div className="mb-2 flex items-start gap-2">
-                            {emp && <LogoEmpresa nombre={emp.nombre} logoPath={emp.logo_path} size={28} className="mt-0.5" />}
-                            <div className="min-w-0">
-                            <p className="text-[11px] text-[var(--c-muted)] font-medium truncate">
-                              {emp?.nombre ?? 'Sin empresa'}
-                            </p>
-                            <h4 className="text-xs font-semibold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] hover:text-[var(--c-on-accent)] transition-colors leading-snug line-clamp-2">
-                              {op.numero ? <span className="font-mono text-[10px] text-[var(--c-muted)] mr-1">{formatCorrelativo('NEG', op.numero)}</span> : null}{op.nombre}
-                            </h4>
+                          {/* Cabecera: cliente, correlativo y nombre */}
+                          <div className="flex items-start gap-2">
+                            {emp && (
+                              <LogoEmpresa nombre={emp.nombre} logoPath={emp.logo_path} size={28} className="mt-0.5 shrink-0" />
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-[10px] text-[var(--c-muted)] font-medium truncate uppercase tracking-wide">
+                                  {emp?.nombre ?? 'Sin empresa'}
+                                </p>
+                                {op.numero ? (
+                                  <span className="font-mono text-[10px] text-[var(--c-muted)] shrink-0">
+                                    {formatCorrelativo('NEG', op.numero)}
+                                  </span>
+                                ) : null}
+                              </div>
+                              <h4 className="text-xs font-semibold text-[var(--c-text)] leading-snug line-clamp-2">
+                                {op.nombre}
+                              </h4>
                             </div>
                           </div>
 
-                          {/* Valor neto en Blanco Aire #F5F5F5 & Aviso USD */}
-                          <div className="flex items-center justify-between mb-2 pt-1 border-t border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-text)]">
-                            <div>
-                              <span className="font-mono text-xs font-bold text-[var(--c-text)]">
+                          {/* Valor neto, ponderado, probabilidad y responsable */}
+                          <div className="flex items-end justify-between gap-2">
+                            <div className="min-w-0">
+                              <p className="font-mono text-sm font-bold text-[var(--c-text)] leading-none">
                                 {formatMoneda(op.valor_neto, op.moneda)}
-                              </span>
+                              </p>
+                              <p className="font-mono text-[10px] text-[var(--c-muted)] mt-1">
+                                Pond. {formatMoneda(op.valor_ponderado, op.moneda)} · {op.probabilidad}%
+                              </p>
                               {esUSD && (
                                 <p className="text-[9px] text-[var(--c-muted)] font-mono leading-none mt-0.5">
                                   No incluido en totales CLP
                                 </p>
                               )}
                             </div>
-
-                            <span className="text-[11px] text-[var(--c-text-2)] flex items-center gap-1">
-                              <User className="w-3 h-3 text-[var(--c-muted)]" />
-                              <span className="truncate max-w-[80px]">
-                                {resp?.nombre.split(' ')[0] ?? 'Equipo'}
+                            <span className="flex items-center gap-1.5 text-[11px] text-[var(--c-text-2)] shrink-0" title={resp?.nombre ?? 'Equipo'}>
+                              <span className="grid place-items-center w-5 h-5 rounded bg-[var(--c-surface-3)] text-[9px] font-bold text-[var(--c-text)]">
+                                {iniciales(resp?.nombre)}
                               </span>
+                              <span className="truncate max-w-[72px]">{resp?.nombre.split(' ')[0] ?? 'Equipo'}</span>
                             </span>
                           </div>
 
+                          {/* Calificación (vista v_calificacion_oportunidad) */}
+                          {tieneCalificacion && calificacion && (
+                            <div>
+                              <div className="flex items-center justify-between text-[10px] font-mono text-[var(--c-muted)] mb-1">
+                                <span>Calificación</span>
+                                {calificacion.falla_eliminatorio ? (
+                                  <span className="text-[var(--c-danger)] font-semibold">Falla criterio eliminatorio</span>
+                                ) : (
+                                  <span>{calificacion.puntaje_total}/{calificacion.puntaje_maximo}</span>
+                                )}
+                              </div>
+                              <div className="h-1 rounded-full bg-[var(--c-line)] overflow-hidden">
+                                <div
+                                  className={`h-full rounded-full ${
+                                    calificacion.falla_eliminatorio
+                                      ? 'bg-[var(--c-danger)]'
+                                      : pctCalificacion >= 60
+                                        ? 'bg-[var(--c-ok)]'
+                                        : 'bg-[var(--c-warn)]'
+                                  }`}
+                                  style={{ width: `${Math.min(100, Math.max(0, pctCalificacion))}%` }}
+                                />
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Señales: seguimiento, cierre y fuente */}
+                          {(seguimiento || cierreTexto || fuente) && (
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              {seguimiento && (
+                                <span className={`px-1.5 py-0.5 rounded border text-[10px] font-semibold ${seguimiento.tono}`}>
+                                  {seguimiento.label}
+                                </span>
+                              )}
+                              {cierreTexto && (
+                                <span className={`font-mono text-[10px] ${cierreTono}`}>{cierreTexto}</span>
+                              )}
+                              {fuente && (
+                                <span className="ml-auto px-1.5 py-0.5 rounded bg-[var(--c-surface-2)] border border-[var(--c-line)] text-[10px] text-[var(--c-text-2)] truncate max-w-[100px]">
+                                  {fuente.nombre}
+                                </span>
+                              )}
+                            </div>
+                          )}
+
                           {/* Mover etapa sin arrastrar (móvil) */}
-                          <div className="md:hidden mb-2" onClick={(ev) => ev.stopPropagation()}>
+                          <div className="md:hidden" onClick={(ev) => ev.stopPropagation()}>
                             <label className="sr-only" htmlFor={`mover-${op.id}`}>Mover a otra etapa</label>
                             <select
                               id={`mover-${op.id}`}
@@ -359,32 +477,36 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                             </select>
                           </div>
 
-                          {/* Próxima Acción */}
-                          <div className="pt-1.5 border-t border-[var(--c-line)] text-[11px]">
-                            {atrasada ? (
-                              <div className="text-[var(--c-danger)] space-y-0.5">
-                                <div className="flex items-center gap-1 font-semibold text-[10px] font-mono">
-                                  <AlertCircle className="w-3 h-3 text-[var(--c-danger)]" />
-                                  <span>ACCIÓN ATRASADA ({formatFecha(op.proxima_accion_fecha)})</span>
-                                </div>
-                                <p className="text-[var(--c-text)] text-[11px] truncate">
-                                  {op.proxima_accion_texto || 'Revisar seguimiento'}
-                                </p>
-                              </div>
-                            ) : sinAccion ? (
-                              <div className="text-[var(--c-muted)] flex items-center gap-1 text-[10px] font-mono">
-                                <Clock className="w-3 h-3 shrink-0" />
-                                <span>Sin próxima acción</span>
-                              </div>
-                            ) : (
-                              <div className="text-[var(--c-text-2)] space-y-0.5">
-                                <p className="text-[var(--c-muted)] font-mono text-[10px] flex items-center gap-1">
-                                  <Calendar className="w-3 h-3 text-[var(--c-muted)]" />
-                                  <span>{formatFecha(op.proxima_accion_fecha)}</span>
-                                </p>
-                                <p className="truncate text-[var(--c-text-2)]">{op.proxima_accion_texto}</p>
-                              </div>
-                            )}
+                          {/* Siguiente movimiento */}
+                          <div
+                            className={`rounded-md border px-2 py-1.5 ${
+                              atrasada
+                                ? 'border-[var(--c-danger)]/50 bg-[var(--c-danger)]/10'
+                                : 'border-[var(--c-line)] bg-[var(--c-surface-2)]'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-[9px] font-mono uppercase tracking-wider text-[var(--c-muted)]">
+                                Siguiente movimiento
+                              </span>
+                              {op.proxima_accion_fecha && (
+                                <span
+                                  className={`font-mono text-[10px] flex items-center gap-1 ${
+                                    atrasada ? 'text-[var(--c-danger)] font-semibold' : 'text-[var(--c-muted)]'
+                                  }`}
+                                >
+                                  {atrasada ? <AlertCircle className="w-3 h-3" /> : <Calendar className="w-3 h-3" />}
+                                  {formatFecha(op.proxima_accion_fecha)}
+                                </span>
+                              )}
+                            </div>
+                            <p
+                              className={`text-[11px] truncate mt-0.5 ${
+                                sinAccion ? 'text-[var(--c-muted)] italic' : 'text-[var(--c-text)]'
+                              }`}
+                            >
+                              {op.proxima_accion_texto?.trim() || 'Sin próxima acción'}
+                            </p>
                           </div>
                         </div>
                       );
