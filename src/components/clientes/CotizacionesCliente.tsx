@@ -5,6 +5,7 @@ import { parseSupabaseError } from '../../lib/errorHandler';
 import { formatFecha, formatMoneda, formatRUT, formatCorrelativo, formatCLP, MonedaCRM } from '../../lib/formatters';
 import { PLANES, SETUP_LISTA } from '../../lib/planes';
 import { useCRM } from '../../context/CRMContext';
+import { urlLogo } from './Logo';
 import { useAuth } from '../../context/AuthContext';
 import { Empresa, PlanEmpresa } from '../../types/crm';
 
@@ -291,7 +292,7 @@ const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creada
       .join('');
     const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${inicial ? formatCorrelativo('COT', inicial.numero) : 'Cotización'} · ${esc(empresa.nombre)}</title>
 <style>body{font-family:Arial,sans-serif;color:#0A0A0A;margin:40px;font-size:13px}h1{font-size:20px;margin:0}table{width:100%;border-collapse:collapse;margin:16px 0}th,td{border-bottom:1px solid #ddd;padding:8px;text-align:left}th{background:#F5F5F5}.n{text-align:right}.tot td{border:0;padding:3px 8px}.sm{color:#555;font-size:12px}.box{margin-top:14px}</style></head><body>
-<h1>Cotización ${inicial ? formatCorrelativo('COT', inicial.numero) : '(borrador)'} · P48</h1>
+${urlLogo(empresa.logo_path) ? `<img src="${urlLogo(empresa.logo_path)}" alt="" style="height:48px;float:right">` : ''}<h1>Cotización ${inicial ? formatCorrelativo('COT', inicial.numero) : '(borrador)'} · P48</h1>
 <p class="sm">${esc(titulo)}<br>Emisión: ${esc(formatFecha(inicial?.fecha_emision ?? new Date()))} · Válida ${esc(validez)} días</p>
 <p><b>${esc(empresa.razon_social || empresa.nombre)}</b><br>${empresa.rut ? 'RUT ' + esc(formatRUT(empresa.rut)) + '<br>' : ''}${empresa.giro ? esc(empresa.giro) + '<br>' : ''}${empresa.direccion_facturacion ? esc(empresa.direccion_facturacion) : ''}</p>
 <table><thead><tr><th>Concepto</th><th class="n">Cant.</th><th class="n">Precio neto</th><th class="n">Subtotal neto</th><th>Tipo</th></tr></thead><tbody>${filasHtml}</tbody></table>

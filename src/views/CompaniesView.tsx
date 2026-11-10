@@ -10,6 +10,8 @@ import {
   Filter,
 } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';
+import { LogoEmpresa } from '../components/clientes/Logo';
+import { LayoutList, LayoutGrid } from 'lucide-react';
 import { formatCLP, formatRUT, formatRUTInput } from '../lib/formatters';
 
 interface CompaniesViewProps {
@@ -20,7 +22,7 @@ interface CompaniesViewProps {
 export const CompaniesView: React.FC<CompaniesViewProps> = ({
   onSelectEmpresa,
 }) => {
-  const { empresas, accesosAdmin, miembros, industrias, crearEmpresa } = useCRM();
+  const { empresas, accesosAdmin, miembros, industrias, crearEmpresa, oportunidades } = useCRM();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filtroEstado, setFiltroEstado] = useState<string>('todos');
@@ -29,6 +31,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
 
   // Modal para nueva empresa
   const [showNewModal, setShowNewModal] = useState(false);
+  const [vista, setVista] = useState<'tabla' | 'tarjetas'>('tabla');
   const [newCompany, setNewCompany] = useState<{
     nombre: string;
     rut: string;
@@ -206,8 +209,67 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
         </select>
       </div>
 
+      {/* Conmutador tabla / tarjetas */}
+      <div className="flex justify-end">
+        <div className="inline-flex border border-[var(--c-line)] rounded overflow-hidden">
+          <button
+            onClick={() => setVista('tabla')}
+            className={`px-2.5 py-1 text-[11px] font-mono flex items-center gap-1 ${vista === 'tabla' ? 'bg-[var(--c-surface-3)] text-[var(--c-text)]' : 'text-[var(--c-muted)]'}`}
+          >
+            <LayoutList className="w-3.5 h-3.5" /> Tabla
+          </button>
+          <button
+            onClick={() => setVista('tarjetas')}
+            className={`px-2.5 py-1 text-[11px] font-mono flex items-center gap-1 ${vista === 'tarjetas' ? 'bg-[var(--c-surface-3)] text-[var(--c-text)]' : 'text-[var(--c-muted)]'}`}
+          >
+            <LayoutGrid className="w-3.5 h-3.5" /> Tarjetas
+          </button>
+        </div>
+      </div>
+
+      {vista === 'tarjetas' && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+          {filteredEmpresas.length === 0 && (
+            <p className="col-span-full py-8 text-center text-xs text-[var(--c-muted)]">No se encontraron empresas con los filtros aplicados.</p>
+          )}
+          {filteredEmpresas.map((emp) => {
+            const resp = miembros.find((m) => m.id === emp.responsable_id);
+            const ind = industrias.find((i) => i.id === emp.industria_id);
+            const nNegocios = oportunidades.filter((o) => o.empresa_id === emp.id && !o.archivado).length;
+            return (
+              <button
+                key={emp.id}
+                onClick={() => onSelectEmpresa(emp.id)}
+                className="text-left p-4 rounded-lg border border-[var(--c-line)] bg-[var(--c-surface)] hover:border-[var(--c-accent)] transition-colors space-y-3"
+              >
+                <div className="flex items-start gap-3">
+                  <LogoEmpresa nombre={emp.nombre} logoPath={emp.logo_path} size={44} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <p className="font-semibold text-[var(--c-text)] truncate">{emp.nombre}</p>
+                      {emp.salud && (
+                        <span
+                          className={`w-2 h-2 rounded-full shrink-0 ${emp.salud === 'verde' ? 'bg-[var(--c-ok)]' : emp.salud === 'amarillo' ? 'bg-[var(--c-warn)]' : 'bg-[var(--c-danger)]'}`}
+                          title={`Salud: ${emp.salud}`}
+                        />
+                      )}
+                    </div>
+                    <p className="text-[10px] font-mono text-[var(--c-muted)] truncate">{emp.rut ? formatRUT(emp.rut) : 'Sin RUT'} · {ind?.nombre ?? 'General'}</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between text-[11px] font-mono text-[var(--c-muted)]">
+                  <span>{emp.estado}</span>
+                  <span>{nNegocios} negocio{nNegocios === 1 ? '' : 's'}</span>
+                  <span className="truncate max-w-[40%]">{resp?.nombre ?? 'Sin responsable'}</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {/* Tabla Densa de Empresas */}
-      <div className="bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white border border-[var(--c-line)] rounded-lg overflow-hidden shadow-sm">
+      <div className={`${vista === 'tabla' ? '' : 'hidden '}bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white border border-[var(--c-line)] rounded-lg overflow-hidden shadow-sm`}>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-surface-2)] border-b border-[var(--c-line)] text-[var(--c-muted)] uppercase font-mono text-[11px]">
@@ -260,9 +322,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                       {/* Empresa */}
                       <td className="py-2.5 px-4">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-6 h-6 rounded bg-[var(--c-surface-3)] flex items-center justify-center text-[var(--c-accent)] shrink-0">
-                            <Building2 className="w-3.5 h-3.5" />
-                          </div>
+                          <LogoEmpresa nombre={emp.nombre} logoPath={emp.logo_path} size={24} />
                           <div>
                             <div className="flex items-center gap-1.5">
                               <p className="font-semibold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] group-hover:text-[var(--c-accent)] transition-colors">
