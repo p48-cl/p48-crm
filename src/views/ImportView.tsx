@@ -141,7 +141,7 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
         },
         esDuplicado: esDuplicadoEmpresa || esDuplicadoContacto,
         motivoDuplicado: esDuplicadoEmpresa
-          ? 'Empresa ya existe por nombre o dominio'
+          ? 'Cliente ya existe por nombre o dominio'
           : esDuplicadoContacto
           ? 'Contacto ya existe por correo'
           : '',
@@ -181,7 +181,7 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold font-sans text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
-            Importador de Empresas y Contactos
+            Importador de Clientes y Contactos
           </h1>
           <p className="text-xs text-[var(--c-muted)] mt-0.5">
             Carga masiva vía CSV con detección de duplicados y mapeo relacional
@@ -256,12 +256,12 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
             <div className="p-4 bg-[var(--c-surface)] rounded border border-[var(--c-line)] space-y-3">
               <h4 className="font-semibold text-[var(--c-accent)] flex items-center gap-1.5">
                 <Building2 className="w-3.5 h-3.5" />
-                <span>Datos de Empresa</span>
+                <span>Datos del cliente</span>
               </h4>
 
               <div>
                 <label className="block text-[11px] text-[var(--c-text-2)] mb-1">
-                  Nombre Empresa <span className="text-[var(--c-accent)]">*</span>
+                  Nombre del cliente <span className="text-[var(--c-accent)]">*</span>
                 </label>
                 <select
                   value={mapping.nombreEmpresa}
@@ -278,7 +278,7 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
               </div>
 
               <div>
-                <label className="block text-[11px] text-[var(--c-text-2)] mb-1">RUT Empresa</label>
+                <label className="block text-[11px] text-[var(--c-text-2)] mb-1">RUT</label>
                 <select
                   value={mapping.rut}
                   onChange={(e) => setMapping({ ...mapping, rut: e.target.value })}
@@ -447,7 +447,7 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
               <thead className="bg-[var(--c-surface-2)] border-b border-[var(--c-line)] text-[var(--c-muted)] font-mono text-[10px] uppercase">
                 <tr>
                   <th className="py-2 px-3">Estado</th>
-                  <th className="py-2 px-3">Empresa</th>
+                  <th className="py-2 px-3">Cliente</th>
                   <th className="py-2 px-3">RUT</th>
                   <th className="py-2 px-3">Dominio</th>
                   <th className="py-2 px-3">Contacto</th>
@@ -524,7 +524,7 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
               <p className="font-mono text-lg font-bold text-[var(--c-accent)]">
                 {resultadoImportacion.empresasCreadas}
               </p>
-              <p className="text-[10px] text-[var(--c-muted)]">Empresas Creadas</p>
+              <p className="text-[10px] text-[var(--c-muted)]">Clientes creados</p>
             </div>
             <div className="p-3 bg-[var(--c-surface-2)] rounded border border-[var(--c-line)]">
               <p className="font-mono text-lg font-bold text-[var(--c-info)]">

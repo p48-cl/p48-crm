@@ -313,7 +313,7 @@ const CRMAppContent: React.FC = () => {
           >
             <p className="text-[10px] font-mono uppercase text-[var(--c-muted)] px-2 pb-2">Más secciones</p>
             {[
-              { id: 'empresas' as const, label: 'Empresas y clientes', icon: Building2 },
+              { id: 'empresas' as const, label: 'Clientes', icon: Building2 },
               { id: 'contactos' as const, label: 'Contactos', icon: Users },
               { id: 'cotizaciones' as const, label: 'Cotizaciones', icon: FileText },
               { id: 'actividades' as const, label: 'Actividades', icon: Activity },

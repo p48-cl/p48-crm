@@ -1213,7 +1213,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!empId) {
         erroresPorFila.push({
           fila: idx + 2,
-          error: `No se pudo vincular la empresa "${f.nombreEmpresa}".`,
+          error: `No se pudo vincular el cliente "${f.nombreEmpresa}".`,
         });
         return;
       }

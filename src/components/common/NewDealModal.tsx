@@ -148,7 +148,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <label className={label}>Empresa *</label>
+              <label className={label}>Cliente *</label>
               <button
                 type="button"
                 onClick={() => setAltaEmpresa(!altaEmpresa)}
@@ -161,7 +161,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
               <div className="grid grid-cols-2 gap-2">
                 <input
                   className={input}
-                  placeholder="Nombre de la empresa"
+                  placeholder="Nombre del cliente"
                   value={nuevaEmpresa.nombre}
                   onChange={(e) => setNuevaEmpresa({ ...nuevaEmpresa, nombre: e.target.value })}
                 />
@@ -172,7 +172,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
                   onChange={(e) => setNuevaEmpresa({ ...nuevaEmpresa, dominio: e.target.value })}
                 />
                 <p className="col-span-2 text-[10px] text-[var(--c-muted)]">
-                  Se crea como prospecto. La ficha completa se edita después en Empresas.
+                  Se crea como prospecto. La ficha completa se edita después en Clientes.
                 </p>
               </div>
             ) : (

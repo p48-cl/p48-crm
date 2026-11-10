@@ -118,7 +118,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
             id: `server-emp-${e.id}`,
             tipo: 'empresa',
             titulo: e.nombre,
-            subtitulo: e.dominio_web || e.rut || 'Empresa B2B',
+            subtitulo: e.dominio_web || e.rut || 'Cliente B2B',
             metadato: e.estado.toUpperCase(),
             rawId: e.id,
           });
@@ -190,7 +190,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
           id: `emp-${emp.id}`,
           tipo: 'empresa',
           titulo: emp.nombre,
-          subtitulo: emp.dominio_web || emp.rut || 'Empresa B2B',
+          subtitulo: emp.dominio_web || emp.rut || 'Cliente B2B',
           metadato: emp.estado.toUpperCase(),
           rawId: emp.id,
         });
@@ -273,7 +273,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
               setSelectedIndex(0);
             }}
             onKeyDown={handleKeyDownList}
-            placeholder="Buscar por empresa, contacto, RUT o negocio..."
+            placeholder="Buscar por cliente, contacto, RUT o negocio..."
             className="w-full bg-transparent text-sm text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] placeholder:text-[var(--c-muted-2)] focus:outline-none font-sans"
           />
           {query ? (

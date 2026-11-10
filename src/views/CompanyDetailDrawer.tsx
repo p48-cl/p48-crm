@@ -276,7 +276,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                 <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)] -mb-1">Estado</p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                   <div>
-                    <label className="block text-[11px] text-[var(--c-muted)] mb-1">Estado Empresa</label>
+                    <label className="block text-[11px] text-[var(--c-muted)] mb-1">Estado del cliente</label>
                     <select
                       value={empresa.estado}
                       onChange={(e) => actualizarEmpresa(empresa.id, { estado: e.target.value as any })}
