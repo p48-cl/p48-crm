@@ -25,6 +25,7 @@ import { ActivityModal } from './components/common/ActivityModal';
 import { CheckSquare, Kanban, Clock, Building2, LayoutDashboard, MoreHorizontal, Users, Upload, Settings, Activity, BarChart3, FileText } from 'lucide-react';
 import { NewTaskModal } from './components/common/NewTaskModal';
 import { Tarea } from './types/crm';
+import { useConfiguracionCRM } from './lib/configuracion';
 
 const CRMAppContent: React.FC = () => {
   const { isLoggedIn, isLoading, accessDeniedError, isAdmin } = useAuth();
@@ -34,7 +35,11 @@ const CRMAppContent: React.FC = () => {
   const [masAbierto, setMasAbierto] = useState(false);
   const [mktSeccion, setMktSeccion] = useState<SeccionMarketing>('dashboard');
   const abrirMarketing = (s: SeccionMarketing) => { setMktSeccion(s); setCurrentView('marketing'); };
+  const { config: configCRM } = useConfiguracionCRM(isLoggedIn);
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
+  useEffect(() => {
+    setTheme(configCRM.tema_defecto === 'oscuro' ? 'dark' : 'light');
+  }, [configCRM.tema_defecto]);
 
   // Modales y Drawers globales
   const [isSearchOpen, setIsSearchOpen] = useState(false);

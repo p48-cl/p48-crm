@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Building2,
   Search,
@@ -10,6 +10,7 @@ import {
   Filter,
 } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';
+import { useConfiguracionCRM } from '../lib/configuracion';
 import { LogoEmpresa } from '../components/clientes/Logo';
 import { LayoutList, LayoutGrid } from 'lucide-react';
 import { formatCLP, formatRUT, formatRUTInput } from '../lib/formatters';
@@ -31,7 +32,11 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
 
   // Modal para nueva empresa
   const [showNewModal, setShowNewModal] = useState(false);
-  const [vista, setVista] = useState<'tabla' | 'tarjetas'>('tabla');
+  const { config: configCRM } = useConfiguracionCRM();
+  const [vista, setVista] = useState<'tabla' | 'tarjetas'>(configCRM.vista_clientes_defecto);
+  useEffect(() => {
+    setVista(configCRM.vista_clientes_defecto);
+  }, [configCRM.vista_clientes_defecto]);
   const [newCompany, setNewCompany] = useState<{
     nombre: string;
     rut: string;
