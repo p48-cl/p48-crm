@@ -15,7 +15,16 @@ export function formatCLP(monto: number | null | undefined): string {
   return `$ ${formateado} CLP`;
 }
 
-export function formatMoneda(monto: number | null | undefined, moneda: 'CLP' | 'USD' = 'CLP'): string {
+export type MonedaCRM = 'CLP' | 'USD' | 'UF';
+
+export function formatUF(monto: number | null | undefined): string {
+  if (monto === null || monto === undefined || isNaN(monto)) return 'UF 0';
+  const formateado = new Intl.NumberFormat('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(monto);
+  return `UF ${formateado}`;
+}
+
+export function formatMoneda(monto: number | null | undefined, moneda: MonedaCRM = 'CLP'): string {
+  if (moneda === 'UF') return formatUF(monto);
   if (moneda === 'USD') {
     if (monto === null || monto === undefined || isNaN(monto)) return 'US$ 0';
     const formateado = new Intl.NumberFormat('en-US', {

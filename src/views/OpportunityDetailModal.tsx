@@ -156,7 +156,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                 <span className="font-mono text-xs text-[var(--c-text)] font-bold">
                   {formatMoneda(oportunidad.valor_neto, oportunidad.moneda)}
                 </span>
-                {oportunidad.moneda === 'USD' && (
+                {oportunidad.moneda !== 'CLP' && (
                   <span className="text-[10px] text-[var(--c-muted)] font-mono">(No suma a CLP)</span>
                 )}
               </div>

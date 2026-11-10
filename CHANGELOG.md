@@ -5,6 +5,7 @@ Formato: versión, fecha de unión a `main`, PR, qué cambia y si toca base de d
 ## v0.11.0 · en curso (no publicada)
 Estado al 9 de noviembre de 2026. Cada entrada indica si ya está en `main`.
 
+- **PR #62** · Moneda UF en negocios y cotizaciones (apilado sobre #61). Cotizaciones: CLP, UF o USD; con UF, los precios de lista en CLP se convierten con el último valor de `uf_diaria` (no posterior a hoy) y el valor queda congelado en la cotización (`uf_valor`, `uf_fecha`). Negocios: UF disponible; se marca «No suma a CLP». Base: crm_27 (oportunidades acepta UF) y crm_28 (`v_cotizaciones` expone el snapshot UF).
 - **PR #61** · Ficha del negocio en dos paneles: izquierda los datos (nombre, valor, setup, probabilidad, plan, fuente de origen, responsable, cierre, contacto principal, cliente con razón social/RUT/giro/dirección/email y sus contactos), todo editable; derecha la gestión comercial (etapa, próxima acción, cotizaciones del negocio con «Nueva cotización», calificación, tareas, actividades). Correlativos únicos: cotizaciones `COT-0001` y negocios `NEG-0001` (también en Kanban). Base: crm_26.
 - **PR #60** · Estética JAMP CRM: nuevo sistema visual (isotipo, wordmark, favicon, paleta oscura azul-marino, colores por módulo Ventas/Media/Orgánico), barra lateral reagrupada con leyenda de agentes, cabecera, login y portal con la marca. Solo diseño: sin cambios de lógica, datos ni permisos.
 - **PR #57** · Contactos: al crear un contacto se elige o crea el cliente con el mismo selector (búsqueda y alta en línea) en vez de un desplegable.

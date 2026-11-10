@@ -204,6 +204,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
               <select value={moneda} onChange={(e) => setMoneda(e.target.value as Moneda)} className={`${input} font-mono`}>
                 <option value="CLP">CLP</option>
                 <option value="USD">USD</option>
+                <option value="UF">UF</option>
               </select>
             </div>
             <div>

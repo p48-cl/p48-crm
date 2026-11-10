@@ -78,7 +78,7 @@ export interface Contacto {
   created_at?: string;
 }
 
-export type Moneda = 'CLP' | 'USD';
+export type Moneda = 'CLP' | 'USD' | 'UF';
 
 export type EstadoSeguimiento = 'sin_accion' | 'atrasado' | 'por_vencer' | 'al_dia' | null;
 
