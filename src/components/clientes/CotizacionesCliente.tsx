@@ -197,8 +197,20 @@ const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creada
     cambiar(i, { plan, concepto: plan === 'personalizado' ? lineas[i].concepto : `Plan ${plan} · ${p.nombre}`, precio_neto: plan === 'personalizado' ? lineas[i].precio_neto : p.valor, recurrente: plan !== 'E' });
   };
 
+  // Datos legales mínimos: sin ellos no se puede enviar ni aceptar una cotización
+  const faltantesTributarios = [
+    !empresa.razon_social && 'razón social',
+    !empresa.rut && 'RUT',
+    !empresa.giro && 'giro',
+    !empresa.direccion_facturacion && 'dirección',
+  ].filter(Boolean) as string[];
+  const requiereDatos = estado === 'enviada' || estado === 'aceptada';
+
   const guardar = async () => {
     if (!supabase) return;
+    if (requiereDatos && faltantesTributarios.length > 0) {
+      return setError(`Para marcar la cotización como ${estado} faltan datos del cliente: ${faltantesTributarios.join(', ')}. Complétalos en «Datos legales y tributarios».`);
+    }
     if (!titulo.trim()) return setError('Falta el título');
     if (lineas.length === 0 || lineas.some((l) => !l.concepto.trim())) return setError('Cada línea necesita un concepto');
     if (lineas.some((l) => !(l.cantidad > 0) || l.precio_neto < 0)) return setError('Revisa cantidades y precios');
@@ -267,6 +279,13 @@ const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creada
     <div className="space-y-4">
       <button onClick={onVolver} className="text-xs text-[var(--c-muted)] hover:text-[var(--c-text)] flex items-center gap-1"><ArrowLeft className="w-3.5 h-3.5" /> Volver a cotizaciones</button>
       <h3 className="text-sm font-semibold text-[var(--c-text)]">{inicial ? `Cotización N° ${inicial.numero}` : 'Nueva cotización'}</h3>
+
+      {faltantesTributarios.length > 0 && (
+        <div className="text-xs rounded border border-[var(--c-warn)] bg-[var(--c-surface-2)] p-3 text-[var(--c-text-2)]">
+          Al cliente le faltan datos tributarios: <b className="text-[var(--c-text)]">{faltantesTributarios.join(', ')}</b>.
+          Puedes guardar como borrador, pero no enviar ni aceptar hasta completarlos en «Datos legales y tributarios» (pestaña Datos &amp; Accesos).
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="sm:col-span-2"><label className={etiqueta}>Título</label><input className={campo} value={titulo} onChange={(e) => setTitulo(e.target.value)} /></div>
