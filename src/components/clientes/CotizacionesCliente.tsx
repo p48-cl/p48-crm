@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Plus, Printer, Trash2, ArrowLeft } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { parseSupabaseError } from '../../lib/errorHandler';
-import { formatFecha, formatMoneda, formatRUT } from '../../lib/formatters';
+import { formatFecha, formatMoneda, formatRUT, formatCorrelativo } from '../../lib/formatters';
 import { PLANES, SETUP_LISTA } from '../../lib/planes';
 import { useCRM } from '../../context/CRMContext';
 import { useAuth } from '../../context/AuthContext';
@@ -67,9 +67,10 @@ interface CotizacionesClienteProps {
   empresa: Empresa;
   iniciarNueva?: boolean;
   onNuevaUsada?: () => void;
+  oportunidadId?: string; // si viene, lista solo las del negocio y las crea vinculadas
 }
 
-export const CotizacionesCliente: React.FC<CotizacionesClienteProps> = ({ empresa, iniciarNueva, onNuevaUsada }) => {
+export const CotizacionesCliente: React.FC<CotizacionesClienteProps> = ({ empresa, iniciarNueva, onNuevaUsada, oportunidadId }) => {
   const { oportunidades } = useCRM();
   const { currentUser } = useAuth();
   const [filas, setFilas] = useState<CotizacionFila[]>([]);
@@ -90,11 +91,12 @@ export const CotizacionesCliente: React.FC<CotizacionesClienteProps> = ({ empres
       .from('v_cotizaciones')
       .select('*')
       .eq('empresa_id', empresa.id)
+      .match(oportunidadId ? { oportunidad_id: oportunidadId } : {})
       .order('numero', { ascending: false });
     if (err) setError(parseSupabaseError(err));
     else setFilas(((data ?? []) as CotizacionFila[]).map((f) => ({ ...f, neto_mensual: Number(f.neto_mensual), neto_unico: Number(f.neto_unico), iva_pct: Number(f.iva_pct) })));
     setCargando(false);
-  }, [empresa.id]);
+  }, [empresa.id, oportunidadId]);
 
   useEffect(() => { cargar(); }, [cargar]);
 
@@ -107,6 +109,7 @@ export const CotizacionesCliente: React.FC<CotizacionesClienteProps> = ({ empres
         inicial={editando === 'nueva' ? null : editando}
         oportunidades={oportunidades.filter((o) => o.empresa_id === empresa.id && !o.archivado).map((o) => ({ id: o.id, nombre: o.nombre }))}
         creadaPor={currentUser?.id ?? null}
+        oportunidadInicial={oportunidadId}
         onVolver={() => { setEditando(null); cargar(); }}
       />
     );
@@ -135,7 +138,7 @@ export const CotizacionesCliente: React.FC<CotizacionesClienteProps> = ({ empres
             return (
               <button key={c.id} onClick={() => setEditando(c)} className="w-full text-left p-3 hover:bg-[var(--c-surface-2)] flex items-center justify-between gap-3 text-xs">
                 <div className="min-w-0">
-                  <p className="font-medium text-[var(--c-text)] truncate">N° {c.numero} · {c.titulo}</p>
+                  <p className="font-medium text-[var(--c-text)] truncate">{formatCorrelativo('COT', c.numero)} · {c.titulo}</p>
                   <p className="text-[11px] text-[var(--c-muted)] font-mono">Emitida {formatFecha(c.fecha_emision)} · vence {formatFecha(c.vence_el)}</p>
                 </div>
                 <div className="text-right shrink-0">
@@ -158,13 +161,14 @@ interface EditorProps {
   inicial: CotizacionFila | null;
   oportunidades: { id: string; nombre: string }[];
   creadaPor: string | null;
+  oportunidadInicial?: string;
   onVolver: () => void;
 }
 
-const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creadaPor, onVolver }) => {
+const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creadaPor, oportunidadInicial, onVolver }) => {
   const [titulo, setTitulo] = useState(inicial?.titulo ?? `Propuesta ${empresa.nombre}`);
   const [estado, setEstado] = useState<Estado>(inicial?.estado ?? 'borrador');
-  const [oportunidadId, setOportunidadId] = useState(inicial?.oportunidad_id ?? '');
+  const [oportunidadId, setOportunidadId] = useState(inicial?.oportunidad_id ?? oportunidadInicial ?? '');
   const [validez, setValidez] = useState(String(inicial?.validez_dias ?? 15));
   const [ivaPct, setIvaPct] = useState(String(inicial?.iva_pct ?? 19));
   const [moneda, setMoneda] = useState<'CLP' | 'USD'>(inicial?.moneda ?? 'CLP');
@@ -255,9 +259,9 @@ const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creada
     const filasHtml = lineas
       .map((l) => `<tr><td>${esc(l.concepto)}</td><td class="n">${l.cantidad}</td><td class="n">${esc(formatMoneda(l.precio_neto, moneda))}</td><td class="n">${esc(formatMoneda(l.cantidad * l.precio_neto, moneda))}</td><td>${l.recurrente ? 'Mensual' : 'Pago único'}</td></tr>`)
       .join('');
-    const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Cotización ${inicial ? inicial.numero : ''} · ${esc(empresa.nombre)}</title>
+    const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${inicial ? formatCorrelativo('COT', inicial.numero) : 'Cotización'} · ${esc(empresa.nombre)}</title>
 <style>body{font-family:Arial,sans-serif;color:#0A0A0A;margin:40px;font-size:13px}h1{font-size:20px;margin:0}table{width:100%;border-collapse:collapse;margin:16px 0}th,td{border-bottom:1px solid #ddd;padding:8px;text-align:left}th{background:#F5F5F5}.n{text-align:right}.tot td{border:0;padding:3px 8px}.sm{color:#555;font-size:12px}.box{margin-top:14px}</style></head><body>
-<h1>Cotización ${inicial ? 'N° ' + inicial.numero : '(borrador)'} · P48</h1>
+<h1>Cotización ${inicial ? formatCorrelativo('COT', inicial.numero) : '(borrador)'} · P48</h1>
 <p class="sm">${esc(titulo)}<br>Emisión: ${esc(formatFecha(inicial?.fecha_emision ?? new Date()))} · Válida ${esc(validez)} días</p>
 <p><b>${esc(empresa.razon_social || empresa.nombre)}</b><br>${empresa.rut ? 'RUT ' + esc(formatRUT(empresa.rut)) + '<br>' : ''}${empresa.giro ? esc(empresa.giro) + '<br>' : ''}${empresa.direccion_facturacion ? esc(empresa.direccion_facturacion) : ''}</p>
 <table><thead><tr><th>Concepto</th><th class="n">Cant.</th><th class="n">Precio neto</th><th class="n">Subtotal neto</th><th>Tipo</th></tr></thead><tbody>${filasHtml}</tbody></table>
@@ -278,7 +282,7 @@ const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creada
   return (
     <div className="space-y-4">
       <button onClick={onVolver} className="text-xs text-[var(--c-muted)] hover:text-[var(--c-text)] flex items-center gap-1"><ArrowLeft className="w-3.5 h-3.5" /> Volver a cotizaciones</button>
-      <h3 className="text-sm font-semibold text-[var(--c-text)]">{inicial ? `Cotización N° ${inicial.numero}` : 'Nueva cotización'}</h3>
+      <h3 className="text-sm font-semibold text-[var(--c-text)]">{inicial ? `Cotización ${formatCorrelativo('COT', inicial.numero)}` : 'Nueva cotización'}</h3>
 
       {faltantesTributarios.length > 0 && (
         <div className="text-xs rounded border border-[var(--c-warn)] bg-[var(--c-surface-2)] p-3 text-[var(--c-text-2)]">

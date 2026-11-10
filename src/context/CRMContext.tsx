@@ -80,6 +80,7 @@ interface CRMContextType {
   ) => Promise<void>;
   crearOportunidad: (datos: Partial<Oportunidad>) => Promise<Oportunidad | null>;
   actualizarProximaAccion: (oportunidadId: string, accion: string, fecha: string) => Promise<void>;
+  actualizarOportunidad: (oportunidadId: string, datos: Partial<Oportunidad>) => Promise<void>;
   archivarOportunidad: (oportunidadId: string) => Promise<void>;
 
   // Calificación
@@ -426,6 +427,22 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     return data as Oportunidad;
+  };
+
+  const actualizarOportunidad = async (oportunidadId: string, datos: Partial<Oportunidad>) => {
+    // Campos calculados o de sistema: nunca se escriben
+    const { valor_ponderado, numero, id, created_at, ...limpios } = datos as any;
+    if (!supabase) {
+      if (isModoDemo) setOportunidades((prev) => prev.map((o) => (o.id === oportunidadId ? { ...o, ...limpios } : o)));
+      return;
+    }
+    const { error } = await supabase.from('oportunidades').update(limpios).eq('id', oportunidadId);
+    if (error) {
+      setErrorMensaje(parseSupabaseError(error));
+      return;
+    }
+    const { data: vista } = await supabase.from('v_oportunidades').select('*').eq('id', oportunidadId).single();
+    if (vista) setOportunidades((prev) => prev.map((o) => (o.id === oportunidadId ? (vista as VOportunidad) : o)));
   };
 
   const actualizarProximaAccion = async (oportunidadId: string, accion: string, fecha: string) => {
@@ -1296,6 +1313,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         moverOportunidadEtapa,
         crearOportunidad,
         actualizarProximaAccion,
+        actualizarOportunidad,
         archivarOportunidad,
         evaluarCriterio,
         cargarCalificacionOportunidad,

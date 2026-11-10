@@ -12,7 +12,9 @@ import {
 } from 'lucide-react';
 import { CriterioCalificacion } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
-import { formatFecha, formatMoneda, esFechaAtrasada } from '../lib/formatters';
+import { formatFecha, formatMoneda, esFechaAtrasada, formatCorrelativo } from '../lib/formatters';
+import { DatosNegocio } from '../components/crm/DatosNegocio';
+import { CotizacionesCliente } from '../components/clientes/CotizacionesCliente';
 
 interface OpportunityDetailModalProps {
   oportunidadId: string | null;
@@ -140,7 +142,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white border border-[var(--c-line)] rounded-xl max-w-4xl w-full h-[90vh] shadow-2xl flex flex-col justify-between overflow-hidden">
+      <div className="bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white border border-[var(--c-line)] rounded-xl max-w-6xl w-full h-[92vh] shadow-2xl flex flex-col justify-between overflow-hidden">
         {/* Header Ficha */}
         <div className="p-5 border-b border-[var(--c-line)] flex items-start justify-between bg-[var(--c-surface-2)]">
           <div className="flex items-start gap-3">
@@ -149,6 +151,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
+                <span className="font-mono text-[11px] text-[var(--c-muted)]">{formatCorrelativo('NEG', oportunidad.numero)}</span>
                 <h2 className="text-lg font-bold text-[var(--c-text)]">{oportunidad.nombre}</h2>
                 <span className="font-mono text-xs text-[var(--c-text)] font-bold">
                   {formatMoneda(oportunidad.valor_neto, oportunidad.moneda)}
@@ -206,8 +209,36 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
         )}
 
         {/* Contenido */}
-        <div className="flex-1 overflow-y-auto p-5 grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
+        <div className="flex-1 overflow-y-auto p-5 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          {/* Izquierda: datos del negocio, cliente y contactos */}
+          <DatosNegocio
+            oportunidad={oportunidad}
+            onVerCliente={(id) => { onClose(); onSelectEmpresa(id); }}
+          />
+
+          {/* Derecha: gestión comercial */}
+          <div className="space-y-6">
+            <h2 className="text-[11px] font-mono uppercase tracking-wider text-[var(--c-muted)]">Gestión comercial</h2>
+
+            {/* Etapa */}
+            <div className="p-4 bg-[var(--c-surface-2)] rounded-lg border border-[var(--c-line)] space-y-3">
+              <h3 className="text-xs font-semibold text-[var(--c-text)]">Etapa Comercial</h3>
+              <select
+                value={oportunidad.etapa_id}
+                onChange={(e) => moverOportunidadEtapa(oportunidad.id, e.target.value)}
+                className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)] font-mono"
+              >
+                {etapas.map((et) => (
+                  <option key={et.id} value={et.id}>
+                    {et.nombre} ({et.probabilidad_default}%)
+                  </option>
+                ))}
+              </select>
+              <div className="text-[11px] font-mono text-[var(--c-muted)] pt-1">
+                <p>Ponderado (Base): {formatMoneda(oportunidad.valor_ponderado, oportunidad.moneda)}</p>
+              </div>
+            </div>
+
             {/* Próxima Acción */}
             <div
               className={`p-4 rounded-lg border transition-colors ${
@@ -359,31 +390,13 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                 ))}
               </div>
             </div>
-          </div>
 
-          {/* Columna Derecha */}
-          <div className="space-y-6">
-            {/* Etapa */}
-            <div className="p-4 bg-[var(--c-surface-2)] rounded-lg border border-[var(--c-line)] space-y-3">
-              <h3 className="text-xs font-semibold text-[var(--c-text)]">Etapa Comercial</h3>
-              <select
-                value={oportunidad.etapa_id}
-                onChange={(e) => moverOportunidadEtapa(oportunidad.id, e.target.value)}
-                className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)] font-mono"
-              >
-                {etapas.map((et) => (
-                  <option key={et.id} value={et.id}>
-                    {et.nombre} ({et.probabilidad_default}%)
-                  </option>
-                ))}
-              </select>
-
-              <div className="text-[11px] font-mono text-[var(--c-muted)] pt-1">
-                <p>
-                  Ponderado (Base): {formatMoneda(oportunidad.valor_ponderado, oportunidad.moneda)}
-                </p>
+            {/* Cotizaciones del negocio */}
+            {empresa && (
+              <div className="p-4 bg-[var(--c-surface-2)] rounded-lg border border-[var(--c-line)]">
+                <CotizacionesCliente empresa={empresa} oportunidadId={oportunidad.id} />
               </div>
-            </div>
+            )}
 
             {/* Tareas */}
             <div className="p-4 bg-[var(--c-surface-2)] rounded-lg border border-[var(--c-line)] space-y-3">
