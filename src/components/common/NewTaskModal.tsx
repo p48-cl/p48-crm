@@ -72,7 +72,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-xl max-w-md w-full p-6 shadow-2xl">
+      <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-xl max-w-md w-full p-4 sm:p-6 shadow-2xl max-h-[92dvh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded bg-[var(--c-accent)]/15 flex items-center justify-center text-[var(--c-accent)]">
@@ -103,7 +103,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Cliente</label>
               <select
@@ -137,7 +137,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Responsable</label>
               <select

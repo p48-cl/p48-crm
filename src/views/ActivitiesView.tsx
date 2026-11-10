@@ -58,7 +58,7 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold font-sans text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
+          <h1 className="text-xl font-bold font-sans text-[var(--c-text)]">
             Línea de Tiempo de Actividades
           </h1>
           <p className="text-xs text-[var(--c-muted)] mt-0.5">
@@ -76,7 +76,7 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
       </div>
 
       {/* Barra de Filtros */}
-      <div className="flex items-center gap-3 bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-[var(--c-bg)] p-3 rounded-lg border border-[var(--c-line)]">
+      <div className="flex items-center gap-3 bg-[var(--c-surface)] p-3 rounded-lg border border-[var(--c-line)]">
         <Filter className="w-3.5 h-3.5 text-[var(--c-muted)]" />
         <select
           value={filtroTipo}
@@ -126,13 +126,13 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
                   <div className="w-1.5 h-1.5 rounded-full bg-[var(--c-accent)]" />
                 </div>
 
-                <div className="p-4 bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white rounded-lg border border-[var(--c-line)] space-y-2.5 shadow-xs">
+                <div className="p-4 bg-[var(--c-surface)] rounded-lg border border-[var(--c-line)] space-y-2.5 shadow-xs">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded bg-[var(--c-surface-2)] flex items-center justify-center">
                         {getIcono(act.tipo)}
                       </div>
-                      <span className="font-semibold text-xs text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
+                      <span className="font-semibold text-xs text-[var(--c-text)]">
                         {act.titulo}
                       </span>
                       <span className="text-[10px] uppercase font-mono text-[var(--c-muted)]">

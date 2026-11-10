@@ -260,9 +260,9 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-100">
-      <div className="bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white border border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-line)] rounded-xl max-w-xl w-full shadow-2xl overflow-hidden">
+      <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-xl max-w-xl w-full shadow-2xl overflow-hidden">
         {/* Input */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-text)]">
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--c-line)]">
           <Search className="w-4 h-4 text-[var(--c-muted)] shrink-0" />
           <input
             ref={inputRef}
@@ -274,7 +274,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
             }}
             onKeyDown={handleKeyDownList}
             placeholder="Buscar por cliente, contacto, RUT o negocio..."
-            className="w-full bg-transparent text-sm text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] placeholder:text-[var(--c-muted-2)] focus:outline-none font-sans"
+            className="w-full bg-transparent text-sm text-[var(--c-text)] placeholder:text-[var(--c-muted-2)] focus:outline-none font-sans"
           />
           {query ? (
             <button
@@ -284,7 +284,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
               <X className="w-4 h-4" />
             </button>
           ) : (
-            <kbd className="font-mono text-[10px] bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-line)] px-1.5 py-0.5 rounded text-[var(--c-muted)]">
+            <kbd className="font-mono text-[10px] bg-[var(--c-surface-2)] px-1.5 py-0.5 rounded text-[var(--c-muted)]">
               ESC
             </kbd>
           )}
@@ -314,7 +314,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                     onMouseEnter={() => setSelectedIndex(index)}
                     className={`w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between transition-colors ${
                       isSelected
-                        ? 'bg-[var(--c-surface-3)] dark:bg-[var(--c-surface-3)] light:bg-[var(--c-surface-2)] text-[var(--c-text)]'
+                        ? 'bg-[var(--c-surface-3)] text-[var(--c-text)]'
                         : 'text-[var(--c-line)] hover:bg-[var(--c-surface-2)]'
                     }`}
                   >
@@ -334,7 +334,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                       </div>
 
                       <div className="truncate">
-                        <p className="text-xs font-medium text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] truncate">
+                        <p className="text-xs font-medium text-[var(--c-text)] truncate">
                           {item.titulo}
                         </p>
                         <p className="text-[11px] text-[var(--c-muted)] truncate">{item.subtitulo}</p>
@@ -355,7 +355,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-2 border-t border-[var(--c-surface-3)] dark:border-[var(--c-surface-3)] light:border-[var(--c-text)] flex items-center justify-between text-[11px] text-[var(--c-muted-2)] font-mono">
+        <div className="px-4 py-2 border-t border-[var(--c-surface-3)] flex items-center justify-between text-[11px] text-[var(--c-muted-2)] font-mono">
           <span>Búsqueda instantánea P48</span>
           <span>{resultados.length} resultados</span>
         </div>

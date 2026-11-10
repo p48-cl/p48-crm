@@ -16,6 +16,8 @@ import { formatFecha, formatMoneda, esFechaAtrasada, formatCorrelativo, diasHast
 import { useConfiguracionCRM } from '../lib/configuracion';
 import { DatosNegocio } from '../components/crm/DatosNegocio';
 import { CotizacionesCliente } from '../components/clientes/CotizacionesCliente';
+import { FranjaDecision, TonoFranja } from '../components/common/FranjaDecision';
+import { ChipSenal } from '../components/common/ChipSenal';
 
 interface OpportunityDetailModalProps {
   oportunidadId: string | null;
@@ -102,12 +104,8 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
         : diasCierre === 0
           ? 'Cierra hoy'
           : `Faltan ${diasCierre} d`;
-  const cierreTono =
-    diasCierre !== null && diasCierre < 0
-      ? 'text-[var(--c-danger)]'
-      : diasCierre !== null && diasCierre <= 14
-        ? 'text-[var(--c-warn)]'
-        : 'text-[var(--c-muted)]';
+  const cierreTono: TonoFranja =
+    diasCierre !== null && diasCierre < 0 ? 'danger' : diasCierre !== null && diasCierre <= 14 ? 'warn' : 'muted';
 
   // Calificación desde vista v_calificacion_oportunidad
   const calificacion = calificaciones[oportunidad.id];
@@ -171,8 +169,8 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
     (oportunidad.proxima_accion_fecha && esFechaAtrasada(oportunidad.proxima_accion_fecha));
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white border border-[var(--c-line)] rounded-xl max-w-6xl w-full h-[92vh] shadow-2xl flex flex-col justify-between overflow-hidden">
+    <div className="fixed inset-0 z-40 flex items-center justify-center sm:p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
+      <div className="bg-[var(--c-surface)] border border-[var(--c-line)] sm:rounded-xl max-w-6xl w-full h-[100dvh] sm:h-[92vh] shadow-2xl flex flex-col justify-between overflow-hidden">
         {/* Encabezado de la ficha (mismo patrón que la ficha de cliente) */}
         <div className="px-5 py-4 border-b border-[var(--c-line)] flex items-start justify-between gap-4 bg-[var(--c-surface-2)]">
           <div className="flex items-start gap-3 min-w-0">
@@ -236,49 +234,42 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
           </div>
         )}
 
-        {/* Franja de decisión: visible siempre */}
-        <div className="grid grid-cols-2 md:grid-cols-4 border-b border-[var(--c-line)] bg-[var(--c-surface)]">
-          <div className="px-4 sm:px-5 py-3 border-r border-[var(--c-line)]">
-            <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">Valor neto</p>
-            <p className="text-sm font-semibold mt-0.5 font-mono text-[var(--c-text)]">
-              {formatMoneda(oportunidad.valor_neto, oportunidad.moneda)}
-            </p>
-            <p className="text-[10px] font-mono text-[var(--c-muted)] mt-0.5">
-              Pond. {formatMoneda(oportunidad.valor_ponderado, oportunidad.moneda)} · {oportunidad.probabilidad}%
-            </p>
-          </div>
-          <div className="px-4 sm:px-5 py-3 md:border-r border-[var(--c-line)]">
-            <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">Cierre estimado</p>
-            <p className="text-sm font-semibold mt-0.5 font-mono text-[var(--c-text)]">
-              {formatFecha(oportunidad.fecha_cierre_estimada)}
-            </p>
-            {cierreTexto && <p className={`text-[10px] font-mono mt-0.5 ${cierreTono}`}>{cierreTexto}</p>}
-          </div>
-          <div className="px-4 sm:px-5 py-3 border-r border-t md:border-t-0 border-[var(--c-line)]">
-            <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">Próxima acción</p>
-            <p
-              className={`text-sm font-semibold mt-0.5 font-mono ${
-                atrasada ? 'text-[var(--c-danger)]' : 'text-[var(--c-text)]'
-              }`}
-            >
-              {oportunidad.proxima_accion_fecha ? formatFecha(oportunidad.proxima_accion_fecha) : 'Sin fecha'}
-            </p>
-            {diasAccion !== null && (
-              <p className={`text-[10px] font-mono mt-0.5 ${atrasada ? 'text-[var(--c-danger)]' : 'text-[var(--c-muted)]'}`}>
-                {diasAccion < 0 ? `atrasada hace ${-diasAccion} d` : diasAccion === 0 ? 'vence hoy' : `en ${diasAccion} d`}
-              </p>
-            )}
-          </div>
-          <div className="px-4 sm:px-5 py-3 border-t md:border-t-0 border-[var(--c-line)]">
-            <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">Responsable</p>
-            <p className="text-sm font-semibold mt-0.5 text-[var(--c-text)] truncate">
-              {responsable ? responsable.nombre : 'Sin asignar'}
-            </p>
-          </div>
-        </div>
+        <FranjaDecision
+          items={[
+            {
+              etiqueta: 'Valor neto',
+              valor: formatMoneda(oportunidad.valor_neto, oportunidad.moneda),
+              mono: true,
+              nota: `Pond. ${formatMoneda(oportunidad.valor_ponderado, oportunidad.moneda)} · ${oportunidad.probabilidad}%`,
+            },
+            {
+              etiqueta: 'Cierre estimado',
+              valor: formatFecha(oportunidad.fecha_cierre_estimada),
+              mono: true,
+              nota: cierreTexto,
+              tonoNota: cierreTono,
+            },
+            {
+              etiqueta: 'Próxima acción',
+              valor: oportunidad.proxima_accion_fecha ? formatFecha(oportunidad.proxima_accion_fecha) : 'Sin fecha',
+              mono: true,
+              tonoValor: atrasada ? 'danger' : 'normal',
+              nota:
+                diasAccion === null
+                  ? null
+                  : diasAccion < 0
+                    ? `atrasada hace ${-diasAccion} d`
+                    : diasAccion === 0
+                      ? 'vence hoy'
+                      : `en ${diasAccion} d`,
+              tonoNota: atrasada ? 'danger' : 'muted',
+            },
+            { etiqueta: 'Responsable', valor: responsable ? responsable.nombre : 'Sin asignar' },
+          ]}
+        />
 
         {/* Contenido */}
-        <div className="flex-1 overflow-y-auto p-5 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-5 grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-start">
           {/* Izquierda: datos del negocio, cliente y contactos */}
           <DatosNegocio
             oportunidad={oportunidad}
@@ -291,32 +282,16 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
 
             {/* Señales de la oportunidad */}
             <div className="flex flex-wrap gap-1.5">
-              {atrasada && (
-                <span className="px-1.5 py-0.5 rounded border border-[var(--c-danger)]/40 bg-[var(--c-danger)]/10 text-[var(--c-danger)] text-[10px] font-semibold">
-                  Acción atrasada
-                </span>
-              )}
-              {!tieneCalificacion && (
-                <span className="px-1.5 py-0.5 rounded border border-[var(--c-warn)]/40 bg-[var(--c-warn)]/10 text-[var(--c-warn)] text-[10px] font-semibold">
-                  Sin calificar
-                </span>
-              )}
+              {atrasada && <ChipSenal tono="danger">Acción atrasada</ChipSenal>}
+              {!tieneCalificacion && <ChipSenal tono="warn">Sin calificar</ChipSenal>}
               {diasSinActividad === null ? (
-                <span className="px-1.5 py-0.5 rounded border border-[var(--c-warn)]/40 bg-[var(--c-warn)]/10 text-[var(--c-warn)] text-[10px] font-semibold">
-                  Sin actividades registradas
-                </span>
+                <ChipSenal tono="warn">Sin actividades registradas</ChipSenal>
               ) : (
                 diasSinActividad >= configCRM.dias_sin_actividad && (
-                  <span className="px-1.5 py-0.5 rounded border border-[var(--c-warn)]/40 bg-[var(--c-warn)]/10 text-[var(--c-warn)] text-[10px] font-semibold">
-                    Sin actividad hace {diasSinActividad} d
-                  </span>
+                  <ChipSenal tono="warn">Sin actividad hace {diasSinActividad} d</ChipSenal>
                 )
               )}
-              {fuente && (
-                <span className="px-1.5 py-0.5 rounded border border-[var(--c-line)] bg-[var(--c-surface-2)] text-[var(--c-text-2)] text-[10px]">
-                  Origen: {fuente.nombre}
-                </span>
-              )}
+              {fuente && <ChipSenal tono="neutro">Origen: {fuente.nombre}</ChipSenal>}
             </div>
 
             {/* Etapa */}

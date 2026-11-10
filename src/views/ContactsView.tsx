@@ -85,7 +85,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
     <div className="p-6 max-w-7xl mx-auto space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold font-sans text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
+          <h1 className="text-xl font-bold font-sans text-[var(--c-text)]">
             Directorio de Contactos
           </h1>
           <p className="text-xs text-[var(--c-muted)] mt-0.5">
@@ -103,7 +103,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
       </div>
 
       {/* Barra de búsqueda */}
-      <div className="bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-[var(--c-bg)] p-3 rounded-lg border border-[var(--c-line)]">
+      <div className="bg-[var(--c-surface)] p-3 rounded-lg border border-[var(--c-line)]">
         <div className="relative max-w-md">
           <Search className="w-3.5 h-3.5 text-[var(--c-muted)] absolute left-3 top-2.5" />
           <input
@@ -111,16 +111,16 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Buscar por nombre, email o cargo..."
-            className="w-full bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-white border border-[var(--c-line)] rounded pl-8 pr-3 py-1.5 text-xs text-[var(--c-text)] placeholder:text-[var(--c-muted-2)] focus:outline-none focus:border-[var(--c-accent)]"
+            className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded pl-8 pr-3 py-1.5 text-xs text-[var(--c-text)] placeholder:text-[var(--c-muted-2)] focus:outline-none focus:border-[var(--c-accent)]"
           />
         </div>
       </div>
 
       {/* Tabla densa de contactos */}
-      <div className="bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white border border-[var(--c-line)] rounded-lg overflow-hidden shadow-sm">
+      <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-lg overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-surface-2)] border-b border-[var(--c-line)] text-[var(--c-muted)] uppercase font-mono text-[11px]">
+            <thead className="bg-[var(--c-surface-2)] border-b border-[var(--c-line)] text-[var(--c-muted)] uppercase font-mono text-[11px]">
               <tr>
                 <th className="py-2.5 px-4 font-medium">Nombre</th>
                 <th className="py-2.5 px-3 font-medium">Cliente</th>
@@ -164,7 +164,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                     >
                       <td className="py-2.5 px-4">
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
+                          <span className="font-semibold text-[var(--c-text)]">
                             {con.nombre} {con.apellido}
                           </span>
                           {con.es_principal && (
@@ -286,7 +286,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <input
                   type="text"
                   required
@@ -304,7 +304,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <input
                   type="email"
                   required
@@ -322,7 +322,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <input
                   type="text"
                   placeholder="Celular +569"

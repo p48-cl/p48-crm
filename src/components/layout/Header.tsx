@@ -21,7 +21,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [showUserMenu, setShowUserMenu] = React.useState(false);
 
   return (
-    <header className="sticky top-0 z-30 h-14 border-b border-[var(--c-line)] bg-[var(--c-bg)]/95 dark:bg-[var(--c-bg)]/95 light:bg-white/95 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between gap-6 transition-colors">
+    <header className="sticky top-0 z-30 h-14 border-b border-[var(--c-line)] bg-[var(--c-bg)]/95 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between gap-6 transition-colors">
       {/* Zona 1: Marca JAMP CRM */}
       <div className="flex items-center gap-4 shrink-0">
         <div className="flex items-center gap-2 md:hidden">
@@ -46,24 +46,24 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={onOpenSearch}
           type="button"
-          className="flex items-center justify-center sm:justify-between gap-3 w-9 sm:w-full max-w-xs shrink-0 px-2 sm:px-3 py-1.5 text-xs text-[var(--c-muted)] bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-surface-2)] border border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-line)] rounded hover:border-[var(--c-line)] transition-colors"
+          className="flex items-center justify-center sm:justify-between gap-3 w-9 sm:w-full max-w-xs shrink-0 px-2 sm:px-3 py-1.5 text-xs text-[var(--c-muted)] bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded hover:border-[var(--c-line)] transition-colors"
         >
           <span className="flex items-center gap-2">
             <Search className="w-3.5 h-3.5 text-[var(--c-muted)]" />
             <span className="hidden sm:inline truncate">Buscar empresas, contactos o negocios...</span>
           </span>
-          <kbd className="hidden sm:inline-block font-mono text-[10px] bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-line)] px-1.5 py-0.5 rounded text-[var(--c-text-2)]">
+          <kbd className="hidden sm:inline-block font-mono text-[10px] bg-[var(--c-surface-2)] px-1.5 py-0.5 rounded text-[var(--c-text-2)]">
             ⌘K
           </kbd>
         </button>
 
         {/* Filtro Mis Datos / Todo el Equipo */}
-        <div className="hidden lg:flex items-center p-0.5 bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-surface-3)] border border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-line)] rounded text-xs">
+        <div className="hidden lg:flex items-center p-0.5 bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded text-xs">
           <button
             onClick={() => setFiltroAlcance('todo_el_equipo')}
             className={`px-2.5 py-1 rounded transition-colors whitespace-nowrap ${
               filtroAlcance === 'todo_el_equipo'
-                ? 'bg-[var(--c-surface-3)] dark:bg-[var(--c-surface-3)] light:bg-white text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] font-medium shadow-sm'
+                ? 'bg-[var(--c-surface-3)] text-[var(--c-text)] font-medium shadow-sm'
                 : 'text-[var(--c-muted)] hover:text-[var(--c-text-2)]'
             }`}
           >
@@ -73,7 +73,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setFiltroAlcance('mis_datos')}
             className={`px-2.5 py-1 rounded transition-colors whitespace-nowrap ${
               filtroAlcance === 'mis_datos'
-                ? 'bg-[var(--c-surface-3)] dark:bg-[var(--c-surface-3)] light:bg-white text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] font-medium shadow-sm'
+                ? 'bg-[var(--c-surface-3)] text-[var(--c-text)] font-medium shadow-sm'
                 : 'text-[var(--c-muted)] hover:text-[var(--c-text-2)]'
             }`}
           >
@@ -96,7 +96,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="relative">
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-2 pl-2 pr-1.5 py-1 rounded bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-surface-2)] border border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-line)] text-xs text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] hover:border-[var(--c-line)] transition-colors"
+            className="flex items-center gap-2 pl-2 pr-1.5 py-1 rounded bg-[var(--c-surface-2)] border border-[var(--c-line)] text-xs text-[var(--c-text)] hover:border-[var(--c-line)] transition-colors"
           >
             <div className="w-5 h-5 rounded-full bg-[var(--c-accent)] text-[var(--c-on-accent)] font-bold text-[10px] flex items-center justify-center font-mono">
               {currentUser?.nombre ? currentUser.nombre.slice(0, 1) : 'U'}
@@ -111,9 +111,9 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
 
           {showUserMenu && (
-            <div className="absolute right-0 mt-1 w-64 bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white border border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-line)] rounded shadow-xl py-2 z-50 text-xs">
-              <div className="px-3 py-2 border-b border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-text)]">
-                <p className="font-medium text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] truncate">
+            <div className="absolute right-0 mt-1 w-64 bg-[var(--c-surface)] border border-[var(--c-line)] rounded shadow-xl py-2 z-50 text-xs">
+              <div className="px-3 py-2 border-b border-[var(--c-line)]">
+                <p className="font-medium text-[var(--c-text)] truncate">
                   {currentUser?.nombre}
                 </p>
                 <p className="text-[var(--c-muted)] font-mono text-[11px] truncate">{currentUser?.email}</p>
@@ -123,7 +123,7 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
 
               {/* Selector de miembro para pruebas en AI Studio */}
-              <div className="px-3 py-2 border-b border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-text)]">
+              <div className="px-3 py-2 border-b border-[var(--c-line)]">
                 <p className="text-[11px] font-medium text-[var(--c-muted)] mb-1.5">
                   Probar con otro miembro (Demo):
                 </p>
