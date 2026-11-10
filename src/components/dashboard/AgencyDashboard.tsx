@@ -144,7 +144,7 @@ export const AgencyDashboard: React.FC<{ seccion: SeccionDashboard }> = ({ secci
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-[minmax(0,1fr)] lg:grid-cols-2 gap-6">
         {/* Embudo */}
         <div className={`${card} ${vis('ventas')}`}>
           <Cabecera icon={<Layers className="w-4 h-4" />} title="Embudo comercial" sub="Aproximado: oportunidades que hoy están en esa etapa o más allá" />
@@ -261,7 +261,7 @@ export const AgencyDashboard: React.FC<{ seccion: SeccionDashboard }> = ({ secci
         {cartera.length === 0 ? (
           <Vacio texto="Aún no hay clientes activos." />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-[minmax(0,1fr)] md:grid-cols-2 gap-3">
             {cartera.map((c) => {
               const pronto = c.dias_a_renovacion != null && c.dias_a_renovacion <= 60;
               return (

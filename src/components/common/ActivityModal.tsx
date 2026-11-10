@@ -119,7 +119,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Cliente</label>
               <select
@@ -153,7 +153,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Contacto</label>
               <select

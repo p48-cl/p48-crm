@@ -322,7 +322,7 @@ ${urlLogo(empresa.logo_path) ? `<img src="${urlLogo(empresa.logo_path)}" alt="" 
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-3">
         <div className="sm:col-span-2"><label className={etiqueta}>Título</label><input className={campo} value={titulo} onChange={(e) => setTitulo(e.target.value)} /></div>
         <div><label className={etiqueta}>Estado</label>
           <select className={campo} value={estado} onChange={(e) => setEstado(e.target.value as Estado)}>
@@ -334,7 +334,7 @@ ${urlLogo(empresa.logo_path) ? `<img src="${urlLogo(empresa.logo_path)}" alt="" 
             {oportunidades.map((o) => <option key={o.id} value={o.id}>{o.nombre}</option>)}
           </select></div>
         <div><label className={etiqueta}>Validez (días)</label><input type="number" className={`${campo} font-mono`} value={validez} onChange={(e) => setValidez(e.target.value)} /></div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-3">
           <div><label className={etiqueta}>Moneda</label>
             <select className={campo} value={moneda} onChange={(e) => setMoneda(e.target.value as MonedaCRM)}><option value="CLP">CLP</option><option value="UF">UF</option><option value="USD">USD</option></select>{ufError && <p className="text-[11px] text-[var(--c-danger)] mt-1">{ufError}</p>}</div>
           <div><label className={etiqueta}>IVA %</label><input type="number" className={`${campo} font-mono`} value={ivaPct} onChange={(e) => setIvaPct(e.target.value)} /></div>
@@ -351,7 +351,7 @@ ${urlLogo(empresa.logo_path) ? `<img src="${urlLogo(empresa.logo_path)}" alt="" 
         </div>
         {lineas.map((l, i) => (
           <div key={i} className="border border-[var(--c-line)] rounded p-2.5 space-y-2">
-            <div className="grid grid-cols-1 sm:grid-cols-[140px_1fr] gap-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-[140px_1fr] gap-2">
               <select className={campo} value={l.plan} onChange={(e) => elegirPlan(i, e.target.value as PlanEmpresa | '')} aria-label="Plan de la línea">
                 <option value="">Libre</option>
                 {(Object.keys(PLANES) as PlanEmpresa[]).map((p) => <option key={p} value={p}>{p === 'personalizado' ? 'Personalizado' : `Plan ${p}`}</option>)}

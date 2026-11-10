@@ -219,7 +219,7 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
             <div className={filaCard}>
               <input className={input} placeholder="Nombre del proyecto" value={fp.nombre} onChange={(e) => setFp({ ...fp, nombre: e.target.value })} />
               <textarea className={input} rows={2} placeholder="Descripción (visible para el cliente)" value={fp.descripcion} onChange={(e) => setFp({ ...fp, descripcion: e.target.value })} />
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-3 gap-2">
                 <select className={input} value={fp.estado} onChange={(e) => setFp({ ...fp, estado: e.target.value as EstadoProyecto })}>
                   {ESTADOS_PROYECTO.map((s) => <option key={s} value={s}>{etiqueta(s)}</option>)}
                 </select>
@@ -286,7 +286,7 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
                     {entProyecto === p.id ? (
                       <div className="p-2 bg-[var(--c-surface)] rounded border border-[var(--c-line)] space-y-2">
                         <input className={input} placeholder="Título del entregable" value={fe.titulo} onChange={(e) => setFe({ ...fe, titulo: e.target.value })} />
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-2">
                           <select className={input} value={fe.estado} onChange={(e) => setFe({ ...fe, estado: e.target.value as EstadoEntregable })}>
                             {ESTADOS_ENTREGABLE.map((s) => <option key={s} value={s}>{etiqueta(s)}</option>)}
                           </select>
@@ -324,7 +324,7 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
           {nuevoReporte && (
             <div className={filaCard}>
               <input className={input} placeholder="Título del reporte" value={fr.titulo} onChange={(e) => setFr({ ...fr, titulo: e.target.value })} />
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-2">
                 <select className={input} value={fr.tipo} onChange={(e) => setFr({ ...fr, tipo: e.target.value as TipoReporte })}>
                   {TIPOS_REPORTE.map((t) => <option key={t} value={t}>{t}</option>)}
                 </select>
@@ -368,7 +368,7 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
             Registrar un correo no envía invitación. El acceso del cliente al portal se habilita cuando esté definido el método de inicio de sesión.
           </p>
           <div className={filaCard}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-2">
               <input className={input} placeholder="Nombre" value={fu.nombre} onChange={(e) => setFu({ ...fu, nombre: e.target.value })} />
               <input type="email" className={input} placeholder="correo@cliente.cl" value={fu.email} onChange={(e) => setFu({ ...fu, email: e.target.value })} />
             </div>

@@ -74,7 +74,7 @@ export const Organico: React.FC = () => {
           Sin métricas orgánicas para este cliente. Usa la plantilla «Métricas semanales» con plataforma instagram, facebook, tiktok, linkedin, youtube u otro.
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] lg:grid-cols-2 gap-3">
           {redesConDatos.map((red) => {
             const metricas = porRed.get(red.id)!;
             const ultimaSemana = [...new Set([...metricas.values()].flat().map((p) => p.periodo))].sort().pop();
