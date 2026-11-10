@@ -1,3 +1,4 @@
+import { JampMark } from '../components/brand/Jamp';
 import React from 'react';
 import { LogIn, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -9,9 +10,7 @@ export const LoginView: React.FC = () => {
     <div className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col items-center justify-center p-6 selection:bg-[var(--c-accent)] selection:text-[var(--c-on-accent)]">
       <div className="max-w-sm w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded-xl p-8 shadow-2xl relative text-center">
         {/* Logo JAMP */}
-        <div className="w-12 h-12 bg-[var(--c-accent)] text-[var(--c-on-accent)] font-black flex items-center justify-center text-lg tracking-tighter rounded mx-auto mb-4 font-mono shadow-lg">
-          J
-        </div>
+        <JampMark size={56} className="mx-auto mb-4" />
 
         <h1 className="text-xl font-bold font-sans text-[var(--c-text)] mb-1">
           JAMP CRM

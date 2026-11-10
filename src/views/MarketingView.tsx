@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { MktDashboard } from '../components/marketing/MktDashboard';
 import { ClienteHub } from '../components/marketing/ClienteHub';
 import { Estrategia } from '../components/marketing/Estrategia';
@@ -6,6 +6,7 @@ import { Ads } from '../components/marketing/Ads';
 import { Importador } from '../components/marketing/Importador';
 import { SEO } from '../components/marketing/SEO';
 import { Organico } from '../components/marketing/Organico';
+import type { SeccionMarketing } from '../components/layout/Sidebar';
 
 // Secciones de Mkt Inteligence.
 const SECCIONES = [
@@ -18,8 +19,13 @@ const SECCIONES = [
   { id: 'cargar', label: 'Cargar datos' },
 ] as const;
 
-export const MarketingView: React.FC<{ onAbrirFicha?: (empresaId: string) => void }> = ({ onAbrirFicha }) => {
-  const [seccion, setSeccion] = useState<(typeof SECCIONES)[number]['id']>('dashboard');
+interface MarketingViewProps {
+  seccion: SeccionMarketing;
+  onSeccion: (s: SeccionMarketing) => void;
+  onAbrirFicha?: (empresaId: string) => void;
+}
+
+export const MarketingView: React.FC<MarketingViewProps> = ({ seccion, onSeccion: setSeccion, onAbrirFicha }) => {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-5">
       <div>
@@ -35,7 +41,7 @@ export const MarketingView: React.FC<{ onAbrirFicha?: (empresaId: string) => voi
             onClick={() => setSeccion(s.id)}
             aria-pressed={seccion === s.id}
             className={`px-3 py-1.5 rounded-md font-medium min-h-[36px] ${
-              seccion === s.id ? 'bg-[var(--c-surface-3)] text-[var(--c-text)]' : 'text-[var(--c-muted)] hover:text-[var(--c-text-2)]'
+              seccion === s.id ? 'bg-[var(--module-soft)] text-[var(--c-text)] ring-1 ring-[var(--module)]' : 'text-[var(--c-muted)] hover:text-[var(--c-text-2)]'
             }`}
           >
             {s.label}

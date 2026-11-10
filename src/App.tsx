@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CRMProvider, useCRM } from './context/CRMContext';
 import { Header } from './components/layout/Header';
-import { Sidebar, ViewType } from './components/layout/Sidebar';
+import { Sidebar, ViewType, SeccionMarketing } from './components/layout/Sidebar';
+import { JampMark } from './components/brand/Jamp';
 import { DashboardView } from './views/DashboardView';
 import { KanbanView } from './views/KanbanView';
 import { CompaniesView } from './views/CompaniesView';
@@ -31,6 +32,8 @@ const CRMAppContent: React.FC = () => {
 
   const [currentView, setCurrentView] = useState<ViewType>('inicio');
   const [masAbierto, setMasAbierto] = useState(false);
+  const [mktSeccion, setMktSeccion] = useState<SeccionMarketing>('dashboard');
+  const abrirMarketing = (s: SeccionMarketing) => { setMktSeccion(s); setCurrentView('marketing'); };
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
 
   // Modales y Drawers globales
@@ -84,9 +87,7 @@ const CRMAppContent: React.FC = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[var(--c-bg)] flex flex-col items-center justify-center text-[var(--c-text)] font-sans">
-        <div className="w-10 h-10 bg-[var(--c-accent)] text-[var(--c-on-accent)] font-black flex items-center justify-center text-sm font-mono rounded animate-pulse">
-          J
-        </div>
+        <JampMark size={48} className="animate-pulse" />
         <p className="mt-3 text-xs text-[var(--c-muted)] font-mono">Cargando JAMP CRM...</p>
       </div>
     );
@@ -122,12 +123,17 @@ const CRMAppContent: React.FC = () => {
             if (v === 'administracion' && !isAdmin) return;
             setCurrentView(v);
           }}
+          marketingSection={mktSeccion}
+          onOpenMarketing={abrirMarketing}
           onOpenQuickActivity={() => setActivityModalState({ isOpen: true })}
           onOpenNewDeal={() => setIsNewDealOpen(true)}
         />
 
         {/* Viewport Principal */}
-        <main className="flex-1 overflow-y-auto pb-24 md:pb-0 bg-[var(--c-bg)] dark:bg-[var(--c-bg)] light:bg-[var(--c-bg)]">
+        <main
+          data-module={currentView === 'marketing' ? (mktSeccion === 'seo' || mktSeccion === 'organico' ? 'organic' : mktSeccion === 'ads' ? 'media' : 'sales') : 'sales'}
+          className="flex-1 overflow-y-auto pb-24 md:pb-0 bg-[var(--c-bg)] border-t-2 border-[var(--module)]"
+        >
           {currentView === 'inicio' && (
             <DashboardView
               onNavigateKanban={() => setCurrentView('crm')}
@@ -177,7 +183,7 @@ const CRMAppContent: React.FC = () => {
             />
           )}
 
-          {currentView === 'marketing' && <MarketingView onAbrirFicha={(id) => { setFichaTab('marketing'); setSelectedEmpId(id); }} />}
+          {currentView === 'marketing' && <MarketingView seccion={mktSeccion} onSeccion={setMktSeccion} onAbrirFicha={(id) => { setFichaTab('marketing'); setSelectedEmpId(id); }} />}
 
           {currentView === 'importar' && <ImportView />}
 
