@@ -11,6 +11,7 @@ import {
   Sliders,
   Plus,
   Radio,
+  FolderKanban,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCRM } from '../../context/CRMContext';
@@ -22,6 +23,7 @@ export type ViewType =
   | 'empresas'
   | 'contactos'
   | 'cotizaciones'
+  | 'proyectos'
   | 'tareas'
   | 'actividades'
   | 'marketing'
@@ -78,6 +80,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const operacion: NavItem[] = [
     { key: 'contactos', label: 'Contactos', icon: Users, active: currentView === 'contactos', onClick: () => onChangeView('contactos') },
     { key: 'cotizaciones', label: 'Cotizaciones', icon: FileText, active: currentView === 'cotizaciones', onClick: () => onChangeView('cotizaciones') },
+    { key: 'proyectos', label: 'Proyectos', icon: FolderKanban, active: currentView === 'proyectos', onClick: () => onChangeView('proyectos') },
     {
       key: 'tareas',
       label: 'Tareas',

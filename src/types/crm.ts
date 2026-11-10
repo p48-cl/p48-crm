@@ -201,7 +201,31 @@ export interface Tarea {
   prioridad: 'alta' | 'media' | 'baja';
   completada: boolean;
   fecha_completada?: string | null;
+  proyecto_id?: string | null;
+  fase_id?: string | null;
+  fecha_inicio?: string | null; // inicio en el Gantt; si falta, la tarea es un hito en su fecha de vencimiento
   created_at?: string;
+}
+
+export interface ProyectoFase {
+  id: string;
+  proyecto_id: string;
+  nombre: string;
+  orden: number;
+  fecha_inicio?: string | null;
+  fecha_fin?: string | null;
+  visible_cliente: boolean;
+}
+
+export interface ProyectoMiembro {
+  proyecto_id: string;
+  miembro_id: string;
+  rol: 'responsable' | 'colaborador';
+}
+
+export interface TareaDependencia {
+  tarea_id: string;
+  depende_de_id: string;
 }
 
 // Vistas de gráficos
@@ -292,9 +316,14 @@ export type EstadoProyecto = 'planificado' | 'en_curso' | 'pausado' | 'finalizad
 export type EstadoEntregable = 'pendiente' | 'en_progreso' | 'en_revision' | 'entregado';
 export type TipoReporte = 'mensual' | 'auditoria' | 'otro';
 
+export type TipoProyecto = 'interno' | 'cliente';
+
 export interface Proyecto {
   id: string;
-  empresa_id: string;
+  empresa_id: string | null; // null en proyectos internos
+  tipo?: TipoProyecto;
+  plantilla?: string | null;
+  responsable_id?: string | null;
   nombre: string;
   descripcion?: string | null;
   estado: EstadoProyecto;
