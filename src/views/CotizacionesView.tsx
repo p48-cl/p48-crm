@@ -5,6 +5,7 @@ import { parseSupabaseError } from '../lib/errorHandler';
 import { formatFecha, formatMoneda, formatCorrelativo } from '../lib/formatters';
 import { useCRM } from '../context/CRMContext';
 import { SelectorCliente } from '../components/common/SelectorCliente';
+import { Kpi } from '../components/dashboard/ui';
 
 interface Fila {
   id: string;
@@ -87,6 +88,36 @@ export const CotizacionesView: React.FC<{ onAbrirFicha: (empresaId: string, nuev
 
   const pendientes = filas.filter((f) => f.estado === 'borrador' || f.estado === 'enviada').length;
 
+  // Tarjetas resumen: sólo CLP (las demás monedas se indican aparte, sin sumarlas).
+  const kpis = useMemo(() => {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const clp = filas.filter((f) => f.moneda === 'CLP');
+    const conIva = (f: Fila, campo: 'neto_mensual' | 'neto_unico') => Math.round(f[campo] * (1 + f.iva_pct / 100));
+    const aceptadas = clp.filter((f) => f.estado === 'aceptada');
+    const enviadas = clp.filter((f) => f.estado === 'enviada');
+    const rechazadas = clp.filter((f) => f.estado === 'rechazada');
+    const cerradas = aceptadas.length + rechazadas.length;
+    const mensualAceptado = aceptadas.reduce((a, f) => a + conIva(f, 'neto_mensual'), 0);
+    const unicoAceptado = aceptadas.reduce((a, f) => a + conIva(f, 'neto_unico'), 0);
+    const enEspera = enviadas.reduce((a, f) => a + conIva(f, 'neto_mensual') + conIva(f, 'neto_unico'), 0);
+    const venceEn7 = enviadas.filter((f) => {
+      const dias = Math.round((new Date(`${f.vence_el.slice(0, 10)}T00:00:00`).getTime() - hoy.getTime()) / 86400000);
+      return dias >= 0 && dias <= 7;
+    }).length;
+    return {
+      aceptadas: aceptadas.length,
+      mensualAceptado,
+      unicoAceptado,
+      enviadas: enviadas.length,
+      enEspera,
+      tasa: cerradas > 0 ? Math.round((aceptadas.length / cerradas) * 100) : null,
+      cerradas,
+      venceEn7,
+      otraMoneda: filas.length - clp.length,
+    };
+  }, [filas]);
+
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-5">
       {/* Título y acción principal (mismo patrón que Clientes) */}
@@ -105,6 +136,41 @@ export const CotizacionesView: React.FC<{ onAbrirFicha: (empresaId: string, nuev
           <span>Nueva cotización</span>
         </button>
       </div>
+
+      {/* Resumen (mismo lenguaje visual que Clientes y Pipeline) */}
+      {!cargando && filas.length > 0 && (
+        <div className="space-y-2">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <Kpi
+              etiqueta="Aceptado mensual"
+              valor={formatMoneda(kpis.mensualAceptado, 'CLP')}
+              nota={`${kpis.aceptadas} aceptadas · único ${formatMoneda(kpis.unicoAceptado, 'CLP')}`}
+            />
+            <Kpi
+              etiqueta="En espera"
+              valor={kpis.enviadas}
+              nota={`${formatMoneda(kpis.enEspera, 'CLP')} potencial c/IVA`}
+            />
+            <Kpi
+              etiqueta="Tasa de aceptación"
+              valor={kpis.tasa != null ? `${kpis.tasa}%` : '—'}
+              progreso={kpis.tasa}
+              nota={`${kpis.aceptadas} de ${kpis.cerradas} cerradas`}
+            />
+            <Kpi
+              etiqueta="Vencen en 7 días"
+              valor={kpis.venceEn7}
+              tono={kpis.venceEn7 > 0 ? 'aviso' : 'normal'}
+              nota="Enviadas sin respuesta"
+            />
+          </div>
+          {kpis.otraMoneda > 0 && (
+            <p className="text-[10px] text-[var(--c-muted)]">
+              {kpis.otraMoneda} cotización(es) en otra moneda no se suman en estas tarjetas.
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Barra de búsqueda y filtros */}
       <div className="flex flex-wrap items-center gap-3 bg-[var(--c-surface)] p-3 rounded-lg border border-[var(--c-line)]">

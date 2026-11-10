@@ -88,7 +88,9 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
   const tareasOp = tareas.filter((t) => t.oportunidad_id === oportunidad.id);
   const etapa = etapas.find((et) => et.id === oportunidad.etapa_id);
   const fuente = fuentes.find((f) => f.id === oportunidad.fuente_id);
-  const diasCierre = diasHastaFecha(oportunidad.fecha_cierre_estimada);
+  // En ganadas/perdidas el cierre ya ocurrió: no se muestra "vencido".
+  const cerrada = Boolean(etapa?.es_ganada || etapa?.es_perdida);
+  const diasCierre = cerrada ? null : diasHastaFecha(oportunidad.fecha_cierre_estimada);
   const diasAccion = diasHastaFecha(oportunidad.proxima_accion_fecha);
   const ultimaActividad = actividadesOp.reduce<string | null>(
     (max, a) => (!max || a.fecha_actividad > max ? a.fecha_actividad : max),

@@ -331,7 +331,9 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                         (!op.proxima_accion_texto?.trim() && !op.proxima_accion_fecha);
                       const esUSD = op.moneda !== 'CLP';
                       const seguimiento = op.estado_seguimiento ? SEGUIMIENTO_UI[op.estado_seguimiento] : undefined;
-                      const diasCierre = diasHastaFecha(op.fecha_cierre_estimada);
+                      // En ganadas/perdidas el cierre ya ocurrió: no se muestra "vencido".
+                      const cerrada = Boolean(etapa.es_ganada || etapa.es_perdida);
+                      const diasCierre = cerrada ? null : diasHastaFecha(op.fecha_cierre_estimada);
                       const cierreTexto =
                         diasCierre === null
                           ? null
