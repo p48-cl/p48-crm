@@ -22,7 +22,7 @@ export const ConfirmWonModal: React.FC<ConfirmWonModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
-      <div className="bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white border border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-line)] rounded-lg max-w-md w-full p-6 shadow-2xl relative">
+      <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-lg max-w-md w-full p-6 shadow-2xl relative">
         <button
           onClick={onCancel}
           className="absolute top-4 right-4 text-[var(--c-muted)] hover:text-[var(--c-text)] transition-colors"
@@ -35,14 +35,14 @@ export const ConfirmWonModal: React.FC<ConfirmWonModalProps> = ({
             <CheckCircle2 className="w-6 h-6 stroke-[2]" />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
+            <h3 className="text-base font-semibold text-[var(--c-text)]">
               ¿Marcar oportunidad como Ganada?
             </h3>
             <p className="text-xs text-[var(--c-muted)]">Confirmación de cierre comercial</p>
           </div>
         </div>
 
-        <div className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-bg)] p-3 rounded border border-[var(--c-surface-3)] dark:border-[var(--c-surface-3)] light:border-[var(--c-text)] mb-4 space-y-1">
+        <div className="bg-[var(--c-surface-2)] p-3 rounded border border-[var(--c-surface-3)] mb-4 space-y-1">
           <p className="text-xs text-[var(--c-line)] font-medium truncate">{oportunidad.nombre}</p>
           <p className="text-xs text-[var(--c-muted)]">
             Empresa: <span className="text-[var(--c-text)] font-medium">{empresa?.nombre ?? 'Sin empresa'}</span>

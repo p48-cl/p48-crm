@@ -111,7 +111,7 @@ const CRMAppContent: React.FC = () => {
   const selectedEmpresaObj = empresas.find((e) => e.id === selectedEmpId) || null;
 
   return (
-    <div className="min-h-screen bg-[var(--c-bg)] dark:bg-[var(--c-bg)] light:bg-[var(--c-bg)] text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-surface)] flex flex-col font-sans transition-colors">
+    <div className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col font-sans transition-colors">
       {/* Top Bar Header */}
       <Header
         onOpenSearch={() => setIsSearchOpen(true)}

@@ -334,7 +334,7 @@ ${urlLogo(empresa.logo_path) ? `<img src="${urlLogo(empresa.logo_path)}" alt="" 
             {oportunidades.map((o) => <option key={o.id} value={o.id}>{o.nombre}</option>)}
           </select></div>
         <div><label className={etiqueta}>Validez (días)</label><input type="number" className={`${campo} font-mono`} value={validez} onChange={(e) => setValidez(e.target.value)} /></div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div><label className={etiqueta}>Moneda</label>
             <select className={campo} value={moneda} onChange={(e) => setMoneda(e.target.value as MonedaCRM)}><option value="CLP">CLP</option><option value="UF">UF</option><option value="USD">USD</option></select>{ufError && <p className="text-[11px] text-[var(--c-danger)] mt-1">{ufError}</p>}</div>
           <div><label className={etiqueta}>IVA %</label><input type="number" className={`${campo} font-mono`} value={ivaPct} onChange={(e) => setIvaPct(e.target.value)} /></div>

@@ -21,6 +21,7 @@ import { CuentasCliente } from '../components/clientes/CuentasCliente';
 import { SubirLogo } from '../components/clientes/Logo';
 import { FichaMarketing } from '../components/marketing/FichaMarketing';
 import { useConfiguracionCRM } from '../lib/configuracion';
+import { FranjaDecision, TonoFranja } from '../components/common/FranjaDecision';
 
 type Tab = 'resumen' | 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'cotizaciones' | 'marketing' | 'info' | 'cliente';
 
@@ -163,10 +164,10 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
     return max === null || ts > max ? ts : max;
   }, null);
   const diasSinActividad = ultimaActividad === null ? null : Math.floor((hoyMs - ultimaActividad) / 86400000);
-  const saludEtiqueta: Record<string, { texto: string; clase: string }> = {
-    verde: { texto: 'Saludable', clase: 'text-[var(--c-ok)]' },
-    amarillo: { texto: 'En alerta', clase: 'text-[var(--c-warn)]' },
-    rojo: { texto: 'En riesgo', clase: 'text-[var(--c-danger)]' },
+  const saludEtiqueta: Record<string, { texto: string; tono: TonoFranja }> = {
+    verde: { texto: 'Saludable', tono: 'ok' },
+    amarillo: { texto: 'En alerta', tono: 'warn' },
+    rojo: { texto: 'En riesgo', tono: 'danger' },
   };
   const salud = empresa.salud ? saludEtiqueta[empresa.salud] : null;
 
@@ -242,7 +243,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
             <SubirLogo empresaId={empresa.id} nombre={empresa.nombre} logoPath={empresa.logo_path} size={48} />
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
+                <h2 className="text-lg font-bold text-[var(--c-text)]">
                   {empresa.nombre}
                 </h2>
                 <span className={`font-mono text-[10px] uppercase px-2 py-0.5 rounded-full border border-[var(--c-line)] ${empresa.estado === 'cliente' ? 'text-[var(--c-ok)]' : 'text-[var(--c-muted)]'}`}>
@@ -311,40 +312,32 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
         </div>
 
         {/* Franja de decisión: visible en todas las pestañas */}
-        <div className="grid grid-cols-2 md:grid-cols-4 border-b border-[var(--c-line)] bg-[var(--c-surface)]">
-          <div className="px-4 sm:px-5 py-3 border-r border-[var(--c-line)]">
-            <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">Salud de cuenta</p>
-            <p className={`text-sm font-semibold mt-0.5 ${salud?.clase ?? 'text-[var(--c-muted)]'}`}>
-              {salud ? salud.texto : 'Sin definir'}
-            </p>
-          </div>
-          <div className="px-4 sm:px-5 py-3 md:border-r border-[var(--c-line)]">
-            <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">MRR contratado</p>
-            <p className="text-sm font-semibold mt-0.5 font-mono text-[var(--c-text)]">
-              {empresa.mrr_actual_clp ? `${formatCLP(empresa.mrr_actual_clp)} CLP` : 'Sin MRR'}
-            </p>
-          </div>
-          <div className="px-4 sm:px-5 py-3 border-r border-t md:border-t-0 border-[var(--c-line)]">
-            <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">Próxima renovación</p>
-            <p className="text-sm font-semibold mt-0.5 font-mono text-[var(--c-text)]">
-              {empresa.fecha_renovacion ? formatFecha(empresa.fecha_renovacion) : 'Sin fecha'}
-            </p>
-            {diasRenov !== null && diasRenov <= DIAS_ALERTA_RENOVACION && (
-              <p className="text-[10px] font-mono text-[var(--c-warn)] mt-0.5">
-                {diasRenov < 0 ? `vencida hace ${-diasRenov} d` : `quedan ${diasRenov} d`}
-              </p>
-            )}
-          </div>
-          <div className="px-4 sm:px-5 py-3 border-t md:border-t-0 border-[var(--c-line)]">
-            <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">Responsable</p>
-            <p className="text-sm font-semibold mt-0.5 text-[var(--c-text)] truncate">
-              {responsable ? responsable.nombre : 'Sin asignar'}
-            </p>
-          </div>
-        </div>
+        <FranjaDecision
+          items={[
+            { etiqueta: 'Salud de cuenta', valor: salud ? salud.texto : 'Sin definir', tonoValor: salud?.tono ?? 'muted' },
+            {
+              etiqueta: 'MRR contratado',
+              valor: empresa.mrr_actual_clp ? formatCLP(empresa.mrr_actual_clp) : 'Sin MRR',
+              mono: true,
+            },
+            {
+              etiqueta: 'Próxima renovación',
+              valor: empresa.fecha_renovacion ? formatFecha(empresa.fecha_renovacion) : 'Sin fecha',
+              mono: true,
+              nota:
+                diasRenov !== null && diasRenov <= DIAS_ALERTA_RENOVACION
+                  ? diasRenov < 0
+                    ? `vencida hace ${-diasRenov} d`
+                    : `quedan ${diasRenov} d`
+                  : null,
+              tonoNota: 'warn',
+            },
+            { etiqueta: 'Responsable', valor: responsable ? responsable.nombre : 'Sin asignar' },
+          ]}
+        />
 
         {/* Navigation Tabs */}
-        <div className="px-5 border-b border-[var(--c-line)] bg-[var(--c-surface)] flex flex-wrap gap-x-4 sm:gap-x-5 text-xs font-medium">
+        <div className="px-5 border-b border-[var(--c-line)] bg-[var(--c-surface)] flex flex-nowrap overflow-x-auto gap-x-4 sm:gap-x-5 text-xs font-medium [scrollbar-width:none]">
           {(
             [
               { id: 'resumen' as const, label: 'Resumen' },
@@ -361,7 +354,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-3 border-b-2 transition-colors whitespace-nowrap ${
+              className={`py-3 border-b-2 transition-colors whitespace-nowrap shrink-0 ${
                 activeTab === tab.id
                   ? 'border-[var(--c-accent)] text-[var(--c-accent)]'
                   : 'border-transparent text-[var(--c-muted)] hover:text-[var(--c-text-2)]'

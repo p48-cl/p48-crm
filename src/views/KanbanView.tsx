@@ -14,24 +14,13 @@ import { PipelineKpis } from '../components/crm/PipelineKpis';
 import { formatMoneda, formatFecha, esFechaAtrasada, formatCorrelativo, diasHastaFecha } from '../lib/formatters';
 import { ConfirmWonModal } from '../components/common/ConfirmWonModal';
 import { LossReasonModal } from '../components/common/LossReasonModal';
+import { ChipSenal, TonoChip } from '../components/common/ChipSenal';
 
-const SEGUIMIENTO_UI: Record<string, { label: string; tono: string }> = {
-  atrasado: {
-    label: 'Atrasado',
-    tono: 'text-[var(--c-danger)] border-[var(--c-danger)]/40 bg-[var(--c-danger)]/10',
-  },
-  sin_accion: {
-    label: 'Sin acción',
-    tono: 'text-[var(--c-warn)] border-[var(--c-warn)]/40 bg-[var(--c-warn)]/10',
-  },
-  por_vencer: {
-    label: 'Vence hoy',
-    tono: 'text-[var(--c-warn)] border-[var(--c-warn)]/40 bg-[var(--c-warn)]/10',
-  },
-  al_dia: {
-    label: 'Al día',
-    tono: 'text-[var(--c-ok)] border-[var(--c-ok)]/40 bg-[var(--c-ok)]/10',
-  },
+const SEGUIMIENTO_UI: Record<string, { label: string; tono: TonoChip }> = {
+  atrasado: { label: 'Atrasado', tono: 'danger' },
+  sin_accion: { label: 'Sin acción', tono: 'warn' },
+  por_vencer: { label: 'Vence hoy', tono: 'warn' },
+  al_dia: { label: 'Al día', tono: 'ok' },
 };
 
 const iniciales = (nombre?: string | null): string => {
@@ -167,7 +156,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
       {/* Header del CRM */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold font-sans text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
+          <h1 className="text-xl font-bold font-sans text-[var(--c-text)]">
             Pipeline de Negocios
           </h1>
           <p className="text-xs text-[var(--c-muted)] mt-0.5">
@@ -176,7 +165,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center p-0.5 bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-surface-3)] border border-[var(--c-line)] rounded text-xs">
+          <div className="flex items-center p-0.5 bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded text-xs">
             <button
               onClick={() => setVistaModo('kanban')}
               className={`px-3 py-1.5 rounded flex items-center gap-1.5 transition-colors ${
@@ -213,7 +202,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
       </div>
 
       {/* Barra de Filtros */}
-      <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3 bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-[var(--c-bg)] p-3 rounded-lg border border-[var(--c-line)]">
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3 bg-[var(--c-surface)] p-3 rounded-lg border border-[var(--c-line)]">
         <div className="col-span-2 sm:col-span-1 flex items-center gap-1.5 text-xs text-[var(--c-muted)]">
           <Filter className="w-3.5 h-3.5 text-[var(--c-muted)]" />
           <span>Filtros:</span>
@@ -278,17 +267,17 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                 key={etapa.id}
                 onDragOver={(e) => handleDragOver(e, etapa.id)}
                 onDrop={(e) => handleDrop(e, etapa.id)}
-                className={`snap-start shrink-0 w-[85vw] sm:w-[60vw] md:w-auto flex flex-col bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-[var(--c-text)] border rounded-lg min-w-[240px] transition-colors ${
+                className={`snap-start shrink-0 w-[85vw] sm:w-[60vw] md:w-auto flex flex-col bg-[var(--c-surface)] border rounded-lg min-w-[240px] transition-colors ${
                   isDropTarget
                     ? 'border-[var(--c-muted)] bg-[var(--c-surface-2)]'
-                    : 'border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-line)]'
+                    : 'border-[var(--c-line)]'
                 }`}
               >
                 {/* Cabecera */}
-                <div className="p-3 border-b border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-line)] flex items-center justify-between">
+                <div className="p-3 border-b border-[var(--c-line)] flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <span className="font-semibold text-xs text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
+                      <span className="font-semibold text-xs text-[var(--c-text)]">
                         {etapa.nombre}
                       </span>
                       <span className="font-mono text-[10px] text-[var(--c-muted)]">
@@ -356,7 +345,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                           draggable
                           onDragStart={(e) => handleDragStart(e, op.id)}
                           onClick={() => onSelectOportunidad(op.id)}
-                          className={`p-3 rounded-lg border text-left cursor-grab active:cursor-grabbing hover:border-[var(--c-muted)] transition-all bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white shadow-sm space-y-2.5 ${
+                          className={`p-3 rounded-lg border text-left cursor-grab active:cursor-grabbing hover:border-[var(--c-muted)] transition-all bg-[var(--c-surface)] shadow-sm space-y-2.5 ${
                             atrasada
                               ? 'border-[var(--c-danger)] ring-1 ring-[var(--c-danger)]/40'
                               : 'border-[var(--c-line)]'
@@ -437,17 +426,15 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                           {(seguimiento || cierreTexto || fuente) && (
                             <div className="flex flex-wrap items-center gap-1.5">
                               {seguimiento && (
-                                <span className={`px-1.5 py-0.5 rounded border text-[10px] font-semibold ${seguimiento.tono}`}>
-                                  {seguimiento.label}
-                                </span>
+                                <ChipSenal tono={seguimiento.tono}>{seguimiento.label}</ChipSenal>
                               )}
                               {cierreTexto && (
                                 <span className={`font-mono text-[10px] ${cierreTono}`}>{cierreTexto}</span>
                               )}
                               {fuente && (
-                                <span className="ml-auto px-1.5 py-0.5 rounded bg-[var(--c-surface-2)] border border-[var(--c-line)] text-[10px] text-[var(--c-text-2)] truncate max-w-[100px]">
+                                <ChipSenal tono="neutro" className="ml-auto truncate max-w-[100px] font-normal">
                                   {fuente.nombre}
-                                </span>
+                                </ChipSenal>
                               )}
                             </div>
                           )}
@@ -511,10 +498,10 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
 
       {/* VISTA TABLA */}
       {vistaModo === 'tabla' && (
-        <div className="bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white border border-[var(--c-line)] rounded-lg overflow-hidden shadow-sm">
+        <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-lg overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-surface-2)] border-b border-[var(--c-line)] text-[var(--c-muted)] uppercase font-mono text-[11px]">
+              <thead className="bg-[var(--c-surface-2)] border-b border-[var(--c-line)] text-[var(--c-muted)] uppercase font-mono text-[11px]">
                 <tr>
                   <th className="py-2.5 px-4 font-medium">Oportunidad</th>
                   <th className="py-2.5 px-3 font-medium">Cliente</th>

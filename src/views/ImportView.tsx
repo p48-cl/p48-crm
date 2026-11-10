@@ -180,7 +180,7 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold font-sans text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
+          <h1 className="text-xl font-bold font-sans text-[var(--c-text)]">
             Importador de Clientes y Contactos
           </h1>
           <p className="text-xs text-[var(--c-muted)] mt-0.5">

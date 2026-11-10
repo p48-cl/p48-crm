@@ -84,7 +84,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold font-sans text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
+          <h1 className="text-xl font-bold font-sans text-[var(--c-text)]">
             Gestión de Tareas
           </h1>
           <p className="text-xs text-[var(--c-muted)] mt-0.5">
@@ -205,7 +205,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
                       className={`text-left text-xs font-semibold hover:underline ${
                         t.completada
                           ? 'line-through text-[var(--c-muted-2)]'
-                          : 'text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]'
+                          : 'text-[var(--c-text)]'
                       }`}
                     >
                       {t.titulo}

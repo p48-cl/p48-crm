@@ -47,7 +47,7 @@ export const DatosNegocio: React.FC<Props> = ({ oportunidad, onVerCliente }) => 
           <input className={input} value={nombre} onChange={(e) => setNombre(e.target.value)}
             onBlur={() => nombre.trim() && nombre.trim() !== oportunidad.nombre && guardar({ nombre: nombre.trim() })} />
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className={label}>Valor neto mensual</label>
             <input className={input} inputMode="numeric" value={valor} onChange={(e) => setValor(e.target.value.replace(/[^\d]/g, ''))}

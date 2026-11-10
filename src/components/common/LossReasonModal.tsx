@@ -37,7 +37,7 @@ export const LossReasonModal: React.FC<LossReasonModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
-      <div className="bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white border border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-line)] rounded-lg max-w-md w-full p-6 shadow-2xl relative">
+      <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-lg max-w-md w-full p-6 shadow-2xl relative">
         <button
           onClick={onCancel}
           className="absolute top-4 right-4 text-[var(--c-muted)] hover:text-[var(--c-text)] transition-colors"
@@ -50,7 +50,7 @@ export const LossReasonModal: React.FC<LossReasonModalProps> = ({
             <AlertCircle className="w-6 h-6 stroke-[2]" />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
+            <h3 className="text-base font-semibold text-[var(--c-text)]">
               Registrar Negocio como Perdido
             </h3>
             <p className="text-xs text-[var(--c-muted)]">Requisito obligatorio para el análisis comercial</p>
@@ -72,7 +72,7 @@ export const LossReasonModal: React.FC<LossReasonModalProps> = ({
                 setSelectedMotivoId(e.target.value);
                 if (errorValidacion) setErrorValidacion('');
               }}
-              className="w-full bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-bg)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] focus:outline-none focus:border-[var(--c-danger)]"
+              className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)] focus:outline-none focus:border-[var(--c-danger)]"
             >
               <option value="">Selecciona el motivo...</option>
               {motivosPerdida
@@ -94,7 +94,7 @@ export const LossReasonModal: React.FC<LossReasonModalProps> = ({
               value={detalle}
               onChange={(e) => setDetalle(e.target.value)}
               placeholder="Ej: El cliente optó por agencia tradicional con fee más bajo sin foco en ROAS..."
-              className="w-full bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-bg)] border border-[var(--c-line)] rounded p-2.5 text-xs text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] placeholder:text-[var(--c-muted-2)] focus:outline-none focus:border-[var(--c-muted)]"
+              className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded p-2.5 text-xs text-[var(--c-text)] placeholder:text-[var(--c-muted-2)] focus:outline-none focus:border-[var(--c-muted)]"
             />
           </div>
 

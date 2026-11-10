@@ -186,7 +186,7 @@ export const AdminView: React.FC = () => {
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div>
-        <h1 className="text-xl font-bold font-sans text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
+        <h1 className="text-xl font-bold font-sans text-[var(--c-text)]">
           Administración del Sistema
         </h1>
         <p className="text-xs text-[var(--c-muted)] mt-0.5">

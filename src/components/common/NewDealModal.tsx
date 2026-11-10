@@ -115,7 +115,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-xl max-w-lg w-full p-6 shadow-2xl max-h-[92vh] overflow-y-auto">
+      <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-xl max-w-lg w-full p-4 sm:p-6 shadow-2xl max-h-[92dvh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded bg-[var(--c-surface-2)] flex items-center justify-center text-[var(--c-text)]">
@@ -158,7 +158,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
               </button>
             </div>
             {altaEmpresa ? (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <input
                   className={input}
                   placeholder="Nombre del cliente"
@@ -187,7 +187,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
             )}
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className={label}>Plan</label>
               <select value={plan} onChange={(e) => elegirPlan(e.target.value as PlanEmpresa | '')} className={`${input} font-mono`}>
@@ -219,7 +219,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className={label}>Valor neto *</label>
               <input
@@ -248,7 +248,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className={label}>Probabilidad (%)</label>
               <input type="number" min={0} max={100} value={probabilidad} onChange={(e) => setProbabilidad(Number(e.target.value))} className={`${input} font-mono`} />
@@ -272,7 +272,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
 
           <div className="pt-2 border-t border-[var(--c-line)] space-y-2">
             <label className={label}>Origen (UTM, opcional)</label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <input className={input} placeholder="utm_fuente" value={utm.fuente} onChange={(e) => setUtm({ ...utm, fuente: e.target.value })} />
               <input className={input} placeholder="utm_campana" value={utm.campana} onChange={(e) => setUtm({ ...utm, campana: e.target.value })} />
               <input className={input} placeholder="utm_medio" value={utm.medio} onChange={(e) => setUtm({ ...utm, medio: e.target.value })} />
@@ -281,8 +281,8 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
 
           <div className="pt-2 border-t border-[var(--c-line)] space-y-2">
             <label className={label}>Próxima acción y fecha</label>
-            <div className="grid grid-cols-3 gap-2">
-              <input type="text" placeholder="Ej: Enviar auditoría técnica..." value={proximaAccionTexto} onChange={(e) => setProximaAccionTexto(e.target.value)} className={`col-span-2 ${input}`} />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <input type="text" placeholder="Ej: Enviar auditoría técnica..." value={proximaAccionTexto} onChange={(e) => setProximaAccionTexto(e.target.value)} className={`sm:col-span-2 ${input}`} />
               <input type="date" value={proximaAccionFecha} onChange={(e) => setProximaAccionFecha(e.target.value)} className={`${input} font-mono`} />
             </div>
           </div>

@@ -65,7 +65,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Cabecera & Selector de Alcance */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-3xl font-bold tracking-tight font-sans text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
+          <h1 className="text-xl sm:text-3xl font-bold tracking-tight font-sans text-[var(--c-text)]">
             Panel de Rendimiento Comercial
           </h1>
           <p className="text-xs text-[var(--c-muted)] mt-0.5">
@@ -74,7 +74,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* Filtro Mis datos / Todo el equipo */}
-        <div className="flex items-center gap-1 p-1 bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-[var(--c-bg)] border border-[var(--c-line)] rounded-lg text-xs">
+        <div className="flex items-center gap-1 p-1 bg-[var(--c-surface)] border border-[var(--c-line)] rounded-lg text-xs">
           <Filter className="w-3.5 h-3.5 text-[var(--c-muted)] ml-2 mr-1" />
           <button
             onClick={() => setFiltroAlcance('todo_el_equipo')}
@@ -143,7 +143,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* KPI 2: Oportunidades Abiertas */}
         <div
           onClick={onNavigateKanban}
-          className="p-4 bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white rounded-lg border border-[var(--c-line)] space-y-1 cursor-pointer hover:border-[var(--c-line)] transition-colors"
+          className="p-4 bg-[var(--c-surface)] rounded-lg border border-[var(--c-line)] space-y-1 cursor-pointer hover:border-[var(--c-line)] transition-colors"
         >
           <div className="flex items-center justify-between">
             <p className="text-[11px] font-mono text-[var(--c-muted)] uppercase tracking-wider">
@@ -191,7 +191,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* KPI 4: Tareas de Hoy */}
         <div
           onClick={onNavigateTasks}
-          className="p-4 bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white rounded-lg border border-[var(--c-line)] space-y-1 cursor-pointer hover:border-[var(--c-line)] transition-colors"
+          className="p-4 bg-[var(--c-surface)] rounded-lg border border-[var(--c-line)] space-y-1 cursor-pointer hover:border-[var(--c-line)] transition-colors"
         >
           <div className="flex items-center justify-between">
             <p className="text-[11px] font-mono text-[var(--c-muted)] uppercase tracking-wider">

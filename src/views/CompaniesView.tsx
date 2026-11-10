@@ -134,7 +134,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
       {/* Barra superior de título y acción principal */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold font-sans text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
+          <h1 className="text-xl font-bold font-sans text-[var(--c-text)]">
             Directorio de Clientes
           </h1>
           <p className="text-xs text-[var(--c-muted)] mt-0.5">
@@ -153,7 +153,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
       </div>
 
       {/* Barra de Filtros y Búsqueda */}
-      <div className="flex flex-wrap items-center gap-3 bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-[var(--c-bg)] p-3 rounded-lg border border-[var(--c-line)]">
+      <div className="flex flex-wrap items-center gap-3 bg-[var(--c-surface)] p-3 rounded-lg border border-[var(--c-line)]">
         {/* Input búsqueda */}
         <div className="relative flex-1 min-w-[200px]">
           <Search className="w-3.5 h-3.5 text-[var(--c-muted)] absolute left-3 top-2.5" />
@@ -162,7 +162,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Buscar por nombre, RUT o dominio..."
-            className="w-full bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-white border border-[var(--c-line)] rounded pl-8 pr-3 py-1.5 text-xs text-[var(--c-text)] placeholder:text-[var(--c-muted-2)] focus:outline-none focus:border-[var(--c-accent)]"
+            className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded pl-8 pr-3 py-1.5 text-xs text-[var(--c-text)] placeholder:text-[var(--c-muted-2)] focus:outline-none focus:border-[var(--c-accent)]"
           />
         </div>
 
@@ -274,10 +274,10 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
       )}
 
       {/* Tabla Densa de Empresas */}
-      <div className={`${vista === 'tabla' ? '' : 'hidden '}bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white border border-[var(--c-line)] rounded-lg overflow-hidden shadow-sm`}>
+      <div className={`${vista === 'tabla' ? '' : 'hidden '}bg-[var(--c-surface)] border border-[var(--c-line)] rounded-lg overflow-hidden shadow-sm`}>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[var(--c-surface-2)] dark:bg-[var(--c-surface-2)] light:bg-[var(--c-surface-2)] border-b border-[var(--c-line)] text-[var(--c-muted)] uppercase font-mono text-[11px]">
+            <thead className="bg-[var(--c-surface-2)] border-b border-[var(--c-line)] text-[var(--c-muted)] uppercase font-mono text-[11px]">
               <tr>
                 <th className="py-2.5 px-4 font-medium">Cliente</th>
                 <th className="py-2.5 px-3 font-medium">RUT / Web</th>
@@ -291,7 +291,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                 <th className="py-2.5 px-3 text-right"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--c-line)] dark:divide-[var(--c-line)] light:divide-[var(--c-surface-3)]">
+            <tbody className="divide-y divide-[var(--c-line)]">
               {filteredEmpresas.length === 0 ? (
                 <tr>
                   <td colSpan={10} className="py-8 text-center text-xs text-[var(--c-muted)]">
@@ -322,7 +322,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                     <tr
                       key={emp.id}
                       onClick={() => onSelectEmpresa(emp.id)}
-                      className="hover:bg-[var(--c-surface-2)] dark:hover:bg-[var(--c-surface-2)] light:hover:bg-[var(--c-bg)] cursor-pointer transition-colors group"
+                      className="hover:bg-[var(--c-surface-2)] cursor-pointer transition-colors group"
                     >
                       {/* Empresa */}
                       <td className="py-2.5 px-4">
@@ -330,7 +330,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                           <LogoEmpresa nombre={emp.nombre} logoPath={emp.logo_path} size={24} />
                           <div>
                             <div className="flex items-center gap-1.5">
-                              <p className="font-semibold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] group-hover:text-[var(--c-accent)] transition-colors">
+                              <p className="font-semibold text-[var(--c-text)] group-hover:text-[var(--c-accent)] transition-colors">
                                 {emp.nombre}
                               </p>
                               {emp.salud && (
@@ -456,8 +456,8 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
       {/* Modal Crear Nueva Empresa */}
       {showNewModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[var(--c-surface)] dark:bg-[var(--c-surface)] light:bg-white border border-[var(--c-line)] rounded-lg max-w-lg w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-base font-bold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] mb-1">
+          <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-lg max-w-lg w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h2 className="text-base font-bold text-[var(--c-text)] mb-1">
               Nuevo cliente
             </h2>
             <p className="text-xs text-[var(--c-muted)] mb-4">
@@ -479,7 +479,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">RUT</label>
                   <input
@@ -502,7 +502,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Estado</label>
                   <select
@@ -549,7 +549,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">
                     Fee Mensual (CLP)
@@ -578,7 +578,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Responsable</label>
                   <select
@@ -606,7 +606,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">
                     URL Looker Dashboard
