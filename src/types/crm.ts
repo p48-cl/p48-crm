@@ -38,6 +38,7 @@ export interface Empresa {
   tamano?: string | null;
   looker_dashboard_url?: string | null;
   drive_folder_url?: string | null;
+  logo_path?: string | null;
   estado: EstadoEmpresa;
   plan?: PlanEmpresa | null;
   fee_mensual_clp?: number | null;
@@ -78,7 +79,7 @@ export interface Contacto {
   created_at?: string;
 }
 
-export type Moneda = 'CLP' | 'USD';
+export type Moneda = 'CLP' | 'USD' | 'UF';
 
 export type EstadoSeguimiento = 'sin_accion' | 'atrasado' | 'por_vencer' | 'al_dia' | null;
 

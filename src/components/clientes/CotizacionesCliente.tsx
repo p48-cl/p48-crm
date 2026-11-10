@@ -2,9 +2,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Plus, Printer, Trash2, ArrowLeft } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { parseSupabaseError } from '../../lib/errorHandler';
-import { formatFecha, formatMoneda, formatRUT, formatCorrelativo } from '../../lib/formatters';
+import { formatFecha, formatMoneda, formatRUT, formatCorrelativo, formatCLP, MonedaCRM } from '../../lib/formatters';
 import { PLANES, SETUP_LISTA } from '../../lib/planes';
 import { useCRM } from '../../context/CRMContext';
+import { urlLogo } from './Logo';
 import { useAuth } from '../../context/AuthContext';
 import { Empresa, PlanEmpresa } from '../../types/crm';
 
@@ -19,7 +20,9 @@ interface CotizacionFila {
   estado: Estado;
   fecha_emision: string;
   validez_dias: number;
-  moneda: 'CLP' | 'USD';
+  moneda: MonedaCRM;
+  uf_valor?: number | null;
+  uf_fecha?: string | null;
   iva_pct: number;
   condicion_comision: string;
   condiciones_comerciales: string;
@@ -171,7 +174,32 @@ const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creada
   const [oportunidadId, setOportunidadId] = useState(inicial?.oportunidad_id ?? oportunidadInicial ?? '');
   const [validez, setValidez] = useState(String(inicial?.validez_dias ?? 15));
   const [ivaPct, setIvaPct] = useState(String(inicial?.iva_pct ?? 19));
-  const [moneda, setMoneda] = useState<'CLP' | 'USD'>(inicial?.moneda ?? 'CLP');
+  const [moneda, setMoneda] = useState<MonedaCRM>(inicial?.moneda ?? 'CLP');
+  // Valor UF congelado en la cotización (snapshot). Si es nueva, se toma el último valor de uf_diaria.
+  const [uf, setUf] = useState<{ valor: number; fecha: string } | null>(
+    inicial?.uf_valor && inicial?.uf_fecha ? { valor: Number(inicial.uf_valor), fecha: inicial.uf_fecha } : null
+  );
+  const [ufError, setUfError] = useState<string | null>(null);
+
+  const cargarUfActual = useCallback(async () => {
+    if (!supabase) return null;
+    const hoy = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Santiago' });
+    const { data, error: err } = await supabase
+      .from('uf_diaria').select('fecha,valor').lte('fecha', hoy).order('fecha', { ascending: false }).limit(1).maybeSingle();
+    if (err || !data) return null;
+    return { valor: Number(data.valor), fecha: data.fecha as string };
+  }, []);
+
+  useEffect(() => {
+    if (moneda !== 'UF' || uf) return;
+    cargarUfActual().then((v) => {
+      if (v) { setUf(v); setUfError(null); }
+      else setUfError('No hay valor UF disponible. Revisa la carga diaria de UF.');
+    });
+  }, [moneda, uf, cargarUfActual]);
+
+  // Convierte un precio de lista en CLP a la moneda de la cotización
+  const aMoneda = (clp: number) => (moneda === 'UF' && uf ? Math.round((clp / uf.valor) * 100) / 100 : clp);
   const [comision, setComision] = useState(inicial?.condicion_comision ?? COMISION_BASE);
   const [condiciones, setCondiciones] = useState(inicial?.condiciones_comerciales ?? CONDICIONES_BASE);
   const [notas, setNotas] = useState(inicial?.notas_internas ?? '');
@@ -198,7 +226,7 @@ const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creada
   const elegirPlan = (i: number, plan: PlanEmpresa | '') => {
     if (!plan) return cambiar(i, { plan: '' });
     const p = PLANES[plan];
-    cambiar(i, { plan, concepto: plan === 'personalizado' ? lineas[i].concepto : `Plan ${plan} · ${p.nombre}`, precio_neto: plan === 'personalizado' ? lineas[i].precio_neto : p.valor, recurrente: plan !== 'E' });
+    cambiar(i, { plan, concepto: plan === 'personalizado' ? lineas[i].concepto : `Plan ${plan} · ${p.nombre}`, precio_neto: plan === 'personalizado' ? lineas[i].precio_neto : aMoneda(p.valor), recurrente: plan !== 'E' });
   };
 
   // Datos legales mínimos: sin ellos no se puede enviar ni aceptar una cotización
@@ -218,6 +246,7 @@ const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creada
     if (!titulo.trim()) return setError('Falta el título');
     if (lineas.length === 0 || lineas.some((l) => !l.concepto.trim())) return setError('Cada línea necesita un concepto');
     if (lineas.some((l) => !(l.cantidad > 0) || l.precio_neto < 0)) return setError('Revisa cantidades y precios');
+    if (moneda === 'UF' && !uf) return setError('No hay valor UF disponible para congelar en la cotización');
     const v = Number(validez);
     if (!Number.isInteger(v) || v < 1 || v > 180) return setError('Validez entre 1 y 180 días');
     if (!Number.isFinite(iva) || iva < 0 || iva > 100) return setError('IVA entre 0 y 100');
@@ -231,6 +260,8 @@ const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creada
       estado,
       validez_dias: v,
       moneda,
+      uf_valor: moneda === 'UF' && uf ? uf.valor : null,
+      uf_fecha: moneda === 'UF' && uf ? uf.fecha : null,
       iva_pct: iva,
       condicion_comision: comision,
       condiciones_comerciales: condiciones,
@@ -261,7 +292,7 @@ const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creada
       .join('');
     const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${inicial ? formatCorrelativo('COT', inicial.numero) : 'Cotización'} · ${esc(empresa.nombre)}</title>
 <style>body{font-family:Arial,sans-serif;color:#0A0A0A;margin:40px;font-size:13px}h1{font-size:20px;margin:0}table{width:100%;border-collapse:collapse;margin:16px 0}th,td{border-bottom:1px solid #ddd;padding:8px;text-align:left}th{background:#F5F5F5}.n{text-align:right}.tot td{border:0;padding:3px 8px}.sm{color:#555;font-size:12px}.box{margin-top:14px}</style></head><body>
-<h1>Cotización ${inicial ? formatCorrelativo('COT', inicial.numero) : '(borrador)'} · P48</h1>
+${urlLogo(empresa.logo_path) ? `<img src="${urlLogo(empresa.logo_path)}" alt="" style="height:48px;float:right">` : ''}<h1>Cotización ${inicial ? formatCorrelativo('COT', inicial.numero) : '(borrador)'} · P48</h1>
 <p class="sm">${esc(titulo)}<br>Emisión: ${esc(formatFecha(inicial?.fecha_emision ?? new Date()))} · Válida ${esc(validez)} días</p>
 <p><b>${esc(empresa.razon_social || empresa.nombre)}</b><br>${empresa.rut ? 'RUT ' + esc(formatRUT(empresa.rut)) + '<br>' : ''}${empresa.giro ? esc(empresa.giro) + '<br>' : ''}${empresa.direccion_facturacion ? esc(empresa.direccion_facturacion) : ''}</p>
 <table><thead><tr><th>Concepto</th><th class="n">Cant.</th><th class="n">Precio neto</th><th class="n">Subtotal neto</th><th>Tipo</th></tr></thead><tbody>${filasHtml}</tbody></table>
@@ -305,7 +336,7 @@ const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creada
         <div><label className={etiqueta}>Validez (días)</label><input type="number" className={`${campo} font-mono`} value={validez} onChange={(e) => setValidez(e.target.value)} /></div>
         <div className="grid grid-cols-2 gap-3">
           <div><label className={etiqueta}>Moneda</label>
-            <select className={campo} value={moneda} onChange={(e) => setMoneda(e.target.value as 'CLP' | 'USD')}><option value="CLP">CLP</option><option value="USD">USD</option></select></div>
+            <select className={campo} value={moneda} onChange={(e) => setMoneda(e.target.value as MonedaCRM)}><option value="CLP">CLP</option><option value="UF">UF</option><option value="USD">USD</option></select>{ufError && <p className="text-[11px] text-[var(--c-danger)] mt-1">{ufError}</p>}</div>
           <div><label className={etiqueta}>IVA %</label><input type="number" className={`${campo} font-mono`} value={ivaPct} onChange={(e) => setIvaPct(e.target.value)} /></div>
         </div>
       </div>
@@ -314,7 +345,7 @@ const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creada
         <div className="flex items-center justify-between">
           <p className="text-[11px] font-mono uppercase text-[var(--c-muted)]">Líneas</p>
           <div className="flex gap-2">
-            <button onClick={() => setLineas((p) => [...p, { concepto: 'Setup inicial', plan: '', cantidad: 1, precio_neto: SETUP_LISTA, recurrente: false }])} className="text-[11px] text-[var(--c-accent)]">+ Setup</button>
+            <button onClick={() => setLineas((p) => [...p, { concepto: 'Setup inicial', plan: '', cantidad: 1, precio_neto: aMoneda(SETUP_LISTA), recurrente: false }])} className="text-[11px] text-[var(--c-accent)]">+ Setup</button>
             <button onClick={() => setLineas((p) => [...p, { concepto: '', plan: '', cantidad: 1, precio_neto: 0, recurrente: true }])} className="text-[11px] text-[var(--c-accent)]">+ Línea</button>
           </div>
         </div>
@@ -329,13 +360,14 @@ const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creada
             </div>
             <div className="grid grid-cols-[64px_1fr_auto] sm:grid-cols-[70px_1fr_auto_auto] gap-2 items-center">
               <input type="number" min={0} step="any" className={`${campo} font-mono`} value={l.cantidad} onChange={(e) => cambiar(i, { cantidad: Number(e.target.value) })} aria-label="Cantidad" />
-              <input type="number" min={0} className={`${campo} font-mono`} value={l.precio_neto} onChange={(e) => cambiar(i, { precio_neto: Number(e.target.value) })} aria-label="Precio neto" />
+              <input type="number" min={0} step={moneda === 'UF' ? '0.01' : '1'} className={`${campo} font-mono`} value={l.precio_neto} onChange={(e) => cambiar(i, { precio_neto: Number(e.target.value) })} aria-label="Precio neto" />
               <label className="col-span-2 sm:col-span-1 text-[11px] text-[var(--c-muted)] flex items-center gap-1"><input type="checkbox" checked={l.recurrente} onChange={(e) => cambiar(i, { recurrente: e.target.checked })} /> Mensual</label>
               <button onClick={() => setLineas((p) => p.filter((_, k) => k !== i))} aria-label="Quitar línea" className="justify-self-end text-[var(--c-muted)] hover:text-[var(--c-danger)] p-1"><Trash2 className="w-4 h-4" /></button>
             </div>
           </div>
         ))}
         <div className="text-[11px] sm:text-xs font-mono text-right space-y-0.5 text-[var(--c-text-2)] break-words">
+          {moneda === 'UF' && uf && <p className="text-[11px] font-mono text-[var(--c-muted)]">UF del {uf.fecha}: {formatCLP(uf.valor)} · Total mensual ≈ {formatCLP(t.mensualIva * uf.valor)}</p>}
           <p>Mensual: {formatMoneda(t.mensual, moneda)} neto · <b className="text-[var(--c-text)]">{formatMoneda(t.mensualIva, moneda)}</b> con IVA</p>
           <p>Único: {formatMoneda(t.unico, moneda)} neto · <b className="text-[var(--c-text)]">{formatMoneda(t.unicoIva, moneda)}</b> con IVA</p>
         </div>

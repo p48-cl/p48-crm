@@ -4,7 +4,7 @@ import { useCRM } from '../../context/CRMContext';
 import { DatosFacturacion } from '../clientes/DatosFacturacion';
 import { formatCorrelativo, formatRUT } from '../../lib/formatters';
 import { PLANES } from '../../lib/planes';
-import { Oportunidad, PlanEmpresa } from '../../types/crm';
+import { Moneda, Oportunidad, PlanEmpresa } from '../../types/crm';
 
 const input = 'w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]';
 const label = 'block text-[11px] text-[var(--c-muted)] mb-1';
@@ -55,9 +55,10 @@ export const DatosNegocio: React.FC<Props> = ({ oportunidad, onVerCliente }) => 
           </div>
           <div>
             <label className={label}>Moneda</label>
-            <select className={input} value={oportunidad.moneda} onChange={(e) => guardar({ moneda: e.target.value as 'CLP' | 'USD' })}>
+            <select className={input} value={oportunidad.moneda} onChange={(e) => guardar({ moneda: e.target.value as Moneda })}>
               <option value="CLP">CLP</option>
               <option value="USD">USD</option>
+              <option value="UF">UF</option>
             </select>
           </div>
           <div>

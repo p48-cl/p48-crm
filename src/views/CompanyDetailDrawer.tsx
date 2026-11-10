@@ -18,6 +18,7 @@ import { ClientePanel } from '../components/clientes/ClientePanel';
 import { CotizacionesCliente } from '../components/clientes/CotizacionesCliente';
 import { DatosFacturacion } from '../components/clientes/DatosFacturacion';
 import { CuentasCliente } from '../components/clientes/CuentasCliente';
+import { SubirLogo } from '../components/clientes/Logo';
 import { FichaMarketing } from '../components/marketing/FichaMarketing';
 
 type Tab = 'info' | 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'cotizaciones' | 'cliente' | 'marketing';
@@ -179,9 +180,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-[var(--c-line)] flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded bg-[var(--c-surface-2)] border border-[var(--c-surface-3)] flex items-center justify-center text-[var(--c-accent)]">
-              <Building2 className="w-5 h-5" />
-            </div>
+            <SubirLogo empresaId={empresa.id} nombre={empresa.nombre} logoPath={empresa.logo_path} size={48} />
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-bold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
