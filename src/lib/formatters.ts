@@ -82,6 +82,27 @@ export function formatRUT(rutRaw?: string | null): string {
   return `${cuerpoFormateado}-${dv}`;
 }
 
+// Formato mientras se escribe: 12345678 -> 12.345.678 ; dígito verificador tras guion.
+export function formatRUTInput(raw: string): string {
+  const limpio = raw.replace(/[^0-9kK]/g, '').toUpperCase().slice(0, 9);
+  if (limpio.length <= 1) return limpio;
+  const cuerpo = limpio.slice(0, -1);
+  const dv = limpio.slice(-1);
+  return `${new Intl.NumberFormat('es-CL').format(parseInt(cuerpo, 10))}-${dv}`;
+}
+
+// Celular chileno: siempre +569 seguido de 8 dígitos, formato "+569 1234 5678".
+export function formatTelefonoCL(raw: string): string {
+  const d = raw.replace(/\D/g, '');
+  if (!d || (d.length < 3 && '569'.startsWith(d))) return '';
+  let resto = d.startsWith('56') ? d.slice(2) : d;
+  if (!resto) return '+56';
+  if (!resto.startsWith('9')) resto = '9' + resto.replace(/^0+/, '');
+  const cuerpo = resto.slice(1, 9);
+  const bloques = [cuerpo.slice(0, 4), cuerpo.slice(4, 8)].filter(Boolean).join(' ');
+  return bloques ? `+569 ${bloques}` : '+569';
+}
+
 export function normalizarDominio(raw?: string | null): string {
   if (!raw) return '';
   return raw

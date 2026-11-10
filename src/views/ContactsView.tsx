@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Search, Plus, Mail, Phone, Linkedin, Building2, Archive } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';
-import { formatFecha } from '../lib/formatters';
+import { formatFecha, formatTelefonoCL } from '../lib/formatters';
 
 interface ContactsViewProps {
   onSelectEmpresa: (id: string) => void;
@@ -199,7 +199,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                       </td>
                       <td className="py-2.5 px-3 font-mono text-[11px] text-[var(--c-text-2)]">
                         {con.telefono ? (
-                          <a href={`tel:${con.telefono}`} className="hover:text-[var(--c-text)] flex items-center gap-1">
+                          <a href={`tel:${(con.telefono ?? '').replace(/\s/g, '')}`} className="hover:text-[var(--c-text)] flex items-center gap-1">
                             <Phone className="w-3 h-3 text-[var(--c-muted-2)]" />
                             <span>{con.telefono}</span>
                           </a>
@@ -295,9 +295,9 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
               <div className="grid grid-cols-2 gap-2">
                 <input
                   type="text"
-                  placeholder="Teléfono"
+                  placeholder="Celular +569"
                   value={newContact.telefono}
-                  onChange={(e) => setNewContact({ ...newContact, telefono: e.target.value })}
+                  onChange={(e) => setNewContact({ ...newContact, telefono: formatTelefonoCL(e.target.value) })}
                   className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                 />
                 <input

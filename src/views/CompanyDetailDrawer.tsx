@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { Empresa, AccesosAdminMarketing, Tarea } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
-import { formatCLP, formatFecha, formatMoneda, formatRUT } from '../lib/formatters';
+import { formatCLP, formatFecha, formatMoneda, formatRUT, formatTelefonoCL } from '../lib/formatters';
 import { ClientePanel } from '../components/clientes/ClientePanel';
 import { CotizacionesCliente } from '../components/clientes/CotizacionesCliente';
 import { DatosFacturacion } from '../components/clientes/DatosFacturacion';
@@ -523,9 +523,9 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <input
                       type="text"
-                      placeholder="Teléfono móvil"
+                      placeholder="Celular +569"
                       value={newContact.telefono}
-                      onChange={(e) => setNewContact({ ...newContact, telefono: e.target.value })}
+                      onChange={(e) => setNewContact({ ...newContact, telefono: formatTelefonoCL(e.target.value) })}
                       className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
                     />
                     <input
@@ -613,7 +613,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                           {c.telefono && (
                             <span className="flex items-center gap-1">
                               <Phone className="w-3 h-3 text-[var(--c-muted)]" />
-                              <a href={`tel:${c.telefono}`} className="hover:text-[var(--c-text)]">
+                              <a href={`tel:${(c.telefono ?? '').replace(/\s/g, '')}`} className="hover:text-[var(--c-text)]">
                                 {c.telefono}
                               </a>
                             </span>
