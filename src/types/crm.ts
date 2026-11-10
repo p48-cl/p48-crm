@@ -119,6 +119,8 @@ export interface Oportunidad {
   utm_medio?: string | null;
   archivado?: boolean;
   created_at?: string;
+  updated_at?: string;
+  fecha_cierre_real?: string | null; // la fija la base al pasar a ganada/perdida
 }
 
 // Vista calculada v_oportunidades (para lectura)
@@ -228,28 +230,6 @@ export interface TareaDependencia {
   depende_de_id: string;
 }
 
-// Vistas de gráficos
-export interface VPipelinePorEtapa {
-  etapa_id: string;
-  nombre: string;
-  orden: number;
-  color?: string | null;
-  es_ganada: boolean;
-  es_perdida: boolean;
-  cantidad: number;
-  valor_ponderado: number;
-}
-
-export interface VOportunidadesPorFuente {
-  nombre: string;
-  cantidad: number;
-}
-
-export interface VMotivosPerdida {
-  nombre: string;
-  cantidad: number;
-}
-
 // Respuesta de RPC kpis_dashboard
 export interface KPIsDashboard {
   pipeline_ponderado_total: number;
@@ -257,58 +237,6 @@ export interface KPIsDashboard {
   seguimientos_atrasados_count: number;
   tareas_hoy_count: number;
   mrr_clientes_activos: number;
-}
-
-// ===== Dashboard de agencia (vistas v_dash_*) =====
-export interface DashResultados {
-  ganadas: number;
-  perdidas: number;
-  tasa_cierre_pct: number | null;
-  ciclo_venta_dias: number | null;
-  valor_ganado_clp: number;
-}
-
-export interface DashEmbudoEtapa {
-  etapa_id: string;
-  nombre: string;
-  orden: number;
-  color?: string | null;
-  alcanzaron: number;
-}
-
-export interface DashForecastMes {
-  mes: string; // YYYY-MM-DD (primer día del mes)
-  oportunidades: number;
-  valor_neto: number;
-  valor_ponderado: number;
-}
-
-export interface DashPipelineResponsable {
-  responsable_id: string;
-  responsable: string;
-  oportunidades_abiertas: number;
-  valor_neto_total: number;
-  valor_ponderado_total: number;
-}
-
-export interface DashClienteCartera {
-  empresa_id: string;
-  nombre: string;
-  plan: string | null;
-  fee_mensual_clp: number | null;
-  mrr_actual_clp: number | null;
-  fecha_renovacion: string | null;
-  dias_a_renovacion: number | null;
-  salud: 'verde' | 'amarillo' | 'rojo' | null;
-  responsable: string | null;
-}
-
-export interface DashTareasResponsable {
-  responsable_id: string;
-  responsable: string;
-  pendientes: number;
-  vencidas: number;
-  hoy: number;
 }
 
 // ===== Capa de clientes (tablas proyectos, entregables, reportes, cliente_usuarios) =====

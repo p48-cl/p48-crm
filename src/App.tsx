@@ -142,11 +142,7 @@ const CRMAppContent: React.FC = () => {
           className="flex-1 min-h-0 overflow-y-auto pb-24 lg:pb-0 bg-[var(--c-bg)] border-t-2 border-[var(--module)]"
         >
           {currentView === 'inicio' && (
-            <DashboardView
-              onNavigateKanban={() => setCurrentView('crm')}
-              onNavigateTasks={() => setCurrentView('tareas')}
-              onSelectOportunidad={(id) => setSelectedOpId(id)}
-            />
+            <DashboardView onNavigate={setCurrentView} />
           )}
 
           {currentView === 'crm' && (
