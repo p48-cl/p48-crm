@@ -31,6 +31,8 @@ interface CompanyDetailDrawerProps {
   onOpenNewTask: (empresaId: string) => void;
   onEditTask: (t: Tarea) => void;
   tabInicial?: Tab;
+  iniciarNuevaCotizacion?: boolean;
+  onNuevaCotizacionUsada?: () => void;
 }
 
 // Enlace editable: solo acepta http(s) o vacío. Guarda al salir del campo.
@@ -81,6 +83,8 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
   onOpenNewTask,
   onEditTask,
   tabInicial,
+  iniciarNuevaCotizacion,
+  onNuevaCotizacionUsada,
 }) => {
   const {
     contactos,
@@ -783,7 +787,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
             </div>
           )}
           {activeTab === 'cotizaciones' && (
-            <CotizacionesCliente empresa={empresa} />
+            <CotizacionesCliente empresa={empresa} iniciarNueva={!!iniciarNuevaCotizacion} onNuevaUsada={onNuevaCotizacionUsada} />
           )}
           {activeTab === 'marketing' && empresa.estado === 'cliente' && <FichaMarketing empresaId={empresa.id} />}
           {activeTab === 'cliente' && empresa.estado === 'cliente' && (

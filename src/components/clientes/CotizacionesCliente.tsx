@@ -63,13 +63,25 @@ const totales = (lineas: Linea[], ivaPct: number) => {
   return { mensual, unico, mensualIva: Math.round(mensual * f), unicoIva: Math.round(unico * f) };
 };
 
-export const CotizacionesCliente: React.FC<{ empresa: Empresa }> = ({ empresa }) => {
+interface CotizacionesClienteProps {
+  empresa: Empresa;
+  iniciarNueva?: boolean;
+  onNuevaUsada?: () => void;
+}
+
+export const CotizacionesCliente: React.FC<CotizacionesClienteProps> = ({ empresa, iniciarNueva, onNuevaUsada }) => {
   const { oportunidades } = useCRM();
   const { currentUser } = useAuth();
   const [filas, setFilas] = useState<CotizacionFila[]>([]);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [editando, setEditando] = useState<CotizacionFila | 'nueva' | null>(null);
+  const [editando, setEditando] = useState<CotizacionFila | 'nueva' | null>(iniciarNueva ? 'nueva' : null);
+
+  // La orden «Nueva cotización» desde el módulo se consume una sola vez
+  useEffect(() => {
+    if (iniciarNueva) onNuevaUsada?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const cargar = useCallback(async () => {
     if (!isSupabaseConfigured || !supabase) return;
@@ -115,7 +127,7 @@ export const CotizacionesCliente: React.FC<{ empresa: Empresa }> = ({ empresa })
       {cargando && filas.length === 0 ? (
         <p className="text-xs text-[var(--c-muted)]">Cargando…</p>
       ) : filas.length === 0 ? (
-        <p className="text-xs text-[var(--c-muted)] py-4 text-center">Aún no hay cotizaciones para esta cuenta.</p>
+        <p className="text-xs text-[var(--c-muted)] py-4 text-center">Aún no hay cotizaciones para este cliente.</p>
       ) : (
         <div className="divide-y divide-[var(--c-line)] border border-[var(--c-line)] rounded-lg">
           {filas.map((c) => {
