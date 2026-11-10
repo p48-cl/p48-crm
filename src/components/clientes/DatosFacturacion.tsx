@@ -1,3 +1,4 @@
+import { formatRUTInput } from '../../lib/formatters';
 import React, { useEffect, useState } from 'react';
 import { Receipt } from 'lucide-react';
 import { Empresa } from '../../types/crm';
@@ -75,7 +76,7 @@ export const DatosFacturacion: React.FC<Props> = ({ empresa, onGuardar }) => {
         </div>
         <div>
           <label className={label}>RUT *</label>
-          <input className={`${input} font-mono`} placeholder="76.123.456-7" value={f.rut} onChange={(e) => setF({ ...f, rut: e.target.value })} onBlur={() => guardarTexto('rut')} />
+          <input className={`${input} font-mono`} placeholder="76.123.456-7" value={f.rut} onChange={(e) => setF({ ...f, rut: formatRUTInput(e.target.value) })} onBlur={() => guardarTexto('rut')} />
         </div>
         <div>
           <label className={label}>Giro *</label>

@@ -10,7 +10,7 @@ import {
   Filter,
 } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';
-import { formatCLP, formatRUT } from '../lib/formatters';
+import { formatCLP, formatRUT, formatRUTInput } from '../lib/formatters';
 
 interface CompaniesViewProps {
   onSelectEmpresa: (id: string) => void;
@@ -421,7 +421,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                     type="text"
                     placeholder="Ej: 76.123.456-K"
                     value={newCompany.rut}
-                    onChange={(e) => setNewCompany({ ...newCompany, rut: e.target.value })}
+                    onChange={(e) => setNewCompany({ ...newCompany, rut: formatRUTInput(e.target.value) })}
                     className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
                   />
                 </div>
