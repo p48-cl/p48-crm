@@ -92,6 +92,7 @@ Caso a vigilar: reabrir una oportunidad ganada no revierte la empresa a prospect
 | crm_19 | origen_dato_y_cargas | Origen, `cargado_por` y `cargas_datos` |
 | crm_20 | seo_keywords | Palabras clave SEO por semana |
 | crm_24 | cotizaciones_facturacion | Tablas `cotizaciones` y `cotizacion_items`, vista `v_cotizaciones` y datos de facturación en `empresas` (razón social, giro, dirección, correo, días de pago). Comisión de pauta como texto editable por cotización. Facturas: etapa 2 |
+| crm_25 | uf_diaria | Tabla `uf_diaria` (valor UF por día desde mindicador.cl, Banco Central). Funciones `uf_pedir` (diaria, 11:00 UTC) y `uf_procesar` (cada 30 min) vía pg_net/pg_cron, con validación de rango y variación < 0,5%. `cotizaciones` acepta moneda UF con snapshot `uf_valor` + `uf_fecha`. `uf_solicitudes` es interna (sin políticas, a propósito) |
 
 ## 8. Frontend: estructura
 - `src/context/AuthContext.tsx`: sesión, vinculación de miembro o cliente.
