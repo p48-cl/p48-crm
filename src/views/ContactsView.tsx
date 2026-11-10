@@ -1,3 +1,4 @@
+import { fondoCerrable } from '../lib/fondo';
 import React, { useState, useMemo } from 'react';
 import { Search, Plus, Mail, Phone, Linkedin, Building2, Archive } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';
@@ -263,7 +264,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
 
       {/* Modal Nuevo Contacto */}
       {showNewModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" {...fondoCerrable(() => setShowNewModal(false))}>
           <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-lg max-w-md w-full p-6 shadow-2xl">
             <h2 className="text-base font-bold text-[var(--c-text)] mb-3">{editId ? 'Editar contacto' : 'Nuevo Contacto'}</h2>
             <form onSubmit={handleCreateSubmit} className="space-y-3">

@@ -1,3 +1,4 @@
+import { fondoCerrable } from '../lib/fondo';
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   Building2,
@@ -455,7 +456,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
 
       {/* Modal Crear Nueva Empresa */}
       {showNewModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" {...fondoCerrable(() => setShowNewModal(false))}>
           <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-lg max-w-lg w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <h2 className="text-base font-bold text-[var(--c-text)] mb-1">
               Nuevo cliente

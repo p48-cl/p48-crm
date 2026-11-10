@@ -1,3 +1,4 @@
+import { fondoCerrable } from '../lib/fondo';
 import React, { useState, useEffect } from 'react';
 import {
   X,
@@ -169,7 +170,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
     (oportunidad.proxima_accion_fecha && esFechaAtrasada(oportunidad.proxima_accion_fecha));
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center sm:p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-40 flex items-center justify-center sm:p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150" {...fondoCerrable(onClose)}>
       <div className="bg-[var(--c-surface)] border border-[var(--c-line)] sm:rounded-xl max-w-6xl w-full h-[100dvh] sm:h-[92vh] shadow-2xl flex flex-col justify-between overflow-hidden">
         {/* Encabezado de la ficha (mismo patrón que la ficha de cliente) */}
         <div className="px-5 py-4 border-b border-[var(--c-line)] flex items-start justify-between gap-4 bg-[var(--c-surface-2)]">
