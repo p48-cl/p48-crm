@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Search, Plus, Mail, Phone, Linkedin, Building2, Archive } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';
+import { SelectorCliente } from '../components/common/SelectorCliente';
 import { formatFecha, formatTelefonoCL } from '../lib/formatters';
 
 interface ContactsViewProps {
@@ -8,7 +9,12 @@ interface ContactsViewProps {
 }
 
 export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) => {
-  const { contactos, empresas, crearContacto, actualizarContacto, archivarContacto } = useCRM();
+  const { contactos, empresas, crearContacto, actualizarContacto, archivarContacto, crearEmpresa } = useCRM();
+  const [selectorCliente, setSelectorCliente] = useState(false);
+  const clientesActivos = useMemo(
+    () => empresas.filter((e) => !e.archivado).sort((a, b) => a.nombre.localeCompare(b.nombre)),
+    [empresas]
+  );
   const [editId, setEditId] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -49,7 +55,11 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newContact.nombre || !newContact.email || !newContact.empresa_id) return;
+    if (!newContact.nombre || !newContact.email) return;
+    if (!newContact.empresa_id) {
+      setSelectorCliente(true);
+      return;
+    }
 
     if (editId) {
       await actualizarContacto(editId, newContact);
@@ -233,6 +243,24 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
         </div>
       </div>
 
+      {selectorCliente && (
+        <SelectorCliente
+          titulo="Cliente del contacto"
+          etiquetaBoton="Usar este cliente"
+          clientes={clientesActivos}
+          onCrear={async (nombre) => {
+            const creada = await crearEmpresa({ nombre, estado: 'prospecto' });
+            if (creada) setNewContact((c) => ({ ...c, empresa_id: creada.id }));
+            return creada?.id ?? null;
+          }}
+          onCerrar={() => setSelectorCliente(false)}
+          onElegir={(id) => {
+            setNewContact((c) => ({ ...c, empresa_id: id }));
+            setSelectorCliente(false);
+          }}
+        />
+      )}
+
       {/* Modal Nuevo Contacto */}
       {showNewModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
@@ -241,19 +269,21 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
             <form onSubmit={handleCreateSubmit} className="space-y-3">
               <div>
                 <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Cliente *</label>
-                <select
-                  required
-                  value={newContact.empresa_id}
-                  onChange={(e) => setNewContact({ ...newContact, empresa_id: e.target.value })}
-                  className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
+                <button
+                  type="button"
+                  onClick={() => setSelectorCliente(true)}
+                  className={`w-full flex items-center justify-between gap-2 text-left bg-[var(--c-surface-2)] border rounded px-3 py-2 text-xs ${
+                    newContact.empresa_id ? 'border-[var(--c-line)] text-[var(--c-text)]' : 'border-[var(--c-accent)] text-[var(--c-muted)]'
+                  }`}
                 >
-                  <option value="">Selecciona la empresa...</option>
-                  {empresas.map((e) => (
-                    <option key={e.id} value={e.id}>
-                      {e.nombre}
-                    </option>
-                  ))}
-                </select>
+                  <span className="truncate">
+                    {empresas.find((e) => e.id === newContact.empresa_id)?.nombre ?? 'Elegir o crear cliente…'}
+                  </span>
+                  <span className="text-[var(--c-accent)] shrink-0">{newContact.empresa_id ? 'Cambiar' : 'Elegir'}</span>
+                </button>
+                {!newContact.empresa_id && (
+                  <p className="text-[11px] text-[var(--c-muted)] mt-1">Un contacto siempre pertenece a un cliente.</p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-2">

@@ -5,6 +5,7 @@ Formato: versión, fecha de unión a `main`, PR, qué cambia y si toca base de d
 ## v0.11.0 · en curso (no publicada)
 Estado al 9 de noviembre de 2026. Cada entrada indica si ya está en `main`.
 
+- **PR #57** · Contactos: al crear un contacto se elige o crea el cliente con el mismo selector (búsqueda y alta en línea) en vez de un desplegable.
 - **PR #56** · Selector de cliente reutilizable: busca, elige o crea un cliente sin salir del flujo (usado en Cotizaciones). Una cotización no se puede marcar «enviada» ni «aceptada» si al cliente le faltan razón social, RUT, giro o dirección; el editor avisa qué falta. Apilado sobre #55.
 - **PR #55** · Cotizaciones con el mismo diseño que Clientes: título y contador, búsqueda y filtro de estado en tarjeta, tabla densa (N°, cotización, cliente, estado, fechas, mensual y único con IVA) y «Nueva cotización» con selector de cliente. Apilado sobre #54.
 - **PR #54** · Cotizaciones: el encabezado ya no se corta en escritorio, el botón dice «Nueva cotización» y abre directamente el formulario del cliente elegido (antes solo abría la ficha). Apilado sobre #51.
