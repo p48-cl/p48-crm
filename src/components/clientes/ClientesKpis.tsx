@@ -57,9 +57,26 @@ export const ClientesKpis: React.FC = () => {
   const proxima = m.renovaciones[0];
   const totalSalud = m.verde + m.amarillo + m.rojo + m.sinSalud;
   const pct = (n: number) => (totalSalud > 0 ? (n / totalSalud) * 100 : 0);
+  const R = 40;
+  const C = 2 * Math.PI * R;
+  const segmentosSalud = [
+    { key: 'verde', label: 'Verde', n: m.verde, color: 'var(--c-ok)' },
+    { key: 'amarillo', label: 'Amarillo', n: m.amarillo, color: 'var(--c-warn)' },
+    { key: 'rojo', label: 'Rojo', n: m.rojo, color: 'var(--c-danger)' },
+    { key: 'sin', label: 'Sin evaluar', n: m.sinSalud, color: 'var(--c-muted-2)' },
+  ].filter((s) => s.n > 0);
+  // Desplazamiento acumulado (en unidades del círculo) de cada segmento
+  const acumulado = (key: string) => {
+    let suma = 0;
+    for (const s of segmentosSalud) {
+      if (s.key === key) break;
+      suma += (s.n / totalSalud) * C;
+    }
+    return suma;
+  };
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
       <div className={tarjeta}>
         <p className={etiqueta}>MRR</p>
         <p className={valor}>{formatCLP(mrr)}</p>
@@ -73,22 +90,43 @@ export const ClientesKpis: React.FC = () => {
         {totalSalud === 0 ? (
           <p className={nota}>Sin clientes activos</p>
         ) : (
-          <>
-            <div className={barra} role="img" aria-label="Salud de clientes">
-              <div className="h-full bg-[var(--c-ok)]" style={{ width: `${pct(m.verde)}%` }} />
-              <div className="h-full bg-[var(--c-warn)]" style={{ width: `${pct(m.amarillo)}%` }} />
-              <div className="h-full bg-[var(--c-danger)]" style={{ width: `${pct(m.rojo)}%` }} />
-              <div className="h-full bg-[var(--c-surface-3)]" style={{ width: `${pct(m.sinSalud)}%` }} />
+          <div className="flex items-center gap-5">
+            <div className="relative w-24 h-24 shrink-0">
+              <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90" role="img" aria-label={`Salud de ${totalSalud} clientes`}>
+                <circle cx="50" cy="50" r={R} fill="none" strokeWidth="12" style={{ stroke: 'var(--c-surface-3)' }} />
+                {segmentosSalud.map((s) => {
+                  const len = (s.n / totalSalud) * C;
+                  const off = -(acumulado(s.key));
+                  return (
+                    <circle
+                      key={s.key}
+                      cx="50"
+                      cy="50"
+                      r={R}
+                      fill="none"
+                      strokeWidth="12"
+                      style={{ stroke: s.color }}
+                      strokeDasharray={`${len} ${C - len}`}
+                      strokeDashoffset={off}
+                    />
+                  );
+                })}
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-lg font-bold font-mono text-[var(--c-text)] leading-none">{m.clientes}</span>
+                <span className="text-[9px] font-mono uppercase text-[var(--c-muted)] mt-0.5">clientes</span>
+              </div>
             </div>
-            <ul className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-[var(--c-text-2)]">
-              <li className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[var(--c-ok)]" aria-hidden />Verde <span className="font-mono text-[var(--c-muted)]">{m.verde}</span></li>
-              <li className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[var(--c-warn)]" aria-hidden />Amarillo <span className="font-mono text-[var(--c-muted)]">{m.amarillo}</span></li>
-              <li className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[var(--c-danger)]" aria-hidden />Rojo <span className="font-mono text-[var(--c-muted)]">{m.rojo}</span></li>
-              {m.sinSalud > 0 && (
-                <li className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[var(--c-surface-3)]" aria-hidden />Sin evaluar <span className="font-mono text-[var(--c-muted)]">{m.sinSalud}</span></li>
-              )}
+            <ul className="flex flex-col gap-1.5 text-[11px] text-[var(--c-text-2)] min-w-0">
+              {segmentosSalud.map((s) => (
+                <li key={s.key} className="inline-flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ background: s.color }} aria-hidden />
+                  {s.label}
+                  <span className="font-mono text-[var(--c-muted)]">{s.n} · {pct(s.n).toFixed(0)}%</span>
+                </li>
+              ))}
             </ul>
-          </>
+          </div>
         )}
       </div>
 
