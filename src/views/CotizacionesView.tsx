@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronRight, Filter, Plus, Search } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { parseSupabaseError } from '../lib/errorHandler';
-import { formatFecha, formatMoneda } from '../lib/formatters';
+import { formatFecha, formatMoneda, formatCorrelativo } from '../lib/formatters';
 import { useCRM } from '../context/CRMContext';
 import { SelectorCliente } from '../components/common/SelectorCliente';
 
@@ -78,7 +78,7 @@ export const CotizacionesView: React.FC<{ onAbrirFicha: (empresaId: string, nuev
       if (estado !== 'todos' && f.estado !== estado) return false;
       if (!q) return true;
       return (
-        String(f.numero).includes(q) ||
+        formatCorrelativo('COT', f.numero).toLowerCase().includes(q) || String(f.numero).includes(q) ||
         f.titulo.toLowerCase().includes(q) ||
         (nombres.get(f.empresa_id) ?? '').toLowerCase().includes(q)
       );
@@ -175,7 +175,7 @@ export const CotizacionesView: React.FC<{ onAbrirFicha: (empresaId: string, nuev
                       onClick={() => onAbrirFicha(c.empresa_id)}
                       className="hover:bg-[var(--c-surface-2)] cursor-pointer transition-colors group"
                     >
-                      <td className="py-2.5 px-4 font-mono text-[var(--c-text-2)]">{c.numero}</td>
+                      <td className="py-2.5 px-4 font-mono text-[var(--c-text-2)]">{formatCorrelativo('COT', c.numero)}</td>
                       <td className="py-2.5 px-3 text-[var(--c-text)] font-medium max-w-[260px] truncate">{c.titulo}</td>
                       <td className="py-2.5 px-3 text-[var(--c-text-2)]">{nombres.get(c.empresa_id) ?? '—'}</td>
                       <td className={`py-2.5 px-3 font-mono text-[11px] uppercase ${est.color}`}>{est.label}</td>

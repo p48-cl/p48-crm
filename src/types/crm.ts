@@ -96,6 +96,7 @@ export interface Etapa {
 // Oportunidad para inserción y actualización (tabla oportunidades)
 export interface Oportunidad {
   id: string; // uuid
+  numero?: number; // correlativo NEG-0001
   nombre: string;
   empresa_id: string;
   contacto_principal_id?: string | null;

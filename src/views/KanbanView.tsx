@@ -12,7 +12,7 @@ import {
 import { VOportunidad } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
 import { PipelineKpis } from '../components/crm/PipelineKpis';
-import { formatMoneda, formatFecha, esFechaAtrasada } from '../lib/formatters';
+import { formatMoneda, formatFecha, esFechaAtrasada, formatCorrelativo } from '../lib/formatters';
 import { ConfirmWonModal } from '../components/common/ConfirmWonModal';
 import { LossReasonModal } from '../components/common/LossReasonModal';
 
@@ -315,7 +315,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                               {emp?.nombre ?? 'Sin empresa'}
                             </p>
                             <h4 className="text-xs font-semibold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] hover:text-[var(--c-on-accent)] transition-colors leading-snug line-clamp-2">
-                              {op.nombre}
+                              {op.numero ? <span className="font-mono text-[10px] text-[var(--c-muted)] mr-1">{formatCorrelativo('NEG', op.numero)}</span> : null}{op.nombre}
                             </h4>
                           </div>
 

@@ -142,3 +142,9 @@ export function esFechaHoy(fechaStr?: string | null): boolean {
     return false;
   }
 }
+
+// Correlativos únicos: COT-0001, NEG-0001
+export function formatCorrelativo(prefijo: 'COT' | 'NEG', numero?: number | null): string {
+  if (numero == null) return '';
+  return `${prefijo}-${String(numero).padStart(4, '0')}`;
+}
