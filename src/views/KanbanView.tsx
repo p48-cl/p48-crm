@@ -253,7 +253,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
 
       {/* VISTA KANBAN */}
       {vistaModo === 'kanban' && (
-        <div className="flex md:grid md:grid-cols-3 lg:grid-cols-5 gap-4 overflow-x-auto snap-x snap-mandatory pb-6">
+        <div className="flex md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 overflow-x-auto snap-x snap-mandatory pb-6">
           {etapas.filter((e) => e.activa).map((etapa) => {
             const opsEtapa = filteredOportunidades.filter((o) => o.etapa_id === etapa.id);
             const totalEtapaCLP = opsEtapa

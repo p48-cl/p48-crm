@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { ChipSenal } from '../components/common/ChipSenal';
 import {
   CheckSquare,
   Plus,
@@ -264,6 +265,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
                     <Calendar className="w-3.5 h-3.5 text-[var(--c-muted-2)]" />
                     <span>{formatFecha(t.fecha_vencimiento)}</span>
                   </span>
+                  {atrasada && <ChipSenal tono="danger">Atrasada</ChipSenal>}
                 </div>
               </div>
             );

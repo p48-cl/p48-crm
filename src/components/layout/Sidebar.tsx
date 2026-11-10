@@ -133,7 +133,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   );
 
   return (
-    <aside className="hidden md:flex w-[220px] shrink-0 border-r border-[var(--c-line)] bg-[var(--c-sidebar)] flex-col justify-between py-4 select-none">
+    <aside className="hidden lg:flex w-[220px] shrink-0 border-r border-[var(--c-line)] bg-[var(--c-sidebar)] flex-col justify-between py-4 select-none">
       <div className="space-y-5 overflow-y-auto">
         <div className="px-4">
           <JampBrand size={36} subtitle />

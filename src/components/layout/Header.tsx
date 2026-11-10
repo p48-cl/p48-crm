@@ -24,13 +24,13 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="sticky top-0 z-30 h-14 border-b border-[var(--c-line)] bg-[var(--c-bg)]/95 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between gap-6 transition-colors">
       {/* Zona 1: Marca JAMP CRM */}
       <div className="flex items-center gap-4 shrink-0">
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="flex items-center gap-2 lg:hidden">
           <JampMark size={28} />
           <JampWordmark className="text-sm" />
         </div>
 
         {/* Indicador de conexión / Modo */}
-        <div className="hidden md:flex items-center gap-1.5 text-xs text-[var(--c-muted)] font-mono">
+        <div className="hidden lg:flex items-center gap-1.5 text-xs text-[var(--c-muted)] font-mono">
           <span className="font-semibold text-[var(--c-text-2)]">JAMP</span>
           <span className="text-[var(--c-muted-2)]">/</span>
           {isSupabaseLive ? (
@@ -104,7 +104,7 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="hidden sm:inline font-medium truncate max-w-[110px]">
               {currentUser?.nombre ?? 'Usuario'}
             </span>
-            <span className="text-[10px] font-mono uppercase text-[var(--c-muted)] hidden md:inline">
+            <span className="text-[10px] font-mono uppercase text-[var(--c-muted)] hidden lg:inline">
               ({currentUser?.rol ?? 'miembro'})
             </span>
             <ChevronDown className="w-3 h-3 text-[var(--c-muted)]" />
