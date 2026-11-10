@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Building, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';
 import { ChipSenal } from '../components/common/ChipSenal';
 import { Kpi } from '../components/dashboard/ui';
@@ -9,6 +9,7 @@ import { CuentasCliente } from '../components/clientes/CuentasCliente';
 import { FichaMarketing } from '../components/marketing/FichaMarketing';
 import { EstrategiaEditor } from '../components/clientes/EstrategiaCliente';
 import { DatosFacturacion } from '../components/clientes/DatosFacturacion';
+import { SubirLogo } from '../components/clientes/Logo';
 import { useProyectos } from '../components/proyectos/useProyectos';
 import { hoyIso, diaCorto } from '../components/proyectos/fechas';
 import { formatFecha } from '../lib/formatters';
@@ -69,7 +70,7 @@ export const AgenciaView: React.FC<Props> = ({ onNuevaTarea, onEditTask }) => {
   return (
     <div data-module="organic" className="p-4 sm:p-6 max-w-7xl mx-auto space-y-5">
       <div className="surface p-4 flex flex-wrap items-center gap-3 border-l-4" style={{ borderLeftColor: 'var(--module)' }}>
-        <Building className="w-5 h-5 text-[var(--module)]" />
+        <SubirLogo empresaId={agencia.id} nombre={agencia.nombre} logoPath={agencia.logo_path} size={44} />
         <div className="min-w-0">
           <h1 className="text-xl font-bold tracking-tight text-[var(--c-text)]">{agencia.nombre}</h1>
           <p className="text-xs text-[var(--c-muted)]">Gestión propia de la agencia. No suma a clientes, MRR, pipeline ni cotizaciones de clientes.</p>
