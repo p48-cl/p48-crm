@@ -28,7 +28,8 @@ export type ViewType =
   | 'importar'
   | 'administracion';
 
-export type SeccionMarketing = 'dashboard' | 'estrategia' | 'seo' | 'organico' | 'ads' | 'cliente' | 'cargar';
+// 'resumen', 'cargar' o el id de plataforma del canal (google_ads, meta_ads, gsc, instagram...)
+export type SeccionMarketing = string;
 
 interface SidebarProps {
   currentView: ViewType;
@@ -70,7 +71,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const principales: NavItem[] = [
     { key: 'inicio', label: 'Overview', icon: LayoutDashboard, active: currentView === 'inicio', onClick: () => onChangeView('inicio') },
     { key: 'crm', label: 'Pipeline', icon: Kanban, active: currentView === 'crm', onClick: () => onChangeView('crm') },
-    { key: 'marketing', label: 'Marketing', icon: Radio, active: enMkt, onClick: () => onOpenMarketing('dashboard') },
+    { key: 'marketing', label: 'Marketing', icon: Radio, active: enMkt, onClick: () => onOpenMarketing('resumen') },
     { key: 'empresas', label: 'Clientes', icon: Building2, active: currentView === 'empresas', onClick: () => onChangeView('empresas') },
   ];
 

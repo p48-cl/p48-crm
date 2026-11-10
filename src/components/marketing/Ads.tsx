@@ -23,12 +23,12 @@ interface Campana {
 const select = 'px-2.5 py-1.5 text-xs bg-[var(--c-surface)] border border-[var(--c-line)] rounded text-[var(--c-text)]';
 const pct = (v: number) => `${Math.round(v * 100)}%`;
 
-export const Ads: React.FC = () => {
+export const Ads: React.FC<{ plataforma?: string }> = ({ plataforma }) => {
   const { clientes, cargando } = useDatosMarketing();
   const [clienteSel, setClienteSel] = useState('todos');
   const [campanas, setCampanas] = useState<Campana[]>([]);
   const [conPrueba, setConPrueba] = useState(false);
-  const [plataformaSel, setPlataformaSel] = useState('todas');
+  const [plataformaSel, setPlataformaSel] = useState(plataforma ?? 'todas');
 
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) return;
@@ -120,6 +120,7 @@ export const Ads: React.FC = () => {
             <option key={c.id} value={c.id}>{c.nombre}</option>
           ))}
         </select>
+        {!plataforma && (
         <select className={select} value={plataformaSel} onChange={(e) => setPlataformaSel(e.target.value)} aria-label="Plataforma">
           <option value="todas">Todas las plataformas</option>
           <option value="google_ads">Google Ads</option>
@@ -127,6 +128,7 @@ export const Ads: React.FC = () => {
           <option value="tiktok_ads">TikTok Ads</option>
           <option value="linkedin_ads">LinkedIn Ads</option>
         </select>
+        )}
         <label className="flex items-center gap-1.5 text-xs text-[var(--c-text-2)]">
           <input type="checkbox" checked={conPrueba} onChange={(e) => setConPrueba(e.target.checked)} />
           Incluir datos de prueba
