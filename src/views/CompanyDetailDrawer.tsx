@@ -20,10 +20,11 @@ import { DatosFacturacion } from '../components/clientes/DatosFacturacion';
 import { CuentasCliente } from '../components/clientes/CuentasCliente';
 import { SubirLogo } from '../components/clientes/Logo';
 import { FichaMarketing } from '../components/marketing/FichaMarketing';
+import { EstrategiaEditor, ResumenEstrategia } from '../components/clientes/EstrategiaCliente';
 import { useConfiguracionCRM } from '../lib/configuracion';
 import { FranjaDecision, TonoFranja } from '../components/common/FranjaDecision';
 
-type Tab = 'resumen' | 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'cotizaciones' | 'marketing' | 'info' | 'cliente';
+type Tab = 'resumen' | 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'cotizaciones' | 'estrategia' | 'marketing' | 'info' | 'cliente';
 
 interface CompanyDetailDrawerProps {
   empresa: Empresa | null;
@@ -346,6 +347,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
               { id: 'actividades' as const, label: 'Actividad' },
               { id: 'tareas' as const, label: `Tareas (${tareasPendientes.length})` },
               { id: 'cotizaciones' as const, label: 'Cotizaciones' },
+              { id: 'estrategia' as const, label: 'Estrategia' },
               ...(empresa.estado === 'cliente' ? [{ id: 'marketing' as const, label: 'Marketing' }] : []),
               { id: 'info' as const, label: 'Contrato y datos' },
               ...(empresa.estado === 'cliente' ? [{ id: 'cliente' as const, label: 'Portal y activos' }] : []),
@@ -371,6 +373,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
           {activeTab === 'resumen' && (
             <div className="grid grid-cols-[minmax(0,1fr)] xl:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)] gap-5 items-start">
               <div className="space-y-5">
+                <ResumenEstrategia empresaId={empresa.id} onVerTodo={() => setActiveTab('estrategia')} />
                 <div className="ficha-card p-4">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-xs font-semibold text-[var(--c-text)]">Prioridades abiertas</h3>
@@ -963,6 +966,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
           {activeTab === 'cotizaciones' && (
             <CotizacionesCliente empresa={empresa} iniciarNueva={!!iniciarNuevaCotizacion} onNuevaUsada={onNuevaCotizacionUsada} />
           )}
+          {activeTab === 'estrategia' && <EstrategiaEditor empresaId={empresa.id} nombreCliente={empresa.nombre} />}
           {activeTab === 'marketing' && empresa.estado === 'cliente' && <FichaMarketing empresaId={empresa.id} />}
           {activeTab === 'cliente' && empresa.estado === 'cliente' && (
             <ClientePanel empresaId={empresa.id} />
