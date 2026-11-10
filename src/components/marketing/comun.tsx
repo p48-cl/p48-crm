@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { formatCLP } from '../../lib/formatters';
+import type { Agrega, FormatoKpi, KpiCanal } from './canales';
 
 export interface Fila {
   empresa_id: string;
@@ -147,4 +148,183 @@ export const useDatosMarketing = () => {
   }, []);
 
   return { clientes, filas, cuentas, cargando };
+};
+
+// Métricas de una plataforma para un cliente (tabla metricas_snapshot).
+export interface Medida {
+  plataforma: string;
+  metrica: string;
+  periodo: string;
+  valor: number;
+}
+
+export function useMetricasCliente(clienteId: string, plataformas: string[]) {
+  const [filas, setFilas] = useState<Medida[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const clave = plataformas.join(',');
+
+  useEffect(() => {
+    if (!isSupabaseConfigured || !supabase || !clienteId || !clave) return;
+    let vivo = true;
+    supabase
+      .from('metricas_snapshot')
+      .select('plataforma,metrica,periodo,valor')
+      .eq('empresa_id', clienteId)
+      .in('plataforma', clave.split(','))
+      .order('periodo', { ascending: true })
+      .limit(5000)
+      .then(({ data, error: err }) => {
+        if (!vivo) return;
+        setError(err ? err.message : null);
+        setFilas(((data ?? []) as Medida[]).map((p) => ({ ...p, valor: Number(p.valor) })));
+      });
+    return () => {
+      vivo = false;
+    };
+  }, [clienteId, clave]);
+
+  return { filas, error };
+}
+
+// Filtro de periodo: cuántas semanas recientes se consideran. 0 = todo el histórico.
+export type Rango = 1 | 4 | 12 | 0;
+const RANGOS: { valor: Rango; etiqueta: string }[] = [
+  { valor: 1, etiqueta: 'Última semana' },
+  { valor: 4, etiqueta: '4 semanas' },
+  { valor: 12, etiqueta: '12 semanas' },
+  { valor: 0, etiqueta: 'Todo' },
+];
+
+export const FiltroPeriodo: React.FC<{ valor: Rango; onChange: (r: Rango) => void }> = ({ valor, onChange }) => (
+  <div role="group" aria-label="Periodo" className="inline-flex flex-wrap gap-1 p-0.5 rounded-md bg-[var(--c-surface-2)]">
+    {RANGOS.map((r) => (
+      <button
+        key={r.valor}
+        type="button"
+        onClick={() => onChange(r.valor)}
+        aria-pressed={valor === r.valor}
+        className={`px-2.5 py-1 text-xs rounded ${
+          valor === r.valor
+            ? 'bg-[var(--c-surface)] text-[var(--c-text)] font-semibold ring-1 ring-[var(--module)]'
+            : 'text-[var(--c-muted)] hover:text-[var(--c-text-2)]'
+        }`}
+      >
+        {r.etiqueta}
+      </button>
+    ))}
+  </div>
+);
+
+// Periodos de la ventana actual y de la inmediatamente anterior de igual largo (para comparar).
+export function ventanas(periodos: string[], n: Rango): { actual: string[]; previa: string[] } {
+  const orden = [...new Set(periodos)].sort();
+  if (n === 0) return { actual: orden, previa: [] };
+  return { actual: orden.slice(-n), previa: orden.slice(-2 * n, -n) };
+}
+
+export const formatearValor = (v: number, f: FormatoKpi) => {
+  if (f === 'clp') return formatCLP(v);
+  if (f === 'pct') return `${(v * 100).toFixed(1)}%`;
+  if (f === 'decimal') return v.toFixed(1);
+  if (f === 'x') return `${v.toFixed(1)}x`;
+  return Math.round(v).toLocaleString('es-CL');
+};
+
+// Valor de una métrica en una ventana: suma, promedio o último registro disponible.
+export function valorVentana(filas: Medida[], metrica: string, periodos: string[], agrega: Agrega): number | undefined {
+  const porSemana = periodos
+    .map((p) => filas.filter((f) => f.metrica === metrica && f.periodo === p))
+    .filter((rs) => rs.length > 0)
+    .map((rs) => rs.reduce((a, r) => a + r.valor, 0));
+  if (porSemana.length === 0) return undefined;
+  if (agrega === 'suma') return porSemana.reduce((a, b) => a + b, 0);
+  if (agrega === 'promedio') return porSemana.reduce((a, b) => a + b, 0) / porSemana.length;
+  return porSemana[porSemana.length - 1];
+}
+
+// Métricas básicas de una plataforma: tarjetas con variación, gráfico de la principal y tabla completa.
+export const KpisCanal: React.FC<{
+  kpis: KpiCanal[];
+  filas: Medida[];
+  ventana: { actual: string[]; previa: string[] };
+}> = ({ kpis, filas, ventana }) => {
+  const metricas = [...new Set(filas.filter((f) => ventana.actual.includes(f.periodo)).map((f) => f.metrica))];
+  const config = (m: string) => kpis.find((k) => k.metrica === m);
+  const principal = kpis[0];
+  const puntos = principal
+    ? ventana.actual.flatMap((p) => {
+        const rs = filas.filter((f) => f.metrica === principal.metrica && f.periodo === p);
+        return rs.length > 0 ? [{ etiqueta: fechaCorta(p), valor: rs.reduce((a, r) => a + r.valor, 0) }] : [];
+      })
+    : [];
+
+  if (metricas.length === 0) return <p className="text-xs text-[var(--c-muted)]">Sin datos en el periodo seleccionado.</p>;
+
+  const formatoDe = (m: string) => (v: number) => formatearValor(v, config(m)?.formato ?? 'entero');
+
+  return (
+    <div className="space-y-4">
+      {kpis.length > 0 && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {kpis.map((k) => {
+            const a = valorVentana(filas, k.metrica, ventana.actual, k.agrega);
+            const b = valorVentana(filas, k.metrica, ventana.previa, k.agrega);
+            return (
+              <div key={k.metrica} className="surface p-4 space-y-1">
+                <p className="text-[11px] font-mono uppercase tracking-wider text-[var(--c-muted)]">{k.titulo}</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-lg font-bold font-mono text-[var(--c-text)]">
+                    {a === undefined ? '—' : formatearValor(a, k.formato)}
+                  </span>
+                  {a !== undefined && b !== undefined && <Variacion actual={a} previo={b} mejorSube={k.mejorSube ?? true} />}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {principal && puntos.length >= 2 && (
+        <div className="surface p-4 space-y-2">
+          <p className="text-sm font-semibold text-[var(--c-text)]">{principal.titulo} por semana</p>
+          {principal.agrega === 'suma' ? (
+            <Barras puntos={puntos} formato={formatoDe(principal.metrica)} />
+          ) : (
+            <Tendencia puntos={puntos} formato={formatoDe(principal.metrica)} />
+          )}
+        </div>
+      )}
+
+      <div className="surface overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="text-left text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">
+              <th className="py-2 px-3 font-normal">Métrica</th>
+              <th className="py-2 px-3 font-normal text-right">Valor</th>
+              <th className="py-2 px-3 font-normal text-right">Vs periodo anterior</th>
+            </tr>
+          </thead>
+          <tbody>
+            {metricas.map((m) => {
+              const k = config(m);
+              const agrega = k?.agrega ?? 'suma';
+              const a = valorVentana(filas, m, ventana.actual, agrega);
+              const b = valorVentana(filas, m, ventana.previa, agrega);
+              return (
+                <tr key={m} className="border-t border-[var(--c-line)] text-[var(--c-text-2)]">
+                  <td className="py-2 px-3 capitalize">{m.replace(/_/g, ' ')}</td>
+                  <td className="py-2 px-3 text-right font-mono text-[var(--c-text)]">
+                    {a === undefined ? '—' : formatearValor(a, k?.formato ?? 'entero')}
+                  </td>
+                  <td className="py-2 px-3 text-right">
+                    {a !== undefined && b !== undefined && <Variacion actual={a} previo={b} mejorSube={k?.mejorSube ?? true} />}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 };

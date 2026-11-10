@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
-import { Variacion, fechaCorta, useDatosMarketing } from './comun';
+import { FiltroPeriodo, KpisCanal, Rango, Variacion, fechaCorta, useDatosMarketing, useMetricasCliente, ventanas } from './comun';
+import { KPIS_CANAL } from './canales';
 
 interface Kw {
   keyword: string;
@@ -27,6 +28,7 @@ const resumen = (rows: Kw[]) => {
 export const SEO: React.FC = () => {
   const { clientes, cargando } = useDatosMarketing();
   const [clienteSel, setClienteSel] = useState('');
+  const [rango, setRango] = useState<Rango>(1);
   const [filas, setFilas] = useState<Kw[]>([]);
   const [busqueda, setBusqueda] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -57,8 +59,14 @@ export const SEO: React.FC = () => {
   }, [clienteId]);
 
   const periodos = useMemo(() => [...new Set(filas.map((f) => f.periodo))].sort(), [filas]);
-  const ultima = periodos[periodos.length - 1];
-  const previa = periodos[periodos.length - 2];
+  const v = useMemo(() => ventanas(periodos, rango), [periodos, rango]);
+  // La posición es una foto: se compara el último corte de la ventana con el corte anterior a ella.
+  const ultima = v.actual[v.actual.length - 1];
+  const previa = v.previa[v.previa.length - 1];
+
+  const { filas: medidas } = useMetricasCliente(clienteId, ['gsc']);
+  const periodosMedidas = useMemo(() => [...new Set(medidas.map((m) => m.periodo))], [medidas]);
+  const vm = useMemo(() => ventanas(periodosMedidas, rango), [periodosMedidas, rango]);
 
   const actual = useMemo(() => filas.filter((f) => f.periodo === ultima), [filas, ultima]);
   const anterior = useMemo(() => filas.filter((f) => f.periodo === previa), [filas, previa]);
@@ -81,12 +89,17 @@ export const SEO: React.FC = () => {
         <select value={clienteId} onChange={(e) => setClienteSel(e.target.value)} className={select} aria-label="Cliente">
           {clientes.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
         </select>
-        <span className="text-[11px] text-[var(--c-muted)]">
-          {ultima ? `Semana ${fechaCorta(ultima)}${previa ? ` vs ${fechaCorta(previa)}` : ''}` : 'Sin datos. Carga un CSV en Cargar datos › SEO.'}
-        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          <FiltroPeriodo valor={rango} onChange={setRango} />
+          <span className="text-[11px] text-[var(--c-muted)]">
+            {ultima ? `Corte ${fechaCorta(ultima)}${previa ? ` vs ${fechaCorta(previa)}` : ''}` : 'Sin datos. Carga un CSV en Cargar datos › SEO.'}
+          </span>
+        </div>
       </div>
 
       {error && <p className="text-xs text-[var(--c-danger)] border border-[var(--c-danger)]/40 rounded p-2">{error}</p>}
+
+      {medidas.length > 0 && <KpisCanal kpis={KPIS_CANAL.gsc} filas={medidas} ventana={vm} />}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="surface p-4 space-y-1">
@@ -130,7 +143,7 @@ export const SEO: React.FC = () => {
           />
         </div>
         {tabla.length === 0 ? (
-          <p className="text-xs text-[var(--c-muted)]">Sin palabras clave en la última semana.</p>
+          <p className="text-xs text-[var(--c-muted)]">Sin palabras clave en el corte seleccionado.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
