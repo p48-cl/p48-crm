@@ -240,7 +240,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
             const totalEtapaCLP = opsEtapa
               .filter((o) => o.moneda === 'CLP')
               .reduce((sum, o) => sum + (o.valor_ponderado || 0), 0);
-            const hayUSD = opsEtapa.some((o) => o.moneda === 'USD');
+            const hayUSD = opsEtapa.some((o) => o.moneda !== 'CLP');
             const isDropTarget = dragOverEtapaId === etapa.id;
 
             return (
@@ -296,7 +296,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                       const sinAccion =
                         op.estado_seguimiento === 'sin_accion' ||
                         (!op.proxima_accion_texto?.trim() && !op.proxima_accion_fecha);
-                      const esUSD = op.moneda === 'USD';
+                      const esUSD = op.moneda !== 'CLP';
 
                       return (
                         <div
