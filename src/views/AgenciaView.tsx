@@ -7,19 +7,23 @@ import { ProjectsView } from './ProjectsView';
 import { CotizacionesCliente } from '../components/clientes/CotizacionesCliente';
 import { CuentasCliente } from '../components/clientes/CuentasCliente';
 import { FichaMarketing } from '../components/marketing/FichaMarketing';
+import { EstrategiaEditor } from '../components/clientes/EstrategiaCliente';
+import { DatosFacturacion } from '../components/clientes/DatosFacturacion';
 import { useProyectos } from '../components/proyectos/useProyectos';
 import { hoyIso, diaCorto } from '../components/proyectos/fechas';
 import { formatFecha } from '../lib/formatters';
 import type { Tarea } from '../types/crm';
 
-type Seccion = 'resumen' | 'proyectos' | 'tareas' | 'cotizaciones' | 'marketing';
+type Seccion = 'resumen' | 'proyectos' | 'tareas' | 'cotizaciones' | 'estrategia' | 'marketing' | 'datos';
 
 const SECCIONES: { id: Seccion; label: string }[] = [
   { id: 'resumen', label: 'Resumen' },
   { id: 'proyectos', label: 'Proyectos' },
   { id: 'tareas', label: 'Tareas' },
   { id: 'cotizaciones', label: 'Cotizaciones' },
+  { id: 'estrategia', label: 'Estrategia' },
   { id: 'marketing', label: 'Marketing' },
+  { id: 'datos', label: 'Datos y carpeta' },
 ];
 
 interface Props {
@@ -29,7 +33,7 @@ interface Props {
 
 // Espacio interno de la agencia (P48): separado de clientes, sin sumar a sus métricas.
 export const AgenciaView: React.FC<Props> = ({ onNuevaTarea, onEditTask }) => {
-  const { agencia, tareas, miembros, accesosAdmin, toggleTareaCompletada, actualizarAccesosAdmin } = useCRM();
+  const { agencia, tareas, miembros, accesosAdmin, toggleTareaCompletada, actualizarAccesosAdmin, actualizarEmpresa } = useCRM();
   const { proyectos } = useProyectos();
   const [seccion, setSeccion] = useState<Seccion>('resumen');
   const hoy = hoyIso();
@@ -142,6 +146,29 @@ export const AgenciaView: React.FC<Props> = ({ onNuevaTarea, onEditTask }) => {
       )}
 
       {seccion === 'cotizaciones' && <CotizacionesCliente empresa={agencia} />}
+
+      {seccion === 'estrategia' && <EstrategiaEditor empresaId={agencia.id} nombreCliente={agencia.nombre} />}
+
+      {seccion === 'datos' && (
+        <div className="space-y-4">
+          <p className="text-[11px] text-[var(--c-muted)]">Datos legales de la agencia: se usan como emisor en cotizaciones. Sin contrato, plan ni fee, porque la agencia no se factura a sí misma.</p>
+          <DatosFacturacion empresa={agencia} onGuardar={(c) => actualizarEmpresa(agencia.id, c)} />
+          <div className="ficha-card p-4 space-y-2">
+            <label className="block text-[11px] text-[var(--c-muted)]" htmlFor="agencia-drive">Carpeta de Drive de la agencia</label>
+            <input
+              id="agencia-drive"
+              type="url"
+              defaultValue={agencia.drive_folder_url ?? ''}
+              placeholder="https://drive.google.com/..."
+              onBlur={(e) => {
+                const v = e.target.value.trim() || null;
+                if (v !== (agencia.drive_folder_url ?? null)) actualizarEmpresa(agencia.id, { drive_folder_url: v });
+              }}
+              className="w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
+            />
+          </div>
+        </div>
+      )}
 
       {seccion === 'marketing' && (
         <div className="space-y-6">
