@@ -13,12 +13,15 @@ import {
 } from 'lucide-react';
 import { Empresa, AccesosAdminMarketing, Tarea } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
+import { useAuth } from '../context/AuthContext';
 import { formatCLP, formatFecha, formatMoneda, formatRUT, formatTelefonoCL } from '../lib/formatters';
 import { ClientePanel } from '../components/clientes/ClientePanel';
 import { CotizacionesCliente } from '../components/clientes/CotizacionesCliente';
 import { DatosFacturacion } from '../components/clientes/DatosFacturacion';
 import { CuentasCliente } from '../components/clientes/CuentasCliente';
 import { SubirLogo } from '../components/clientes/Logo';
+import { ServiciosCliente } from '../components/clientes/ServiciosCliente';
+import { HistorialFee } from '../components/clientes/HistorialFee';
 import { FichaMarketing } from '../components/marketing/FichaMarketing';
 import { useConfiguracionCRM } from '../lib/configuracion';
 
@@ -103,6 +106,8 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
     industrias,
   } = useCRM();
   const { config: cfg } = useConfiguracionCRM();
+  // Permisos: solo admin edita la ficha; los miembros (ejecutivos) solo crean
+  const { isAdmin } = useAuth();
   const DIAS_ALERTA_RENOVACION = cfg.dias_alerta_renovacion;
   const DIAS_SIN_ACTIVIDAD = cfg.dias_sin_actividad;
 
@@ -239,7 +244,9 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-[var(--c-line)] bg-[var(--c-surface)] flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <SubirLogo empresaId={empresa.id} nombre={empresa.nombre} logoPath={empresa.logo_path} size={48} />
+            <fieldset disabled={!isAdmin} className="contents">
+              <SubirLogo empresaId={empresa.id} nombre={empresa.nombre} logoPath={empresa.logo_path} size={48} />
+            </fieldset>
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-bold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)]">
@@ -294,6 +301,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                 {accionPrincipal.label}
               </button>
             )}
+            {isAdmin && (
             <button
               onClick={handleArchive}
               className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-danger)] hover:bg-[var(--c-surface-3)] rounded transition-colors"
@@ -301,6 +309,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
             >
               <Archive className="w-4 h-4" />
             </button>
+            )}
             <button
               onClick={onClose}
               className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-text)] hover:bg-[var(--c-surface-3)] rounded transition-colors"
@@ -321,7 +330,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
           <div className="px-4 sm:px-5 py-3 md:border-r border-[var(--c-line)]">
             <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">MRR contratado</p>
             <p className="text-sm font-semibold mt-0.5 font-mono text-[var(--c-text)]">
-              {empresa.mrr_actual_clp ? `${formatCLP(empresa.mrr_actual_clp)} CLP` : 'Sin MRR'}
+              {empresa.mrr_actual_clp ? formatCLP(empresa.mrr_actual_clp) : "Sin MRR"}
             </p>
           </div>
           <div className="px-4 sm:px-5 py-3 border-r border-t md:border-t-0 border-[var(--c-line)]">
@@ -421,21 +430,47 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                 </div>
               </div>
 
+              <fieldset disabled={!isAdmin} className="contents">
               <div className="space-y-5">
                 <div className="ficha-card p-4 space-y-3">
                   <h3 className="text-xs font-semibold text-[var(--c-text)]">Perfil comercial</h3>
                   <div className="grid grid-cols-2 gap-3 text-xs">
                     <div>
-                      <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Plan</p>
-                      <p className="text-[var(--c-text)] mt-0.5">{empresa.plan ? (empresa.plan === 'personalizado' ? 'Personalizado' : `Plan ${empresa.plan}`) : 'Sin plan'}</p>
+                      <p className="text-[10px] font-mono uppercase text-[var(--c-muted)] mb-1">Plan</p>
+                      <select
+                        value={empresa.plan || ''}
+                        onChange={(e) => actualizarEmpresa(empresa.id, { plan: (e.target.value as any) || null })}
+                        className="w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2 py-1 text-xs text-[var(--c-text)]"
+                      >
+                        <option value="">Sin plan</option>
+                        <option value="A">Plan A</option>
+                        <option value="B">Plan B</option>
+                        <option value="C">Plan C</option>
+                        <option value="D">Plan D</option>
+                        <option value="E">Plan E</option>
+                        <option value="personalizado">Personalizado</option>
+                      </select>
                     </div>
                     <div>
                       <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Renovación</p>
                       <p className="text-[var(--c-text)] mt-0.5">{empresa.renovacion_tipo === 'automatica' ? 'Automática' : 'Manual'}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Fee mensual</p>
-                      <p className="font-mono text-[var(--c-text)] mt-0.5">{empresa.fee_mensual_clp ? formatCLP(empresa.fee_mensual_clp) : '—'}</p>
+                      <p className="text-[10px] font-mono uppercase text-[var(--c-muted)] mb-1">Fee mensual (CLP)</p>
+                      <input
+                        key={`fee-${empresa.fee_mensual_clp ?? 'null'}`}
+                        type="number"
+                        defaultValue={empresa.fee_mensual_clp ?? ''}
+                        placeholder="Sin fee"
+                        onBlur={(e) => {
+                          const v = e.target.value === '' ? null : Number(e.target.value);
+                          if (v !== (empresa.fee_mensual_clp ?? null)) actualizarEmpresa(empresa.id, { fee_mensual_clp: v });
+                        }}
+                        className="w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2 py-1 text-xs text-[var(--c-text)] font-mono"
+                      />
+                      <p className="text-[10px] font-mono text-[var(--c-muted)] mt-1">
+                        MRR {empresa.mrr_actual_clp ? formatCLP(empresa.mrr_actual_clp) : '—'} · fee + servicios
+                      </p>
                     </div>
                     <div>
                       <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Contactos</p>
@@ -476,12 +511,14 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                   </div>
                 </div>
               </div>
+              </fieldset>
             </div>
           )}
 
           {/* TAB CONTRATO Y DATOS: administrativo, legal y facturable */}
           {activeTab === 'info' && (
             <div className="space-y-6">
+              <fieldset disabled={!isAdmin} className="contents">
               {/* Parámetros Comerciales & Operativos */}
               <div className="ficha-card p-4 space-y-4">
                 <div className="flex items-center justify-between">
@@ -633,6 +670,17 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                 </div>
               </div>
 
+              </fieldset>
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+              <ServiciosCliente
+                empresaId={empresa.id}
+                puedeEditar={isAdmin}
+                onCambio={() => actualizarEmpresa(empresa.id, { fee_mensual_clp: empresa.fee_mensual_clp ?? null })}
+              />
+              <HistorialFee empresaId={empresa.id} />
+              </div>
+
+              <fieldset disabled={!isAdmin} className="contents">
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
               {/* Datos legales y tributarios */}
               <DatosFacturacion empresa={empresa} onGuardar={(c) => actualizarEmpresa(empresa.id, c)} />
@@ -646,6 +694,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
               />
               </div>
               </div>
+              </fieldset>
             </div>
           )}
 
