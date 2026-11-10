@@ -30,6 +30,65 @@ export const CANALES: Canal[] = [
   { plataforma: 'merchant', nombre: 'Merchant Center', tipo: 'pago', conector: 'mcp_google', estado: 'activo', muestra: 'Productos, clics e impresiones de Shopping.' },
 ];
 
+export type Agrega = 'suma' | 'promedio' | 'ultimo';
+export type FormatoKpi = 'entero' | 'decimal' | 'pct' | 'clp' | 'x';
+
+export interface KpiCanal {
+  metrica: string; // nombre exacto que envía el conector o el CSV
+  titulo: string;
+  agrega: Agrega; // cómo combinar las semanas del periodo
+  formato: FormatoKpi; // pct: fracción (0,05 = 5%)
+  mejorSube?: boolean; // false si un valor menor es mejor (posición). Por defecto true
+}
+
+// Métricas básicas que muestra cada plataforma al abrirla. Si el conector usa otro nombre, la tarjeta queda en "—".
+export const KPIS_CANAL: Record<string, KpiCanal[]> = {
+  ga4: [
+    { metrica: 'sesiones', titulo: 'Sesiones', agrega: 'suma', formato: 'entero' },
+    { metrica: 'usuarios', titulo: 'Usuarios', agrega: 'suma', formato: 'entero' },
+    { metrica: 'conversiones', titulo: 'Conversiones', agrega: 'suma', formato: 'entero' },
+    { metrica: 'tasa_conversion', titulo: 'Tasa de conversión', agrega: 'promedio', formato: 'pct' },
+  ],
+  gsc: [
+    { metrica: 'clics', titulo: 'Clics', agrega: 'suma', formato: 'entero' },
+    { metrica: 'impresiones', titulo: 'Impresiones', agrega: 'suma', formato: 'entero' },
+    { metrica: 'ctr', titulo: 'CTR', agrega: 'promedio', formato: 'pct' },
+    { metrica: 'posicion', titulo: 'Posición media', agrega: 'promedio', formato: 'decimal', mejorSube: false },
+  ],
+  gbp: [
+    { metrica: 'vistas', titulo: 'Vistas', agrega: 'suma', formato: 'entero' },
+    { metrica: 'llamadas', titulo: 'Llamadas', agrega: 'suma', formato: 'entero' },
+    { metrica: 'rutas', titulo: 'Rutas', agrega: 'suma', formato: 'entero' },
+    { metrica: 'resenas', titulo: 'Reseñas', agrega: 'ultimo', formato: 'entero' },
+  ],
+  merchant: [
+    { metrica: 'clics', titulo: 'Clics', agrega: 'suma', formato: 'entero' },
+    { metrica: 'impresiones', titulo: 'Impresiones', agrega: 'suma', formato: 'entero' },
+    { metrica: 'productos_activos', titulo: 'Productos activos', agrega: 'ultimo', formato: 'entero' },
+  ],
+  instagram: [
+    { metrica: 'seguidores', titulo: 'Seguidores', agrega: 'ultimo', formato: 'entero' },
+    { metrica: 'alcance', titulo: 'Alcance', agrega: 'suma', formato: 'entero' },
+    { metrica: 'interacciones', titulo: 'Interacciones', agrega: 'suma', formato: 'entero' },
+    { metrica: 'visitas_perfil', titulo: 'Visitas al perfil', agrega: 'suma', formato: 'entero' },
+  ],
+  facebook: [
+    { metrica: 'seguidores', titulo: 'Seguidores', agrega: 'ultimo', formato: 'entero' },
+    { metrica: 'alcance', titulo: 'Alcance', agrega: 'suma', formato: 'entero' },
+    { metrica: 'interacciones', titulo: 'Interacciones', agrega: 'suma', formato: 'entero' },
+  ],
+  tiktok: [
+    { metrica: 'seguidores', titulo: 'Seguidores', agrega: 'ultimo', formato: 'entero' },
+    { metrica: 'vistas', titulo: 'Vistas', agrega: 'suma', formato: 'entero' },
+    { metrica: 'interacciones', titulo: 'Interacciones', agrega: 'suma', formato: 'entero' },
+  ],
+  linkedin: [
+    { metrica: 'seguidores', titulo: 'Seguidores', agrega: 'ultimo', formato: 'entero' },
+    { metrica: 'impresiones', titulo: 'Impresiones', agrega: 'suma', formato: 'entero' },
+    { metrica: 'interacciones', titulo: 'Interacciones', agrega: 'suma', formato: 'entero' },
+  ],
+};
+
 export const GRUPOS_CANAL: { tipo: TipoCanal; titulo: string }[] = [
   { tipo: 'pago', titulo: 'Pago' },
   { tipo: 'organico', titulo: 'Orgánico' },
