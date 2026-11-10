@@ -5,6 +5,7 @@ Formato: versión, fecha de unión a `main`, PR, qué cambia y si toca base de d
 ## v0.11.0 · en curso (no publicada)
 Estado al 9 de noviembre de 2026. Cada entrada indica si ya está en `main`.
 
+- **PR #55** · Cotizaciones con el mismo diseño que Clientes: título y contador, búsqueda y filtro de estado en tarjeta, tabla densa (N°, cotización, cliente, estado, fechas, mensual y único con IVA) y «Nueva cotización» con selector de cliente. Apilado sobre #54.
 - **PR #54** · Cotizaciones: el encabezado ya no se corta en escritorio, el botón dice «Nueva cotización» y abre directamente el formulario del cliente elegido (antes solo abría la ficha). Apilado sobre #51.
 - **PR #51** · Etiquetas: «Empresa» pasa a «Cliente» en toda la interfaz (menú, directorio, fichas, formularios, importador, búsqueda). Solo textos visibles; el código y la base de datos no cambian.
 - **PR #50** · Responsivo: grids de la ficha y de datos tributarios apilados en móvil, fila de líneas de cotización adaptada a pantallas pequeñas, botones de cotizaciones a ancho completo en móvil y encabezado de la ficha ajustado.
