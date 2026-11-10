@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { formatCLP } from '../../lib/formatters';
+import { ThOrdenable } from '../common/ThOrdenable';
+import { useOrden } from '../../lib/orden';
 import type { Agrega, FormatoKpi, KpiCanal } from './canales';
 
 export interface Fila {
@@ -261,6 +263,17 @@ export const KpisCanal: React.FC<{
       })
     : [];
 
+  // Orden de la tabla de métricas (hook antes del return condicional)
+  const ordMetricas = useOrden<'metrica' | 'valor' | 'vs'>('metrica', 'asc');
+  const metricasOrdenadas = ordMetricas.ordenar(metricas, (m, k) => {
+    const agrega = config(m)?.agrega ?? 'suma';
+    if (k === 'metrica') return m;
+    if (k === 'valor') return valorVentana(filas, m, ventana.actual, agrega) ?? -1e18;
+    const a = valorVentana(filas, m, ventana.actual, agrega);
+    const b = valorVentana(filas, m, ventana.previa, agrega);
+    return a !== undefined && b !== undefined && b !== 0 ? (a - b) / Math.abs(b) : -1e18;
+  });
+
   if (metricas.length === 0) return <p className="text-xs text-[var(--c-muted)]">Sin datos en el periodo seleccionado.</p>;
 
   const formatoDe = (m: string) => (v: number) => formatearValor(v, config(m)?.formato ?? 'entero');
@@ -302,13 +315,13 @@ export const KpisCanal: React.FC<{
         <table className="w-full text-xs">
           <thead>
             <tr className="text-left text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">
-              <th className="py-2 px-3 font-normal">Métrica</th>
-              <th className="py-2 px-3 font-normal text-right">Valor</th>
-              <th className="py-2 px-3 font-normal text-right">Vs periodo anterior</th>
+              <ThOrdenable etiqueta="Métrica" className="py-2 px-3 font-normal" activa={ordMetricas.clave === 'metrica'} dir={ordMetricas.dir} onClick={() => ordMetricas.alternar('metrica')} />
+              <ThOrdenable etiqueta="Valor" className="py-2 px-3 font-normal" alinear="right" activa={ordMetricas.clave === 'valor'} dir={ordMetricas.dir} onClick={() => ordMetricas.alternar('valor')} />
+              <ThOrdenable etiqueta="Vs periodo anterior" className="py-2 px-3 font-normal" alinear="right" activa={ordMetricas.clave === 'vs'} dir={ordMetricas.dir} onClick={() => ordMetricas.alternar('vs')} />
             </tr>
           </thead>
           <tbody>
-            {metricas.map((m) => {
+            {metricasOrdenadas.map((m) => {
               const k = config(m);
               const agrega = k?.agrega ?? 'suma';
               const a = valorVentana(filas, m, ventana.actual, agrega);

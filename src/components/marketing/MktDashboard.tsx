@@ -2,6 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { formatCLP } from '../../lib/formatters';
 import { Barras, Tendencia, Variacion, fechaCorta, useDatosMarketing } from './comun';
+import { ThOrdenable } from '../common/ThOrdenable';
+import { useOrden } from '../../lib/orden';
 
 const select =
   'px-2.5 py-1.5 text-xs bg-[var(--c-surface)] border border-[var(--c-line)] rounded text-[var(--c-text)]';
@@ -87,10 +89,23 @@ export const MktDashboard: React.FC = () => {
     return { periodos, porSemana, tabla, alertas, ultima, penultima };
   }, [clientes, filas, cuentas, filtroCliente, semanas, conPrueba]);
 
+  // Orden de la tabla por cliente (hook antes de los returns condicionales)
+  const ordMkt = useOrden<'cliente' | 'ses' | 'clics' | 'pos' | 'inv' | 'roas'>('inv', 'desc');
+  const tablaOrdenada = ordMkt.ordenar(datos.tabla, (r, k) => {
+    switch (k) {
+      case 'cliente': return r.c.nombre;
+      case 'ses': return r.ses ?? -1;
+      case 'clics': return r.clics ?? -1;
+      case 'pos': return r.pos ?? 999;
+      case 'inv': return r.inv ?? -1;
+      case 'roas': return r.roas ?? -1;
+    }
+  });
+
   if (cargando) return <p className="text-sm text-[var(--c-muted)]">Cargando...</p>;
   if (clientes.length === 0) return <div className="surface p-6 text-sm text-[var(--c-muted)]">No hay clientes activos todavía.</div>;
 
-  const { porSemana, tabla, alertas, ultima } = datos;
+  const { porSemana, alertas, ultima } = datos;
   const u = porSemana[porSemana.length - 1];
   const p = porSemana[porSemana.length - 2];
 
@@ -159,13 +174,16 @@ export const MktDashboard: React.FC = () => {
             <table className="w-full text-xs">
               <thead>
                 <tr className="text-left text-[var(--c-muted)] border-b border-[var(--c-line)]">
-                  {['Cliente', 'Sesiones', 'Clics GSC', 'Posición', 'Inversión', 'ROAS'].map((h) => (
-                    <th key={h} className="p-3 font-medium whitespace-nowrap">{h}</th>
-                  ))}
+                  <ThOrdenable etiqueta="Cliente" className="p-3 font-medium whitespace-nowrap" activa={ordMkt.clave === 'cliente'} dir={ordMkt.dir} onClick={() => ordMkt.alternar('cliente')} />
+                  <ThOrdenable etiqueta="Sesiones" className="p-3 font-medium whitespace-nowrap" activa={ordMkt.clave === 'ses'} dir={ordMkt.dir} onClick={() => ordMkt.alternar('ses')} />
+                  <ThOrdenable etiqueta="Clics GSC" className="p-3 font-medium whitespace-nowrap" activa={ordMkt.clave === 'clics'} dir={ordMkt.dir} onClick={() => ordMkt.alternar('clics')} />
+                  <ThOrdenable etiqueta="Posición" className="p-3 font-medium whitespace-nowrap" activa={ordMkt.clave === 'pos'} dir={ordMkt.dir} onClick={() => ordMkt.alternar('pos')} />
+                  <ThOrdenable etiqueta="Inversión" className="p-3 font-medium whitespace-nowrap" activa={ordMkt.clave === 'inv'} dir={ordMkt.dir} onClick={() => ordMkt.alternar('inv')} />
+                  <ThOrdenable etiqueta="ROAS" className="p-3 font-medium whitespace-nowrap" activa={ordMkt.clave === 'roas'} dir={ordMkt.dir} onClick={() => ordMkt.alternar('roas')} />
                 </tr>
               </thead>
               <tbody>
-                {tabla.map((r) => (
+                {tablaOrdenada.map((r) => (
                   <tr key={r.c.id} className="border-b border-[var(--c-line)] last:border-0">
                     <td className="p-3 font-medium text-[var(--c-text)] whitespace-nowrap">{r.c.nombre}</td>
                     <td className="p-3 font-mono">

@@ -9,6 +9,8 @@ import {
   Users,
 } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';
+import { ThOrdenable } from '../components/common/ThOrdenable';
+import { useOrden } from '../lib/orden';
 
 export const ImportView: React.FC = () => {
   const { empresas, contactos, importarCSVRelacional } = useCRM();
@@ -95,6 +97,9 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
     setMapping(autoMap);
     setStep('mapping');
   };
+
+  // Orden de la previsualización (hook antes del return)
+  const ordPrevia = useOrden<'estado' | 'cliente' | 'rut' | 'dominio' | 'contacto' | 'email'>('cliente', 'asc');
 
   // Convertir filas mapeadas
   const registrosMapeados = React.useMemo(() => {
@@ -446,16 +451,25 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
             <table className="w-full text-left text-xs">
               <thead className="bg-[var(--c-surface-2)] border-b border-[var(--c-line)] text-[var(--c-muted)] font-mono text-[10px] uppercase">
                 <tr>
-                  <th className="py-2 px-3">Estado</th>
-                  <th className="py-2 px-3">Cliente</th>
-                  <th className="py-2 px-3">RUT</th>
-                  <th className="py-2 px-3">Dominio</th>
-                  <th className="py-2 px-3">Contacto</th>
-                  <th className="py-2 px-3">Email</th>
+                  <ThOrdenable etiqueta="Estado" className="py-2 px-3" activa={ordPrevia.clave === 'estado'} dir={ordPrevia.dir} onClick={() => ordPrevia.alternar('estado')} />
+                  <ThOrdenable etiqueta="Cliente" className="py-2 px-3" activa={ordPrevia.clave === 'cliente'} dir={ordPrevia.dir} onClick={() => ordPrevia.alternar('cliente')} />
+                  <ThOrdenable etiqueta="RUT" className="py-2 px-3" activa={ordPrevia.clave === 'rut'} dir={ordPrevia.dir} onClick={() => ordPrevia.alternar('rut')} />
+                  <ThOrdenable etiqueta="Dominio" className="py-2 px-3" activa={ordPrevia.clave === 'dominio'} dir={ordPrevia.dir} onClick={() => ordPrevia.alternar('dominio')} />
+                  <ThOrdenable etiqueta="Contacto" className="py-2 px-3" activa={ordPrevia.clave === 'contacto'} dir={ordPrevia.dir} onClick={() => ordPrevia.alternar('contacto')} />
+                  <ThOrdenable etiqueta="Email" className="py-2 px-3" activa={ordPrevia.clave === 'email'} dir={ordPrevia.dir} onClick={() => ordPrevia.alternar('email')} />
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--c-line)]">
-                {registrosMapeados.map((r, i) => (
+                {ordPrevia.ordenar(registrosMapeados, (r, k) => {
+                  switch (k) {
+                    case 'estado': return r.esDuplicado ? 1 : 0;
+                    case 'cliente': return r.empresa.nombre;
+                    case 'rut': return r.empresa.rut;
+                    case 'dominio': return r.empresa.dominio_web;
+                    case 'contacto': return `${r.contacto.nombre} ${r.contacto.apellido}`.trim();
+                    case 'email': return r.contacto.email;
+                  }
+                }).map((r, i) => (
                   <tr
                     key={i}
                     className={r.esDuplicado ? 'bg-[var(--c-surface-2)]/50' : 'hover:bg-[var(--c-surface-2)]'}

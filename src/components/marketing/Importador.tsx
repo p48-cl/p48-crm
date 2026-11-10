@@ -6,6 +6,8 @@ import { useAuth } from '../../context/AuthContext';
 import { descargarCSV, parseCSV } from '../../lib/csv';
 import { PLANTILLAS, procesarCampanas, procesarMetricas, procesarSeo, type FilaCampana, type FilaMetrica, type FilaSeo } from './plantillas';
 import { useDatosMarketing } from './comun';
+import { ThOrdenable } from '../common/ThOrdenable';
+import { useOrden } from '../../lib/orden';
 
 const select = 'px-2.5 py-1.5 text-xs bg-[var(--c-surface)] border border-[var(--c-line)] rounded text-[var(--c-text)]';
 
@@ -67,12 +69,16 @@ export const Importador: React.FC = () => {
     if (!error) { setFilasCsv(null); setArchivo(null); }
   };
 
+  // Orden de la previsualización (hook antes de los returns condicionales)
+  const ordImp = useOrden<string>('', 'asc');
+
   if (cargando) return <p className="text-sm text-[var(--c-muted)]">Cargando...</p>;
   if (!isSupabaseConfigured) return <div className="surface p-6 text-sm text-[var(--c-muted)]">La carga de datos requiere Supabase.</div>;
   if (clientes.length === 0) return <div className="surface p-6 text-sm text-[var(--c-muted)]">No hay clientes activos todavía.</div>;
 
   const vista = resultado?.filas.slice(0, 6) ?? [];
   const columnas = vista[0] ? Object.keys(vista[0]) : [];
+  const vistaOrdenada = ordImp.ordenar(vista as unknown as Record<string, unknown>[], (r, k) => String(r[k] ?? ''));
 
   return (
     <div className="space-y-5">
@@ -138,11 +144,13 @@ export const Importador: React.FC = () => {
                   <table className="w-full text-[11px]">
                     <thead>
                       <tr className="text-left text-[var(--c-muted)] font-mono uppercase">
-                        {columnas.map((c) => <th key={c} className="pr-3 pb-1 font-normal">{c}</th>)}
+                        {columnas.map((c) => (
+                          <ThOrdenable key={c} etiqueta={c} className="pr-3 pb-1 font-normal" activa={ordImp.clave === c} dir={ordImp.dir} onClick={() => ordImp.alternar(c)} />
+                        ))}
                       </tr>
                     </thead>
                     <tbody>
-                      {vista.map((r, i) => (
+                      {vistaOrdenada.map((r, i) => (
                         <tr key={i} className="border-t border-[var(--c-line)] text-[var(--c-text-2)]">
                           {columnas.map((c) => <td key={c} className="pr-3 py-1 whitespace-nowrap">{String((r as unknown as Record<string, unknown>)[c] ?? '')}</td>)}
                         </tr>

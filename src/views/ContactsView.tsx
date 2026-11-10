@@ -4,6 +4,10 @@ import { Search, Plus, Mail, Phone, Linkedin, Building2, Archive } from 'lucide-
 import { useCRM } from '../context/CRMContext';
 import { SelectorCliente } from '../components/common/SelectorCliente';
 import { formatFecha, formatTelefonoCL } from '../lib/formatters';
+import { ThOrdenable } from '../components/common/ThOrdenable';
+import { useOrden } from '../lib/orden';
+
+type ClaveOrdenContacto = 'nombre' | 'cliente' | 'cargo' | 'rol' | 'email' | 'telefono' | 'linkedin' | 'registrado';
 
 interface ContactsViewProps {
   onSelectEmpresa: (id: string) => void;
@@ -11,6 +15,17 @@ interface ContactsViewProps {
 
 export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) => {
   const { contactos, empresas, crearContacto, actualizarContacto, archivarContacto, crearEmpresa } = useCRM();
+  const cabecera = (clave: ClaveOrdenContacto, etiqueta: string, alinear: 'left' | 'right' | 'center' = 'left', extra = 'px-3') => (
+    <ThOrdenable
+      key={clave}
+      etiqueta={etiqueta}
+      activa={sortKey === clave}
+      dir={sortDir}
+      onClick={() => alternarOrden(clave)}
+      alinear={alinear}
+      className={`py-2.5 ${extra} font-medium`}
+    />
+  );
   const [selectorCliente, setSelectorCliente] = useState(false);
   const clientesActivos = useMemo(
     () => empresas.filter((e) => !e.archivado).sort((a, b) => a.nombre.localeCompare(b.nombre)),
@@ -53,6 +68,25 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
       return nomCompleto.includes(q) || email.includes(q) || cargo.includes(q);
     });
   }, [contactos, searchQuery]);
+
+  const { clave: sortKey, dir: sortDir, alternar: alternarOrden, ordenar } = useOrden<ClaveOrdenContacto>('registrado', 'desc');
+  const contactosOrdenados = useMemo(
+    () =>
+      ordenar(filteredContactos, (con, clave) => {
+        switch (clave) {
+          case 'nombre': return `${con.nombre} ${con.apellido || ''}`.trim();
+          case 'cliente': return empresas.find((e) => e.id === con.empresa_id)?.nombre ?? '';
+          case 'cargo': return con.cargo ?? '';
+          case 'rol': return con.rol_decision ?? '';
+          case 'email': return con.email ?? '';
+          case 'telefono': return con.telefono ?? '';
+          case 'linkedin': return con.linkedin_url ? 1 : 0;
+          case 'registrado': return con.created_at ?? '';
+        }
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [filteredContactos, empresas, sortKey, sortDir]
+  );
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,14 +157,14 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
           <table className="w-full text-left text-xs">
             <thead className="bg-[var(--c-surface-2)] border-b border-[var(--c-line)] text-[var(--c-muted)] uppercase font-mono text-[11px]">
               <tr>
-                <th className="py-2.5 px-4 font-medium">Nombre</th>
-                <th className="py-2.5 px-3 font-medium">Cliente</th>
-                <th className="py-2.5 px-3 font-medium">Cargo</th>
-                <th className="py-2.5 px-3 font-medium">Rol Decisión</th>
-                <th className="py-2.5 px-3 font-medium">Email</th>
-                <th className="py-2.5 px-3 font-medium">Teléfono</th>
-                <th className="py-2.5 px-3 font-medium text-center">LinkedIn</th>
-                <th className="py-2.5 px-4 font-medium text-right">Registrado</th>
+                {cabecera('nombre', 'Nombre', 'left', 'px-4')}
+                {cabecera('cliente', 'Cliente')}
+                {cabecera('cargo', 'Cargo')}
+                {cabecera('rol', 'Rol Decisión')}
+                {cabecera('email', 'Email')}
+                {cabecera('telefono', 'Teléfono')}
+                {cabecera('linkedin', 'LinkedIn', 'center')}
+                {cabecera('registrado', 'Registrado', 'right', 'px-4')}
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--c-line)]">
@@ -141,7 +175,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                   </td>
                 </tr>
               ) : (
-                filteredContactos.map((con) => {
+                contactosOrdenados.map((con) => {
                   const emp = empresas.find((e) => e.id === con.empresa_id);
                   return (
                     <tr
