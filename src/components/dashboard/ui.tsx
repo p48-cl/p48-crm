@@ -6,7 +6,7 @@ export const estilos = {
   tarjeta: 'surface p-4 flex flex-col gap-2 min-w-0',
   bloque: 'surface p-5 flex flex-col gap-4 min-w-0',
   etiqueta: 'text-[11px] font-mono uppercase tracking-wider text-[var(--c-muted)]',
-  valor: 'text-lg font-bold font-mono text-[var(--c-text)] truncate',
+  valor: 'text-lg font-bold font-mono text-[var(--c-text)] leading-tight break-words',
   nota: 'text-[10px] text-[var(--c-muted)]',
   barra: 'h-1.5 w-full rounded-full bg-[var(--c-surface-3)] overflow-hidden flex',
 };
