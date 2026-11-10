@@ -11,7 +11,7 @@ export const ClientesKpis: React.FC = () => {
   const proxima = c.renovaciones[0];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
       <Kpi
         etiqueta="MRR"
         valor={formatCLP(c.mrr)}
@@ -56,12 +56,6 @@ export const ClientesKpis: React.FC = () => {
         valor={c.incompletos}
         tono={c.incompletos > 0 ? 'aviso' : 'normal'}
         nota={c.incompletos > 0 ? 'Sin responsable o sin salud' : 'Ficha completa'}
-      />
-      <Kpi
-        etiqueta="Prospectos"
-        valor={c.prospectos}
-        progreso={c.prospectos > 0 ? (c.prospectosConNegocio / c.prospectos) * 100 : 0}
-        nota={`${c.prospectosConNegocio} con negocio abierto`}
       />
     </div>
   );
