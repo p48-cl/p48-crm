@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   X,
-  Building2,
   ExternalLink,
   Folder,
   Plus,

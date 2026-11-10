@@ -15,9 +15,6 @@ import {
   AccesosAdminMarketing,
   Miembro,
   KPIsDashboard,
-  VPipelinePorEtapa,
-  VOportunidadesPorFuente,
-  VMotivosPerdida,
 } from '../types/crm';
 import {
   INITIAL_EMPRESAS,
@@ -54,11 +51,6 @@ interface CRMContextType {
   motivosPerdida: CatalogoItem[];
   industrias: CatalogoItem[];
   miembros: Miembro[];
-
-  // Vistas para gráficos
-  graficoPipeline: VPipelinePorEtapa[];
-  graficoFuentes: VOportunidadesPorFuente[];
-  graficoMotivos: VMotivosPerdida[];
 
   // KPIs
   kpis: KPIsDashboard;
@@ -164,9 +156,6 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [miembros, setMiembros] = useState<Miembro[]>([]);
 
   // Vistas de gráficos
-  const [graficoPipeline, setGraficoPipeline] = useState<VPipelinePorEtapa[]>([]);
-  const [graficoFuentes, setGraficoFuentes] = useState<VOportunidadesPorFuente[]>([]);
-  const [graficoMotivos, setGraficoMotivos] = useState<VMotivosPerdida[]>([]);
 
   // KPIs
   const [kpis, setKpis] = useState<KPIsDashboard>({
@@ -248,22 +237,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (dbActividades) setActividades(dbActividades as Actividad[]);
         if (dbTareas) setTareas(dbTareas as Tarea[]);
 
-        // 6. Cargar vistas para gráficos
-        const [
-          { data: dbPipeView },
-          { data: dbFuentesView },
-          { data: dbMotivosView },
-        ] = await Promise.all([
-          supabase.from('v_pipeline_por_etapa').select('*').order('orden'),
-          supabase.from('v_oportunidades_por_fuente').select('*'),
-          supabase.from('v_motivos_perdida').select('*'),
-        ]);
-
-        if (dbPipeView) setGraficoPipeline(dbPipeView as VPipelinePorEtapa[]);
-        if (dbFuentesView) setGraficoFuentes(dbFuentesView as VOportunidadesPorFuente[]);
-        if (dbMotivosView) setGraficoMotivos(dbMotivosView as VMotivosPerdida[]);
-
-        // 7. Cargar KPIs vía RPC
+        // 6. Cargar KPIs vía RPC
         const soloMios = filtroAlcance === 'mis_datos';
         const { data: dbKpis, error: errKpis } = await supabase.rpc('kpis_dashboard', {
           p_solo_mios: soloMios,
@@ -1300,9 +1274,6 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         motivosPerdida,
         industrias,
         miembros,
-        graficoPipeline,
-        graficoFuentes,
-        graficoMotivos,
         kpis,
         filtroAlcance,
         setFiltroAlcance,

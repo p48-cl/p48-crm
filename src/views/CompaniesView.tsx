@@ -1,7 +1,6 @@
 import { fondoCerrable } from '../lib/fondo';
 import React, { useState, useMemo, useEffect } from 'react';
 import {
-  Building2,
   Search,
   Plus,
   ExternalLink,
