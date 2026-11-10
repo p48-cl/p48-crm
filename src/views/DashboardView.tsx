@@ -206,20 +206,22 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               <option key={e.id} value={e.id}>{e.nombre}</option>
             ))}
           </select>
-          <button type="button" onClick={actualizar} disabled={actualizando} title="Actualizar datos"
-            className="surface p-2 text-[var(--c-muted)] hover:text-[var(--c-accent)] disabled:opacity-50">
-            <RefreshCw className={`w-4 h-4 ${actualizando ? 'animate-spin' : ''}`} />
-          </button>
         </div>
       </div>
 
-      <nav className="surface p-1 flex overflow-x-auto gap-1 max-w-full" aria-label="Secciones">
+      <div className="flex items-center gap-2">
+      <nav className="surface p-1 flex overflow-x-auto gap-1 min-w-0 flex-1" aria-label="Secciones">
         {SECCIONES.map((s) => (
           <button key={s.id} type="button" aria-pressed={seccion === s.id} className={chip(seccion === s.id)} onClick={() => setSeccion(s.id)}>
             {s.label}
           </button>
         ))}
       </nav>
+      <button type="button" onClick={actualizar} disabled={actualizando} title="Actualizar datos" aria-label="Actualizar datos"
+        className="surface p-2.5 shrink-0 text-[var(--c-muted)] hover:text-[var(--c-accent)] disabled:opacity-50">
+        <RefreshCw className={`w-4 h-4 ${actualizando ? 'animate-spin' : ''}`} />
+      </button>
+      </div>
 
       {seccion === 'todo' && (
         <LoUrgenteHoy
