@@ -15,12 +15,14 @@ interface Props {
   onCerrar: () => void;
   onCreado: (proyectoId: string) => void;
   empresaIdInicial?: string;
+  /** Fija el tipo y oculta el selector (por ejemplo, 'interno' desde Agencia). */
+  tipoFijo?: TipoProyecto;
 }
 
-export const NuevoProyectoModal: React.FC<Props> = ({ onCerrar, onCreado, empresaIdInicial }) => {
+export const NuevoProyectoModal: React.FC<Props> = ({ onCerrar, onCreado, empresaIdInicial, tipoFijo }) => {
   const { currentUser, isAdmin } = useAuth();
   const { empresas, miembros, refetchTodo } = useCRM();
-  const [tipo, setTipo] = useState<TipoProyecto>(empresaIdInicial ? 'cliente' : 'interno');
+  const [tipo, setTipo] = useState<TipoProyecto>(tipoFijo ?? (empresaIdInicial ? 'cliente' : 'interno'));
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [empresaId, setEmpresaId] = useState(empresaIdInicial ?? '');
@@ -135,7 +137,7 @@ export const NuevoProyectoModal: React.FC<Props> = ({ onCerrar, onCreado, empres
         </div>
 
         <div className="space-y-3">
-          <div role="group" aria-label="Tipo" className="grid grid-cols-2 gap-2">
+          <div role="group" aria-label="Tipo" className={tipoFijo ? 'hidden' : 'grid grid-cols-2 gap-2'}>
             {([['interno', 'Interno de la agencia'], ['cliente', 'De cliente']] as const).map(([k, t]) => (
               <button key={k} type="button" aria-pressed={tipo === k} onClick={() => { setTipo(k); setPlantillaId(''); }} className={`px-3 py-2 text-xs rounded border ${tipo === k ? 'border-[var(--module)] bg-[var(--module-soft)] text-[var(--c-text)] font-semibold' : 'border-[var(--c-line)] text-[var(--c-muted)]'}`}>{t}</button>
             ))}

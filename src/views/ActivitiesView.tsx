@@ -25,7 +25,7 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
   onSelectEmpresa,
   onSelectOportunidad,
 }) => {
-  const { actividades, empresas, oportunidades, contactos, miembros } = useCRM();
+  const { actividades, empresasTodas: empresas, oportunidades, contactos, miembros } = useCRM();
 
   const [filtroTipo, setFiltroTipo] = useState<string>('todos');
   const [filtroAutor, setFiltroAutor] = useState<string>('todos');

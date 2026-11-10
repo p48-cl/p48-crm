@@ -137,9 +137,12 @@ export const useDatosMarketing = () => {
           .eq('archivado', false),
       ]);
       if (!vivo) return;
-      setClientes((c.data as Cliente[]) ?? []);
-      setFilas(((m.data as any[]) ?? []).map((r) => ({ ...r, valor: Number(r.valor) })));
-      setCuentas((k.data as CuentaMkt[]) ?? []);
+      // Solo clientes: los datos de la cuenta interna de la agencia no entran en los totales.
+      const lista = (c.data as Cliente[]) ?? [];
+      const ids = new Set(lista.map((x) => x.id));
+      setClientes(lista);
+      setFilas(((m.data as any[]) ?? []).filter((r) => ids.has(r.empresa_id)).map((r) => ({ ...r, valor: Number(r.valor) })));
+      setCuentas(((k.data as CuentaMkt[]) ?? []).filter((r) => ids.has(r.empresa_id)));
       setCargando(false);
     })();
     return () => {

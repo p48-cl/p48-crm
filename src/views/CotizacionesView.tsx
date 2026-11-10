@@ -35,8 +35,10 @@ const selectClase =
   'bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2 py-1.5 text-xs text-[var(--c-text)] focus:outline-none focus:border-[var(--c-accent)]';
 
 export const CotizacionesView: React.FC<{ onAbrirFicha: (empresaId: string, nueva?: boolean) => void }> = ({ onAbrirFicha }) => {
-  const { empresas, crearEmpresa } = useCRM();
-  const [filas, setFilas] = useState<Fila[]>([]);
+  const { empresas, agencia, crearEmpresa } = useCRM();
+  const [filasTodas, setFilas] = useState<Fila[]>([]);
+  // Las cotizaciones de la cuenta interna de la agencia se ven solo en Agencia.
+  const filas = useMemo(() => filasTodas.filter((f) => f.empresa_id !== agencia?.id), [filasTodas, agencia]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busqueda, setBusqueda] = useState('');

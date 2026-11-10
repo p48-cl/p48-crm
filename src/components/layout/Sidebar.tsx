@@ -12,6 +12,7 @@ import {
   Plus,
   Radio,
   FolderKanban,
+  Building,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCRM } from '../../context/CRMContext';
@@ -24,6 +25,7 @@ export type ViewType =
   | 'contactos'
   | 'cotizaciones'
   | 'proyectos'
+  | 'agencia'
   | 'tareas'
   | 'actividades'
   | 'marketing'
@@ -86,6 +88,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { key: 'actividades', label: 'Actividades', icon: Clock, active: currentView === 'actividades', onClick: () => onChangeView('actividades') },
   ];
 
+  const agenciaItems: NavItem[] = [
+    { key: 'agencia', label: 'P48 · Agencia', icon: Building, active: currentView === 'agencia', onClick: () => onChangeView('agencia') },
+  ];
+
   const sistema: NavItem[] = [
     { key: 'importar', label: 'Importar CSV', icon: UploadCloud, active: currentView === 'importar', onClick: () => onChangeView('importar') },
     ...(isAdmin
@@ -146,6 +152,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <nav className="px-2 space-y-5">
           {grupo('Centro de mando', principales)}
           {grupo('Operación', operacion)}
+          {grupo('Interno', agenciaItems)}
           {sistema.length > 0 && grupo('Sistema', sistema)}
         </nav>
       </div>

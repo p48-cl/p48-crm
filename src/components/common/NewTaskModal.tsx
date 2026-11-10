@@ -20,7 +20,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
   oportunidadIdInicial,
   tareaEditar,
 }) => {
-  const { empresas, oportunidades, miembros, crearTarea, actualizarTarea } = useCRM();
+  const { empresas, agencia, oportunidades, miembros, crearTarea, actualizarTarea } = useCRM();
   const { currentUser } = useAuth();
 
   const [titulo, setTitulo] = useState(tareaEditar?.titulo ?? '');
@@ -113,6 +113,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
                 className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
               >
                 <option value="">(Opcional) Cliente...</option>
+                {agencia && <option value={agencia.id}>{agencia.nombre} (interno)</option>}
                 {empresas.map((e) => (
                   <option key={e.id} value={e.id}>
                     {e.nombre}

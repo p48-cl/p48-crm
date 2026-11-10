@@ -10,6 +10,7 @@ import { CompaniesView } from './views/CompaniesView';
 import { ContactsView } from './views/ContactsView';
 import { TasksView } from './views/TasksView';
 import { ProjectsView } from './views/ProjectsView';
+import { AgenciaView } from './views/AgenciaView';
 import { ActivitiesView } from './views/ActivitiesView';
 import { MarketingView } from './views/MarketingView';
 import { canalDe } from './components/marketing/canales';
@@ -31,7 +32,7 @@ import { useConfiguracionCRM } from './lib/configuracion';
 
 const CRMAppContent: React.FC = () => {
   const { isLoggedIn, isLoading, accessDeniedError, isAdmin } = useAuth();
-  const { empresas } = useCRM();
+  const { empresasTodas: empresas } = useCRM();
 
   const [currentView, setCurrentView] = useState<ViewType>('inicio');
   const [masAbierto, setMasAbierto] = useState(false);
@@ -182,6 +183,13 @@ const CRMAppContent: React.FC = () => {
             <ProjectsView onEditTask={(t) => setTaskModalState({ isOpen: true, tarea: t, k: Date.now() })} />
           )}
 
+          {currentView === 'agencia' && (
+            <AgenciaView
+              onNuevaTarea={(empId) => setTaskModalState({ isOpen: true, empresaId: empId, k: Date.now() })}
+              onEditTask={(t) => setTaskModalState({ isOpen: true, tarea: t, k: Date.now() })}
+            />
+          )}
+
           {currentView === 'actividades' && (
             <ActivitiesView
               onOpenNewActivity={() => setActivityModalState({ isOpen: true })}
@@ -309,7 +317,7 @@ const CRMAppContent: React.FC = () => {
         <button
           onClick={() => setMasAbierto(true)}
           className={`min-w-[56px] min-h-[52px] flex flex-col items-center justify-center gap-1 ${
-            ['empresas', 'contactos', 'actividades', 'marketing', 'importar', 'administracion'].includes(currentView)
+            ['empresas', 'contactos', 'actividades', 'marketing', 'agencia', 'importar', 'administracion'].includes(currentView)
               ? 'text-[var(--c-accent)] font-semibold'
               : 'text-[var(--c-muted)]'
           }`}
@@ -333,6 +341,7 @@ const CRMAppContent: React.FC = () => {
               { id: 'contactos' as const, label: 'Contactos', icon: Users },
               { id: 'cotizaciones' as const, label: 'Cotizaciones', icon: FileText },
               { id: 'proyectos' as const, label: 'Proyectos', icon: FolderKanban },
+              { id: 'agencia' as const, label: 'P48 · Agencia', icon: Building2 },
               { id: 'actividades' as const, label: 'Actividades', icon: Activity },
               { id: 'marketing' as const, label: 'Marketing', icon: BarChart3 },
               { id: 'importar' as const, label: 'Importar CSV', icon: Upload },
