@@ -251,7 +251,7 @@ Transportes del Norte,96.111.222-3,transnorte.cl,Carlos,Fuentes,cfuentes@transno
             <span className="font-mono text-xs text-[var(--c-accent)]">{rows.length} filas detectadas</span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <div className="grid grid-cols-[minmax(0,1fr)] md:grid-cols-2 gap-4 text-xs">
             {/* Campos Empresa */}
             <div className="p-4 bg-[var(--c-surface)] rounded border border-[var(--c-line)] space-y-3">
               <h4 className="font-semibold text-[var(--c-accent)] flex items-center gap-1.5">

@@ -122,7 +122,7 @@ export const MetasMes: React.FC = () => {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-3 gap-4">
           <Barra etiqueta="Leads" actual={total.leads} meta={global.leads_mes} />
           <Barra etiqueta="Reuniones" actual={total.reuniones} meta={global.reuniones_mes} />
           <Barra etiqueta="Cierres" actual={total.cierres} meta={global.cierres_mes} />

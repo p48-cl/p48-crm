@@ -136,7 +136,7 @@ export const Estrategia: React.FC = () => {
               <h3 className="text-xs font-semibold text-[var(--c-text)]">{g.titulo}</h3>
               <span className="text-[11px] text-[var(--c-muted)]">· {g.sub}</span>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-[minmax(0,1fr)] lg:grid-cols-3 gap-3">
               {g.campos.map((id) => {
                 const c = CAMPOS.find((x) => x.id === id)!;
                 const texto = valores[id];

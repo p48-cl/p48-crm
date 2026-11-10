@@ -269,7 +269,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
         />
 
         {/* Contenido */}
-        <div className="flex-1 overflow-y-auto p-3 sm:p-5 grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-start">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-5 grid grid-cols-[minmax(0,1fr)] lg:grid-cols-2 gap-4 sm:gap-6 items-start">
           {/* Izquierda: datos del negocio, cliente y contactos */}
           <DatosNegocio
             oportunidad={oportunidad}

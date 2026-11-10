@@ -103,7 +103,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Cliente</label>
               <select
@@ -137,7 +137,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Responsable</label>
               <select

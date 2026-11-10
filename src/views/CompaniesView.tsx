@@ -233,7 +233,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
       </div>
 
       {vista === 'tarjetas' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {filteredEmpresas.length === 0 && (
             <p className="col-span-full py-8 text-center text-xs text-[var(--c-muted)]">No se encontraron empresas con los filtros aplicados.</p>
           )}
@@ -479,7 +479,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">RUT</label>
                   <input
@@ -502,7 +502,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Estado</label>
                   <select
@@ -549,7 +549,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">
                     Fee Mensual (CLP)
@@ -578,7 +578,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">Responsable</label>
                   <select
@@ -606,7 +606,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-[var(--c-text-2)] mb-1">
                     URL Looker Dashboard

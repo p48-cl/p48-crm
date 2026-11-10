@@ -69,7 +69,7 @@ export const DatosFacturacion: React.FC<Props> = ({ empresa, onGuardar }) => {
         <h3 className="text-xs font-semibold text-[var(--c-text)]">Datos legales y tributarios</h3>
         <span className="ml-auto text-[10px] text-[var(--c-muted)]">Necesarios para cotizar y facturar</span>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+      <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-3 text-xs">
         <div>
           <label className={label}>Razón social *</label>
           <input className={input} value={f.razon_social} onChange={(e) => setF({ ...f, razon_social: e.target.value })} onBlur={() => guardarTexto('razon_social')} />
