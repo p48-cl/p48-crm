@@ -137,7 +137,7 @@ const CRMAppContent: React.FC = () => {
         {/* Viewport Principal */}
         <main
           data-module={currentView === 'marketing' ? (mktSeccion === 'seo' || mktSeccion === 'organico' ? 'organic' : mktSeccion === 'ads' ? 'media' : 'sales') : 'sales'}
-          className="flex-1 overflow-y-auto pb-24 md:pb-0 bg-[var(--c-bg)] border-t-2 border-[var(--module)]"
+          className="flex-1 overflow-y-auto pb-24 lg:pb-0 bg-[var(--c-bg)] border-t-2 border-[var(--module)]"
         >
           {currentView === 'inicio' && (
             <DashboardView
@@ -265,7 +265,7 @@ const CRMAppContent: React.FC = () => {
       />
 
       {/* Barra de navegación inferior móvil: prioriza tareas, fichas y registro rápido */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 material-bar flex items-center justify-around py-1.5 px-1 pb-[max(0.375rem,env(safe-area-inset-bottom))] text-[10px] font-sans">
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 material-bar flex items-center justify-around py-1.5 px-1 pb-[max(0.375rem,env(safe-area-inset-bottom))] text-[10px] font-sans">
         <button
           onClick={() => setCurrentView('inicio')}
           className={`min-w-[56px] min-h-[52px] flex flex-col items-center justify-center gap-1 ${
@@ -318,7 +318,7 @@ const CRMAppContent: React.FC = () => {
       </nav>
 
       {masAbierto && (
-        <div className="md:hidden fixed inset-0 z-50 flex items-end bg-black/60" onClick={() => setMasAbierto(false)}>
+        <div className="lg:hidden fixed inset-0 z-50 flex items-end bg-black/60" onClick={() => setMasAbierto(false)}>
           <div
             className="w-full bg-[var(--c-surface)] border-t border-[var(--c-line)] rounded-t-xl p-4 pb-8 space-y-1"
             onClick={(ev) => ev.stopPropagation()}
