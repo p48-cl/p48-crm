@@ -1,3 +1,4 @@
+import { LogoEmpresa } from '../components/clientes/Logo';
 import React, { useState, useMemo } from 'react';
 import {
   Kanban,
@@ -310,13 +311,16 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                               : 'border-[var(--c-line)] dark:border-[var(--c-line)] light:border-[var(--c-line)]'
                           }`}
                         >
-                          <div className="mb-2">
+                          <div className="mb-2 flex items-start gap-2">
+                            {emp && <LogoEmpresa nombre={emp.nombre} logoPath={emp.logo_path} size={28} className="mt-0.5" />}
+                            <div className="min-w-0">
                             <p className="text-[11px] text-[var(--c-muted)] font-medium truncate">
                               {emp?.nombre ?? 'Sin empresa'}
                             </p>
                             <h4 className="text-xs font-semibold text-[var(--c-text)] dark:text-[var(--c-text)] light:text-[var(--c-text)] hover:text-[var(--c-on-accent)] transition-colors leading-snug line-clamp-2">
                               {op.numero ? <span className="font-mono text-[10px] text-[var(--c-muted)] mr-1">{formatCorrelativo('NEG', op.numero)}</span> : null}{op.nombre}
                             </h4>
+                            </div>
                           </div>
 
                           {/* Valor neto en Blanco Aire #F5F5F5 & Aviso USD */}

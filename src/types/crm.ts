@@ -38,6 +38,7 @@ export interface Empresa {
   tamano?: string | null;
   looker_dashboard_url?: string | null;
   drive_folder_url?: string | null;
+  logo_path?: string | null;
   estado: EstadoEmpresa;
   plan?: PlanEmpresa | null;
   fee_mensual_clp?: number | null;
