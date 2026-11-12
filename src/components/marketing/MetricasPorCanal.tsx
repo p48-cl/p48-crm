@@ -2,35 +2,33 @@ import React, { useEffect, useState } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { formatCLP } from '../../lib/formatters';
-import { CANALES, GRUPOS_CANAL, KPIS_CANAL, KpiCanal, Canal, useCanales } from './canales';
+import { CANALES, GRUPOS_CANAL, KpiCanal, Canal, useCanales } from './canales';
+import { kpisParaRubro, useConfigMetricas } from './metricasConfig';
 import { Variacion, fechaCorta, formatearValor, useMetricasCliente, ventanas, valorVentana } from './comun';
 
-// KPI de canales de pago (no están en KPIS_CANAL para no alterar Orgánico/SEO)
-const KPIS_PAGO: Record<string, KpiCanal[]> = {
-  google_ads: [
-    { metrica: 'inversion', titulo: 'Inversión', agrega: 'suma', formato: 'clp' },
-    { metrica: 'roas', titulo: 'ROAS', agrega: 'promedio', formato: 'x' },
-  ],
-};
-
-const kpisDe = (plataforma: string): KpiCanal[] => KPIS_CANAL[plataforma] ?? KPIS_PAGO[plataforma] ?? [];
 const PLATAFORMAS = CANALES.map((c) => c.plataforma);
 
 interface Camp { campana_nombre: string; periodo: string; costo_clp: number; conversiones: number; valor_conversion_clp: number }
 
 const TarjetaCanal: React.FC<{
   canal: Canal;
+  kpis: KpiCanal[];
   filas: ReturnType<typeof useMetricasCliente>['filas'];
   ventana: { actual: string[]; previa: string[] };
   campanas: Camp[];
-}> = ({ canal, filas, ventana, campanas }) => {
-  const kpis = kpisDe(canal.plataforma);
+}> = ({ canal, kpis, filas, ventana, campanas }) => {
   const tieneDatos = kpis.some((k) => valorVentana(filas, k.metrica, ventana.actual, k.agrega) !== undefined);
+  const esPrueba = filas.some((f) => f.plataforma === canal.plataforma && f.es_prueba);
 
   return (
     <div className="surface p-4 space-y-3">
-      <p className="text-sm font-semibold text-[var(--c-text)]">{canal.nombre}</p>
-      {!tieneDatos ? (
+      <p className="text-sm font-semibold text-[var(--c-text)]">
+        {canal.nombre}
+        {esPrueba && <span className="ml-2 font-mono text-[10px] uppercase text-[var(--c-warn)]">Prueba</span>}
+      </p>
+      {kpis.length === 0 ? (
+        <p className="text-xs text-[var(--c-muted)]">Sin métricas configuradas para este rubro. Se definen en Administración &gt; Métricas por canal.</p>
+      ) : !tieneDatos ? (
         <p className="text-xs text-[var(--c-muted)]">Sin datos en la última semana.</p>
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
@@ -67,8 +65,9 @@ const TarjetaCanal: React.FC<{
 };
 
 // Métricas de la última semana vs la anterior, solo para canales conectados.
-export const MetricasPorCanal: React.FC<{ empresaId: string }> = ({ empresaId }) => {
+export const MetricasPorCanal: React.FC<{ empresaId: string; industriaId?: string | null }> = ({ empresaId, industriaId }) => {
   const canales = useCanales();
+  const { filas: configFilas, error: errorConfig } = useConfigMetricas();
   const { filas, error } = useMetricasCliente(empresaId, PLATAFORMAS);
   const [camps, setCamps] = useState<Camp[]>([]);
   const [verSinConectar, setVerSinConectar] = useState(false);
@@ -95,8 +94,8 @@ export const MetricasPorCanal: React.FC<{ empresaId: string }> = ({ empresaId })
   const ultimaCamp = [...new Set(camps.map((c) => c.periodo))].sort().pop();
   const campsSemana = camps.filter((c) => c.periodo === ultimaCamp);
 
-  // Conectado: estado activo en fuentes_marketing o ya llegaron datos de la plataforma
-  const conectado = (c: Canal) => c.estado === 'activo' || filas.some((f) => f.plataforma === c.plataforma);
+  // Conectado para este cliente: ya llegaron datos de la plataforma
+  const conectado = (c: Canal) => filas.some((f) => f.plataforma === c.plataforma);
   const conectados = canales.filter(conectado);
   const sinConectar = canales.filter((c) => !conectado(c));
 
@@ -108,7 +107,7 @@ export const MetricasPorCanal: React.FC<{ empresaId: string }> = ({ empresaId })
           {ultimaSemana ? `Semana ${fechaCorta(ultimaSemana)} vs anterior` : 'Sin datos'}
         </span>
       </div>
-      {error && <p className="text-xs text-[var(--c-danger)]">{error}</p>}
+      {(error || errorConfig) && <p className="text-xs text-[var(--c-danger)]">{error ?? errorConfig}</p>}
 
       {GRUPOS_CANAL.map((g) => {
         const lista = conectados.filter((c) => c.tipo === g.tipo);
@@ -121,6 +120,7 @@ export const MetricasPorCanal: React.FC<{ empresaId: string }> = ({ empresaId })
                 <TarjetaCanal
                   key={c.plataforma}
                   canal={c}
+                  kpis={kpisParaRubro(configFilas ?? [], industriaId, c.plataforma)}
                   filas={filas}
                   ventana={ventana}
                   campanas={c.plataforma === 'google_ads' ? campsSemana : []}
@@ -134,7 +134,7 @@ export const MetricasPorCanal: React.FC<{ empresaId: string }> = ({ empresaId })
       {sinConectar.length > 0 && (
         <div className="surface p-3 space-y-3">
           <div className="flex items-center justify-between gap-3">
-            <span className="text-xs text-[var(--c-muted)]">{sinConectar.length} canales sin conectar</span>
+            <span className="text-xs text-[var(--c-muted)]">{sinConectar.length} canales sin datos</span>
             <button
               onClick={() => setVerSinConectar(!verSinConectar)}
               className="flex items-center gap-1 text-[11px] text-[var(--c-accent)] hover:underline"
@@ -150,7 +150,7 @@ export const MetricasPorCanal: React.FC<{ empresaId: string }> = ({ empresaId })
                   <p className="text-xs font-semibold text-[var(--c-text)]">{c.nombre}</p>
                   <p className="text-[11px] text-[var(--c-muted)]">{c.muestra}</p>
                   <p className="text-[10px] font-mono text-[var(--c-muted-2)]">
-                    Conector {c.conector} · estado {c.estado}. Se activa al conectar el conector y marcar la fuente como activa en fuentes_marketing.
+                    Sin datos para este cliente. Conector {c.conector} · fuente {c.estado}.
                   </p>
                 </li>
               ))}
