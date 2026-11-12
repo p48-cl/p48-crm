@@ -1,18 +1,23 @@
 import React, { useMemo, useState } from 'react';
-import { CalendarDays, FolderKanban, Plus, GanttChart } from 'lucide-react';
+import { CalendarDays, FolderKanban, Plus, GanttChart, Pencil } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCRM } from '../context/CRMContext';
 import { ChipSenal } from '../components/common/ChipSenal';
+import { Kpi } from '../components/dashboard/ui';
+import { metricasProyectos } from '../components/dashboard/metricas';
 import { Calendario } from '../components/proyectos/Calendario';
+import { EditarProyectoModal } from '../components/proyectos/EditarProyectoModal';
 import { Gantt } from '../components/proyectos/Gantt';
 import { NuevoProyectoModal } from '../components/proyectos/NuevoProyectoModal';
 import { ProyectoDetalle } from '../components/proyectos/ProyectoDetalle';
 import { useProyectos } from '../components/proyectos/useProyectos';
 import { diaCorto, hoyIso } from '../components/proyectos/fechas';
-import type { EstadoProyecto, Tarea } from '../types/crm';
+import type { EstadoProyecto, Proyecto, Tarea } from '../types/crm';
 
 const ESTADO: Record<EstadoProyecto, string> = { planificado: 'Planificado', en_curso: 'En curso', pausado: 'Pausado', finalizado: 'Finalizado' };
 const select = 'px-2.5 py-1.5 text-xs bg-[var(--c-surface)] border border-[var(--c-line)] rounded text-[var(--c-text)]';
+
+type Pestana = 'gantt' | 'proyectos' | 'calendario';
 
 interface Props {
   onEditTask: (t: Tarea) => void;
@@ -24,10 +29,11 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
   const { isAdmin } = useAuth();
   const { tareas, empresasTodas: empresas, miembros, refetchTodo, toggleTareaCompletada } = useCRM();
   const { proyectos, fases, miembrosProyecto, dependencias, cargando, error, recargar } = useProyectos();
-  const [pestana, setPestana] = useState<'proyectos' | 'calendario' | 'gantt'>('proyectos');
+  const [pestana, setPestana] = useState<Pestana>('gantt');
   const [proyGantt, setProyGantt] = useState<string>('todos');
   const [abierto, setAbierto] = useState<string | null>(null);
   const [nuevo, setNuevo] = useState(false);
+  const [editando, setEditando] = useState<Proyecto | null>(null);
   const [tipo, setTipo] = useState<'todos' | 'interno' | 'cliente'>(ambito === 'agencia' ? 'interno' : 'todos');
   const [estado, setEstado] = useState<'activos' | EstadoProyecto | 'todos'>('activos');
   const hoy = hoyIso();
@@ -36,25 +42,49 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
     await Promise.all([recargar(), refetchTodo()]);
   };
 
+  const visibles = useMemo(
+    () => proyectos.filter((p) => (tipo === 'todos' || (p.tipo ?? 'cliente') === tipo) && (estado === 'todos' ? true : estado === 'activos' ? p.estado !== 'finalizado' : p.estado === estado)),
+    [proyectos, tipo, estado],
+  );
+
+  const indicadores = useMemo(() => {
+    const idsVisibles = new Set(visibles.map((p) => p.id));
+    const tareasVis = tareas.filter((t) => !!t.proyecto_id && idsVisibles.has(t.proyecto_id));
+    const met = metricasProyectos(visibles, tareas);
+    const avance = met.activos.length ? Math.round(met.activos.reduce((s, f) => s + f.avance, 0) / met.activos.length) : 0;
+    return {
+      activos: met.activos.length,
+      enCurso: visibles.filter((p) => p.estado === 'en_curso').length,
+      conAtraso: met.conAtraso,
+      atrasadas: tareasVis.filter((t) => !t.completada && t.fecha_vencimiento < hoy).length,
+      hoy: tareasVis.filter((t) => !t.completada && t.fecha_vencimiento === hoy).length,
+      avance,
+    };
+  }, [visibles, tareas, hoy]);
+
   const lista = useMemo(
     () =>
-      proyectos
-        .filter((p) => (tipo === 'todos' || (p.tipo ?? 'cliente') === tipo) && (estado === 'todos' ? true : estado === 'activos' ? p.estado !== 'finalizado' : p.estado === estado))
-        .map((p) => {
-          const ts = tareas.filter((t) => t.proyecto_id === p.id);
-          return {
-            p,
-            total: ts.length,
-            hechas: ts.filter((t) => t.completada).length,
-            atrasadas: ts.filter((t) => !t.completada && t.fecha_vencimiento < hoy).length,
-            cliente: p.empresa_id ? empresas.find((e) => e.id === p.empresa_id)?.nombre : undefined,
-            responsable: miembros.find((m) => m.id === p.responsable_id)?.nombre,
-          };
-        }),
-    [proyectos, tareas, empresas, miembros, tipo, estado, hoy],
+      visibles.map((p) => {
+        const ts = tareas.filter((t) => t.proyecto_id === p.id);
+        return {
+          p,
+          total: ts.length,
+          hechas: ts.filter((t) => t.completada).length,
+          atrasadas: ts.filter((t) => !t.completada && t.fecha_vencimiento < hoy).length,
+          cliente: p.empresa_id ? empresas.find((e) => e.id === p.empresa_id)?.nombre : undefined,
+          responsable: miembros.find((m) => m.id === p.responsable_id)?.nombre,
+        };
+      }),
+    [visibles, tareas, empresas, miembros, hoy],
   );
 
   const seleccionado = abierto ? proyectos.find((p) => p.id === abierto) : undefined;
+
+  const pestanas: [Pestana, string, typeof GanttChart][] = [
+    ['gantt', 'Gantt', GanttChart],
+    ['proyectos', 'Proyectos', FolderKanban],
+    ['calendario', 'Calendario', CalendarDays],
+  ];
 
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-4">
@@ -72,8 +102,17 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
             <button onClick={() => setNuevo(true)} className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded bg-[var(--c-accent)] text-[var(--c-on-accent)]"><Plus className="w-3.5 h-3.5" />Nuevo proyecto</button>
           </div>
 
+          <div className="grid grid-cols-2 lg:grid-cols-6 gap-2">
+            <Kpi etiqueta="Activos" valor={indicadores.activos} nota={`${indicadores.enCurso} en curso`} />
+            <Kpi etiqueta="Con atraso" valor={indicadores.conAtraso} tono={indicadores.conAtraso > 0 ? 'peligro' : 'normal'} nota="tareas o fecha vencida" />
+            <Kpi etiqueta="Tareas atrasadas" valor={indicadores.atrasadas} tono={indicadores.atrasadas > 0 ? 'peligro' : 'normal'} />
+            <Kpi etiqueta="Vencen hoy" valor={indicadores.hoy} tono={indicadores.hoy > 0 ? 'aviso' : 'normal'} />
+            <Kpi etiqueta="Avance promedio" valor={`${indicadores.avance}%`} progreso={indicadores.avance} />
+            <Kpi etiqueta="Visibles" valor={visibles.length} nota={tipo === 'todos' ? 'internos y clientes' : tipo === 'interno' ? 'internos' : 'de clientes'} />
+          </div>
+
           <div role="tablist" aria-label="Vista" className="inline-flex gap-1 p-0.5 rounded-md bg-[var(--c-surface-2)]">
-            {([['proyectos', 'Proyectos', FolderKanban], ['calendario', 'Calendario', CalendarDays], ['gantt', 'Gantt', GanttChart]] as const).map(([k, t, Icono]) => (
+            {pestanas.map(([k, t, Icono]) => (
               <button key={k} role="tab" aria-selected={pestana === k} onClick={() => setPestana(k)} className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded ${pestana === k ? 'bg-[var(--c-surface)] text-[var(--c-text)] font-semibold ring-1 ring-[var(--module)]' : 'text-[var(--c-muted)]'}`}>
                 <Icono className="w-3.5 h-3.5" />{t}
               </button>
@@ -83,7 +122,6 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
           {error && <p className="text-xs text-[var(--c-danger)] border border-[var(--c-danger)]/40 rounded p-2">{error}</p>}
 
           {pestana === 'gantt' ? (() => {
-            const visibles = proyectos.filter((p) => (tipo === 'todos' || (p.tipo ?? 'cliente') === tipo) && (estado === 'todos' ? true : estado === 'activos' ? p.estado !== 'finalizado' : p.estado === estado));
             const todos = proyGantt === 'todos' || !visibles.some((p) => p.id === proyGantt);
             const idG = todos ? '' : proyGantt;
             const idsVisibles = new Set(visibles.map((p) => p.id));
@@ -92,6 +130,7 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
             const fasesG = fases.filter((f) => (todos ? idsVisibles.has(f.proyecto_id) : f.proyecto_id === idG));
             const depsG = dependencias.filter((d) => idsG.has(d.tarea_id));
             const nombreMiembro = (id?: string | null) => miembros.find((m) => m.id === id)?.nombre ?? 'Sin asignar';
+            const proyectoG = todos ? undefined : visibles.find((p) => p.id === idG);
             return (
               <div className="space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
@@ -99,7 +138,12 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
                     <option value="todos">Todos los proyectos</option>
                     {visibles.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}
                   </select>
-                  {!todos && <button type="button" onClick={() => { setAbierto(idG); setPestana('proyectos'); }} className="text-xs text-[var(--c-accent)] hover:underline">Abrir proyecto</button>}
+                  {proyectoG && (
+                    <>
+                      <button type="button" onClick={() => setEditando(proyectoG)} className="inline-flex items-center gap-1 text-xs text-[var(--c-muted)] hover:text-[var(--c-accent)]"><Pencil className="w-3 h-3" />Editar</button>
+                      <button type="button" onClick={() => { setAbierto(idG); setPestana('proyectos'); }} className="text-xs text-[var(--c-accent)] hover:underline">Abrir proyecto</button>
+                    </>
+                  )}
                 </div>
                 {tareasG.length === 0 && fasesG.length === 0 ? (
                   <p className="text-xs text-[var(--c-muted)]">No hay tareas en {todos ? 'estos proyectos' : 'este proyecto'}.</p>
@@ -112,6 +156,7 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
                     onToggle={(t) => toggleTareaCompletada(t.id, t.completada)}
                     onEditar={(t) => onEditTask(t)}
                     proyectos={todos ? visibles.map((p) => ({ id: p.id, nombre: p.nombre })) : undefined}
+                    onEditarProyecto={(id) => setEditando(proyectos.find((p) => p.id === id) ?? null)}
                   />
                 )}
               </div>
@@ -172,6 +217,7 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
       )}
 
       {nuevo && <NuevoProyectoModal tipoFijo={ambito === 'agencia' ? 'interno' : undefined} onCerrar={() => setNuevo(false)} onCreado={async (id) => { setNuevo(false); await cambio(); setAbierto(id); setPestana('proyectos'); }} />}
+      {editando && <EditarProyectoModal proyecto={editando} onCerrar={() => setEditando(null)} onGuardado={cambio} />}
     </div>
   );
 };
