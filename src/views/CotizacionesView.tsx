@@ -10,6 +10,7 @@ import { SelectorCliente } from '../components/common/SelectorCliente';
 import { Kpi } from '../components/dashboard/ui';
 import { ThOrdenable } from '../components/common/ThOrdenable';
 import { useOrden } from '../lib/orden';
+import { CotizacionDetalle } from '../components/clientes/CotizacionesCliente';
 
 interface Fila {
   id: string;
@@ -51,6 +52,8 @@ export const CotizacionesView: React.FC<CotizacionesViewProps> = ({ onAbrirFicha
   const [busqueda, setBusqueda] = useState('');
   const [estado, setEstado] = useState<string>('todos');
   const [mostrarNueva, setMostrarNueva] = useState(false);
+  const [abierta, setAbierta] = useState<string | null>(null);
+  const [recarga, setRecarga] = useState(0);
   const { clave: sortKey, dir: sortDir, alternar: alternarOrden, ordenar } = useOrden<ClaveOrden>('numero', 'desc');
 
   useEffect(() => {
@@ -77,7 +80,7 @@ export const CotizacionesView: React.FC<CotizacionesViewProps> = ({ onAbrirFicha
         }
         setCargando(false);
       });
-  }, [version]);
+  }, [version, recarga]);
 
   const nombres = useMemo(() => new Map(empresas.map((e) => [e.id, e.nombre])), [empresas]);
   const clientesActivos = useMemo(
@@ -303,7 +306,7 @@ export const CotizacionesView: React.FC<CotizacionesViewProps> = ({ onAbrirFicha
                   return (
                     <tr
                       key={c.id}
-                      onClick={() => onAbrirFicha(c.empresa_id)}
+                      onClick={() => setAbierta(c.id)}
                       className="hover:bg-[var(--c-surface-2)] cursor-pointer transition-colors group"
                     >
                       <td className="py-2.5 px-4 font-mono text-[var(--c-text-2)]">{formatCorrelativo('COT', c.numero)}</td>
@@ -329,6 +332,14 @@ export const CotizacionesView: React.FC<CotizacionesViewProps> = ({ onAbrirFicha
           </table>
         </div>
       </div>
+
+      {abierta && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onMouseDown={(e) => e.target === e.currentTarget && setAbierta(null)}>
+          <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl max-h-[92dvh] overflow-y-auto" role="dialog" aria-label="Cotización">
+            <CotizacionDetalle cotizacionId={abierta} onCerrar={() => setAbierta(null)} onCambio={() => setRecarga((n) => n + 1)} />
+          </div>
+        </div>
+      )}
 
       {mostrarNueva && (
         <SelectorCliente

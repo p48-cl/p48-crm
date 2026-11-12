@@ -6,6 +6,7 @@ import { Kpi } from '../components/dashboard/ui';
 import { ThOrdenable } from '../components/common/ThOrdenable';
 import { useOrden } from '../lib/orden';
 import { estaVencida } from '../components/clientes/FacturasCliente';
+import { FacturaFormulario } from '../components/clientes/FacturaFormulario';
 import type { Factura } from '../types/crm';
 
 type ClaveOrden = 'folio' | 'cliente' | 'estado' | 'emision' | 'vence' | 'total';
@@ -34,12 +35,14 @@ interface FacturasViewProps {
 
 // Vista global de facturas de todos los clientes. El registro se hace dentro de la ficha de cada cliente.
 export const FacturasView: React.FC<FacturasViewProps> = ({ onAbrirFicha }) => {
-  const { facturas, empresas, agencia, actualizarFactura } = useCRM();
+  const { facturas, empresas, empresasTodas, agencia, actualizarFactura } = useCRM();
+  const [abiertaId, setAbiertaId] = useState<string | null>(null);
   const [busqueda, setBusqueda] = useState('');
   const [estado, setEstado] = useState('todos');
   const { clave, dir, alternar, ordenar } = useOrden<ClaveOrden>('emision', 'desc');
 
   const nombres = useMemo(() => new Map(empresas.map((e) => [e.id, e.nombre])), [empresas]);
+  const abierta = abiertaId ? facturas.find((f) => f.id === abiertaId) ?? null : null;
   const filas = useMemo(() => facturas.filter((f) => f.empresa_id !== agencia?.id), [facturas, agencia]);
 
   const visibles = useMemo(() => {
@@ -116,6 +119,35 @@ export const FacturasView: React.FC<FacturasViewProps> = ({ onAbrirFicha }) => {
         </div>
       </div>
 
+      {abierta && (() => {
+        const emp = empresasTodas.find((e) => e.id === abierta.empresa_id);
+        if (!emp) return null;
+        const ev = estadoVisible(abierta);
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onMouseDown={(e) => e.target === e.currentTarget && setAbiertaId(null)}>
+            <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl max-h-[92dvh] overflow-y-auto space-y-4" role="dialog" aria-label="Factura">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-mono text-sm font-semibold text-[var(--c-text)]">{abierta.tipo_documento}-{String(abierta.folio).padStart(6, '0')}</p>
+                  <p className="text-xs text-[var(--c-muted)]">{emp.nombre} · <span className={ETIQUETA[ev].clase}>{ETIQUETA[ev].texto}</span></p>
+                </div>
+                <div className="flex items-center gap-3 text-xs">
+                  <button onClick={() => { setAbiertaId(null); onAbrirFicha(abierta.empresa_id); }} className="text-[var(--c-accent)] hover:underline">Ver cliente</button>
+                  <button onClick={() => setAbiertaId(null)} className="text-[var(--c-muted)] hover:text-[var(--c-text)]">Cerrar</button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div><p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Total</p><p className="font-mono text-[var(--c-text)]">{formatCLP(Number(abierta.monto_total))}</p></div>
+                <div><p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Emisión</p><p className="font-mono text-[var(--c-text-2)]">{formatFecha(abierta.fecha_emision)}</p></div>
+                <div><p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Vence</p><p className="font-mono text-[var(--c-text-2)]">{abierta.fecha_vencimiento ? formatFecha(abierta.fecha_vencimiento) : '—'}</p></div>
+                <div><p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Pagada</p><p className="font-mono text-[var(--c-text-2)]">{abierta.fecha_pago ? formatFecha(abierta.fecha_pago) : '—'}</p></div>
+              </div>
+              <FacturaFormulario empresa={emp} inicial={abierta} onGuardado={() => setAbiertaId(null)} onCancelar={() => setAbiertaId(null)} />
+            </div>
+          </div>
+        );
+      })()}
+
       <div className="bg-[var(--c-surface)] rounded-lg border border-[var(--c-line)] overflow-x-auto">
         <table className="w-full text-left text-xs">
           <thead className="bg-[var(--c-surface-2)] border-b border-[var(--c-line)] text-[var(--c-muted)] uppercase font-mono text-[11px]">
@@ -141,7 +173,7 @@ export const FacturasView: React.FC<FacturasViewProps> = ({ onAbrirFicha }) => {
                 const ev = estadoVisible(f);
                 const et = ETIQUETA[ev];
                 return (
-                  <tr key={f.id} onClick={() => onAbrirFicha(f.empresa_id)} className="hover:bg-[var(--c-surface-2)] cursor-pointer transition-colors">
+                  <tr key={f.id} onClick={() => setAbiertaId(f.id)} className="hover:bg-[var(--c-surface-2)] cursor-pointer transition-colors">
                     <td className="py-2.5 px-4 font-mono text-[var(--c-text)]">{f.tipo_documento}-{String(f.folio).padStart(6, '0')}</td>
                     <td className="py-2.5 px-3 text-[var(--c-text-2)]">{nombres.get(f.empresa_id) ?? '—'}</td>
                     <td className={`py-2.5 px-3 font-mono text-[11px] uppercase ${et.clase}`}>{et.texto}</td>
