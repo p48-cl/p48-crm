@@ -2,14 +2,23 @@ import React, { useEffect, useState } from 'react';
 import { Mail, Phone, Star } from 'lucide-react';
 import { useCRM } from '../../context/CRMContext';
 import { DatosFacturacion } from '../clientes/DatosFacturacion';
-import { FacturaFormulario } from '../clientes/FacturaFormulario';
-import { codigoNegocio, formatCLP, formatCorrelativo, formatRUT } from '../../lib/formatters';
+import { FacturaFormulario, ESTADOS_FACTURA } from '../clientes/FacturaFormulario';
+import { estaVencida } from '../clientes/FacturasCliente';
+import { EncabezadoDoc, FilaKpis, TablaDoc, celda, filaClase } from '../clientes/DocumentosUI';
+import { codigoNegocio, formatCLP, formatCorrelativo, formatFecha, formatRUT } from '../../lib/formatters';
 import { usePlanes } from '../../lib/planes';
 import { Moneda, Oportunidad, PlanEmpresa, RolDecisionContacto } from '../../types/crm';
 
 const input = 'w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]';
 const label = 'block text-[11px] text-[var(--c-muted)] mb-1';
 const caja = 'p-4 bg-[var(--c-surface-2)] rounded-lg border border-[var(--c-line)] space-y-3';
+const COLUMNAS_FACTURA = [
+  { texto: 'Documento' },
+  { texto: 'Emisión' },
+  { texto: 'Vence' },
+  { texto: 'Total', derecha: true },
+  { texto: 'Estado' },
+];
 
 interface Props {
   oportunidad: Oportunidad;
@@ -259,43 +268,61 @@ export const DatosNegocio: React.FC<Props> = ({ oportunidad, onVerCliente, abrir
         )}
       </div>
 
-      {oportunidad.pipeline === 'expansion' && (
-        <div className={caja}>
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-semibold text-[var(--c-text)]">Factura</h3>
-            {empresa && !formFactura && (
-              <button onClick={() => setFormFactura(true)} className="text-xs text-[var(--c-accent)] hover:underline font-mono">
-                + Registrar factura
-              </button>
-            )}
-          </div>
-          {formFactura && empresa && (
-            <FacturaFormulario
-              empresa={empresa}
-              oportunidadId={oportunidad.id}
-              onGuardado={() => setFormFactura(false)}
-              onCancelar={() => setFormFactura(false)}
+      {oportunidad.pipeline === 'expansion' && (() => {
+        const cotIds = new Set(cotizaciones.filter((c) => c.oportunidad_id === oportunidad.id).map((c) => c.id));
+        const facs = facturas
+          .filter((f) => f.oportunidad_id === oportunidad.id || (f.cotizacion_id && cotIds.has(f.cotizacion_id)))
+          .sort((a, b) => b.fecha_emision.localeCompare(a.fecha_emision));
+        const pendientes = facs.filter((f) => f.estado_pago === 'pendiente' && !estaVencida(f));
+        const vencidas = facs.filter(estaVencida);
+        const pagadas = facs.filter((f) => f.estado_pago === 'pagada');
+        const anuladas = facs.filter((f) => f.estado_pago === 'anulada');
+        const suma = (xs: typeof facs) => formatCLP(xs.reduce((acc, f) => acc + Number(f.monto_total), 0));
+        return (
+          <div className={caja}>
+            <EncabezadoDoc
+              titulo="Factura"
+              subtitulo="Registradas a mano desde el SII. Marca el pago cuando llegue."
+              botonTexto={empresa && !formFactura ? 'Registrar factura' : undefined}
+              onBoton={() => setFormFactura(true)}
             />
-          )}
-          {(() => {
-            const cotIds = new Set(cotizaciones.filter((c) => c.oportunidad_id === oportunidad.id).map((c) => c.id));
-            const facs = facturas.filter((f) => f.oportunidad_id === oportunidad.id || (f.cotizacion_id && cotIds.has(f.cotizacion_id)));
-            if (facs.length === 0) {
-              return <p className="text-[11px] text-[var(--c-muted)]">Sin facturas vinculadas a este negocio.</p>;
-            }
-            return (
-              <ul className="space-y-1 text-[11px] font-mono">
-                {facs.map((f) => (
-                  <li key={f.id} className={`flex justify-between gap-2 ${f.estado_pago === 'anulada' ? 'line-through text-[var(--c-muted)]' : 'text-[var(--c-text-2)]'}`}>
-                    <span>{f.tipo_documento}-{String(f.folio).padStart(6, '0')}</span>
-                    <span className="text-right">{formatCLP(Number(f.monto_total))} · <span className="uppercase">{f.estado_pago}</span></span>
-                  </li>
-                ))}
-              </ul>
-            );
-          })()}
-        </div>
-      )}
+            <FilaKpis
+              items={[
+                { etiqueta: 'Pendientes', color: 'var(--c-warn)', valor: `${pendientes.length} factura(s)`, sub: suma(pendientes) },
+                { etiqueta: 'Vencidas', color: 'var(--c-danger)', valor: `${vencidas.length} factura(s)`, sub: suma(vencidas) },
+                { etiqueta: 'Pagadas', color: 'var(--c-ok)', valor: `${pagadas.length} factura(s)`, sub: suma(pagadas) },
+                { etiqueta: 'Anuladas', color: 'var(--c-muted)', valor: `${anuladas.length} factura(s)`, sub: suma(anuladas) },
+              ]}
+            />
+            {formFactura && empresa && (
+              <FacturaFormulario
+                empresa={empresa}
+                oportunidadId={oportunidad.id}
+                onGuardado={() => setFormFactura(false)}
+                onCancelar={() => setFormFactura(false)}
+              />
+            )}
+            <TablaDoc columnas={COLUMNAS_FACTURA} hayFilas={facs.length > 0} vacio="Aún no hay facturas para este negocio.">
+              {facs.map((f) => {
+                const est = ESTADOS_FACTURA.find((s) => s.valor === f.estado_pago);
+                const vencida = estaVencida(f);
+                return (
+                  <tr key={f.id} className={`${filaClase} ${f.estado_pago === 'anulada' ? 'opacity-60' : ''}`}>
+                    <td className={`${celda} font-mono text-[var(--c-text)] whitespace-nowrap`}>
+                      {f.tipo_documento}-{String(f.folio).padStart(6, '0')}
+                      {f.url_documento && <a href={f.url_documento} target="_blank" rel="noreferrer" className="ml-2 text-[var(--c-accent)] hover:underline">PDF</a>}
+                    </td>
+                    <td className={`${celda} font-mono text-[var(--c-muted)] whitespace-nowrap`}>{formatFecha(f.fecha_emision)}</td>
+                    <td className={`${celda} font-mono whitespace-nowrap ${vencida ? 'text-[var(--c-danger)]' : 'text-[var(--c-muted)]'}`}>{f.fecha_vencimiento ? formatFecha(f.fecha_vencimiento) : '—'}</td>
+                    <td className={`${celda} font-mono text-right text-[var(--c-text)] whitespace-nowrap`}>{formatCLP(Number(f.monto_total))}</td>
+                    <td className={`${celda} font-medium whitespace-nowrap ${vencida ? 'text-[var(--c-danger)]' : est?.clase ?? ''}`}>{vencida ? 'Vencida' : est?.texto}</td>
+                  </tr>
+                );
+              })}
+            </TablaDoc>
+          </div>
+        );
+      })()}
 
       {empresa && (
         <div className={caja}>
