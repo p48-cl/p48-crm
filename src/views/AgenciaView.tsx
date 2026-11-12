@@ -6,8 +6,9 @@ import { Kpi } from '../components/dashboard/ui';
 import { ProjectsView } from './ProjectsView';
 import { CotizacionesCliente } from '../components/clientes/CotizacionesCliente';
 import { CuentasCliente } from '../components/clientes/CuentasCliente';
-import { FichaMarketing } from '../components/marketing/FichaMarketing';
-import { EstrategiaEditor } from '../components/clientes/EstrategiaCliente';
+import { UltimoAnalisis } from '../components/marketing/UltimoAnalisis';
+import { MetricasPorCanal } from '../components/marketing/MetricasPorCanal';
+import { EstrategiaCard, EstrategiaEditor } from '../components/clientes/EstrategiaCliente';
 import { DatosFacturacion } from '../components/clientes/DatosFacturacion';
 import { SubirLogo } from '../components/clientes/Logo';
 import { useProyectos } from '../components/proyectos/useProyectos';
@@ -235,12 +236,14 @@ export const AgenciaView: React.FC<Props> = ({ onNuevaTarea, onEditTask }) => {
 
       {seccion === 'marketing' && (
         <div className="space-y-6">
-          <FichaMarketing empresaId={agencia.id} />
+          <UltimoAnalisis empresaId={agencia.id} />
+          <EstrategiaCard empresaId={agencia.id} nombreCliente={agencia.nombre} />
           <CuentasCliente
             empresaId={agencia.id}
             notas={accesos?.notas_accesos || ''}
             onNotas={(v) => actualizarAccesosAdmin(agencia.id, { notas_accesos: v })}
           />
+          <MetricasPorCanal empresaId={agencia.id} />
         </div>
       )}
     </div>

@@ -628,6 +628,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       .from('empresas')
       .insert({
         ...datos,
+        origen: datos.origen ?? 'manual',
         dominio_web: normalizarDominio(datos.dominio_web) || null,
         archivado: false,
       })

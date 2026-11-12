@@ -10,6 +10,7 @@ import { resumen360 } from '../../lib/cliente360';
 import { useCRM } from '../../context/CRMContext';
 import { usePlanes } from '../../lib/planes';
 import { useConfiguracionCRM } from '../../lib/configuracion';
+import { OPCIONES_ORIGEN } from '../../lib/origen';
 
 export type DestinoResumen = 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'facturacion' | 'estrategia' | 'marketing' | 'proyectos' | 'info';
 
@@ -189,6 +190,8 @@ export const ResumenCuenta: React.FC<Props> = ({
   alertas, accesosConcedidos, accesosTotal, enlaces, estrategia, onIr, onAbrirNegocio, onActualizar, diasAlertaCotizacion = 7,
 }) => {
   const crm = useCRM();
+  const leadOrigen = empresa.origen_lead_id ? crm.oportunidades.find((o) => o.id === empresa.origen_lead_id) : undefined;
+  const fuenteLead = leadOrigen?.fuente_id ? crm.fuentes.find((f) => f.id === leadOrigen.fuente_id)?.nombre : undefined;
   const { etapas } = crm;
   const { PLANES: PLANES_VIGENTES, codigos } = usePlanes();
   const { config: cfg } = useConfiguracionCRM();
@@ -506,6 +509,15 @@ export const ResumenCuenta: React.FC<Props> = ({
                 <Campo etiqueta="Próxima facturación" nota={`Pago a ${empresa.dias_pago ?? 30} días`}><Valor mono>{empresa.proxima_facturacion ? formatFecha(empresa.proxima_facturacion) : null}</Valor></Campo>
                 <Campo etiqueta="Próxima renovación" nota={empresa.fecha_renovacion ? (empresa.renovacion_tipo === 'automatica' ? 'Automática' : 'Manual') : undefined}><Valor mono>{empresa.fecha_renovacion ? formatFecha(empresa.fecha_renovacion) : null}</Valor></Campo>
                 <Campo etiqueta="LTV estimado" nota={mesesContrato !== null ? `MRR × ${mesesContrato} meses` : 'Falta inicio de contrato'}><Valor mono>{ltvEstimado !== null ? formatCLP(ltvEstimado) : null}</Valor></Campo>
+                <Campo etiqueta="Procedencia" nota={leadOrigen ? 'Desde lead (solo lectura)' : undefined}>
+                  {leadOrigen ? (
+                    <Valor>{fuenteLead ? `Lead · ${fuenteLead}` : 'Lead'}</Valor>
+                  ) : (
+                    <select value={empresa.origen ?? ''} onChange={(e) => onActualizar({ origen: (e.target.value || null) as Empresa['origen'] })} aria-label="Procedencia" className={input}>
+                      {OPCIONES_ORIGEN.map((o) => <option key={o.valor} value={o.valor}>{o.texto}</option>)}
+                    </select>
+                  )}
+                </Campo>
               </div>
               <dl className="mt-4 pt-4 border-t border-[var(--c-line)] grid grid-cols-[minmax(0,1fr)] sm:grid-cols-3 gap-x-4 gap-y-4 text-xs">
                 <Campo etiqueta="Razón social"><Valor>{empresa.razon_social}</Valor></Campo>

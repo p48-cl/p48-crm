@@ -26,7 +26,7 @@ export type SaludCliente = 'verde' | 'amarillo' | 'rojo';
 export type EstadoPago = 'al_dia' | 'por_vencer' | 'atrasado';
 
 export interface Empresa {
-  origen?: 'lead' | 'referido' | 'prospeccion_directa' | 'cliente_existente' | 'otro' | null;
+  origen?: 'lead' | 'referido' | 'manual' | 'cliente_existente' | 'otro' | null;
   origen_lead_id?: string | null;
   id: string; // uuid
   nombre: string;

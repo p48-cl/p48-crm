@@ -13,9 +13,11 @@ import { NewDealModal } from '../components/common/NewDealModal';
 import type { Actividad } from '../types/crm';
 import { CuentasCliente } from '../components/clientes/CuentasCliente';
 import { SubirLogo } from '../components/clientes/Logo';
-import { FichaMarketing } from '../components/marketing/FichaMarketing';
-import { EstrategiaEditor, ResumenEstrategia } from '../components/clientes/EstrategiaCliente';
+import { UltimoAnalisis } from '../components/marketing/UltimoAnalisis';
+import { MetricasPorCanal } from '../components/marketing/MetricasPorCanal';
+import { EstrategiaCard, ResumenEstrategia } from '../components/clientes/EstrategiaCliente';
 import { useConfiguracionCRM } from '../lib/configuracion';
+import { ORIGEN_ETIQUETA } from '../lib/origen';
 import { FranjaDecision, TonoFranja } from '../components/common/FranjaDecision';
 import { ResumenCuenta, AlertaResumen } from '../components/clientes/ResumenCuenta';
 
@@ -295,19 +297,11 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                     Plan {empresa.plan}
                   </span>
                 )}
-                <select
-                  value={empresa.origen ?? ''}
-                  onChange={(e) => actualizarEmpresa(empresa.id, { origen: (e.target.value || null) as Empresa['origen'] })}
-                  aria-label="Origen del cliente"
-                  className="font-mono text-[10px] uppercase px-2 py-0.5 rounded-full bg-[var(--c-surface-2)] border border-[var(--c-line)] text-[var(--c-text-2)] focus:outline-none"
-                >
-                  <option value="">Origen: sin definir</option>
-                  <option value="lead">Origen: lead</option>
-                  <option value="referido">Origen: referido</option>
-                  <option value="prospeccion_directa">Origen: prospección directa</option>
-                  <option value="cliente_existente">Origen: cliente existente</option>
-                  <option value="otro">Origen: otro</option>
-                </select>
+                {empresa.origen && (
+                  <span className="font-mono text-[10px] uppercase px-2 py-0.5 rounded-full border border-[var(--c-line)] text-[var(--c-muted)]">
+                    Origen: {ORIGEN_ETIQUETA[empresa.origen]}
+                  </span>
+                )}
                 {empresa.salud && (
                   <span className="flex items-center gap-1 font-mono text-[10px] uppercase text-[var(--c-muted)]">
                     <span className={`w-2 h-2 rounded-full ${empresa.salud === 'verde' ? 'bg-[var(--c-ok)]' : empresa.salud === 'amarillo' ? 'bg-[var(--c-warn)]' : 'bg-[var(--c-danger)]'}`} />
@@ -809,8 +803,8 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
           )}
           {activeTab === 'marketing' && (
             <div className="space-y-6">
-              {empresa.estado === 'cliente' && <FichaMarketing empresaId={empresa.id} />}
-              <EstrategiaEditor empresaId={empresa.id} nombreCliente={empresa.nombre} />
+              {empresa.estado === 'cliente' && <UltimoAnalisis empresaId={empresa.id} />}
+              <EstrategiaCard empresaId={empresa.id} nombreCliente={empresa.nombre} />
               {empresa.estado === 'cliente' && (
                 <CuentasCliente
                   empresaId={empresa.id}
@@ -818,6 +812,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                   onNotas={(v) => actualizarAccesosAdmin(empresa.id, { notas_accesos: v })}
                 />
               )}
+              {empresa.estado === 'cliente' && <MetricasPorCanal empresaId={empresa.id} />}
             </div>
           )}
           {activeTab === 'proyectos' && empresa.estado === 'cliente' && <ClientePanel empresaId={empresa.id} vista="proyectos" />}
