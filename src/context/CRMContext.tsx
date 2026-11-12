@@ -16,7 +16,7 @@ import {
   Miembro,
   KPIsDashboard,
 } from '../types/crm';
-import type { Factura } from '../types/crm';
+import type { Factura, CotizacionVista, Proyecto, Reporte } from '../types/crm';
 import {
   INITIAL_EMPRESAS,
   INITIAL_CONTACTOS,
@@ -104,6 +104,9 @@ interface CRMContextType {
   actualizarActividad: (actividadId: string, datos: Partial<Omit<Actividad, 'id' | 'created_at' | 'autor_id'>>) => Promise<void>;
   eliminarActividad: (actividadId: string) => Promise<void>;
   facturas: Factura[];
+  cotizaciones: CotizacionVista[];
+  proyectos: Proyecto[];
+  reportes: Reporte[];
   crearFactura: (datos: Omit<Factura, 'id' | 'created_at' | 'updated_at' | 'creada_por' | 'archivado'>) => Promise<Factura | null>;
   actualizarFactura: (facturaId: string, datos: Partial<Factura>) => Promise<void>;
   eliminarFactura: (facturaId: string) => Promise<void>;
@@ -117,7 +120,7 @@ interface CRMContextType {
   desactivarMiembro: (miembroId: string, reasignarAId: string) => Promise<void>;
   activarMiembro: (miembroId: string) => Promise<void>;
   guardarEtapa: (etapaId: string, cambios: Partial<Etapa>) => Promise<string | null>;
-  crearEtapa: (nombre: string, probabilidad: number) => Promise<string | null>;
+  crearEtapa: (nombre: string, probabilidad: number, pipeline?: 'captacion' | 'expansion') => Promise<string | null>;
   reordenarEtapas: (idsOrdenados: string[]) => Promise<string | null>;
   guardarCriterioPlantilla: (criterio: Partial<CriterioCalificacion>) => Promise<void>;
   agregarItemCatalogo: (tipo: 'fuentes' | 'motivos' | 'industrias', nombre: string) => Promise<void>;
@@ -165,6 +168,9 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [actividades, setActividades] = useState<Actividad[]>([]);
   const [tareas, setTareas] = useState<Tarea[]>([]);
   const [facturas, setFacturas] = useState<Factura[]>([]);
+  const [cotizaciones, setCotizaciones] = useState<CotizacionVista[]>([]);
+  const [proyectos, setProyectos] = useState<Proyecto[]>([]);
+  const [reportes, setReportes] = useState<Reporte[]>([]);
   const [fuentes, setFuentes] = useState<CatalogoItem[]>([]);
   const [motivosPerdida, setMotivosPerdida] = useState<CatalogoItem[]>([]);
   const [industrias, setIndustrias] = useState<CatalogoItem[]>([]);
@@ -253,6 +259,16 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (dbActividades) setActividades(dbActividades as Actividad[]);
         if (dbTareas) setTareas(dbTareas as Tarea[]);
         if (dbFacturas) setFacturas(dbFacturas as Factura[]);
+
+        // 5b. Cotizaciones, proyectos y reportes (para el resumen 360 de cada cliente)
+        const [{ data: dbCotizaciones }, { data: dbProyectos }, { data: dbReportes }] = await Promise.all([
+          supabase.from('v_cotizaciones').select('*').order('fecha_emision', { ascending: false }),
+          supabase.from('proyectos').select('*').eq('archivado', false),
+          supabase.from('reportes').select('*').eq('archivado', false),
+        ]);
+        if (dbCotizaciones) setCotizaciones(dbCotizaciones as CotizacionVista[]);
+        if (dbProyectos) setProyectos(dbProyectos as Proyecto[]);
+        if (dbReportes) setReportes(dbReportes as Reporte[]);
 
         // 6. Cargar KPIs vía RPC
         const soloMios = filtroAlcance === 'mis_datos';
@@ -346,6 +362,23 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (error) {
       setErrorMensaje(parseSupabaseError(error));
       return;
+    }
+
+    // Negocio de expansión ganado con valor mensual en CLP: genera servicio recurrente (sube el MRR por trigger)
+    const etapaDestino = etapas.find((e) => e.id === nuevaEtapaId);
+    const opActual = oportunidades.find((o) => o.id === oportunidadId);
+    if (etapaDestino?.es_ganada && etapaDestino.pipeline === 'expansion' && opActual && opActual.moneda === 'CLP' && Number(opActual.valor_neto) > 0) {
+      const { data: yaExiste } = await supabase.from('servicios_cliente').select('id').eq('oportunidad_id', oportunidadId).maybeSingle();
+      if (!yaExiste) {
+        await supabase.from('servicios_cliente').insert({
+          empresa_id: opActual.empresa_id,
+          nombre: opActual.nombre,
+          monto_clp: opActual.valor_neto,
+          activo: true,
+          inicio: new Date().toLocaleDateString('en-CA', { timeZone: 'America/Santiago' }),
+          oportunidad_id: oportunidadId,
+        });
+      }
     }
 
     // Refetch obligatorio de la fila desde la vista v_oportunidades y empresas
@@ -959,11 +992,11 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return null;
   };
 
-  const crearEtapa = async (nombre: string, probabilidad: number): Promise<string | null> => {
+  const crearEtapa = async (nombre: string, probabilidad: number, pipeline: 'captacion' | 'expansion' = 'captacion'): Promise<string | null> => {
     if (!supabase) return null;
-    const siguiente = Math.max(0, ...etapas.filter((e) => !e.es_ganada && !e.es_perdida).map((e) => e.orden)) + 1;
+    const siguiente = Math.max(0, ...etapas.filter((e) => e.pipeline === pipeline && !e.es_ganada && !e.es_perdida).map((e) => e.orden)) + 1;
     const { error } = await supabase.from('etapas').insert({
-      nombre, orden: siguiente, probabilidad_default: probabilidad, color: '#888888', es_ganada: false, es_perdida: false, activa: true,
+      nombre, orden: siguiente, probabilidad_default: probabilidad, color: '#888888', es_ganada: false, es_perdida: false, activa: true, pipeline,
     });
     if (error) return parseSupabaseError(error);
     await refrescarEtapas();
@@ -1373,6 +1406,9 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         actualizarActividad,
         eliminarActividad,
         facturas,
+        cotizaciones,
+        proyectos,
+        reportes,
         crearFactura,
         actualizarFactura,
         eliminarFactura,

@@ -6,6 +6,7 @@ import { formatCLP, formatFecha, formatMoneda, formatCorrelativo } from '../../l
 import { estadoEfectivo, redondear, MonedaCotizacion, estiloEstado } from '../../lib/cotizaciones';
 import type { Actividad, Contacto, EstadoPago, Empresa, Factura, Miembro, Oportunidad, Tarea } from '../../types/crm';
 import { estaVencida } from './FacturasCliente';
+import { resumen360 } from '../../lib/cliente360';
 import { useCRM } from '../../context/CRMContext';
 import { usePlanes } from '../../lib/planes';
 import { useConfiguracionCRM } from '../../lib/configuracion';
@@ -187,7 +188,8 @@ export const ResumenCuenta: React.FC<Props> = ({
   empresa, responsable, miembros, facturas, contactoPrincipal, oportunidadesAbiertas, actividades, tareasPendientes,
   alertas, accesosConcedidos, accesosTotal, enlaces, estrategia, onIr, onAbrirNegocio, onActualizar, diasAlertaCotizacion = 7,
 }) => {
-  const { etapas } = useCRM();
+  const crm = useCRM();
+  const { etapas } = crm;
   const { PLANES: PLANES_VIGENTES, codigos } = usePlanes();
   const { config: cfg } = useConfiguracionCRM();
   // Plan actual siempre visible aunque esté desactivado en Administración
@@ -329,7 +331,15 @@ export const ResumenCuenta: React.FC<Props> = ({
   if (empresa.proxima_facturacion && soloFecha(empresa.proxima_facturacion) < hoyISO) {
     alertasFicha.push({ texto: `Facturación vencida desde ${formatFecha(empresa.proxima_facturacion)}`, tono: 'alerta', destino: 'info' });
   }
-  const todasAlertas = [...alertas, ...alertasFicha, ...alertasCot];
+  // Alertas del resumen 360 que no repiten las de arriba (facturas y cotizaciones ya están listadas)
+  const r360 = resumen360(empresa, {
+    oportunidades: crm.oportunidades, etapas, facturas: crm.facturas, cotizaciones: crm.cotizaciones,
+    proyectos: crm.proyectos, tareas: crm.tareas, reportes: crm.reportes, actividades: crm.actividades, contactos: crm.contactos,
+  });
+  const alertasCrm: AlertaResumen[] = r360.alertas
+    .filter((a) => !/factura|cotización/i.test(a.texto))
+    .map((a) => ({ texto: a.texto, tono: a.nivel === 'peligro' ? 'alerta' : 'info', destino: /proyecto/i.test(a.texto) ? 'proyectos' : /reporte/i.test(a.texto) ? 'info' : /negocio/i.test(a.texto) ? 'oportunidades' : 'info' }) as AlertaResumen);
+  const todasAlertas = [...alertas, ...alertasFicha, ...alertasCot, ...alertasCrm];
 
   const mesesContrato = empresa.inicio_contrato
     ? Math.max(0, Math.floor((hoyMs - new Date(`${soloFecha(empresa.inicio_contrato)}T12:00:00`).getTime()) / (86400000 * 30.44)))

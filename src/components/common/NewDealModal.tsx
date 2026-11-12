@@ -33,7 +33,10 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
   const [valorNeto, setValorNeto] = useState<number>(PLANES.A.valor);
   const [setupNeto, setSetupNeto] = useState<number>(desdeFicha && empresaFicha?.estado === 'cliente' ? 0 : SETUP_LISTA);
   const [probabilidad, setProbabilidad] = useState<number>(20);
-  const [etapaId] = useState(etapas.find((e) => e.activa)?.id || '');
+  // Pipeline según la empresa: cliente activo → expansión; resto → captación
+  const pipelineNuevo: 'captacion' | 'expansion' =
+    empresas.find((e) => e.id === empresaId)?.estado === 'cliente' ? 'expansion' : 'captacion';
+  const etapaId = etapas.find((e) => e.activa && e.pipeline === pipelineNuevo)?.id || '';
   const [fuenteId, setFuenteId] = useState(fuentes[0]?.id || '');
   const [responsableId, setResponsableId] = useState(currentUser?.id || miembros[0]?.id || '');
   const [utm, setUtm] = useState({ fuente: '', campana: '', medio: '' });

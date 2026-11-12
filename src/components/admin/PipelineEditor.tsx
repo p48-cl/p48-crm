@@ -15,8 +15,12 @@ export const PipelineEditor: React.FC = () => {
   const [aviso, setAviso] = useState<string | null>(null);
   const [nuevoNombre, setNuevoNombre] = useState('');
   const [nuevaProb, setNuevaProb] = useState(10);
+  const [pipelineVista, setPipelineVista] = useState<'captacion' | 'expansion'>('captacion');
 
-  const ordenadas = useMemo(() => [...etapas].sort((a, b) => a.orden - b.orden), [etapas]);
+  const ordenadas = useMemo(
+    () => [...etapas].filter((e) => e.pipeline === pipelineVista).sort((a, b) => a.orden - b.orden),
+    [etapas, pipelineVista],
+  );
 
   // Oportunidades vivas por etapa (para no desactivar una etapa con negocios dentro)
   const vivasPorEtapa = useMemo(() => {
@@ -36,13 +40,13 @@ export const PipelineEditor: React.FC = () => {
     ejecutar(async () => {
       // Solo una etapa ganada y una perdida: se limpia la marca anterior antes de asignar la nueva
       if (tipo === 'ganada') {
-        for (const otra of etapas.filter((x) => x.es_ganada && x.id !== e.id)) {
+        for (const otra of etapas.filter((x) => x.es_ganada && x.id !== e.id && x.pipeline === e.pipeline)) {
           const r = await guardarEtapa(otra.id, { es_ganada: false });
           if (r) return r;
         }
       }
       if (tipo === 'perdida') {
-        for (const otra of etapas.filter((x) => x.es_perdida && x.id !== e.id)) {
+        for (const otra of etapas.filter((x) => x.es_perdida && x.id !== e.id && x.pipeline === e.pipeline)) {
           const r = await guardarEtapa(otra.id, { es_perdida: false });
           if (r) return r;
         }
@@ -76,7 +80,7 @@ export const PipelineEditor: React.FC = () => {
     if (!nombre) return setError('Pon un nombre para la etapa.');
     if (nuevaProb < 0 || nuevaProb > 100) return setError('La probabilidad debe estar entre 0 y 100.');
     ejecutar(async () => {
-      const r = await crearEtapa(nombre, nuevaProb);
+      const r = await crearEtapa(nombre, nuevaProb, pipelineVista);
       if (!r) { setNuevoNombre(''); setNuevaProb(10); }
       return r;
     });
@@ -90,6 +94,19 @@ export const PipelineEditor: React.FC = () => {
           Orden de las columnas del tablero. Una etapa inactiva deja de aparecer, pero sus negocios se conservan.
           La probabilidad se usa para el forecast ponderado.
         </p>
+      </div>
+
+      <div className="flex items-center p-0.5 bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded text-xs w-fit">
+        {([['captacion', 'Captación (prospectos)'], ['expansion', 'Expansión (clientes activos)']] as ['captacion' | 'expansion', string][]).map(([p, label]) => (
+          <button
+            key={p}
+            type="button"
+            onClick={() => setPipelineVista(p)}
+            className={`px-3 py-1.5 rounded transition-colors ${pipelineVista === p ? 'bg-[var(--c-surface-3)] text-[var(--c-text)] font-medium shadow-sm' : 'text-[var(--c-muted)] hover:text-[var(--c-text-2)]'}`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {error && <p className="text-xs text-[var(--c-danger)] border border-[var(--c-danger)]/40 rounded p-2">{error}</p>}
@@ -178,7 +195,7 @@ export const PipelineEditor: React.FC = () => {
       </div>
 
       <div className="surface p-3 flex flex-wrap items-center gap-2">
-        <span className="text-[11px] text-[var(--c-muted)]">Nueva etapa</span>
+        <span className="text-[11px] text-[var(--c-muted)]">Nueva etapa en {pipelineVista === 'captacion' ? 'Captación' : 'Expansión'}</span>
         <input className={`${input} min-w-[200px]`} placeholder="Nombre (ej: Reunión agendada)" value={nuevoNombre} onChange={(e) => setNuevoNombre(e.target.value)} />
         <input type="number" min={0} max={100} className={`${input} w-20 font-mono`} value={nuevaProb} onChange={(e) => setNuevaProb(Number(e.target.value))} aria-label="Probabilidad" />
         <button type="button" onClick={agregar} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded bg-[var(--c-accent)] text-[var(--c-on-accent)]">
