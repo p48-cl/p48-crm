@@ -3,8 +3,9 @@ import { Plus, Printer, Trash2, ArrowLeft } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { parseSupabaseError } from '../../lib/errorHandler';
 import { formatFecha, formatMoneda, formatRUT, formatCorrelativo, formatCLP } from '../../lib/formatters';
-import { PLANES, SETUP_LISTA } from '../../lib/planes';
-import { estadoEfectivo, convertirMoneda, redondear, MonedaCotizacion } from '../../lib/cotizaciones';
+import { usePlanes } from '../../lib/planes';
+import { useConfiguracionCRM } from '../../lib/configuracion';
+import { estadoEfectivo, convertirMoneda, redondear, MonedaCotizacion, estiloEstado, ESTADOS_COTIZACION } from '../../lib/cotizaciones';
 import { useCRM } from '../../context/CRMContext';
 import { urlLogo } from './Logo';
 import { useAuth } from '../../context/AuthContext';
@@ -41,19 +42,6 @@ interface Linea {
   recurrente: boolean;
 }
 
-const COMISION_BASE =
-  'Comisión de gestión de pauta: 15% de la inversión mensual en plataformas, con escala descendente hasta 8% según el monto invertido. La inversión en pauta se paga directamente a cada plataforma y no está incluida en esta cotización.';
-const CONDICIONES_BASE =
-  'Valores netos en pesos chilenos, más IVA. Cotización válida por el plazo indicado. El servicio inicia con la aceptación y la entrega de accesos de administrador a las plataformas.';
-
-const COLOR_ESTADO: Record<Estado, string> = {
-  borrador: 'text-[var(--c-muted)]',
-  enviada: 'text-[var(--c-info)]',
-  aceptada: 'text-[var(--c-ok)]',
-  rechazada: 'text-[var(--c-danger)]',
-  vencida: 'text-[var(--c-warn)]',
-};
-
 const campo = 'w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]';
 const etiqueta = 'block text-[11px] text-[var(--c-muted)] mb-1';
 
@@ -82,6 +70,7 @@ interface CotizacionesClienteProps {
 export const CotizacionesCliente: React.FC<CotizacionesClienteProps> = ({ empresa, iniciarNueva, onNuevaUsada, oportunidadId }) => {
   const { oportunidades } = useCRM();
   const { currentUser } = useAuth();
+  const { config: cfg } = useConfiguracionCRM();
   const [filas, setFilas] = useState<CotizacionFila[]>([]);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -143,7 +132,7 @@ export const CotizacionesCliente: React.FC<CotizacionesClienteProps> = ({ empres
           const monto = grupo.reduce((acc, c) => acc + totales([{ concepto: '', plan: '', cantidad: 1, precio_neto: c.neto_mensual, recurrente: true }], c.iva_pct, c.moneda).mensualIva, 0);
           return (
             <div key={e} className="surface p-3 space-y-0.5">
-              <p className={`text-[10px] font-mono uppercase tracking-wider ${COLOR_ESTADO[e]}`}>{e === 'enviada' ? 'Enviadas' : e === 'aceptada' ? 'Aceptadas' : e === 'rechazada' ? 'Rechazadas' : 'Vencidas'}</p>
+              <p className={`text-[10px] font-mono uppercase tracking-wider ${estiloEstado(cfg.estados_cotizacion, e).clase}`}>{estiloEstado(cfg.estados_cotizacion, e).etiqueta}</p>
               <p className="text-lg font-bold font-mono text-[var(--c-text)]">{grupo.length}</p>
               <p className="text-[10px] font-mono text-[var(--c-muted)]">{grupo.length > 0 && monedas.size === 1 ? `${formatMoneda(monto, grupo[0].moneda)} /mes` : '—'}</p>
             </div>
@@ -168,7 +157,7 @@ export const CotizacionesCliente: React.FC<CotizacionesClienteProps> = ({ empres
                 <div className="text-right shrink-0">
                   <p className="font-mono text-[var(--c-text)]">{formatMoneda(t.mensualIva, c.moneda)} /mes</p>
                   {c.neto_unico > 0 && <p className="font-mono text-[11px] text-[var(--c-muted)]">+ {formatMoneda(t.unicoIva, c.moneda)} único</p>}
-                  <p className={`text-[10px] font-mono uppercase ${COLOR_ESTADO[estado]}`}>{estado}</p>
+                  <p className={`text-[10px] font-mono uppercase ${estiloEstado(cfg.estados_cotizacion, estado).clase}`}>{estiloEstado(cfg.estados_cotizacion, estado).etiqueta}</p>
                 </div>
               </button>
             );
@@ -190,11 +179,13 @@ interface EditorProps {
 }
 
 const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creadaPor, oportunidadInicial, onVolver }) => {
+  const { PLANES, codigos, SETUP_LISTA } = usePlanes();
+  const { config: cfg } = useConfiguracionCRM();
   const [titulo, setTitulo] = useState(inicial?.titulo ?? `Propuesta ${empresa.nombre}`);
   const [estado, setEstado] = useState<Estado>(inicial?.estado ?? 'borrador');
   const [oportunidadId, setOportunidadId] = useState(inicial?.oportunidad_id ?? oportunidadInicial ?? '');
-  const [validez, setValidez] = useState(String(inicial?.validez_dias ?? 15));
-  const [ivaPct, setIvaPct] = useState(String(inicial?.iva_pct ?? 19));
+  const [validez, setValidez] = useState(String(inicial?.validez_dias ?? cfg.cotizacion_validez_dias));
+  const [ivaPct, setIvaPct] = useState(String(inicial?.iva_pct ?? cfg.iva_pct));
   const [moneda, setMoneda] = useState<MonedaCotizacion>(inicial?.moneda ?? 'CLP');
   // Valor UF congelado en la cotización (snapshot). Si es nueva, se toma el último valor de uf_diaria.
   const [uf, setUf] = useState<{ valor: number; fecha: string } | null>(
@@ -240,8 +231,8 @@ const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creada
     setMoneda(nueva);
   };
 
-  const [comision, setComision] = useState(inicial?.condicion_comision ?? COMISION_BASE);
-  const [condiciones, setCondiciones] = useState(inicial?.condiciones_comerciales ?? CONDICIONES_BASE);
+  const [comision, setComision] = useState(inicial?.condicion_comision ?? cfg.comision_base);
+  const [condiciones, setCondiciones] = useState(inicial?.condiciones_comerciales ?? cfg.condiciones_base);
   const [notas, setNotas] = useState(inicial?.notas_internas ?? '');
   const [lineas, setLineas] = useState<Linea[]>([]);
   const [guardando, setGuardando] = useState(false);
@@ -367,7 +358,7 @@ ${urlLogo(empresa.logo_path) ? `<img src="${urlLogo(empresa.logo_path)}" alt="" 
         <div className="sm:col-span-2"><label className={etiqueta}>Título</label><input className={campo} value={titulo} onChange={(e) => setTitulo(e.target.value)} /></div>
         <div><label className={etiqueta}>Estado</label>
           <select className={campo} value={estado} onChange={(e) => setEstado(e.target.value as Estado)}>
-            {(['borrador', 'enviada', 'aceptada', 'rechazada', 'vencida'] as Estado[]).map((e) => <option key={e} value={e}>{e}</option>)}
+            {(ESTADOS_COTIZACION as readonly Estado[]).map((e) => <option key={e} value={e}>{estiloEstado(cfg.estados_cotizacion, e).etiqueta}</option>)}
           </select></div>
         <div><label className={etiqueta}>Negocio asociado</label>
           <select className={campo} value={oportunidadId} onChange={(e) => setOportunidadId(e.target.value)}>
@@ -399,7 +390,7 @@ ${urlLogo(empresa.logo_path) ? `<img src="${urlLogo(empresa.logo_path)}" alt="" 
             <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-[140px_1fr] gap-2">
               <select className={campo} value={l.plan} disabled={!ufListo} onChange={(e) => elegirPlan(i, e.target.value as PlanEmpresa | '')} aria-label="Plan de la línea">
                 <option value="">Libre</option>
-                {(Object.keys(PLANES) as PlanEmpresa[]).map((p) => <option key={p} value={p}>{p === 'personalizado' ? 'Personalizado' : `Plan ${p}`}</option>)}
+                {codigos.map((p) => <option key={p} value={p}>{p === 'personalizado' ? 'Personalizado' : `Plan ${p}`}</option>)}
               </select>
               <input className={campo} placeholder="Concepto" value={l.concepto} onChange={(e) => cambiar(i, { concepto: e.target.value })} />
             </div>

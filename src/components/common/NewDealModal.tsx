@@ -1,10 +1,10 @@
 import { fondoCerrable } from '../../lib/fondo';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X, Kanban, Plus } from 'lucide-react';
 import { useCRM } from '../../context/CRMContext';
 import { useAuth } from '../../context/AuthContext';
 import { Moneda, PlanEmpresa } from '../../types/crm';
-import { PLANES, SETUP_LISTA } from '../../lib/planes';
+import { usePlanes } from '../../lib/planes';
 
 interface NewDealModalProps {
   isOpen: boolean;
@@ -20,6 +20,7 @@ const label = 'block text-xs font-medium text-[var(--c-text-2)] mb-1';
 export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onCreated, empresaIdInicial }) => {
   const { empresas, etapas, miembros, fuentes, crearOportunidad, crearEmpresa } = useCRM();
   const { currentUser } = useAuth();
+  const { PLANES, codigos, SETUP_LISTA } = usePlanes();
 
   const [nombre, setNombre] = useState('');
   const [empresaId, setEmpresaId] = useState(empresaIdInicial ?? '');
@@ -45,6 +46,14 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
   const [proximaAccionFecha, setProximaAccionFecha] = useState(
     new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10),
   );
+
+  // Al abrir, el precio y el setup parten de los vigentes (los planes se editan en Administración)
+  useEffect(() => {
+    if (!isOpen) return;
+    if (plan) setValorNeto(PLANES[plan].valor);
+    setSetupNeto(desdeFicha && empresaFicha?.estado === 'cliente' ? 0 : SETUP_LISTA);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, SETUP_LISTA]);
 
   if (!isOpen) return null;
 
@@ -198,7 +207,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
               <label className={label}>Plan</label>
               <select value={plan} onChange={(e) => elegirPlan(e.target.value as PlanEmpresa | '')} className={`${input} font-mono`}>
                 <option value="">Sin plan</option>
-                {(Object.keys(PLANES) as PlanEmpresa[]).map((p) => (
+                {codigos.map((p) => (
                   <option key={p} value={p}>
                     {p === 'personalizado' ? PLANES[p].nombre : `Plan ${p} · ${PLANES[p].nombre}`}
                   </option>

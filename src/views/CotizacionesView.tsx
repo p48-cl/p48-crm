@@ -3,7 +3,8 @@ import { ChevronRight, Filter, Plus, Search } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { parseSupabaseError } from '../lib/errorHandler';
 import { formatFecha, formatMoneda, formatCorrelativo } from '../lib/formatters';
-import { estadoEfectivo, redondear, MonedaCotizacion } from '../lib/cotizaciones';
+import { estadoEfectivo, redondear, MonedaCotizacion, estiloEstado, ESTADOS_COTIZACION } from '../lib/cotizaciones';
+import { useConfiguracionCRM } from '../lib/configuracion';
 import { useCRM } from '../context/CRMContext';
 import { SelectorCliente } from '../components/common/SelectorCliente';
 import { Kpi } from '../components/dashboard/ui';
@@ -24,15 +25,8 @@ interface Fila {
   neto_unico: number;
 }
 
-const ESTADOS = ['borrador', 'enviada', 'aceptada', 'rechazada', 'vencida'] as const;
+const ESTADOS = ESTADOS_COTIZACION;
 
-const ESTILO_ESTADO: Record<string, { label: string; color: string }> = {
-  borrador: { label: 'Borrador', color: 'text-[var(--c-muted)]' },
-  enviada: { label: 'Enviada', color: 'text-[var(--c-info)]' },
-  aceptada: { label: 'Aceptada', color: 'text-[var(--c-ok)] font-medium' },
-  rechazada: { label: 'Rechazada', color: 'text-[var(--c-danger)]' },
-  vencida: { label: 'Vencida', color: 'text-[var(--c-warn)]' },
-};
 
 type ClaveOrden = 'numero' | 'titulo' | 'cliente' | 'estado' | 'emitida' | 'vence' | 'mensual' | 'unico';
 
@@ -47,6 +41,8 @@ interface CotizacionesViewProps {
 
 export const CotizacionesView: React.FC<CotizacionesViewProps> = ({ onAbrirFicha, version = 0 }) => {
   const { empresas, agencia, crearEmpresa } = useCRM();
+  const { config: cfgCRM } = useConfiguracionCRM();
+  const estilo = (e: string) => { const x = estiloEstado(cfgCRM.estados_cotizacion, e); return { label: x.etiqueta, color: x.clase }; };
   const [filasTodas, setFilas] = useState<Fila[]>([]);
   // Las cotizaciones de la cuenta interna de la agencia se ven solo en Agencia.
   const filas = useMemo(() => filasTodas.filter((f) => f.empresa_id !== agencia?.id), [filasTodas, agencia]);
@@ -248,7 +244,7 @@ export const CotizacionesView: React.FC<CotizacionesViewProps> = ({ onAbrirFicha
             <option value="todos">Todos los estados</option>
             {ESTADOS.map((e) => (
               <option key={e} value={e}>
-                {ESTILO_ESTADO[e].label}
+                {estilo(e).label}
               </option>
             ))}
           </select>
@@ -293,7 +289,7 @@ export const CotizacionesView: React.FC<CotizacionesViewProps> = ({ onAbrirFicha
                 visibles.map((c) => {
                   const f = 1 + c.iva_pct / 100;
                   const estadoActual = estadoEfectivo(c);
-                  const est = ESTILO_ESTADO[estadoActual] ?? { label: estadoActual, color: 'text-[var(--c-muted)]' };
+                  const est = estilo(estadoActual);
                   return (
                     <tr
                       key={c.id}

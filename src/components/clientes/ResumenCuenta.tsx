@@ -3,10 +3,12 @@ import { Mail, Phone, ChevronRight, Pencil, Check, X } from 'lucide-react';
 import { formatRUTInput } from '../../lib/formatters';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { formatCLP, formatFecha, formatMoneda, formatCorrelativo } from '../../lib/formatters';
-import { estadoEfectivo, redondear, MonedaCotizacion } from '../../lib/cotizaciones';
+import { estadoEfectivo, redondear, MonedaCotizacion, estiloEstado } from '../../lib/cotizaciones';
 import type { Actividad, Contacto, EstadoPago, Empresa, Factura, Miembro, Oportunidad, Tarea } from '../../types/crm';
 import { estaVencida } from './FacturasCliente';
 import { useCRM } from '../../context/CRMContext';
+import { usePlanes } from '../../lib/planes';
+import { useConfiguracionCRM } from '../../lib/configuracion';
 
 export type DestinoResumen = 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'facturacion' | 'estrategia' | 'marketing' | 'proyectos' | 'info';
 
@@ -80,15 +82,6 @@ const ESTADOS_CLIENTE: { valor: Empresa['estado']; texto: string }[] = [
   { valor: 'archivado', texto: 'Archivado' },
 ];
 
-const PLANES = [
-  { valor: '', texto: 'Sin plan' },
-  { valor: 'A', texto: 'Plan A' },
-  { valor: 'B', texto: 'Plan B' },
-  { valor: 'C', texto: 'Plan C' },
-  { valor: 'D', texto: 'Plan D' },
-  { valor: 'E', texto: 'Plan E' },
-  { valor: 'personalizado', texto: 'Personalizado' },
-];
 
 const ETIQUETA_PROYECTO: Record<ProyectoRes['estado'], string> = {
   planificado: 'Planificado',
@@ -195,6 +188,13 @@ export const ResumenCuenta: React.FC<Props> = ({
   alertas, accesosConcedidos, accesosTotal, enlaces, estrategia, onIr, onAbrirNegocio, onActualizar, diasAlertaCotizacion = 7,
 }) => {
   const { etapas } = useCRM();
+  const { PLANES: PLANES_VIGENTES, codigos } = usePlanes();
+  const { config: cfg } = useConfiguracionCRM();
+  // Plan actual siempre visible aunque esté desactivado en Administración
+  const PLANES = [
+    { valor: '', texto: 'Sin plan' },
+    ...[...new Set([...codigos, ...(empresa.plan ? [empresa.plan] : [])])].map((c) => ({ valor: c as string, texto: c === 'personalizado' ? 'Personalizado' : `Plan ${c} · ${PLANES_VIGENTES[c as keyof typeof PLANES_VIGENTES]?.nombre ?? ''}` })),
+  ];
   const [cotizaciones, setCotizaciones] = useState<CotRes[]>([]);
   const [proyectos, setProyectos] = useState<ProyectoRes[]>([]);
   const [riesgosTxt, setRiesgosTxt] = useState(empresa.riesgos_oportunidades ?? '');
@@ -356,11 +356,11 @@ export const ResumenCuenta: React.FC<Props> = ({
     return { valor: grupo.length, monto: m && grupo.length ? formatMoneda(monto, m) : undefined };
   };
   const rebanadasCot: Rebanada[] = [
-    { etiqueta: 'Enviadas', color: COLOR.info, ...cotConMonto('enviada') },
-    { etiqueta: 'Aceptadas', color: COLOR.ok, ...cotConMonto('aceptada') },
-    { etiqueta: 'Rechazadas', color: COLOR.danger, ...cotConMonto('rechazada') },
-    { etiqueta: 'Vencidas', color: COLOR.warn, ...cotConMonto('vencida') },
-    { etiqueta: 'Borradores', color: COLOR.muted, ...cotConMonto('borrador') },
+    ...(['enviada', 'aceptada', 'rechazada', 'vencida', 'borrador'] as const).map((e) => ({
+      etiqueta: estiloEstado(cfg.estados_cotizacion, e).etiqueta,
+      color: estiloEstado(cfg.estados_cotizacion, e).color,
+      ...cotConMonto(e),
+    })),
   ];
 
   const sumaFact = (xs: Factura[]) => xs.reduce((a, f) => a + Number(f.monto_total), 0);
