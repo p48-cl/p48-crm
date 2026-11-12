@@ -26,6 +26,8 @@ export type SaludCliente = 'verde' | 'amarillo' | 'rojo';
 export type EstadoPago = 'al_dia' | 'por_vencer' | 'atrasado';
 
 export interface Empresa {
+  origen?: 'lead' | 'referido' | 'prospeccion_directa' | 'cliente_existente' | 'otro' | null;
+  origen_oportunidad_id?: string | null;
   id: string; // uuid
   nombre: string;
   rut?: string | null;
@@ -188,6 +190,7 @@ export type TipoActividad = 'llamada' | 'reunion' | 'nota' | 'correo_manual';
 
 // Inserción en actividades (el autor lo asigna la base)
 export interface Actividad {
+  archivado?: boolean;
   id: string;
   empresa_id?: string | null;
   oportunidad_id?: string | null;
@@ -202,6 +205,7 @@ export interface Actividad {
 }
 
 export interface Tarea {
+  archivado?: boolean;
   id: string;
   empresa_id?: string | null;
   oportunidad_id?: string | null;
@@ -358,6 +362,10 @@ export type EstadoFactura = 'pendiente' | 'pagada' | 'anulada';
 
 // Factura registrada a mano desde el SII (afecta 33 o exenta 34).
 export interface Factura {
+  moneda?: 'CLP' | 'UF';
+  monto_uf?: number | null;
+  uf_valor?: number | null;
+  uf_fecha?: string | null;
   id: string;
   empresa_id: string;
   cotizacion_id?: string | null;
@@ -383,6 +391,7 @@ export interface Factura {
 // Fila de v_cotizaciones (cotización con netos y vencimiento calculados por la base)
 export interface CotizacionVista {
   id: string;
+  archivado?: boolean;
   numero: number;
   empresa_id: string;
   oportunidad_id?: string | null;
