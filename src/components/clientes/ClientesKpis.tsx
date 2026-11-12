@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useCRM } from '../../context/CRMContext';
 import { formatCLP } from '../../lib/formatters';
-import { Kpi, Dona, COLOR_SALUD, estilos } from '../dashboard/ui';
+import { Kpi, Dona, COLOR_SALUD, ALTO_TARJETA, estilos } from '../dashboard/ui';
 import { metricasCartera, hoyIso } from '../dashboard/metricas';
 import { resumen360 } from '../../lib/cliente360';
 import { estadoEfectivo } from '../../lib/cotizaciones';
@@ -11,9 +11,6 @@ import { IngresosChart } from './IngresosChart';
 const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`;
 const netoCotizacion = (q: { neto_mensual: number | null; neto_unico: number | null }) =>
   Number(q.neto_mensual ?? 0) + Number(q.neto_unico ?? 0);
-
-// Las 8 tarjetas comparten altura para que la grilla no cambie de tamaño según su contenido.
-const ALTO_TARJETA = 'h-44';
 
 export const ClientesKpis: React.FC = () => {
   const { empresas, oportunidades, etapas, facturas, cotizaciones, proyectos, tareas, reportes, actividades, contactos, agencia } = useCRM();

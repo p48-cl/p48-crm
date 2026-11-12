@@ -3,7 +3,7 @@ import { CalendarDays, FolderKanban, Plus, GanttChart, Pencil } from 'lucide-rea
 import { useAuth } from '../context/AuthContext';
 import { useCRM } from '../context/CRMContext';
 import { ChipSenal } from '../components/common/ChipSenal';
-import { Dona, Kpi, estilos } from '../components/dashboard/ui';
+import { ALTO_TARJETA, Dona, Kpi, estilos } from '../components/dashboard/ui';
 import { metricasProyectos, faseActual } from '../components/dashboard/metricas';
 import { Calendario } from '../components/proyectos/Calendario';
 import { EditarProyectoModal } from '../components/proyectos/EditarProyectoModal';
@@ -68,6 +68,7 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
       conTareasAtrasadas: met.conTareasAtrasadas,
       atrasadas: tareasVis.filter((t) => !t.completada && t.fecha_vencimiento < hoy).length,
       hoy: tareasVis.filter((t) => !t.completada && t.fecha_vencimiento === hoy).length,
+      abiertasVis: tareasVis.filter((t) => !t.completada).length,
       avance,
     };
   }, [visibles, tareas, hoy]);
@@ -115,7 +116,7 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
-            <div className={`${estilos.tarjeta} col-span-2 lg:col-span-1`} style={{ borderTop: '3px solid var(--c-accent)' }}>
+            <div className={`${estilos.tarjeta} ${ALTO_TARJETA} col-span-2 lg:col-span-1`} style={{ borderTop: '3px solid var(--c-accent)' }}>
               <p className={estilos.etiqueta} style={{ color: 'var(--c-accent)' }}>Proyectos por estado</p>
               <Dona
                 rotulo={`${visibles.length} proyectos visibles por estado`}
@@ -126,13 +127,15 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
               <p className={estilos.nota}>{indicadores.vencidos} vencidos · {indicadores.conTareasAtrasadas} con tareas atrasadas</p>
             </div>
             <Kpi
+              className={ALTO_TARJETA}
               etiqueta="Tareas atrasadas"
               acento="var(--c-danger)"
               valor={indicadores.atrasadas}
               tono={indicadores.atrasadas > 0 ? 'peligro' : 'normal'}
-              nota={`${indicadores.hoy} vencen hoy`}
+              progreso={indicadores.abiertasVis > 0 ? Math.round((indicadores.atrasadas / indicadores.abiertasVis) * 100) : 0}
+              nota={`${indicadores.hoy} vencen hoy · de ${indicadores.abiertasVis} abiertas`}
             />
-            <Kpi etiqueta="Avance promedio" acento="var(--c-ok)" valor={`${indicadores.avance}%`} progreso={indicadores.avance} nota="promedio de proyectos activos" />
+            <Kpi className={ALTO_TARJETA} etiqueta="Avance promedio" acento="var(--c-ok)" valor={`${indicadores.avance}%`} progreso={indicadores.avance} nota="promedio de proyectos activos" />
           </div>
           <div role="tablist" aria-label="Vista" className="inline-flex gap-1 p-0.5 rounded-md bg-[var(--c-surface-2)]">
             {pestanas.map(([k, t, Icono]) => (
