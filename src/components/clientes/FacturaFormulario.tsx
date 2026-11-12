@@ -101,17 +101,21 @@ interface Props {
   empresa?: Empresa | null;
   empresasDisponibles?: Empresa[];
   inicial?: Factura | null;
+  // Negocio desde el que se registra la factura: queda preseleccionado.
+  oportunidadId?: string | null;
   onGuardado: () => void;
   onCancelar: () => void;
 }
 
 // Formulario de registro/edición de una factura. Lo usa la ficha del cliente y la vista global de facturas.
-export const FacturaFormulario: React.FC<Props> = ({ empresa, empresasDisponibles = [], inicial, onGuardado, onCancelar }) => {
+export const FacturaFormulario: React.FC<Props> = ({ empresa, empresasDisponibles = [], inicial, oportunidadId, onGuardado, onCancelar }) => {
   const { facturas, oportunidades, crearFactura, actualizarFactura } = useCRM();
   const { config: cfg } = useConfiguracionCRM();
   const empresaFija = empresa ?? null;
   const [form, setForm] = useState<Form>(() =>
-    inicial ? formDesde(inicial) : formVacio(empresaFija?.id ?? '', empresaFija?.dias_pago ?? 30),
+    inicial
+      ? formDesde(inicial)
+      : { ...formVacio(empresaFija?.id ?? '', empresaFija?.dias_pago ?? 30), oportunidad_id: oportunidadId ?? '' },
   );
   const [error, setError] = useState<string | null>(null);
   const [cotizaciones, setCotizaciones] = useState<CotOpcion[]>([]);
