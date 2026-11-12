@@ -98,6 +98,7 @@ export interface Etapa {
   es_ganada: boolean;
   es_perdida: boolean;
   activa: boolean;
+  pipeline: 'captacion' | 'expansion';
 }
 
 // Oportunidad para inserción y actualización (tabla oportunidades)

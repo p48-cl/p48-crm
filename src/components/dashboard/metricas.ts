@@ -44,9 +44,9 @@ export function clasificarEtapas(etapas: Etapa[]) {
 const num = (v: unknown) => Number(v) || 0;
 
 /** Métricas del pipeline abierto: valor en CLP (USD aparte), ponderado y distribución por etapa. */
-export function metricasPipeline(oportunidades: VOportunidad[], etapas: Etapa[]) {
-  const { ganada, perdida } = clasificarEtapas(etapas);
-  const vivas = oportunidades.filter((o) => !o.archivado);
+export function metricasPipeline(oportunidades: VOportunidad[], etapas: Etapa[], pipeline?: 'captacion' | 'expansion') {
+  const { ganada, perdida } = clasificarEtapas(pipeline ? etapas.filter((e) => e.pipeline === pipeline) : etapas);
+  const vivas = oportunidades.filter((o) => !o.archivado && (!pipeline || etapas.find((e) => e.id === o.etapa_id)?.pipeline === pipeline));
   const abiertas = vivas.filter((o) => !ganada.has(o.etapa_id) && !perdida.has(o.etapa_id));
   const clp = abiertas.filter((o) => o.moneda === 'CLP');
   const porEtapa = etapas
@@ -77,10 +77,10 @@ export function metricasPipeline(oportunidades: VOportunidad[], etapas: Etapa[])
 const fechaCierre = (o: VOportunidad) => (o.fecha_cierre_real ?? o.updated_at ?? o.created_at ?? '').slice(0, 10);
 
 /** Resultados de cierre dentro del período (desde inclusive). */
-export function resultadosPeriodo(oportunidades: VOportunidad[], etapas: Etapa[], desde: string | null, hasta: string | null = null) {
-  const { ganada, perdida } = clasificarEtapas(etapas);
+export function resultadosPeriodo(oportunidades: VOportunidad[], etapas: Etapa[], desde: string | null, hasta: string | null = null, pipeline?: 'captacion' | 'expansion') {
+  const { ganada, perdida } = clasificarEtapas(pipeline ? etapas.filter((e) => e.pipeline === pipeline) : etapas);
   const enRango = (o: VOportunidad) => (!desde || fechaCierre(o) >= desde) && (!hasta || fechaCierre(o) <= hasta);
-  const vivas = oportunidades.filter((o) => !o.archivado);
+  const vivas = oportunidades.filter((o) => !o.archivado && (!pipeline || etapas.find((e) => e.id === o.etapa_id)?.pipeline === pipeline));
   const ganadas = vivas.filter((o) => ganada.has(o.etapa_id) && enRango(o));
   const perdidas = vivas.filter((o) => perdida.has(o.etapa_id) && enRango(o));
   const creada = (o: VOportunidad) => (o.created_at ?? '').slice(0, 10);

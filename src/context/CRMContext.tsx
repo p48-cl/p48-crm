@@ -117,7 +117,7 @@ interface CRMContextType {
   desactivarMiembro: (miembroId: string, reasignarAId: string) => Promise<void>;
   activarMiembro: (miembroId: string) => Promise<void>;
   guardarEtapa: (etapaId: string, cambios: Partial<Etapa>) => Promise<string | null>;
-  crearEtapa: (nombre: string, probabilidad: number) => Promise<string | null>;
+  crearEtapa: (nombre: string, probabilidad: number, pipeline?: 'captacion' | 'expansion') => Promise<string | null>;
   reordenarEtapas: (idsOrdenados: string[]) => Promise<string | null>;
   guardarCriterioPlantilla: (criterio: Partial<CriterioCalificacion>) => Promise<void>;
   agregarItemCatalogo: (tipo: 'fuentes' | 'motivos' | 'industrias', nombre: string) => Promise<void>;
@@ -959,11 +959,11 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return null;
   };
 
-  const crearEtapa = async (nombre: string, probabilidad: number): Promise<string | null> => {
+  const crearEtapa = async (nombre: string, probabilidad: number, pipeline: 'captacion' | 'expansion' = 'captacion'): Promise<string | null> => {
     if (!supabase) return null;
-    const siguiente = Math.max(0, ...etapas.filter((e) => !e.es_ganada && !e.es_perdida).map((e) => e.orden)) + 1;
+    const siguiente = Math.max(0, ...etapas.filter((e) => e.pipeline === pipeline && !e.es_ganada && !e.es_perdida).map((e) => e.orden)) + 1;
     const { error } = await supabase.from('etapas').insert({
-      nombre, orden: siguiente, probabilidad_default: probabilidad, color: '#888888', es_ganada: false, es_perdida: false, activa: true,
+      nombre, orden: siguiente, probabilidad_default: probabilidad, color: '#888888', es_ganada: false, es_perdida: false, activa: true, pipeline,
     });
     if (error) return parseSupabaseError(error);
     await refrescarEtapas();
