@@ -64,7 +64,26 @@ export function useEstrategiaCliente(empresaId: string | null | undefined) {
     else setGuardado(CAMPOS.find((c) => c.id === campo)?.titulo ?? null);
   };
 
-  return { valores, setValores, error, guardado, guardar, cargando };
+  // Guarda todos los campos de una vez (tarjeta editable completa)
+  const guardarTodos = async (nuevos: Valores) => {
+    if (!supabase || !empresaId) return;
+    setError(null);
+    const limpios = Object.fromEntries(CAMPOS.map((c) => [c.id, nuevos[c.id].trim()])) as Valores;
+    const { error: err } = await supabase
+      .from('estrategia_cliente')
+      .upsert(
+        { empresa_id: empresaId, ...Object.fromEntries(CAMPOS.map((c) => [c.id, limpios[c.id] || null])), updated_at: new Date().toISOString() },
+        { onConflict: 'empresa_id' },
+      );
+    if (err) setError(parseSupabaseError(err));
+    else {
+      setValores(limpios);
+      setGuardado('Estrategia');
+    }
+    return !err;
+  };
+
+  return { valores, setValores, error, guardado, guardar, guardarTodos, cargando };
 }
 
 const areaClase =
@@ -216,6 +235,105 @@ export const ResumenEstrategia: React.FC<{ empresaId: string; onVerTodo: () => v
           );
         })}
       </dl>
+    </div>
+  );
+};
+
+
+// Tarjeta única de estrategia para la ficha: 3 campos clave, el resto con "Ver más", edición de la tarjeta completa
+const CAMPOS_CLAVE: Campo[] = ['objetivo_ventas', 'canal_prioritario', 'posicionamiento'];
+
+export const EstrategiaCard: React.FC<{ empresaId: string; nombreCliente?: string }> = ({ empresaId }) => {
+  const { valores, error, guardarTodos, cargando } = useEstrategiaCliente(empresaId);
+  const [editando, setEditando] = useState(false);
+  const [verMas, setVerMas] = useState(false);
+  const [borrador, setBorrador] = useState<Valores>(VACIO);
+  const [guardando, setGuardando] = useState(false);
+  const completos = CAMPOS.filter((c) => valores[c.id].trim()).length;
+  const clave = CAMPOS.filter((c) => CAMPOS_CLAVE.includes(c.id));
+  const resto = CAMPOS.filter((c) => !CAMPOS_CLAVE.includes(c.id));
+
+  const empezarEdicion = () => {
+    setBorrador(valores);
+    setVerMas(true);
+    setEditando(true);
+  };
+
+  const guardar = async () => {
+    setGuardando(true);
+    const ok = await guardarTodos(borrador);
+    setGuardando(false);
+    if (ok) setEditando(false);
+  };
+
+  if (cargando) return <p className="text-sm text-[var(--c-muted)]">Cargando estrategia...</p>;
+
+  const Fila: React.FC<{ c: { id: Campo; titulo: string }; recortar?: boolean }> = ({ c, recortar }) => {
+    const texto = valores[c.id].trim();
+    return (
+      <div className="min-w-0">
+        <dt className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">{c.titulo}</dt>
+        <dd className={`text-xs mt-0.5 whitespace-pre-wrap ${recortar ? 'line-clamp-2' : ''} ${texto ? 'text-[var(--c-text-2)]' : 'text-[var(--c-warn)] italic'}`}>
+          {texto || 'Sin definir'}
+        </dd>
+      </div>
+    );
+  };
+
+  return (
+    <div className="surface p-4 space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-[var(--c-text)]">Estrategia</p>
+          <p className="text-[11px] font-mono text-[var(--c-muted)]">{completos}/{CAMPOS.length} definidos</p>
+        </div>
+        {editando ? (
+          <div className="flex items-center gap-2 shrink-0">
+            <button onClick={() => setEditando(false)} className="px-3 py-1.5 text-xs rounded border border-[var(--c-line)] text-[var(--c-text)] hover:bg-[var(--c-surface-2)]">Cancelar</button>
+            <button onClick={guardar} disabled={guardando} className="px-3 py-1.5 text-xs font-semibold rounded bg-[var(--c-accent)] text-[var(--c-on-accent)] disabled:opacity-50">
+              {guardando ? 'Guardando...' : 'Guardar'}
+            </button>
+          </div>
+        ) : (
+          <button onClick={empezarEdicion} className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded border border-[var(--c-line)] text-[var(--c-text)] hover:bg-[var(--c-surface-2)] shrink-0">
+            <Pencil className="w-3 h-3" /> Editar
+          </button>
+        )}
+      </div>
+
+      {error && <p className="text-xs text-[var(--c-danger)] border border-[var(--c-danger)]/40 rounded p-2">{error}</p>}
+
+      {editando ? (
+        <div className="space-y-3">
+          {CAMPOS.map((c) => (
+            <label key={c.id} className="block space-y-1">
+              <span className="block text-xs font-semibold text-[var(--c-text)]">{c.titulo}</span>
+              <span className="block text-[11px] text-[var(--c-muted)]">{c.ayuda}</span>
+              <textarea
+                rows={2}
+                className={areaClase}
+                value={borrador[c.id]}
+                onChange={(e) => setBorrador({ ...borrador, [c.id]: e.target.value })}
+              />
+            </label>
+          ))}
+        </div>
+      ) : (
+        <>
+          <dl className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-3 gap-x-4 gap-y-3">
+            {clave.map((c) => <Fila key={c.id} c={c} recortar />)}
+          </dl>
+          {verMas && (
+            <dl className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-x-4 gap-y-3 pt-4 border-t border-[var(--c-line)]">
+              {resto.map((c) => <Fila key={c.id} c={c} />)}
+            </dl>
+          )}
+          <button onClick={() => setVerMas(!verMas)} className="flex items-center gap-1 text-[11px] text-[var(--c-accent)] hover:underline">
+            {verMas ? 'Ver menos' : `Ver más (${resto.length})`}
+            {verMas ? null : <ChevronRight className="w-3.5 h-3.5" />}
+          </button>
+        </>
+      )}
     </div>
   );
 };
