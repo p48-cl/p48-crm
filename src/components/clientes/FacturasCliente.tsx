@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
-import { Trash2, Pencil, Check } from 'lucide-react';
+import { Archive, Ban, Pencil, Check } from 'lucide-react';
 import { useCRM } from '../../context/CRMContext';
-import { useAuth } from '../../context/AuthContext';
 import { formatCLP, formatFecha } from '../../lib/formatters';
 import { EncabezadoDoc, FilaKpis, TablaDoc, COLUMNAS_DOC, celda, filaClase } from './DocumentosUI';
 import { FacturaFormulario, ESTADOS_FACTURA } from './FacturaFormulario';
@@ -17,8 +16,7 @@ const soloFecha = (v?: string | null) => (v ? v.slice(0, 10) : '');
 export const estaVencida = (f: Factura) => f.estado_pago === 'pendiente' && !!f.fecha_vencimiento && soloFecha(f.fecha_vencimiento) < hoyISO();
 
 export const FacturasCliente: React.FC<{ empresa: Empresa }> = ({ empresa }) => {
-  const { facturas, actualizarFactura, eliminarFactura } = useCRM();
-  const { isAdmin } = useAuth();
+  const { facturas, actualizarFactura } = useCRM();
   // undefined = sin formulario; null = nueva; Factura = editando
   const [formulario, setFormulario] = useState<Factura | null | undefined>(undefined);
   const [cotizaciones, setCotizaciones] = useState<{ id: string; numero: number }[]>([]);
@@ -86,9 +84,10 @@ export const FacturasCliente: React.FC<{ empresa: Empresa }> = ({ empresa }) => 
                     <button onClick={() => marcarPagada(f)} title="Marcar como pagada" className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-ok)]"><Check className="w-3.5 h-3.5" /></button>
                   )}
                   <button onClick={() => setFormulario(f)} title="Editar" className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-text)]"><Pencil className="w-3.5 h-3.5" /></button>
-                  {isAdmin && (
-                    <button onClick={() => { if (window.confirm(`¿Eliminar la factura ${f.folio}? No se puede deshacer.`)) eliminarFactura(f.id); }} title="Eliminar" className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-danger)]"><Trash2 className="w-3.5 h-3.5" /></button>
+                  {f.estado_pago !== 'anulada' && (
+                    <button onClick={() => { if (window.confirm(`¿Anular la factura ${f.folio}? Queda registrada como anulada.`)) actualizarFactura(f.id, { estado_pago: 'anulada' }); }} title="Anular" className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-danger)]"><Ban className="w-3.5 h-3.5" /></button>
                   )}
+                  <button onClick={() => { if (window.confirm(`¿Archivar la factura ${f.folio}? Podrás restaurarla desde Facturas › Archivadas.`)) actualizarFactura(f.id, { archivado: true }); }} title="Archivar" className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-text)]"><Archive className="w-3.5 h-3.5" /></button>
                 </div>
               </td>
             </tr>

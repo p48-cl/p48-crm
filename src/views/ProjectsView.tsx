@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCRM } from '../context/CRMContext';
 import { ChipSenal } from '../components/common/ChipSenal';
 import { Kpi } from '../components/dashboard/ui';
-import { metricasProyectos } from '../components/dashboard/metricas';
+import { metricasProyectos, faseActual } from '../components/dashboard/metricas';
 import { Calendario } from '../components/proyectos/Calendario';
 import { EditarProyectoModal } from '../components/proyectos/EditarProyectoModal';
 import { Gantt } from '../components/proyectos/Gantt';
@@ -55,7 +55,8 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
     return {
       activos: met.activos.length,
       enCurso: visibles.filter((p) => p.estado === 'en_curso').length,
-      conAtraso: met.conAtraso,
+      vencidos: met.vencidos,
+      conTareasAtrasadas: met.conTareasAtrasadas,
       atrasadas: tareasVis.filter((t) => !t.completada && t.fecha_vencimiento < hoy).length,
       hoy: tareasVis.filter((t) => !t.completada && t.fecha_vencimiento === hoy).length,
       avance,
@@ -66,8 +67,10 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
     () =>
       visibles.map((p) => {
         const ts = tareas.filter((t) => t.proyecto_id === p.id);
+        const fasesP = fases.filter((f) => f.proyecto_id === p.id);
         return {
           p,
+          fase: fasesP.length ? faseActual(fasesP)?.nombre : undefined,
           total: ts.length,
           hechas: ts.filter((t) => t.completada).length,
           atrasadas: ts.filter((t) => !t.completada && t.fecha_vencimiento < hoy).length,
@@ -75,7 +78,7 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
           responsable: miembros.find((m) => m.id === p.responsable_id)?.nombre,
         };
       }),
-    [visibles, tareas, empresas, miembros, hoy],
+    [visibles, tareas, fases, empresas, miembros, hoy],
   );
 
   const seleccionado = abierto ? proyectos.find((p) => p.id === abierto) : undefined;
@@ -104,7 +107,8 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
 
           <div className="grid grid-cols-2 lg:grid-cols-6 gap-2">
             <Kpi etiqueta="Activos" valor={indicadores.activos} nota={`${indicadores.enCurso} en curso`} />
-            <Kpi etiqueta="Con atraso" valor={indicadores.conAtraso} tono={indicadores.conAtraso > 0 ? 'peligro' : 'normal'} nota="tareas o fecha vencida" />
+            <Kpi etiqueta="Proyectos vencidos" valor={indicadores.vencidos} tono={indicadores.vencidos > 0 ? 'peligro' : 'normal'} nota="fecha de término pasada sin finalizar" />
+            <Kpi etiqueta="Con tareas atrasadas" valor={indicadores.conTareasAtrasadas} tono={indicadores.conTareasAtrasadas > 0 ? 'aviso' : 'normal'} nota="al menos una tarea vencida" />
             <Kpi etiqueta="Tareas atrasadas" valor={indicadores.atrasadas} tono={indicadores.atrasadas > 0 ? 'peligro' : 'normal'} />
             <Kpi etiqueta="Vencen hoy" valor={indicadores.hoy} tono={indicadores.hoy > 0 ? 'aviso' : 'normal'} />
             <Kpi etiqueta="Avance promedio" valor={`${indicadores.avance}%`} progreso={indicadores.avance} />
@@ -190,7 +194,7 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
                 </div>
               ) : (
                 <div className="grid grid-cols-[minmax(0,1fr)] md:grid-cols-2 xl:grid-cols-3 gap-3">
-                  {lista.map(({ p, total, hechas, atrasadas, cliente, responsable }) => {
+                  {lista.map(({ p, fase, total, hechas, atrasadas, cliente, responsable }) => {
                     const pct = total ? Math.round((hechas / total) * 100) : 0;
                     return (
                       <button key={p.id} onClick={() => setAbierto(p.id)} className="surface p-4 text-left space-y-3 hover:ring-1 hover:ring-[var(--module)] transition">
@@ -199,12 +203,14 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
                           <ChipSenal tono={p.estado === 'finalizado' ? 'ok' : p.estado === 'pausado' ? 'warn' : 'neutro'}>{ESTADO[p.estado]}</ChipSenal>
                         </div>
                         <p className="text-[11px] text-[var(--c-muted)]">{p.tipo === 'interno' ? 'Interno de la agencia' : cliente ?? 'Cliente'}{responsable ? ` · ${responsable}` : ''}</p>
+                        {fase && <p className="text-[11px] text-[var(--c-text-2)]">Fase actual: <span className="font-medium">{fase}</span></p>}
                         <div className="h-1.5 rounded-full bg-[var(--c-surface-3)] overflow-hidden"><div className="h-full bg-[var(--c-ok)]" style={{ width: `${pct}%` }} /></div>
                         <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono text-[var(--c-muted)]">
                           <span>{hechas}/{total} tareas</span>
                           <span>·</span>
                           <span>{p.fecha_inicio ? diaCorto(p.fecha_inicio) : '—'} → {p.fecha_fin ? diaCorto(p.fecha_fin) : '—'}</span>
-                          {atrasadas > 0 && <ChipSenal tono="danger">{atrasadas} atrasada{atrasadas > 1 ? 's' : ''}</ChipSenal>}
+                          {p.fecha_fin && p.fecha_fin < hoy && p.estado !== 'finalizado' && <ChipSenal tono="danger">Vencido</ChipSenal>}
+                          {atrasadas > 0 && <ChipSenal tono="warn">{atrasadas} tarea{atrasadas > 1 ? 's' : ''} atrasada{atrasadas > 1 ? 's' : ''}</ChipSenal>}
                         </div>
                       </button>
                     );

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ChevronRight, Filter, Plus, Search } from 'lucide-react';
+import { Archive, ArchiveRestore, ChevronRight, Filter, Plus, Search } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { parseSupabaseError } from '../lib/errorHandler';
 import { formatFecha, formatMoneda, formatCorrelativo } from '../lib/formatters';
@@ -55,7 +55,13 @@ export const CotizacionesView: React.FC<CotizacionesViewProps> = ({ onAbrirFicha
   const estilo = (e: string) => { const x = estiloEstado(cfgCRM.estados_cotizacion, e); return { label: x.etiqueta, color: x.clase }; };
   const [filasTodas, setFilas] = useState<Fila[]>([]);
   // Las cotizaciones de la cuenta interna de la agencia se ven solo en Agencia.
-  const filas = useMemo(() => filasTodas.filter((f) => f.empresa_id !== agencia?.id), [filasTodas, agencia]);
+  const [archivadasIds, setArchivadasIds] = useState<Set<string>>(new Set());
+  const [verArchivadas, setVerArchivadas] = useState(false);
+  // Activas o archivadas según el toggle; la agencia interna no aparece aquí
+  const filas = useMemo(
+    () => filasTodas.filter((f) => f.empresa_id !== agencia?.id && archivadasIds.has(f.id) === verArchivadas),
+    [filasTodas, agencia, archivadasIds, verArchivadas]
+  );
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busqueda, setBusqueda] = useState('');
@@ -71,6 +77,11 @@ export const CotizacionesView: React.FC<CotizacionesViewProps> = ({ onAbrirFicha
       setCargando(false);
       return;
     }
+    supabase
+      .from('cotizaciones')
+      .select('id')
+      .eq('archivado', true)
+      .then(({ data }) => setArchivadasIds(new Set(((data ?? []) as { id: string }[]).map((c) => c.id))));
     supabase
       .from('facturas')
       .select('cotizacion_id, tipo_documento, folio, estado_pago, fecha_emision')
@@ -274,6 +285,12 @@ export const CotizacionesView: React.FC<CotizacionesViewProps> = ({ onAbrirFicha
           />
         </div>
         <div className="flex items-center gap-1.5 text-xs text-[var(--c-muted)]">
+          <button
+            onClick={() => setVerArchivadas((v) => !v)}
+            className="ml-2 font-mono text-[11px] text-[var(--c-muted)] hover:text-[var(--c-text)]"
+          >
+            {verArchivadas ? 'Ver activas' : 'Ver archivadas'}
+          </button>
           <Filter className="w-3.5 h-3.5" />
           <select className={selectClase} value={estado} onChange={(e) => setEstado(e.target.value)} aria-label="Filtrar por estado">
             <option value="todos">Todos los estados</option>
@@ -354,6 +371,24 @@ export const CotizacionesView: React.FC<CotizacionesViewProps> = ({ onAbrirFicha
                         )}
                       </td>
                       <td className="py-2.5 px-3 text-right">
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            if (!supabase) return;
+                            const archivar = !archivadasIds.has(c.id);
+                            if (archivar && !window.confirm(`¿Archivar la cotización ${formatCorrelativo('COT', c.numero)}?`)) return;
+                            await supabase.from('cotizaciones').update({ archivado: archivar }).eq('id', c.id);
+                            setArchivadasIds((prev) => {
+                              const nuevo = new Set(prev);
+                              if (archivar) nuevo.add(c.id); else nuevo.delete(c.id);
+                              return nuevo;
+                            });
+                          }}
+                          title={verArchivadas ? 'Restaurar' : 'Archivar'}
+                          className="p-1 mr-1 text-[var(--c-muted)] hover:text-[var(--c-text)] opacity-0 group-hover:opacity-100"
+                        >
+                          {verArchivadas ? <ArchiveRestore className="w-3.5 h-3.5" /> : <Archive className="w-3.5 h-3.5" />}
+                        </button>
                         <ChevronRight className="w-4 h-4 text-[var(--c-muted-2)] group-hover:text-[var(--c-text)] inline" />
                       </td>
                     </tr>

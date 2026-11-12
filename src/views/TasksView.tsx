@@ -14,12 +14,14 @@ import { useCRM } from '../context/CRMContext';
 import { useProyectos } from '../components/proyectos/useProyectos';
 import { formatFecha, esFechaAtrasada, esFechaHoy } from '../lib/formatters';
 import { Kpi } from '../components/dashboard/ui';
+import { Archive, ArchiveRestore } from 'lucide-react';
 
 interface TasksViewProps {
   onOpenNewTask: () => void;
   onEditTask: (t: Tarea) => void;
   onSelectEmpresa: (id: string) => void;
   onSelectOportunidad: (id: string) => void;
+  onSelectProyecto?: (id: string) => void;
 }
 
 export const TasksView: React.FC<TasksViewProps> = ({
@@ -27,12 +29,18 @@ export const TasksView: React.FC<TasksViewProps> = ({
   onEditTask,
   onSelectEmpresa,
   onSelectOportunidad,
+  onSelectProyecto,
 }) => {
-  const { tareas, empresasTodas: empresas, oportunidades, miembros, toggleTareaCompletada } = useCRM();
+  const { tareas, empresasTodas: empresas, oportunidades, miembros, toggleTareaCompletada, actualizarTarea } = useCRM();
   const { proyectos } = useProyectos();
 
-  const [tab, setTab] = useState<'hoy' | 'semana' | 'atrasadas' | 'todas'>('hoy');
+  const [tab, setTab] = useState<'todas' | 'atrasadas' | 'hoy' | 'semana'>('todas');
   const [filtroResponsable, setFiltroResponsable] = useState<string>('todos');
+  const [verArchivadas, setVerArchivadas] = useState(false);
+
+  // Solo tareas vigentes en indicadores y pestañas; con el toggle se ven las archivadas
+  const tareasVigentes = useMemo(() => tareas.filter((t) => !t.archivado), [tareas]);
+  const base = useMemo(() => tareas.filter((t) => !!t.archivado === verArchivadas), [tareas, verArchivadas]);
 
   // Cálculos de fecha para tabs
   const tareasFiltradas = useMemo(() => {
@@ -42,7 +50,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
     const proximaSemana = new Date(hoy);
     proximaSemana.setDate(proximaSemana.getDate() + 7);
 
-    return tareas.filter((t) => {
+    return base.filter((t) => {
       // Filtro responsable
       if (filtroResponsable !== 'todos' && t.responsable_id !== filtroResponsable) return false;
 
@@ -63,22 +71,27 @@ export const TasksView: React.FC<TasksViewProps> = ({
 
       return true; // 'todas'
     });
-  }, [tareas, tab, filtroResponsable]);
+  }, [base, tab, filtroResponsable]);
 
   // Indicadores que no están ya en las pestañas: carga sin responsable y quién acumula atrasos
   const indicadores = useMemo(() => {
-    const abiertas = tareas.filter((t) => !t.completada);
+    const abiertas = tareasVigentes.filter((t) => !t.completada);
     const atrasadas = abiertas.filter((t) => esFechaAtrasada(t.fecha_vencimiento));
-    const porResp = new Map<string, number>();
-    for (const t of atrasadas) if (t.responsable_id) porResp.set(t.responsable_id, (porResp.get(t.responsable_id) ?? 0) + 1);
-    const top = [...porResp.entries()].sort((a, b) => b[1] - a[1])[0];
     return {
       abiertas: abiertas.length,
       sinResponsable: abiertas.filter((t) => !t.responsable_id).length,
-      topNombre: top ? miembros.find((m) => m.id === top[0])?.nombre ?? 'Sin asignar' : null,
-      topAtrasos: top ? top[1] : 0,
+      atrasadas: atrasadas.length,
+      proximas: abiertas.filter((t) => {
+        const f = new Date(t.fecha_vencimiento);
+        f.setHours(0, 0, 0, 0);
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        const en7 = new Date(hoy);
+        en7.setDate(en7.getDate() + 7);
+        return f >= hoy && f <= en7;
+      }).length,
     };
-  }, [tareas, miembros]);
+  }, [tareasVigentes]);
 
   // Contadores para pestañas
   const counts = useMemo(() => {
@@ -87,18 +100,18 @@ export const TasksView: React.FC<TasksViewProps> = ({
     const proximaSemana = new Date(hoy);
     proximaSemana.setDate(proximaSemana.getDate() + 7);
 
-    const hoyCount = tareas.filter((t) => esFechaHoy(t.fecha_vencimiento) && !t.completada).length;
-    const semanaCount = tareas.filter((t) => {
+    const hoyCount = tareasVigentes.filter((t) => esFechaHoy(t.fecha_vencimiento) && !t.completada).length;
+    const semanaCount = tareasVigentes.filter((t) => {
       const f = new Date(t.fecha_vencimiento);
       f.setHours(0, 0, 0, 0);
       return f >= hoy && f <= proximaSemana && !t.completada;
     }).length;
-    const atrasadasCount = tareas.filter(
+    const atrasadasCount = tareasVigentes.filter(
       (t) => esFechaAtrasada(t.fecha_vencimiento) && !t.completada
     ).length;
 
-    return { hoyCount, semanaCount, atrasadasCount, todasCount: tareas.length };
-  }, [tareas]);
+    return { hoyCount, semanaCount, atrasadasCount, todasCount: tareasVigentes.length };
+  }, [tareasVigentes]);
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
@@ -121,16 +134,18 @@ export const TasksView: React.FC<TasksViewProps> = ({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Kpi etiqueta="Abiertas" valor={indicadores.abiertas} nota="pendientes en total" />
+        <Kpi etiqueta="Atrasadas" valor={indicadores.atrasadas} tono={indicadores.atrasadas > 0 ? 'peligro' : 'normal'} nota={indicadores.atrasadas > 0 ? 'vencidas y sin completar' : 'al día'} />
+        <Kpi etiqueta="Próximas 7 días" valor={indicadores.proximas} nota="vencen en la próxima semana" />
         <Kpi etiqueta="Sin responsable" valor={indicadores.sinResponsable} tono={indicadores.sinResponsable > 0 ? 'aviso' : 'normal'} nota="asígnalas para que alguien las tome" />
-        <Kpi etiqueta="Más atrasos" valor={indicadores.topNombre ?? '—'} tono={indicadores.topAtrasos > 0 ? 'peligro' : 'normal'} nota={indicadores.topAtrasos > 0 ? `${indicadores.topAtrasos} tarea(s) atrasada(s)` : 'sin atrasos por persona'} />
       </div>
 
       {/* Pestañas: Hoy, Esta semana, Atrasadas (resaltadas en Magenta), Todas */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--c-line)] pb-1">
         <div className="flex gap-2 text-xs font-medium overflow-x-auto">
           {[
+            { id: 'todas' as const, label: 'Todas', count: counts.todasCount },
             {
               id: 'atrasadas' as const,
               label: 'Atrasadas',
@@ -139,7 +154,6 @@ export const TasksView: React.FC<TasksViewProps> = ({
             },
             { id: 'hoy' as const, label: 'Hoy', count: counts.hoyCount },
             { id: 'semana' as const, label: 'Esta semana', count: counts.semanaCount },
-            { id: 'todas' as const, label: 'Todas', count: counts.todasCount },
           ].map((item) => {
             const active = tab === item.id;
             return (
@@ -171,6 +185,9 @@ export const TasksView: React.FC<TasksViewProps> = ({
 
         {/* Filtro por Responsable */}
         <div className="flex items-center gap-2 text-xs text-[var(--c-muted)] shrink-0">
+          <button onClick={() => setVerArchivadas((v) => !v)} className="font-mono text-[11px] hover:text-[var(--c-text)]">
+            {verArchivadas ? 'Ver activas' : 'Ver archivadas'}
+          </button>
           <Filter className="w-3.5 h-3.5 text-[var(--c-muted)]" />
           <select
             value={filtroResponsable}
@@ -204,7 +221,8 @@ export const TasksView: React.FC<TasksViewProps> = ({
             return (
               <div
                 key={t.id}
-                className={`p-3.5 rounded-lg border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors ${
+                onClick={() => onEditTask(t)}
+                className={`p-3.5 rounded-lg border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors cursor-pointer ${
                   t.completada
                     ? 'bg-[var(--c-surface)] border-[var(--c-line)] opacity-60'
                     : atrasada
@@ -214,7 +232,8 @@ export const TasksView: React.FC<TasksViewProps> = ({
               >
                 <div className="flex items-start gap-3">
                   <button
-                    onClick={() => toggleTareaCompletada(t.id, t.completada)}
+                    onClick={(e) => { e.stopPropagation(); toggleTareaCompletada(t.id, t.completada); }}
+                    aria-label={t.completada ? 'Marcar como pendiente' : 'Marcar como completada'}
                     className="mt-0.5 text-[var(--c-muted)] hover:text-[var(--c-accent)] transition-colors"
                   >
                     <CheckSquare
@@ -225,18 +244,15 @@ export const TasksView: React.FC<TasksViewProps> = ({
                   </button>
 
                   <div>
-                    <button
-                      type="button"
-                      onClick={() => onEditTask(t)}
-                      aria-label={`Editar tarea ${t.titulo}`}
-                      className={`text-left text-xs font-semibold hover:underline ${
+                    <span
+                      className={`block text-left text-xs font-semibold ${
                         t.completada
                           ? 'line-through text-[var(--c-muted-2)]'
                           : 'text-[var(--c-text)]'
                       }`}
                     >
                       {t.titulo}
-                    </button>
+                    </span>
 
                     {t.descripcion && (
                       <p className="text-[11px] text-[var(--c-muted)] mt-0.5 line-clamp-1">
@@ -248,7 +264,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
                     <div className="flex flex-wrap items-center gap-3 text-[10px] text-[var(--c-muted)] font-mono mt-1.5">
                       {emp && (
                         <button
-                          onClick={() => onSelectEmpresa(emp.id)}
+                          onClick={(e) => { e.stopPropagation(); onSelectEmpresa(emp.id); }}
                           className="hover:text-[var(--c-accent)] flex items-center gap-1 font-sans"
                         >
                           <Building2 className="w-3 h-3 text-[var(--c-muted-2)]" />
@@ -257,7 +273,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
                       )}
                       {op && (
                         <button
-                          onClick={() => onSelectOportunidad(op.id)}
+                          onClick={(e) => { e.stopPropagation(); onSelectOportunidad(op.id); }}
                           className="hover:text-[var(--c-accent)] flex items-center gap-1 font-sans"
                         >
                           <Kanban className="w-3 h-3 text-[var(--c-muted-2)]" />
@@ -265,10 +281,15 @@ export const TasksView: React.FC<TasksViewProps> = ({
                         </button>
                       )}
                       {proy && (
-                        <span className="flex items-center gap-1 font-sans" title="Tarea de proyecto">
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); onSelectProyecto?.(proy.id); }}
+                          className="hover:text-[var(--c-accent)] flex items-center gap-1 font-sans"
+                          title="Ver proyecto"
+                        >
                           <FolderKanban className="w-3 h-3 text-[var(--c-muted-2)]" />
                           <span>{proy.nombre}</span>
-                        </span>
+                        </button>
                       )}
                       <span className="hidden sm:inline">·</span>
                       <span>Resp: {resp?.nombre ?? 'Equipo'}</span>
@@ -277,6 +298,14 @@ export const TasksView: React.FC<TasksViewProps> = ({
                 </div>
 
                 <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); actualizarTarea(t.id, { archivado: !t.archivado }); }}
+                    title={t.archivado ? 'Restaurar' : 'Archivar'}
+                    className="p-1 text-[var(--c-muted)] hover:text-[var(--c-text)]"
+                  >
+                    {t.archivado ? <ArchiveRestore className="w-3.5 h-3.5" /> : <Archive className="w-3.5 h-3.5" />}
+                  </button>
                   <span
                     className={`font-mono text-[10px] font-semibold ${
                       t.prioridad === 'alta'

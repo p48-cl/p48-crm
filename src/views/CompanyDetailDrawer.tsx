@@ -294,6 +294,19 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                     Plan {empresa.plan}
                   </span>
                 )}
+                <select
+                  value={empresa.origen ?? ''}
+                  onChange={(e) => actualizarEmpresa(empresa.id, { origen: (e.target.value || null) as Empresa['origen'] })}
+                  aria-label="Origen del cliente"
+                  className="font-mono text-[10px] uppercase px-2 py-0.5 rounded-full bg-[var(--c-surface-2)] border border-[var(--c-line)] text-[var(--c-text-2)] focus:outline-none"
+                >
+                  <option value="">Origen: sin definir</option>
+                  <option value="lead">Origen: lead</option>
+                  <option value="referido">Origen: referido</option>
+                  <option value="prospeccion_directa">Origen: prospección directa</option>
+                  <option value="cliente_existente">Origen: cliente existente</option>
+                  <option value="otro">Origen: otro</option>
+                </select>
                 {empresa.salud && (
                   <span className="flex items-center gap-1 font-mono text-[10px] uppercase text-[var(--c-muted)]">
                     <span className={`w-2 h-2 rounded-full ${empresa.salud === 'verde' ? 'bg-[var(--c-ok)]' : empresa.salud === 'amarillo' ? 'bg-[var(--c-warn)]' : 'bg-[var(--c-danger)]'}`} />

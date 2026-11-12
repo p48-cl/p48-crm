@@ -247,7 +247,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           <Kpi etiqueta="Renovaciones ≤ 60 d" valor={cart.renovaciones.length} tono={cart.renovacionesVencidas > 0 ? 'peligro' : 'normal'}
             nota={cart.renovacionesVencidas > 0 ? `${cart.renovacionesVencidas} vencidas` : cart.renovaciones[0] ? `Próxima en ${cart.renovaciones[0].dias} días` : 'Ninguna próxima'} />
           <Kpi etiqueta="Proyectos activos" valor={proyectosActivos} tono={proy.conAtraso > 0 ? 'aviso' : 'normal'}
-            nota={proy.conAtraso > 0 ? `${proy.conAtraso} con atraso` : 'Todos al día'} onClick={() => onNavigate('proyectos')} />
+            nota={proy.conAtraso > 0 ? `${proy.vencidos} vencido(s) · ${proy.conTareasAtrasadas} con tareas atrasadas` : 'Todos al día'} onClick={() => onNavigate('proyectos')} />
           <Kpi etiqueta="Tareas vencidas" valor={tar.vencidas} tono={tar.vencidas > 0 ? 'peligro' : 'normal'}
             nota={`${tar.hoy} para hoy · ${tar.pendientes} pendientes`} onClick={() => onNavigate('tareas')} />
         </div>

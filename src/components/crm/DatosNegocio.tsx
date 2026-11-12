@@ -17,7 +17,7 @@ interface Props {
 
 // Columna izquierda de la ficha: todos los datos del negocio, del cliente y de sus contactos, editables.
 export const DatosNegocio: React.FC<Props> = ({ oportunidad, onVerCliente }) => {
-  const { empresas, contactos, fuentes, miembros, actualizarOportunidad, actualizarEmpresa } = useCRM();
+  const { empresas, contactos, fuentes, miembros, actualizarOportunidad, actualizarEmpresa, cotizaciones, facturas } = useCRM();
   const { PLANES, codigos } = usePlanes();
   const empresa = empresas.find((e) => e.id === oportunidad.empresa_id);
   const contactosCliente = contactos.filter((c) => c.empresa_id === oportunidad.empresa_id && !c.archivado);
@@ -116,6 +116,36 @@ export const DatosNegocio: React.FC<Props> = ({ oportunidad, onVerCliente }) => 
           </p>
         )}
       </div>
+
+      {oportunidad && (
+        <div className={caja}>
+          <h3 className="text-xs font-semibold text-[var(--c-text)]">Cotizaciones y facturas del negocio</h3>
+          {(() => {
+            const cots = cotizaciones.filter((c) => c.oportunidad_id === oportunidad.id && !c.archivado);
+            const cotIds = new Set(cots.map((c) => c.id));
+            const facs = facturas.filter((f) => f.oportunidad_id === oportunidad.id || (f.cotizacion_id && cotIds.has(f.cotizacion_id)));
+            if (cots.length === 0 && facs.length === 0) {
+              return <p className="text-[11px] text-[var(--c-muted)]">Sin cotizaciones ni facturas vinculadas.</p>;
+            }
+            return (
+              <ul className="space-y-1 text-[11px] font-mono">
+                {cots.map((c) => (
+                  <li key={c.id} className="flex justify-between gap-2 text-[var(--c-text-2)]">
+                    <span>COT-{String(c.numero).padStart(4, '0')} · {c.titulo}</span>
+                    <span className="text-[var(--c-muted)] uppercase">{c.estado}</span>
+                  </li>
+                ))}
+                {facs.map((f) => (
+                  <li key={f.id} className={`flex justify-between gap-2 ${f.estado_pago === 'anulada' ? 'line-through text-[var(--c-muted)]' : 'text-[var(--c-text-2)]'}`}>
+                    <span>{f.tipo_documento}-{String(f.folio).padStart(6, '0')}</span>
+                    <span className="uppercase">{f.estado_pago}</span>
+                  </li>
+                ))}
+              </ul>
+            );
+          })()}
+        </div>
+      )}
 
       {empresa && (
         <div className={caja}>
