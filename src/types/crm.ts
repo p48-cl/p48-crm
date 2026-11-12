@@ -345,7 +345,9 @@ export interface PortalReporte {
   titulo: string;
   tipo: TipoReporte;
   periodo: string | null;
-  url: string;
+  url: string | null;
+  archivo_path?: string | null;
+  archivo_nombre?: string | null;
 }
 
 export type EstadoFactura = 'pendiente' | 'pagada' | 'anulada';

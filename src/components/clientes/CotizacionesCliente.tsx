@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Plus, Printer, Trash2, ArrowLeft } from 'lucide-react';
+import { Plus, Printer, Trash2, ArrowLeft, Pencil } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { parseSupabaseError } from '../../lib/errorHandler';
 import { formatFecha, formatMoneda, formatRUT, formatCorrelativo, formatCLP } from '../../lib/formatters';
 import { usePlanes } from '../../lib/planes';
+import { EncabezadoDoc, FilaKpis, TablaDoc, COLUMNAS_DOC, celda, filaClase } from './DocumentosUI';
 import { useConfiguracionCRM } from '../../lib/configuracion';
 import { estadoEfectivo, convertirMoneda, redondear, MonedaCotizacion, estiloEstado, ESTADOS_COTIZACION } from '../../lib/cotizaciones';
 import { useCRM } from '../../context/CRMContext';
@@ -113,58 +114,52 @@ export const CotizacionesCliente: React.FC<CotizacionesClienteProps> = ({ empres
     );
   }
 
+  const sumaMes = (xs: CotizacionFila[]) => {
+    const monedas = new Set(xs.map((c) => c.moneda));
+    if (xs.length === 0 || monedas.size !== 1) return undefined;
+    return `${formatMoneda(xs.reduce((acc, c) => acc + redondear(c.neto_mensual * (1 + c.iva_pct / 100), c.moneda), 0), xs[0].moneda)} /mes`;
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-xs font-semibold text-[var(--c-text)]">Cotizaciones</h3>
-        <button
-          onClick={() => setEditando('nueva')}
-          className="text-xs text-[var(--c-on-accent)] bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] px-2.5 py-1 rounded font-medium flex items-center gap-1"
-        >
-          <Plus className="w-3.5 h-3.5" /> Nueva cotización
-        </button>
-      </div>
+      <EncabezadoDoc titulo="Cotizaciones" subtitulo="Propuestas comerciales con IVA. Haz clic en una para abrirla." botonTexto="Nueva cotización" onBoton={() => setEditando('nueva')} />
       {error && <p className="text-xs text-[var(--c-danger)]">{error}</p>}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {(['enviada', 'aceptada', 'rechazada', 'vencida'] as Estado[]).map((e) => {
+      <FilaKpis
+        items={(['enviada', 'aceptada', 'rechazada', 'vencida'] as Estado[]).map((e) => {
           const grupo = filas.filter((c) => (estadoEfectivo(c) as Estado) === e);
-          const monedas = new Set(grupo.map((c) => c.moneda));
-          const monto = grupo.reduce((acc, c) => acc + totales([{ concepto: '', plan: '', cantidad: 1, precio_neto: c.neto_mensual, recurrente: true }], c.iva_pct, c.moneda).mensualIva, 0);
-          return (
-            <div key={e} className="surface p-3 space-y-0.5">
-              <p className={`text-[10px] font-mono uppercase tracking-wider ${estiloEstado(cfg.estados_cotizacion, e).clase}`}>{estiloEstado(cfg.estados_cotizacion, e).etiqueta}</p>
-              <p className="text-lg font-bold font-mono text-[var(--c-text)]">{grupo.length}</p>
-              <p className="text-[10px] font-mono text-[var(--c-muted)]">{grupo.length > 0 && monedas.size === 1 ? `${formatMoneda(monto, grupo[0].moneda)} /mes` : '—'}</p>
-            </div>
-          );
+          const st = estiloEstado(cfg.estados_cotizacion, e);
+          return { etiqueta: st.etiqueta, claseEtiqueta: st.clase, valor: `${grupo.length} cotización(es)`, sub: sumaMes(grupo) };
         })}
-      </div>
+      />
       {cargando && filas.length === 0 ? (
         <p className="text-xs text-[var(--c-muted)]">Cargando…</p>
-      ) : filas.length === 0 ? (
-        <p className="text-xs text-[var(--c-muted)] py-4 text-center">Aún no hay cotizaciones para este cliente.</p>
       ) : (
-        <div className="divide-y divide-[var(--c-line)] border border-[var(--c-line)] rounded-lg">
+        <TablaDoc columnas={COLUMNAS_DOC} hayFilas={filas.length > 0} vacio="Aún no hay cotizaciones para este cliente.">
           {filas.map((c) => {
             const estado = estadoEfectivo(c) as Estado;
+            const st = estiloEstado(cfg.estados_cotizacion, estado);
             const t = totales([{ concepto: '', plan: '', cantidad: 1, precio_neto: c.neto_mensual, recurrente: true }, { concepto: '', plan: '', cantidad: 1, precio_neto: c.neto_unico, recurrente: false }], c.iva_pct, c.moneda);
             return (
-              <button key={c.id} onClick={() => setEditando(c)} className="w-full text-left p-3 hover:bg-[var(--c-surface-2)] flex items-center justify-between gap-3 text-xs">
-                <div className="min-w-0">
-                  <p className="font-medium text-[var(--c-text)] truncate">{formatCorrelativo('COT', c.numero)} · {c.titulo}</p>
-                  <p className="text-[11px] text-[var(--c-muted)] font-mono">Emitida {formatFecha(c.fecha_emision)} · vence {formatFecha(c.vence_el)}</p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="font-mono text-[var(--c-text)]">{formatMoneda(t.mensualIva, c.moneda)} /mes</p>
-                  {c.neto_unico > 0 && <p className="font-mono text-[11px] text-[var(--c-muted)]">+ {formatMoneda(t.unicoIva, c.moneda)} único</p>}
-                  <p className={`text-[10px] font-mono uppercase ${estiloEstado(cfg.estados_cotizacion, estado).clase}`}>{estiloEstado(cfg.estados_cotizacion, estado).etiqueta}</p>
-                </div>
-              </button>
+              <tr key={c.id} onClick={() => setEditando(c)} className={`${filaClase} cursor-pointer hover:bg-[var(--c-surface-2)]`}>
+                <td className={`${celda} font-mono text-[var(--c-text)]`}>{formatCorrelativo('COT', c.numero)}</td>
+                <td className={`${celda} text-[var(--c-text-2)] max-w-[220px] truncate`}>{c.titulo}</td>
+                <td className={`${celda} font-mono text-[var(--c-muted)]`}>{formatFecha(c.fecha_emision)}</td>
+                <td className={`${celda} font-mono text-[var(--c-muted)]`}>{formatFecha(c.vence_el)}</td>
+                <td className={`${celda} font-mono text-right text-[var(--c-text)] whitespace-nowrap`}>
+                  {formatMoneda(t.mensualIva, c.moneda)} /mes
+                  {c.neto_unico > 0 && <span className="block text-[10px] text-[var(--c-muted)]">+ {formatMoneda(t.unicoIva, c.moneda)} único</span>}
+                </td>
+                <td className={`${celda} font-medium ${st.clase}`}>{st.etiqueta}</td>
+                <td className={celda}>
+                  <div className="flex items-center justify-end gap-1">
+                    <button onClick={(e) => { e.stopPropagation(); setEditando(c); }} title="Abrir" className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-text)]"><Pencil className="w-3.5 h-3.5" /></button>
+                  </div>
+                </td>
+              </tr>
             );
           })}
-        </div>
+        </TablaDoc>
       )}
-      <p className="text-[10px] text-[var(--c-muted)]">Totales con IVA. Las tarjetas suman el valor mensual por estado.</p>
     </div>
   );
 };
