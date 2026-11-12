@@ -1,14 +1,19 @@
 import React, { useMemo } from 'react';
 import { useCRM } from '../../context/CRMContext';
 import { formatCLP } from '../../lib/formatters';
-import { Kpi, Dona, COLOR_SALUD, estilos } from '../dashboard/ui';
-import { metricasCartera } from '../dashboard/metricas';
+import { Kpi, BarraApilada, COLOR_SALUD, estilos } from '../dashboard/ui';
+import { metricasCartera, hoyIso } from '../dashboard/metricas';
 import { resumen360 } from '../../lib/cliente360';
+import { estadoEfectivo } from '../../lib/cotizaciones';
 import { SALUD_ETIQUETA } from '../../lib/salud';
 import { IngresosChart } from './IngresosChart';
 
+const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`;
+const netoCotizacion = (q: { neto_mensual: number | null; neto_unico: number | null }) =>
+  Number(q.neto_mensual ?? 0) + Number(q.neto_unico ?? 0);
+
 export const ClientesKpis: React.FC = () => {
-  const { empresas, oportunidades, etapas, facturas, cotizaciones, proyectos, tareas, reportes, actividades, contactos } = useCRM();
+  const { empresas, oportunidades, etapas, facturas, cotizaciones, proyectos, tareas, reportes, actividades, contactos, agencia } = useCRM();
   const c = useMemo(() => metricasCartera(empresas, oportunidades, etapas), [empresas, oportunidades, etapas]);
   const datos = useMemo(
     () => ({ oportunidades, etapas, facturas, cotizaciones, proyectos, tareas, reportes, actividades, contactos }),
@@ -20,36 +25,40 @@ export const ClientesKpis: React.FC = () => {
   const proxima = c.renovaciones[0];
   const porCobrar = res.reduce((a, r) => a + r.porCobrarCLP, 0);
   const vencidas = res.reduce((a, r) => a + r.facturasVencidas, 0);
-  const expansion = res.reduce((a, r) => a + r.valorExpansionCLP, 0);
-  const negociosExpansion = res.reduce((a, r) => a + r.negociosExpansion, 0);
-  const conCritica = res.filter((r) => r.alertas.some((a) => a.nivel === 'peligro')).length;
-  const incompletos = res.filter((r) => r.faltan.length > 0).length;
+  const idsClientes = useMemo(() => new Set(c.clientes.map((e) => e.id)), [c.clientes]);
+
+  const hoy = hoyIso();
+  const mesActual = hoy.slice(0, 7);
+  const agenciaId = agencia?.id;
+
+  // Mismos criterios que IngresosChart: sin agencia, sin anuladas.
+  const ingresos = useMemo(() => {
+    const activas = facturas.filter((f) => f.estado_pago !== 'anulada' && f.empresa_id !== agenciaId);
+    const facturadoMes = activas
+      .filter((f) => f.fecha_emision.slice(0, 7) === mesActual)
+      .reduce((a, f) => a + Number(f.monto_neto || 0), 0);
+    const montoVencido = facturas
+      .filter((f) => !f.archivado && f.estado_pago === 'pendiente' && idsClientes.has(f.empresa_id) && !!f.fecha_vencimiento && f.fecha_vencimiento.slice(0, 10) < hoy)
+      .reduce((a, f) => a + Number(f.monto_total || 0), 0);
+    return { facturadoMes, montoVencido };
+  }, [facturas, agenciaId, mesActual, hoy, idsClientes]);
+
+  const cot = useMemo(() => {
+    const facturadas = new Set(facturas.filter((f) => f.estado_pago !== 'anulada' && f.cotizacion_id).map((f) => f.cotizacion_id as string));
+    const validas = cotizaciones.filter((q) => !q.archivado && q.empresa_id !== agenciaId && q.moneda === 'CLP');
+    const abiertas = validas.filter((q) => estadoEfectivo({ estado: q.estado, vence_el: q.vence_el }) === 'enviada');
+    const sinFacturar = validas.filter((q) => q.estado === 'aceptada' && !facturadas.has(q.id));
+    return {
+      abiertas: abiertas.length,
+      montoAbiertas: abiertas.reduce((a, q) => a + netoCotizacion(q), 0),
+      sinFacturar: sinFacturar.length,
+      montoSinFacturar: sinFacturar.reduce((a, q) => a + netoCotizacion(q), 0),
+    };
+  }, [cotizaciones, facturas, agenciaId]);
 
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className={`${estilos.tarjeta} col-span-2 lg:col-span-1 lg:row-span-2`} style={{ borderTop: '3px solid var(--c-ok)' }}>
-          <p className={estilos.etiqueta} style={{ color: 'var(--c-ok)' }}>Salud de clientes</p>
-          {n === 0 ? (
-            <p className={estilos.nota}>Sin clientes activos</p>
-          ) : (
-            <Dona
-              rotulo={`Salud de ${n} clientes`}
-              centro={
-                <>
-                  <span className="text-lg font-bold font-mono text-[var(--c-text)] leading-none">{n}</span>
-                  <span className="text-[9px] font-mono uppercase text-[var(--c-muted)] mt-0.5">clientes</span>
-                </>
-              }
-              segmentos={[
-                { clave: 'verde', etiqueta: SALUD_ETIQUETA.verde, n: c.salud.verde, color: COLOR_SALUD.verde },
-                { clave: 'amarillo', etiqueta: SALUD_ETIQUETA.amarillo, n: c.salud.amarillo, color: COLOR_SALUD.amarillo },
-                { clave: 'rojo', etiqueta: SALUD_ETIQUETA.rojo, n: c.salud.rojo, color: COLOR_SALUD.rojo },
-                { clave: 'sin', etiqueta: 'Sin evaluar', n: c.salud.sin, color: COLOR_SALUD.sin },
-              ]}
-            />
-          )}
-        </div>
         <Kpi
           acento="var(--c-accent)"
           etiqueta="MRR"
@@ -57,11 +66,37 @@ export const ClientesKpis: React.FC = () => {
           nota={n > 0 ? `${n} clientes · ${formatCLP(c.mrr / n)} promedio` : 'Sin clientes activos'}
         />
         <Kpi
+          acento="var(--c-ok)"
+          etiqueta="Facturado del mes"
+          valor={formatCLP(ingresos.facturadoMes)}
+          nota="Neto, sin IVA"
+        />
+        <Kpi
           acento="var(--c-warn)"
           etiqueta="Por cobrar"
           valor={formatCLP(porCobrar)}
           tono={vencidas > 0 ? 'peligro' : 'normal'}
-          nota={vencidas > 0 ? `${vencidas} factura${vencidas > 1 ? 's' : ''} vencida${vencidas > 1 ? 's' : ''}` : 'Sin facturas vencidas'}
+          nota={vencidas > 0 ? plural(vencidas, 'factura vencida', 'facturas vencidas') : 'Sin facturas vencidas'}
+        />
+        <Kpi
+          acento="var(--c-danger)"
+          etiqueta="Facturas vencidas"
+          valor={formatCLP(ingresos.montoVencido)}
+          tono={vencidas > 0 ? 'peligro' : 'normal'}
+          nota={vencidas > 0 ? plural(vencidas, 'factura', 'facturas') : 'Ninguna'}
+        />
+        <Kpi
+          acento="var(--c-muted)"
+          etiqueta="Cotizaciones abiertas"
+          valor={formatCLP(cot.montoAbiertas)}
+          nota={plural(cot.abiertas, 'cotización enviada', 'cotizaciones enviadas')}
+        />
+        <Kpi
+          acento="var(--c-info)"
+          etiqueta="Aceptadas sin facturar"
+          valor={formatCLP(cot.montoSinFacturar)}
+          tono={cot.sinFacturar > 0 ? 'aviso' : 'normal'}
+          nota={plural(cot.sinFacturar, 'cotización aceptada', 'cotizaciones aceptadas')}
         />
         <Kpi
           acento="var(--c-info)"
@@ -76,26 +111,26 @@ export const ClientesKpis: React.FC = () => {
                 : 'Ninguna en el período'
           }
         />
-        <Kpi
-          acento="var(--c-ok)"
-          etiqueta="Expansión abierta"
-          valor={formatCLP(expansion)}
-          nota={`${negociosExpansion} negocio${negociosExpansion === 1 ? '' : 's'} en pipeline de expansión`}
-        />
-        <Kpi
-          acento="var(--c-danger)"
-          etiqueta="Clientes con alerta crítica"
-          valor={conCritica}
-          tono={conCritica > 0 ? 'peligro' : 'normal'}
-          nota={conCritica > 0 ? 'Factura o renovación vencida' : 'Ninguna'}
-        />
-        <Kpi
-          acento="var(--c-muted)"
-          etiqueta="Clientes por completar"
-          valor={incompletos}
-          tono={incompletos > 0 ? 'aviso' : 'normal'}
-          nota={incompletos > 0 ? 'Faltan RUT, responsable, salud, contacto, plan o renovación' : 'Ficha completa'}
-        />
+        <div className={estilos.tarjeta} style={{ borderTop: '3px solid var(--c-ok)' }}>
+          <p className={estilos.etiqueta} style={{ color: 'var(--c-ok)' }}>Salud de clientes</p>
+          {n === 0 ? (
+            <p className={estilos.nota}>Sin clientes activos</p>
+          ) : (
+            <>
+              <p className={estilos.valor}>{plural(n, 'cliente', 'clientes')}</p>
+              <p className={estilos.nota}>{c.salud.rojo > 0 ? `${c.salud.rojo} en riesgo` : 'Ninguno en riesgo'}</p>
+              <BarraApilada
+                rotulo={`Salud de ${n} clientes`}
+                segmentos={[
+                  { clave: 'verde', etiqueta: SALUD_ETIQUETA.verde, n: c.salud.verde, color: COLOR_SALUD.verde },
+                  { clave: 'amarillo', etiqueta: SALUD_ETIQUETA.amarillo, n: c.salud.amarillo, color: COLOR_SALUD.amarillo },
+                  { clave: 'rojo', etiqueta: SALUD_ETIQUETA.rojo, n: c.salud.rojo, color: COLOR_SALUD.rojo },
+                  { clave: 'sin', etiqueta: 'Sin evaluar', n: c.salud.sin, color: COLOR_SALUD.sin },
+                ]}
+              />
+            </>
+          )}
+        </div>
       </div>
       <IngresosChart />
     </div>
