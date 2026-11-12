@@ -1,15 +1,16 @@
 import React, { useMemo, useState } from 'react';
-import { Check } from 'lucide-react';
+import { Check, Pencil } from 'lucide-react';
 import type { ProyectoFase, Tarea, TareaDependencia } from '../../types/crm';
 import { aFecha, diasEntre, diaCorto, hoyIso, sumarDias } from './fechas';
 
-const ALTO_FILA = 36;
-const ALTO_CABECERA = 44;
-const ANCHO_NOMBRES = 224;
-const ESCALAS = { dia: { px: 32, etiqueta: 'Día' }, semana: { px: 14, etiqueta: 'Semana' }, mes: { px: 5, etiqueta: 'Mes' } } as const;
+const ALTO_FILA = 32;
+const ALTO_CABECERA = 40;
+const ANCHO_NOMBRES = 232;
+const ESCALAS = { dia: { px: 28, etiqueta: 'Día' }, semana: { px: 12, etiqueta: 'Semana' }, mes: { px: 4, etiqueta: 'Mes' } } as const;
 type Escala = keyof typeof ESCALAS;
 
 type Fila =
+  | { tipo: 'proyecto'; id: string; proyectoId: string; nombre: string; inicio: string; fin: string; hechas: number; total: number }
   | { tipo: 'fase'; id: string; nombre: string; inicio: string; fin: string; hechas: number; total: number }
   | { tipo: 'tarea'; id: string; tarea: Tarea; inicio: string; fin: string };
 
@@ -22,11 +23,12 @@ interface Props {
   onEditar: (t: Tarea) => void;
   // Si hay varios proyectos, agrupa por proyecto (cada uno con sus fases)
   proyectos?: { id: string; nombre: string }[];
+  onEditarProyecto?: (proyectoId: string) => void;
 }
 
 const inicioDe = (t: Tarea) => t.fecha_inicio ?? t.fecha_vencimiento;
 
-export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiembro, onToggle, onEditar, proyectos }) => {
+export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiembro, onToggle, onEditar, proyectos, onEditarProyecto }) => {
   const [escala, setEscala] = useState<Escala>('semana');
   const px = ESCALAS[escala].px;
   const hoy = hoyIso();
@@ -57,7 +59,7 @@ export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiem
         agregarGrupos(tP, fases.filter((f) => f.proyecto_id === p.id), bloque, `${p.id}-`);
         const ini = tP.map(inicioDe).sort()[0];
         const fin = tP.map((t) => t.fecha_vencimiento).sort().slice(-1)[0];
-        out.push({ tipo: 'fase', id: `proy-${p.id}`, nombre: p.nombre, inicio: ini, fin, hechas: tP.filter((t) => t.completada).length, total: tP.length });
+        out.push({ tipo: 'proyecto', id: `proy-${p.id}`, proyectoId: p.id, nombre: p.nombre, inicio: ini, fin, hechas: tP.filter((t) => t.completada).length, total: tP.length });
         out.push(...bloque);
       }
     } else {
@@ -79,14 +81,14 @@ export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiem
   const x = (iso: string) => diasEntre(desde, iso) * px;
   const indiceFila = useMemo(() => new Map(filas.map((f, i) => [f.id, i])), [filas]);
 
-  // Marcas de la cabecera
+  // Marcas de la cabecera: meses (con su posición) y etiquetas de día o semana
   const meses = useMemo(() => {
     const out: { etiqueta: string; x: number; ancho: number }[] = [];
     for (let i = 0; i < dias; ) {
       const d = aFecha(sumarDias(desde, i));
       const restantes = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate() - d.getDate() + 1;
       const largo = Math.min(restantes, dias - i);
-      out.push({ etiqueta: d.toLocaleDateString('es-CL', { month: 'long', year: 'numeric' }), x: i * px, ancho: largo * px });
+      out.push({ etiqueta: d.toLocaleDateString('es-CL', { month: 'short', year: 'numeric' }), x: i * px, ancho: largo * px });
       i += largo;
     }
     return out;
@@ -94,11 +96,11 @@ export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiem
 
   const marcas = useMemo(() => {
     if (escala === 'mes') return [];
-    const out: { x: number; etiqueta: string; finde: boolean }[] = [];
+    const out: { x: number; etiqueta: string }[] = [];
     for (let i = 0; i < dias; i++) {
       const d = aFecha(sumarDias(desde, i));
-      if (escala === 'dia') out.push({ x: i * px, etiqueta: String(d.getDate()), finde: d.getDay() === 0 || d.getDay() === 6 });
-      else if (d.getDay() === 1) out.push({ x: i * px, etiqueta: String(d.getDate()), finde: false });
+      if (escala === 'dia') out.push({ x: i * px, etiqueta: String(d.getDate()) });
+      else if (d.getDay() === 1) out.push({ x: i * px, etiqueta: String(d.getDate()) });
     }
     return out;
   }, [desde, dias, px, escala]);
@@ -113,10 +115,11 @@ export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiem
   return (
     <div className="surface overflow-hidden">
       <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-[var(--c-line)]">
-        <div className="flex flex-wrap gap-3 text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">
-          <span className="inline-flex items-center gap-1"><i className="w-2 h-2 rounded-sm bg-[var(--c-accent)]" />En curso</span>
-          <span className="inline-flex items-center gap-1"><i className="w-2 h-2 rounded-sm bg-[var(--c-ok)]" />Hecha</span>
-          <span className="inline-flex items-center gap-1"><i className="w-2 h-2 rounded-sm bg-[var(--c-danger)]" />Atrasada</span>
+        <div className="flex flex-wrap gap-3 text-[11px] text-[var(--c-muted)]">
+          <span className="inline-flex items-center gap-1.5"><i className="w-2 h-2 rounded-sm bg-[var(--c-accent)]" />En curso</span>
+          <span className="inline-flex items-center gap-1.5"><i className="w-2 h-2 rounded-sm bg-[var(--c-ok)]" />Hecha</span>
+          <span className="inline-flex items-center gap-1.5"><i className="w-2 h-2 rounded-sm bg-[var(--c-danger)]" />Atrasada</span>
+          <span className="inline-flex items-center gap-1.5"><i className="w-px h-3 bg-[var(--c-accent)]" />Hoy</span>
         </div>
         <div role="group" aria-label="Escala" className="inline-flex gap-1 p-0.5 rounded-md bg-[var(--c-surface-2)]">
           {(Object.keys(ESCALAS) as Escala[]).map((k) => (
@@ -137,50 +140,78 @@ export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiem
         <div className="flex" style={{ width: ANCHO_NOMBRES + ancho }}>
           {/* Columna de nombres (fija al desplazar) */}
           <div className="sticky left-0 z-10 shrink-0 bg-[var(--c-surface)] border-r border-[var(--c-line)]" style={{ width: ANCHO_NOMBRES }}>
-            <div style={{ height: ALTO_CABECERA }} className="border-b border-[var(--c-line)] px-3 flex items-end pb-1 text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)]">
-              Fase / tarea
+            <div style={{ height: ALTO_CABECERA }} className="border-b border-[var(--c-line)] px-3 flex items-end pb-1.5 text-[11px] text-[var(--c-muted)]">
+              Proyecto · fase · tarea
             </div>
-            {filas.map((f) =>
-              f.tipo === 'fase' ? (
-                <div key={f.id} style={{ height: ALTO_FILA }} className="px-3 flex items-center justify-between gap-2 bg-[var(--c-surface-2)] border-b border-[var(--c-line)]">
-                  <span className="text-xs font-semibold text-[var(--c-text)] truncate">{f.nombre}</span>
-                  <span className="text-[10px] font-mono text-[var(--c-muted)] shrink-0">{f.hechas}/{f.total}</span>
-                </div>
-              ) : (
-                <div key={f.id} style={{ height: ALTO_FILA }} className="px-2 flex items-center gap-2 border-b border-[var(--c-line)]">
+            {filas.map((f) => {
+              if (f.tipo === 'proyecto') {
+                return (
+                  <div key={f.id} style={{ height: ALTO_FILA }} className="px-3 flex items-center justify-between gap-2 bg-[var(--c-surface-2)] border-b border-[var(--c-line)]">
+                    <span className="text-xs font-semibold text-[var(--c-text)] truncate">{f.nombre}</span>
+                    <span className="flex items-center gap-2 shrink-0">
+                      <span className="text-[10px] font-mono text-[var(--c-muted)]">{f.hechas}/{f.total}</span>
+                      {onEditarProyecto && (
+                        <button type="button" onClick={() => onEditarProyecto(f.proyectoId)} aria-label={`Editar ${f.nombre}`} title="Editar proyecto" className="text-[var(--c-muted)] hover:text-[var(--c-accent)]">
+                          <Pencil className="w-3 h-3" />
+                        </button>
+                      )}
+                    </span>
+                  </div>
+                );
+              }
+              if (f.tipo === 'fase') {
+                return (
+                  <div key={f.id} style={{ height: ALTO_FILA }} className="pl-5 pr-3 flex items-center justify-between gap-2 border-b border-[var(--c-line)]/60">
+                    <span className="text-[11px] font-medium text-[var(--c-muted)] truncate">{f.nombre}</span>
+                    <span className="text-[10px] font-mono text-[var(--c-muted)] shrink-0">{f.hechas}/{f.total}</span>
+                  </div>
+                );
+              }
+              return (
+                <div key={f.id} style={{ height: ALTO_FILA }} className="pl-8 pr-2 flex items-center gap-2 border-b border-[var(--c-line)]/60">
                   <button
                     type="button"
                     onClick={() => onToggle(f.tarea)}
                     aria-label={f.tarea.completada ? 'Marcar pendiente' : 'Marcar hecha'}
-                    className={`w-4 h-4 rounded border grid place-items-center shrink-0 ${f.tarea.completada ? 'bg-[var(--c-ok)] border-[var(--c-ok)] text-[var(--c-on-accent)]' : 'border-[var(--c-line)]'}`}
+                    className={`w-3.5 h-3.5 rounded-sm border grid place-items-center shrink-0 ${f.tarea.completada ? 'bg-[var(--c-ok)] border-[var(--c-ok)] text-[var(--c-on-accent)]' : 'border-[var(--c-line)]'}`}
                   >
-                    {f.tarea.completada && <Check className="w-3 h-3" />}
+                    {f.tarea.completada && <Check className="w-2.5 h-2.5" />}
                   </button>
                   <button type="button" onClick={() => onEditar(f.tarea)} className={`min-w-0 text-left text-xs truncate hover:text-[var(--c-accent)] ${f.tarea.completada ? 'line-through text-[var(--c-muted)]' : 'text-[var(--c-text-2)]'}`} title={f.tarea.titulo}>
                     {f.tarea.titulo}
                   </button>
                 </div>
-              ),
-            )}
+              );
+            })}
           </div>
 
           {/* Línea de tiempo */}
           <div className="relative" style={{ width: ancho }}>
             <div style={{ height: ALTO_CABECERA }} className="relative border-b border-[var(--c-line)]">
               {meses.map((m) => (
-                <div key={m.x} className="absolute top-0 h-5 px-2 text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)] border-l border-[var(--c-line)] truncate capitalize" style={{ left: m.x, width: m.ancho }}>
+                <div key={m.x} className="absolute top-0 h-5 px-2 text-[11px] text-[var(--c-text-2)] truncate capitalize" style={{ left: m.x, width: m.ancho }}>
                   {m.etiqueta}
                 </div>
               ))}
               {marcas.map((m) => (
-                <div key={m.x} className={`absolute bottom-1 text-[10px] font-mono ${m.finde ? 'text-[var(--c-muted-2)]' : 'text-[var(--c-muted)]'}`} style={{ left: m.x + 2 }}>
+                <div key={m.x} className="absolute bottom-1.5 text-[10px] font-mono text-[var(--c-muted)]" style={{ left: m.x + 2 }}>
                   {m.etiqueta}
                 </div>
               ))}
             </div>
 
+            {/* Filas y separadores */}
             {filas.map((f, i) => (
-              <div key={f.id} style={{ top: ALTO_CABECERA + i * ALTO_FILA, height: ALTO_FILA }} className={`absolute inset-x-0 border-b border-[var(--c-line)] ${f.tipo === 'fase' ? 'bg-[var(--c-surface-2)]/60' : ''}`} />
+              <div
+                key={f.id}
+                style={{ top: ALTO_CABECERA + i * ALTO_FILA, height: ALTO_FILA }}
+                className={`absolute inset-x-0 border-b border-[var(--c-line)]/60 ${f.tipo === 'proyecto' ? 'bg-[var(--c-surface-2)]' : ''}`}
+              />
+            ))}
+
+            {/* Cambio de mes */}
+            {meses.slice(1).map((m) => (
+              <div key={`mes-${m.x}`} className="absolute top-0 bottom-0 w-px bg-[var(--c-line)]/70" style={{ left: m.x, top: ALTO_CABECERA }} />
             ))}
 
             {/* Hoy */}
@@ -199,7 +230,7 @@ export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiem
                 const x2 = x(fb.inicio);
                 const y2 = b * ALTO_FILA + ALTO_FILA / 2;
                 const medio = Math.max(x1 + 6, Math.min(x2 - 6, (x1 + x2) / 2));
-                return <path key={`${d.tarea_id}-${d.depende_de_id}`} d={`M${x1},${y1} H${medio} V${y2} H${x2}`} fill="none" stroke="var(--c-muted)" strokeWidth={1} opacity={0.7} />;
+                return <path key={`${d.tarea_id}-${d.depende_de_id}`} d={`M${x1},${y1} H${medio} V${y2} H${x2}`} fill="none" stroke="var(--c-muted)" strokeWidth={1} opacity={0.4} />;
               })}
             </svg>
 
@@ -207,12 +238,18 @@ export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiem
             {filas.map((f, i) => {
               const top = ALTO_CABECERA + i * ALTO_FILA;
               const left = x(f.inicio);
-              const w = Math.max((diasEntre(f.inicio, f.fin) + 1) * px, 8);
-              if (f.tipo === 'fase') {
+              const w = Math.max((diasEntre(f.inicio, f.fin) + 1) * px, 6);
+              if (f.tipo === 'proyecto' || f.tipo === 'fase') {
                 const pct = f.total ? f.hechas / f.total : 0;
+                const alt = f.tipo === 'proyecto' ? 6 : 5;
                 return (
-                  <div key={f.id} className="absolute z-[2] rounded-sm bg-[var(--c-muted)]/40" style={{ left, width: w, top: top + 12, height: 12 }} title={`${f.nombre}: ${diaCorto(f.inicio)} – ${diaCorto(f.fin)}`}>
-                    <div className="h-full rounded-sm bg-[var(--c-muted)]" style={{ width: `${pct * 100}%` }} />
+                  <div
+                    key={f.id}
+                    className="absolute z-[2] rounded-full bg-[var(--c-muted)]/25 overflow-hidden"
+                    style={{ left, width: w, top: top + (ALTO_FILA - alt) / 2, height: alt }}
+                    title={`${f.nombre}: ${diaCorto(f.inicio)} – ${diaCorto(f.fin)} · ${f.hechas}/${f.total}`}
+                  >
+                    <div className="h-full bg-[var(--c-muted)]" style={{ width: `${pct * 100}%` }} />
                   </div>
                 );
               }
@@ -222,11 +259,11 @@ export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiem
                   key={f.id}
                   type="button"
                   onClick={() => onEditar(t)}
-                  className="absolute z-[2] rounded text-left overflow-hidden text-[10px] leading-none px-1.5 text-[var(--c-on-accent)] font-semibold hover:brightness-110 focus-visible:ring-2 ring-[var(--c-text)]"
-                  style={{ left, width: w, top: top + 7, height: 22, background: color(t), opacity: t.completada ? 0.75 : 1 }}
+                  className="absolute z-[2] rounded-sm text-left overflow-hidden text-[10px] leading-none px-1.5 text-[var(--c-on-accent)] font-semibold hover:brightness-110 focus-visible:ring-2 ring-[var(--c-text)]"
+                  style={{ left, width: w, top: top + (ALTO_FILA - 16) / 2, height: 16, background: color(t), opacity: t.completada ? 0.6 : 0.9 }}
                   title={`${t.titulo} · ${diaCorto(f.inicio)} – ${diaCorto(f.fin)} · ${nombreMiembro(t.responsable_id)}`}
                 >
-                  {w > 60 ? t.titulo : ''}
+                  {w > 120 ? t.titulo : ''}
                 </button>
               );
             })}
