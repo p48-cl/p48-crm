@@ -205,7 +205,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-xs font-semibold bg-[var(--c-accent)] text-black rounded"
+              className="px-4 py-2 text-xs font-semibold bg-[var(--c-accent)] text-[var(--c-on-accent)] rounded"
             >
               {tareaEditar ? 'Guardar cambios' : 'Guardar Tarea'}
             </button>

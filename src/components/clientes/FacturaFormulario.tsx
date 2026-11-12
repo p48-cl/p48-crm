@@ -354,7 +354,7 @@ export const FacturaFormulario: React.FC<Props> = ({ empresa, empresasDisponible
       {error && <p className="text-[11px] text-[var(--c-danger)]">{error}</p>}
       <div className="flex justify-end gap-2.5 pt-2 border-t border-[var(--c-line)]">
         <button type="button" onClick={onCancelar} className="px-3 py-1.5 text-xs text-[var(--c-muted)] hover:text-[var(--c-text)]">Cancelar</button>
-        <button type="submit" disabled={!form.empresa_id} className="px-4 py-1.5 text-xs font-semibold bg-[var(--c-accent)] text-black rounded disabled:opacity-40">{inicial ? 'Guardar cambios' : 'Registrar factura'}</button>
+        <button type="submit" disabled={!form.empresa_id} className="px-4 py-1.5 text-xs font-semibold bg-[var(--c-accent)] text-[var(--c-on-accent)] rounded disabled:opacity-40">{inicial ? 'Guardar cambios' : 'Registrar factura'}</button>
       </div>
     </form>
   );
