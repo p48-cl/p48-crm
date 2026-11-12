@@ -24,8 +24,9 @@ import { OpportunityDetailModal } from './views/OpportunityDetailModal';
 import { CompanyDetailDrawer } from './views/CompanyDetailDrawer';
 import { NewDealModal } from './components/common/NewDealModal';
 import { CotizacionesView } from './views/CotizacionesView';
+import { FacturasView } from './views/FacturasView';
 import { ActivityModal } from './components/common/ActivityModal';
-import { CheckSquare, Kanban, Clock, Building2, LayoutDashboard, MoreHorizontal, Users, Upload, Settings, Activity, BarChart3, FileText, FolderKanban } from 'lucide-react';
+import { CheckSquare, Kanban, Clock, Building2, LayoutDashboard, MoreHorizontal, Users, Upload, Settings, Activity, BarChart3, FileText, FolderKanban, Receipt } from 'lucide-react';
 import { NewTaskModal } from './components/common/NewTaskModal';
 import { Tarea } from './types/crm';
 import { useConfiguracionCRM } from './lib/configuracion';
@@ -167,6 +168,10 @@ const CRMAppContent: React.FC = () => {
 
           {currentView === 'cotizaciones' && (
             <CotizacionesView version={cotizacionesVersion} onAbrirFicha={(id, nueva) => { setFichaTab('facturacion'); setFichaNuevaCotizacion(!!nueva); setSelectedEmpId(id); }} />
+          )}
+
+          {currentView === 'facturas' && (
+            <FacturasView onAbrirFicha={(id) => { setFichaTab('facturacion'); setFichaNuevaCotizacion(false); setSelectedEmpId(id); }} />
           )}
 
           {currentView === 'contactos' && (
@@ -345,6 +350,7 @@ const CRMAppContent: React.FC = () => {
               { id: 'empresas' as const, label: 'Clientes', icon: Building2 },
               { id: 'contactos' as const, label: 'Contactos', icon: Users },
               { id: 'cotizaciones' as const, label: 'Cotizaciones', icon: FileText },
+              { id: 'facturas' as const, label: 'Facturas', icon: Receipt },
               { id: 'proyectos' as const, label: 'Proyectos', icon: FolderKanban },
               { id: 'agencia' as const, label: 'P48 · Agencia', icon: Building2 },
               { id: 'actividades' as const, label: 'Actividades', icon: Activity },

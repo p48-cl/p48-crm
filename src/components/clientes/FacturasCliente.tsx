@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { formatCLP, formatFecha } from '../../lib/formatters';
 import { useConfiguracionCRM } from '../../lib/configuracion';
+import { EncabezadoDoc, FilaKpis, TablaDoc, COLUMNAS_DOC, celda, filaClase } from './DocumentosUI';
 import type { Empresa, EstadoFactura, Factura } from '../../types/crm';
 
 const input = 'w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] hover:border-[var(--c-muted)] focus:border-[var(--c-accent)] outline-none transition-colors';
@@ -176,32 +177,15 @@ export const FacturasCliente: React.FC<{ empresa: Empresa }> = ({ empresa }) => 
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-3 gap-3 text-xs">
-        <div className="ficha-card p-3">
-          <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Pendiente</p>
-          <p className="font-mono text-sm text-[var(--c-text)] mt-0.5">{formatCLP(suma(pendientes))}</p>
-          <p className="text-[10px] text-[var(--c-muted)]">{pendientes.length} factura(s)</p>
-        </div>
-        <div className="ficha-card p-3">
-          <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Vencido</p>
-          <p className={`font-mono text-sm mt-0.5 ${vencidas.length ? 'text-[var(--c-danger)]' : 'text-[var(--c-text)]'}`}>{formatCLP(suma(vencidas))}</p>
-          <p className="text-[10px] text-[var(--c-muted)]">{vencidas.length} factura(s)</p>
-        </div>
-        <div className="ficha-card p-3">
-          <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Pagado</p>
-          <p className="font-mono text-sm text-[var(--c-ok)] mt-0.5">{formatCLP(suma(pagadas))}</p>
-          <p className="text-[10px] text-[var(--c-muted)]">{pagadas.length} factura(s)</p>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <h3 className="text-xs font-semibold text-[var(--c-text)]">Facturas registradas</h3>
-        {!mostrarForm && (
-          <button onClick={abrirNueva} className="text-xs text-[var(--c-on-accent)] bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] px-2.5 py-1 rounded font-medium flex items-center gap-1">
-            <Plus className="w-3.5 h-3.5" /> Registrar factura
-          </button>
-        )}
-      </div>
+      <EncabezadoDoc titulo="Facturas" subtitulo="Registradas a mano desde el SII. Marca el pago cuando llegue." botonTexto={mostrarForm ? undefined : 'Registrar factura'} onBoton={abrirNueva} />
+      <FilaKpis
+        items={[
+          { etiqueta: 'Pendientes', claseEtiqueta: 'text-[var(--c-warn)]', valor: `${pendientes.length - vencidas.length} factura(s)`, sub: formatCLP(suma(pendientes.filter((f) => !estaVencida(f)))) },
+          { etiqueta: 'Vencidas', claseEtiqueta: 'text-[var(--c-danger)]', valor: `${vencidas.length} factura(s)`, sub: formatCLP(suma(vencidas)) },
+          { etiqueta: 'Pagadas', claseEtiqueta: 'text-[var(--c-ok)]', valor: `${pagadas.length} factura(s)`, sub: formatCLP(suma(pagadas)) },
+          { etiqueta: 'Total facturado', valor: `${delCliente.filter((f) => f.estado_pago !== 'anulada').length} factura(s)`, sub: formatCLP(suma(delCliente.filter((f) => f.estado_pago !== 'anulada'))) },
+        ]}
+      />
 
       {mostrarForm && (
         <form onSubmit={guardar} className="ficha-card p-4 space-y-3 text-xs">
@@ -290,53 +274,39 @@ export const FacturasCliente: React.FC<{ empresa: Empresa }> = ({ empresa }) => 
         </form>
       )}
 
-      {delCliente.length === 0 ? (
-        <p className="text-xs text-[var(--c-muted)] py-4 text-center">Sin facturas registradas para este cliente.</p>
-      ) : (
-        <div className="ficha-card overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="text-left text-[10px] font-mono uppercase text-[var(--c-muted)] border-b border-[var(--c-line)]">
-                <th className="px-3 py-2 font-normal">Folio</th>
-                <th className="px-3 py-2 font-normal">Emisión</th>
-                <th className="px-3 py-2 font-normal">Vence</th>
-                <th className="px-3 py-2 font-normal text-right">Total</th>
-                <th className="px-3 py-2 font-normal">Estado</th>
-                <th className="px-3 py-2 font-normal text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {delCliente.map((f) => {
-                const est = ESTADOS.find((s) => s.valor === f.estado_pago);
-                const vencida = estaVencida(f);
-                return (
-                  <tr key={f.id} className="border-b border-[var(--c-line)] last:border-0">
-                    <td className="px-3 py-2 font-mono text-[var(--c-text)]">
-                      {f.tipo_documento}-{String(f.folio).padStart(6, '0')}
-                      {f.url_documento && <a href={f.url_documento} target="_blank" rel="noreferrer" className="ml-2 text-[var(--c-accent)] hover:underline">PDF</a>}
-                    </td>
-                    <td className="px-3 py-2 font-mono text-[var(--c-muted)]">{formatFecha(f.fecha_emision)}</td>
-                    <td className={`px-3 py-2 font-mono ${vencida ? 'text-[var(--c-danger)]' : 'text-[var(--c-muted)]'}`}>{f.fecha_vencimiento ? formatFecha(f.fecha_vencimiento) : '—'}</td>
-                    <td className="px-3 py-2 font-mono text-right text-[var(--c-text)]">{formatCLP(Number(f.monto_total))}</td>
-                    <td className={`px-3 py-2 font-medium ${vencida ? 'text-[var(--c-danger)]' : est?.clase ?? ''}`}>{vencida ? 'Vencida' : est?.texto}</td>
-                    <td className="px-3 py-2">
-                      <div className="flex items-center justify-end gap-1">
-                        {f.estado_pago === 'pendiente' && (
-                          <button onClick={() => marcarPagada(f)} title="Marcar como pagada" className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-ok)]"><Check className="w-3.5 h-3.5" /></button>
-                        )}
-                        <button onClick={() => abrirEditar(f)} title="Editar" className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-text)]"><Pencil className="w-3.5 h-3.5" /></button>
-                        {isAdmin && (
-                          <button onClick={() => { if (window.confirm(`¿Eliminar la factura ${f.folio}? No se puede deshacer.`)) eliminarFactura(f.id); }} title="Eliminar" className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-danger)]"><Trash2 className="w-3.5 h-3.5" /></button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <TablaDoc columnas={COLUMNAS_DOC} hayFilas={delCliente.length > 0} vacio="Sin facturas registradas para este cliente.">
+        {delCliente.map((f) => {
+          const est = ESTADOS.find((s) => s.valor === f.estado_pago);
+          const vencida = estaVencida(f);
+          const cot = f.cotizacion_id ? cotizaciones.find((c) => c.id === f.cotizacion_id) : undefined;
+          return (
+            <tr key={f.id} className={filaClase}>
+              <td className={`${celda} font-mono text-[var(--c-text)] whitespace-nowrap`}>
+                {f.tipo_documento}-{String(f.folio).padStart(6, '0')}
+                {f.url_documento && <a href={f.url_documento} target="_blank" rel="noreferrer" className="ml-2 text-[var(--c-accent)] hover:underline">PDF</a>}
+              </td>
+              <td className={`${celda} text-[var(--c-text-2)] max-w-[220px] truncate`}>
+                {f.tipo_documento === 33 ? 'Factura afecta' : 'Factura exenta'}{cot ? ` · COT-${String(cot.numero).padStart(4, '0')}` : ''}
+              </td>
+              <td className={`${celda} font-mono text-[var(--c-muted)]`}>{formatFecha(f.fecha_emision)}</td>
+              <td className={`${celda} font-mono ${vencida ? 'text-[var(--c-danger)]' : 'text-[var(--c-muted)]'}`}>{f.fecha_vencimiento ? formatFecha(f.fecha_vencimiento) : '—'}</td>
+              <td className={`${celda} font-mono text-right text-[var(--c-text)] whitespace-nowrap`}>{formatCLP(Number(f.monto_total))}</td>
+              <td className={`${celda} font-medium ${vencida ? 'text-[var(--c-danger)]' : est?.clase ?? ''}`}>{vencida ? 'Vencida' : est?.texto}</td>
+              <td className={celda}>
+                <div className="flex items-center justify-end gap-1">
+                  {f.estado_pago === 'pendiente' && (
+                    <button onClick={() => marcarPagada(f)} title="Marcar como pagada" className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-ok)]"><Check className="w-3.5 h-3.5" /></button>
+                  )}
+                  <button onClick={() => abrirEditar(f)} title="Editar" className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-text)]"><Pencil className="w-3.5 h-3.5" /></button>
+                  {isAdmin && (
+                    <button onClick={() => { if (window.confirm(`¿Eliminar la factura ${f.folio}? No se puede deshacer.`)) eliminarFactura(f.id); }} title="Eliminar" className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-danger)]"><Trash2 className="w-3.5 h-3.5" /></button>
+                  )}
+                </div>
+              </td>
+            </tr>
+          );
+        })}
+      </TablaDoc>
     </div>
   );
 };

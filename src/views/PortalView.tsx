@@ -74,6 +74,13 @@ export const PortalView: React.FC = () => {
     cargar();
   }, [cargar]);
 
+  const abrirArchivo = async (r: PortalReporte) => {
+    if (!supabase || !r.archivo_path) return;
+    const { data, error: errS } = await supabase.storage.from('reportes').createSignedUrl(r.archivo_path, 300, { download: r.archivo_nombre ?? true });
+    if (errS || !data) return setError(parseSupabaseError(errS ?? { message: 'No se pudo abrir el archivo' }));
+    window.open(data.signedUrl, '_blank', 'noopener');
+  };
+
   if (!empresa) return null;
 
   const embed = urlEmbedLooker(empresa.looker_dashboard_url);
@@ -224,7 +231,10 @@ export const PortalView: React.FC = () => {
                       <p className="truncate">{r.titulo}</p>
                       <p className="font-mono text-[10px] text-[var(--c-muted)]">{r.tipo}{r.periodo ? ` · ${fecha(r.periodo)}` : ''}</p>
                     </div>
-                    {url && <a href={url} target="_blank" rel="noreferrer noopener" className="text-[var(--c-accent)] hover:underline shrink-0">Abrir</a>}
+                    <div className="flex items-center gap-3 shrink-0">
+                      {r.archivo_path && <button onClick={() => abrirArchivo(r)} className="text-[var(--c-accent)] hover:underline">{r.archivo_nombre ? 'Descargar' : 'Abrir archivo'}</button>}
+                      {url && <a href={url} target="_blank" rel="noreferrer noopener" className="text-[var(--c-accent)] hover:underline">Abrir enlace</a>}
+                    </div>
                   </div>
                 );
               })}
