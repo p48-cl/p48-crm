@@ -10,7 +10,7 @@ import { EditarProyectoModal } from '../components/proyectos/EditarProyectoModal
 import { Gantt } from '../components/proyectos/Gantt';
 import { NuevoProyectoModal } from '../components/proyectos/NuevoProyectoModal';
 import { ProyectoDetalle } from '../components/proyectos/ProyectoDetalle';
-import { Anillo, ProyectosArbol } from '../components/proyectos/ProyectosArbol';
+import { ProyectosArbol } from '../components/proyectos/ProyectosArbol';
 import { useProyectos } from '../components/proyectos/useProyectos';
 import { diaCorto, hoyIso } from '../components/proyectos/fechas';
 import type { EstadoProyecto, Proyecto, Tarea } from '../types/crm';
@@ -113,17 +113,7 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
             <Kpi etiqueta="Con tareas atrasadas" acento="var(--c-warn)" valor={indicadores.conTareasAtrasadas} tono={indicadores.conTareasAtrasadas > 0 ? 'aviso' : 'normal'} nota="al menos una tarea vencida" />
             <Kpi etiqueta="Tareas atrasadas" acento="var(--c-danger)" valor={indicadores.atrasadas} tono={indicadores.atrasadas > 0 ? 'peligro' : 'normal'} />
             <Kpi etiqueta="Vencen hoy" acento="var(--c-warn)" valor={indicadores.hoy} tono={indicadores.hoy > 0 ? 'aviso' : 'normal'} nota="tareas con vencimiento hoy" />
-            <Kpi
-              etiqueta="Avance promedio"
-              acento="var(--c-ok)"
-              valor={
-                <span className="inline-flex items-center gap-2">
-                  <Anillo pct={indicadores.avance} size={30} />
-                  <span>{indicadores.avance}%</span>
-                </span>
-              }
-              nota="promedio de proyectos activos"
-            />
+            <Kpi etiqueta="Avance promedio" acento="var(--c-ok)" valor={`${indicadores.avance}%`} progreso={indicadores.avance} nota="promedio de proyectos activos" />
             <Kpi etiqueta="Visibles" acento="var(--c-info)" valor={visibles.length} nota={tipo === 'todos' ? 'internos y clientes' : tipo === 'interno' ? 'internos' : 'de clientes'} />
           </div>
 
