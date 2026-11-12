@@ -3,7 +3,7 @@ import { CalendarDays, FolderKanban, Plus, GanttChart, Pencil } from 'lucide-rea
 import { useAuth } from '../context/AuthContext';
 import { useCRM } from '../context/CRMContext';
 import { ChipSenal } from '../components/common/ChipSenal';
-import { ALTO_TARJETA, Dona, Kpi, estilos } from '../components/dashboard/ui';
+import { ALTO_TARJETA, BarraVertical, Kpi, estilos } from '../components/dashboard/ui';
 import { metricasProyectos, faseActual } from '../components/dashboard/metricas';
 import { Calendario } from '../components/proyectos/Calendario';
 import { EditarProyectoModal } from '../components/proyectos/EditarProyectoModal';
@@ -33,6 +33,8 @@ const ESTADOS_SEGMENTO: [EstadoProyecto, string, string][] = [
   ['pausado', 'Pausado', 'var(--c-warn)'],
   ['finalizado', 'Finalizado', 'var(--c-muted-2)'],
 ];
+
+const ETIQUETA_CORTA: Record<string, string> = { planificado: 'Plan.', en_curso: 'Curso', pausado: 'Pausa', finalizado: 'Final.' };
 
 export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
   const { isAdmin } = useAuth();
@@ -117,12 +119,10 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
 
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
             <div className={`${estilos.tarjeta} ${ALTO_TARJETA} col-span-2 lg:col-span-1`} style={{ borderTop: '3px solid var(--c-accent)' }}>
-              <p className={estilos.etiqueta} style={{ color: 'var(--c-accent)' }}>Proyectos por estado</p>
-              <Dona
+              <p className={estilos.etiqueta} style={{ color: 'var(--c-accent)' }}>Proyectos por estado · {visibles.length}</p>
+              <BarraVertical
                 rotulo={`${visibles.length} proyectos visibles por estado`}
-                tamano={80}
-                centro={<span className="text-base font-bold font-mono text-[var(--c-text)] leading-none">{visibles.length}</span>}
-                segmentos={ESTADOS_SEGMENTO.map(([clave, etiqueta, color]) => ({ clave, etiqueta, n: visibles.filter((p) => p.estado === clave).length, color }))}
+                segmentos={ESTADOS_SEGMENTO.map(([clave, etiqueta, color]) => ({ clave, etiqueta, n: visibles.filter((p) => p.estado === clave).length, color, corta: ETIQUETA_CORTA[clave] }))}
               />
               <p className={estilos.nota}>{indicadores.vencidos} vencidos · {indicadores.conTareasAtrasadas} con tareas atrasadas</p>
             </div>
