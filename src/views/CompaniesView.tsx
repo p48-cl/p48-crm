@@ -17,6 +17,7 @@ import { LayoutList, LayoutGrid } from 'lucide-react';
 import { formatCLP, formatRUT, formatRUTInput } from '../lib/formatters';
 import { ThOrdenable } from '../components/common/ThOrdenable';
 import { useOrden } from '../lib/orden';
+import { resumen360 } from '../lib/cliente360';
 
 type ClaveOrdenEmpresa = 'cliente' | 'rut' | 'industria' | 'estado' | 'plan' | 'responsable' | 'accesos' | 'mrr';
 
@@ -28,7 +29,12 @@ interface CompaniesViewProps {
 export const CompaniesView: React.FC<CompaniesViewProps> = ({
   onSelectEmpresa,
 }) => {
-  const { empresas, accesosAdmin, miembros, industrias, crearEmpresa, actualizarEmpresa, oportunidades } = useCRM();
+  const { empresas, accesosAdmin, miembros, industrias, crearEmpresa, actualizarEmpresa, oportunidades, etapas, facturas, cotizaciones, proyectos, tareas, reportes, actividades, contactos } = useCRM();
+  const datos360 = useMemo(
+    () => ({ oportunidades, etapas, facturas, cotizaciones, proyectos, tareas, reportes, actividades, contactos }),
+    [oportunidades, etapas, facturas, cotizaciones, proyectos, tareas, reportes, actividades, contactos],
+  );
+  const r360Map = useMemo(() => new Map(empresas.map((e) => [e.id, resumen360(e, datos360)] as const)), [empresas, datos360]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filtroEstado, setFiltroEstado] = useState<string>('todos');
@@ -349,6 +355,10 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                 {cabeceraEmpresa('responsable', 'Responsable')}
                 {cabeceraEmpresa('accesos', 'Accesos Admin', 'center')}
                 <th className="py-2.5 px-3 font-medium">Enlaces</th>
+                <th className="py-2.5 px-3 font-medium">Negocios</th>
+                <th className="py-2.5 px-3 font-medium text-right">Por cobrar</th>
+                <th className="py-2.5 px-3 font-medium text-center">Alertas</th>
+                <th className="py-2.5 px-3 font-medium text-center">Completa</th>
                 {cabeceraEmpresa('mrr', 'Fee / MRR', 'right', 'px-4')}
                 <th className="py-2.5 px-3 text-right"></th>
               </tr>
@@ -356,7 +366,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
             <tbody className="divide-y divide-[var(--c-line)]">
               {filteredEmpresas.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="py-8 text-center text-xs text-[var(--c-muted)]">
+                  <td colSpan={14} className="py-8 text-center text-xs text-[var(--c-muted)]">
                     No se encontraron empresas con los filtros aplicados.
                   </td>
                 </tr>
@@ -379,6 +389,8 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                   };
 
                   const estConfig = estadoLabels[emp.estado] || { label: emp.estado, color: 'text-[var(--c-muted)]' };
+
+                  const r360 = r360Map.get(emp.id);
 
                   return (
                     <tr
@@ -491,6 +503,43 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                             <span className="text-[var(--c-muted-2)] text-[10px]">—</span>
                           )}
                         </div>
+                      </td>
+
+                      {/* Negocios */}
+                      <td className="py-2.5 px-3 text-[11px] font-mono text-[var(--c-text-2)] whitespace-nowrap">
+                        {!r360 || r360.negociosCaptacion + r360.negociosExpansion === 0 ? (
+                          <span className="text-[var(--c-muted-2)]">—</span>
+                        ) : (
+                          <>
+                            {r360.negociosCaptacion > 0 && <p>Captación {r360.negociosCaptacion}</p>}
+                            {r360.negociosExpansion > 0 && <p>Expansión {r360.negociosExpansion} · {formatCLP(r360.valorExpansionCLP)}</p>}
+                          </>
+                        )}
+                      </td>
+
+                      {/* Por cobrar */}
+                      <td className={`py-2.5 px-3 text-right font-mono text-[11px] ${r360 && r360.facturasVencidas > 0 ? 'text-[var(--c-danger)]' : 'text-[var(--c-text-2)]'}`}>
+                        {r360 && r360.porCobrarCLP > 0 ? formatCLP(r360.porCobrarCLP) : <span className="text-[var(--c-muted-2)]">—</span>}
+                        {r360 && r360.facturasVencidas > 0 && <p className="text-[10px]">{r360.facturasVencidas} vencida{r360.facturasVencidas > 1 ? 's' : ''}</p>}
+                      </td>
+
+                      {/* Alertas */}
+                      <td className="py-2.5 px-3 text-center">
+                        {!r360 || r360.alertas.length === 0 ? (
+                          <span className="text-[var(--c-muted-2)]">—</span>
+                        ) : (
+                          <span
+                            title={r360.alertas.map((a) => a.texto).join('\n')}
+                            className={`inline-flex min-w-[20px] justify-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold ${r360.alertas.some((a) => a.nivel === 'peligro') ? 'bg-[var(--c-danger)]/15 text-[var(--c-danger)]' : 'bg-[var(--c-warn)]/15 text-[var(--c-warn)]'}`}
+                          >
+                            {r360.alertas.length}
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Completitud */}
+                      <td className="py-2.5 px-3 text-center font-mono text-[11px] text-[var(--c-text-2)]">
+                        {r360 ? `${r360.completitud}%` : '—'}
                       </td>
 
                       {/* Fee / MRR */}

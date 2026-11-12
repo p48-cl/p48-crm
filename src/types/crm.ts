@@ -296,6 +296,7 @@ export interface Reporte {
   archivo_bytes?: number | null;
   visible_cliente: boolean;
   archivado: boolean;
+  created_at?: string;
 }
 
 export interface ClienteUsuario {
@@ -375,4 +376,19 @@ export interface Factura {
   archivado: boolean;
   created_at?: string;
   updated_at?: string;
+}
+
+// Fila de v_cotizaciones (cotización con netos y vencimiento calculados por la base)
+export interface CotizacionVista {
+  id: string;
+  numero: number;
+  empresa_id: string;
+  oportunidad_id?: string | null;
+  titulo: string;
+  estado: string;
+  fecha_emision: string;
+  moneda: string;
+  neto_mensual: number | null;
+  neto_unico: number | null;
+  vence_el: string;
 }
