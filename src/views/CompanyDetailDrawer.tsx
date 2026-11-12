@@ -392,12 +392,12 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
           {(
             [
               { id: 'resumen' as const, label: 'Resumen' },
-              { id: 'contactos' as const, label: `Contactos (${contactosEmpresa.length})` },
-              { id: 'oportunidades' as const, label: `Negocios (${oportunidadesEmpresa.length})` },
-              { id: 'facturacion' as const, label: 'Facturación' },
-              { id: 'actividades' as const, label: 'Actividad' },
-              { id: 'tareas' as const, label: `Tareas (${tareasPendientes.length})` },
               { id: 'marketing' as const, label: 'Marketing' },
+              { id: 'facturacion' as const, label: 'Facturación' },
+              { id: 'oportunidades' as const, label: `Negocios (${oportunidadesEmpresa.length})` },
+              { id: 'tareas' as const, label: `Tareas (${tareasPendientes.length})` },
+              { id: 'actividades' as const, label: 'Actividad' },
+              { id: 'contactos' as const, label: `Contactos (${contactosEmpresa.length})` },
               ...(empresa.estado === 'cliente'
                 ? [
                     { id: 'proyectos' as const, label: 'Proyectos' },
