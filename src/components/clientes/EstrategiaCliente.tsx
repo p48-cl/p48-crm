@@ -246,7 +246,7 @@ const CAMPOS_CLAVE: Campo[] = ['objetivo_ventas', 'canal_prioritario', 'posicion
 export const EstrategiaCard: React.FC<{ empresaId: string; nombreCliente?: string }> = ({ empresaId }) => {
   const { valores, error, guardarTodos, cargando } = useEstrategiaCliente(empresaId);
   const [editando, setEditando] = useState(false);
-  const [verMas, setVerMas] = useState(false);
+  const [verMas, setVerMas] = useState(true); // con espacio disponible, la estrategia completa se ve por defecto
   const [borrador, setBorrador] = useState<Valores>(VACIO);
   const [guardando, setGuardando] = useState(false);
   const completos = CAMPOS.filter((c) => valores[c.id].trim()).length;
@@ -321,7 +321,7 @@ export const EstrategiaCard: React.FC<{ empresaId: string; nombreCliente?: strin
       ) : (
         <>
           <dl className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-3 gap-x-4 gap-y-3">
-            {clave.map((c) => <Fila key={c.id} c={c} recortar />)}
+            {clave.map((c) => <Fila key={c.id} c={c} recortar={!verMas} />)}
           </dl>
           {verMas && (
             <dl className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-x-4 gap-y-3 pt-4 border-t border-[var(--c-line)]">
