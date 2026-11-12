@@ -1,4 +1,5 @@
 import { fondoCerrable } from '../lib/fondo';
+import { SALUD_ETIQUETA } from '../lib/salud';
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   Search,
@@ -323,7 +324,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                       {emp.salud && (
                         <span
                           className={`w-2 h-2 rounded-full shrink-0 ${emp.salud === 'verde' ? 'bg-[var(--c-ok)]' : emp.salud === 'amarillo' ? 'bg-[var(--c-warn)]' : 'bg-[var(--c-danger)]'}`}
-                          title={`Salud: ${emp.salud}`}
+                          title={`Salud: ${SALUD_ETIQUETA[emp.salud]}`}
                         />
                       )}
                     </div>
@@ -416,7 +417,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                                       ? 'bg-[var(--c-warn)]'
                                       : 'bg-[var(--c-danger)]'
                                   }`}
-                                  title={`Salud: ${emp.salud}`}
+                                  title={`Salud: ${SALUD_ETIQUETA[emp.salud]}`}
                                 />
                               )}
                             </div>
@@ -682,9 +683,9 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                     className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)]"
                   >
                     <option value="">Sin definir</option>
-                    <option value="verde">Verde (Óptima)</option>
-                    <option value="amarillo">Amarillo (Alerta)</option>
-                    <option value="rojo">Rojo (En riesgo)</option>
+                    <option value="verde">Saludable</option>
+                    <option value="amarillo">En alerta</option>
+                    <option value="rojo">En riesgo</option>
                   </select>
                 </div>
               </div>
