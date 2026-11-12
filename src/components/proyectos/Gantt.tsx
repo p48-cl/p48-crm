@@ -11,7 +11,7 @@ type Escala = keyof typeof ESCALAS;
 
 type Fila =
   | { tipo: 'cliente'; id: string; nombre: string; inicio: string; fin: string; hechas: number; total: number }
-  | { tipo: 'proyecto'; id: string; proyectoId: string; nombre: string; inicio: string; fin: string; hechas: number; total: number }
+  | { tipo: 'proyecto'; id: string; proyectoId: string; nombre: string; inicio: string; fin: string; hechas: number; total: number; fasesHechas: number; fasesTotal: number }
   | { tipo: 'fase'; id: string; nombre: string; inicio: string; fin: string; hechas: number; total: number }
   | { tipo: 'tarea'; id: string; tarea: Tarea; inicio: string; fin: string };
 
@@ -70,10 +70,11 @@ export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiem
           out.push({ tipo: 'cliente', id: `cli-${p.cliente}`, nombre: p.cliente, inicio: tC.map(inicioDe).sort()[0], fin: tC.map((t) => t.fecha_vencimiento).sort().slice(-1)[0], hechas: tC.filter((t) => t.completada).length, total: tC.length });
         }
         const bloque: Fila[] = [];
-        agregarGrupos(tP, fases.filter((f) => f.proyecto_id === p.id), bloque, `${p.id}-`);
+        const fasesP = fases.filter((f) => f.proyecto_id === p.id);
+        agregarGrupos(tP, fasesP, bloque, `${p.id}-`);
         const ini = tP.map(inicioDe).sort()[0];
         const fin = tP.map((t) => t.fecha_vencimiento).sort().slice(-1)[0];
-        out.push({ tipo: 'proyecto', id: `proy-${p.id}`, proyectoId: p.id, nombre: p.nombre, inicio: ini, fin, hechas: tP.filter((t) => t.completada).length, total: tP.length });
+        out.push({ tipo: 'proyecto', id: `proy-${p.id}`, proyectoId: p.id, nombre: p.nombre, inicio: ini, fin, hechas: tP.filter((t) => t.completada).length, total: tP.length, fasesHechas: fasesP.filter((f) => f.completada).length, fasesTotal: fasesP.length });
         out.push(...bloque);
       }
     } else {
@@ -172,7 +173,7 @@ export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiem
                   <div key={f.id} style={{ height: ALTO_FILA }} className={`${conClientes ? 'pl-5' : 'px-3'} pr-3 flex items-center justify-between gap-2 bg-[var(--c-surface-2)] border-b border-[var(--c-line)]`}>
                     <span className="flex items-center gap-2 min-w-0"><Nivel>Proyecto</Nivel><span className="text-xs font-semibold text-[var(--c-text)] truncate">{f.nombre}</span></span>
                     <span className="flex items-center gap-2 shrink-0">
-                      <span className="text-[10px] font-mono text-[var(--c-muted)]">{f.hechas}/{f.total}</span>
+                      <span className="text-[10px] font-mono text-[var(--c-muted)]">{f.fasesTotal > 0 && `${f.fasesHechas}/${f.fasesTotal} fases · `}{f.hechas}/{f.total}</span>
                       {onEditarProyecto && (
                         <button type="button" onClick={() => onEditarProyecto(f.proyectoId)} aria-label={`Editar ${f.nombre}`} title="Editar proyecto" className="text-[var(--c-muted)] hover:text-[var(--c-accent)]">
                           <Pencil className="w-3 h-3" />

@@ -76,6 +76,7 @@ export const ProyectoDetalle: React.FC<Props> = ({ proyecto, fases, miembrosProy
     setNuevaFase('');
     setAgregando(false);
   };
+  const alternarFase = (f: ProyectoFase) => ejecutar(() => supabase!.from('proyecto_fases').update({ completada: !f.completada }).eq('id', f.id));
   const borrarFase = async (f: ProyectoFase) => {
     if (!window.confirm(`¿Eliminar la fase «${f.nombre}»? Sus tareas quedan en el proyecto, sin fase.`)) return;
     await ejecutar(() => supabase!.from('proyecto_fases').delete().eq('id', f.id));
@@ -153,17 +154,26 @@ export const ProyectoDetalle: React.FC<Props> = ({ proyecto, fases, miembrosProy
         ) : (
           <button onClick={() => setAgregando(true)} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded border border-[var(--c-line)] text-[var(--c-text-2)] hover:bg-[var(--c-surface-2)]"><Plus className="w-3.5 h-3.5" />Fase</button>
         )}
-        {fasesProyecto.length > 0 && puedeGestionar && (
-          <div className="flex flex-wrap gap-1 ml-auto">
-            {fasesProyecto.map((f) => (
-              <span key={f.id} className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] rounded bg-[var(--c-surface-2)] text-[var(--c-text-2)]">
-                {f.nombre}
-                <button onClick={() => borrarFase(f)} aria-label={`Eliminar fase ${f.nombre}`} className="text-[var(--c-muted)] hover:text-[var(--c-danger)]"><X className="w-3 h-3" /></button>
-              </span>
-            ))}
-          </div>
-        )}
       </div>
+
+      {fasesProyecto.length > 0 && (
+        <div className="surface p-3 space-y-1">
+          <p className="text-[11px] font-mono uppercase text-[var(--c-muted)] pb-1">Fases · {fasesProyecto.filter((f) => f.completada).length}/{fasesProyecto.length} completadas</p>
+          {fasesProyecto.map((f) => {
+            const tf = tareasProyecto.filter((t) => t.fase_id === f.id);
+            return (
+              <div key={f.id} className="flex items-center gap-2 py-1 text-xs border-b border-[var(--c-line)]/60 last:border-0">
+                <input type="checkbox" checked={f.completada} disabled={!puedeGestionar} onChange={() => alternarFase(f)} aria-label={`Fase ${f.nombre} completada`} />
+                <span className={`flex-1 min-w-0 truncate ${f.completada ? 'line-through text-[var(--c-muted)]' : 'text-[var(--c-text)]'}`}>{f.nombre}</span>
+                <span className="font-mono text-[10px] text-[var(--c-muted)] shrink-0">{tf.filter((t) => t.completada).length}/{tf.length} tareas</span>
+                {puedeGestionar && (
+                  <button onClick={() => borrarFase(f)} aria-label={`Eliminar fase ${f.nombre}`} className="text-[var(--c-muted)] hover:text-[var(--c-danger)]"><X className="w-3 h-3" /></button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <Gantt
         tareas={tareasProyecto}
