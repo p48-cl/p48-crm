@@ -20,32 +20,51 @@ interface Props {
   nombreMiembro: (id?: string | null) => string;
   onToggle: (t: Tarea) => void;
   onEditar: (t: Tarea) => void;
+  // Si hay varios proyectos, agrupa por proyecto (cada uno con sus fases)
+  proyectos?: { id: string; nombre: string }[];
 }
 
 const inicioDe = (t: Tarea) => t.fecha_inicio ?? t.fecha_vencimiento;
 
-export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiembro, onToggle, onEditar }) => {
+export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiembro, onToggle, onEditar, proyectos }) => {
   const [escala, setEscala] = useState<Escala>('semana');
   const px = ESCALAS[escala].px;
   const hoy = hoyIso();
 
   const filas = useMemo<Fila[]>(() => {
     const out: Fila[] = [];
-    const ordenadas = [...tareas].sort((a, b) => inicioDe(a).localeCompare(inicioDe(b)) || a.fecha_vencimiento.localeCompare(b.fecha_vencimiento));
-    const grupos: { id: string; nombre: string; tareas: Tarea[] }[] = [...fases]
-      .sort((a, b) => a.orden - b.orden)
-      .map((f) => ({ id: f.id, nombre: f.nombre, tareas: ordenadas.filter((t) => t.fase_id === f.id) }));
-    const sueltas = ordenadas.filter((t) => !t.fase_id || !fases.some((f) => f.id === t.fase_id));
-    if (sueltas.length > 0) grupos.push({ id: 'sin-fase', nombre: 'Sin fase', tareas: sueltas });
-    for (const g of grupos) {
-      const fase = fases.find((f) => f.id === g.id);
-      const ini = g.tareas.length ? g.tareas.map(inicioDe).sort()[0] : fase?.fecha_inicio ?? hoy;
-      const fin = g.tareas.length ? g.tareas.map((t) => t.fecha_vencimiento).sort().slice(-1)[0] : fase?.fecha_fin ?? ini;
-      out.push({ tipo: 'fase', id: g.id, nombre: g.nombre, inicio: ini, fin, hechas: g.tareas.filter((t) => t.completada).length, total: g.tareas.length });
-      for (const t of g.tareas) out.push({ tipo: 'tarea', id: t.id, tarea: t, inicio: inicioDe(t), fin: t.fecha_vencimiento });
+    // Fases (o "Sin fase") de un conjunto de tareas, en orden
+    const agregarGrupos = (tSub: Tarea[], fSub: ProyectoFase[], destino: Fila[], prefijo: string) => {
+      const ordenadas = [...tSub].sort((a, b) => inicioDe(a).localeCompare(inicioDe(b)) || a.fecha_vencimiento.localeCompare(b.fecha_vencimiento));
+      const grupos: { id: string; nombre: string; tareas: Tarea[] }[] = [...fSub]
+        .sort((a, b) => a.orden - b.orden)
+        .map((f) => ({ id: f.id, nombre: f.nombre, tareas: ordenadas.filter((t) => t.fase_id === f.id) }));
+      const sueltas = ordenadas.filter((t) => !t.fase_id || !fSub.some((f) => f.id === t.fase_id));
+      if (sueltas.length > 0) grupos.push({ id: `${prefijo}sin-fase`, nombre: 'Sin fase', tareas: sueltas });
+      for (const g of grupos) {
+        const fase = fSub.find((f) => f.id === g.id);
+        const ini = g.tareas.length ? g.tareas.map(inicioDe).sort()[0] : fase?.fecha_inicio ?? hoy;
+        const fin = g.tareas.length ? g.tareas.map((t) => t.fecha_vencimiento).sort().slice(-1)[0] : fase?.fecha_fin ?? ini;
+        destino.push({ tipo: 'fase', id: g.id, nombre: g.nombre, inicio: ini, fin, hechas: g.tareas.filter((t) => t.completada).length, total: g.tareas.length });
+        for (const t of g.tareas) destino.push({ tipo: 'tarea', id: t.id, tarea: t, inicio: inicioDe(t), fin: t.fecha_vencimiento });
+      }
+    };
+    if (proyectos && proyectos.length > 1) {
+      for (const p of proyectos) {
+        const tP = tareas.filter((t) => t.proyecto_id === p.id);
+        if (tP.length === 0) continue;
+        const bloque: Fila[] = [];
+        agregarGrupos(tP, fases.filter((f) => f.proyecto_id === p.id), bloque, `${p.id}-`);
+        const ini = tP.map(inicioDe).sort()[0];
+        const fin = tP.map((t) => t.fecha_vencimiento).sort().slice(-1)[0];
+        out.push({ tipo: 'fase', id: `proy-${p.id}`, nombre: p.nombre, inicio: ini, fin, hechas: tP.filter((t) => t.completada).length, total: tP.length });
+        out.push(...bloque);
+      }
+    } else {
+      agregarGrupos(tareas, fases, out, '');
     }
     return out;
-  }, [tareas, fases, hoy]);
+  }, [tareas, fases, hoy, proyectos]);
 
   // Rango visible: desde la primera fecha hasta la última, con margen; siempre incluye hoy
   const { desde, dias } = useMemo(() => {
