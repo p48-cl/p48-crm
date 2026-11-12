@@ -49,8 +49,10 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
       n7: ultimas7.length,
       reuniones7: ultimas7.filter((a) => a.tipo === 'reunion').length,
       llamadas7: ultimas7.filter((a) => a.tipo === 'llamada').length,
+      sinCliente7: ultimas7.filter((a) => !a.empresa_id).length,
       clientes: clientes.length,
       sinContacto,
+      conContactoPct: clientes.length ? Math.round(((clientes.length - sinContacto) / clientes.length) * 100) : null,
     };
   }, [actividades, empresas]);
 
@@ -225,9 +227,11 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <Kpi etiqueta="Últimos 7 días" valor={indicadores.n7} nota={`${indicadores.llamadas7} llamadas · ${indicadores.reuniones7} reuniones`} />
-        <Kpi etiqueta="Clientes sin contacto" valor={`${indicadores.sinContacto} de ${indicadores.clientes}`} tono={indicadores.sinContacto > 0 ? 'aviso' : 'normal'} nota="sin actividad registrada en 30 días" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <Kpi acento="var(--c-accent)" etiqueta="Actividades · 7 días" valor={indicadores.n7} nota={`${indicadores.llamadas7} llamadas · ${indicadores.reuniones7} reuniones`} />
+        <Kpi acento="var(--c-ok)" etiqueta="Clientes con contacto" valor={indicadores.conContactoPct != null ? `${indicadores.conContactoPct}%` : '—'} progreso={indicadores.conContactoPct} nota={`${indicadores.clientes - indicadores.sinContacto} de ${indicadores.clientes} en 30 días`} />
+        <Kpi acento="var(--c-warn)" etiqueta="Clientes sin contacto" valor={indicadores.sinContacto} tono={indicadores.sinContacto > 0 ? 'aviso' : 'normal'} nota="sin actividad registrada en 30 días" />
+        <Kpi acento="var(--c-muted)" etiqueta="Sin cliente · 7 días" valor={indicadores.sinCliente7} tono={indicadores.sinCliente7 > 0 ? 'aviso' : 'normal'} nota="actividades no asociadas a un cliente" />
       </div>
 
       <div className="flex flex-wrap items-center gap-3 bg-[var(--c-surface)] p-3 rounded-lg border border-[var(--c-line)]">
