@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { CriterioCalificacion } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
-import { formatFecha, formatMoneda, esFechaAtrasada, formatCorrelativo, codigoNegocio, diasHastaFecha } from '../lib/formatters';
+import { formatFecha, formatFechaHora, formatMoneda, esFechaAtrasada, formatCorrelativo, codigoNegocio, diasHastaFecha } from '../lib/formatters';
 import { useConfiguracionCRM } from '../lib/configuracion';
 import { DatosNegocio } from '../components/crm/DatosNegocio';
 import { CotizacionesCliente } from '../components/clientes/CotizacionesCliente';
@@ -99,6 +99,12 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
   const diasSinActividad = ultimaActividad
     ? Math.floor((Date.now() - new Date(ultimaActividad).getTime()) / 86400000)
     : null;
+  // Último registro de actividad: fecha/hora y canal (tipo de actividad)
+  const ultimoRegistro = actividadesOp.reduce<(typeof actividadesOp)[number] | null>(
+    (max, a) => (!max || a.fecha_actividad > max.fecha_actividad ? a : max),
+    null,
+  );
+  const CANAL: Record<string, string> = { llamada: 'Llamada', reunion: 'Reunión', nota: 'Nota interna', correo_manual: 'Correo' };
   const cierreTexto =
     diasCierre === null
       ? null
@@ -255,6 +261,13 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
               tonoNota: cierreTono,
             },
             { etiqueta: 'Responsable', valor: responsable ? responsable.nombre : 'Sin asignar' },
+            {
+              etiqueta: 'Último registro',
+              valor: ultimoRegistro ? formatFechaHora(ultimoRegistro.fecha_actividad) : 'Sin registros',
+              mono: true,
+              nota: ultimoRegistro ? `Canal: ${CANAL[ultimoRegistro.tipo] ?? ultimoRegistro.tipo}` : 'Registra la primera actividad',
+              tonoNota: diasSinActividad !== null && diasSinActividad >= configCRM.dias_sin_actividad ? 'warn' : 'muted',
+            },
           ]}
         />
 
