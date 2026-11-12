@@ -154,6 +154,15 @@ const CRMAppContent: React.FC = () => {
 
           {currentView === 'crm' && (
             <KanbanView
+              pipeline="captacion"
+              onSelectOportunidad={(id) => setSelectedOpId(id)}
+              onOpenNewDeal={() => setIsNewDealOpen(true)}
+            />
+          )}
+
+          {currentView === 'negocios' && (
+            <KanbanView
+              pipeline="expansion"
               onSelectOportunidad={(id) => setSelectedOpId(id)}
               onOpenNewDeal={() => setIsNewDealOpen(true)}
             />
@@ -303,7 +312,7 @@ const CRMAppContent: React.FC = () => {
           }`}
         >
           <Kanban className="w-5 h-5" />
-          <span>Negocios</span>
+          <span>Leads</span>
         </button>
 
         <button
