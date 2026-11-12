@@ -13,6 +13,7 @@ import {
 import { useCRM } from '../context/CRMContext';
 import { TipoActividad } from '../types/crm';
 import { formatFechaHora } from '../lib/formatters';
+import { Kpi } from '../components/dashboard/ui';
 
 interface ActivitiesViewProps {
   onOpenNewActivity: () => void;
@@ -26,6 +27,28 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
   onSelectOportunidad,
 }) => {
   const { actividades, empresasTodas: empresas, oportunidades, contactos, miembros } = useCRM();
+
+  // Indicadores: volumen reciente y clientes activos sin contacto registrado en 30 días
+  const indicadores = useMemo(() => {
+    const hace7 = Date.now() - 7 * 86400000;
+    const hace30 = Date.now() - 30 * 86400000;
+    const ultimas7 = actividades.filter((a) => new Date(a.fecha_actividad).getTime() >= hace7);
+    const ultimaPorEmpresa = new Map<string, number>();
+    for (const a of actividades) {
+      if (!a.empresa_id) continue;
+      const t = new Date(a.fecha_actividad).getTime();
+      if (t > (ultimaPorEmpresa.get(a.empresa_id) ?? 0)) ultimaPorEmpresa.set(a.empresa_id, t);
+    }
+    const clientes = empresas.filter((e) => e.estado === 'cliente' && !e.archivado);
+    const sinContacto = clientes.filter((e) => (ultimaPorEmpresa.get(e.id) ?? 0) < hace30).length;
+    return {
+      n7: ultimas7.length,
+      reuniones7: ultimas7.filter((a) => a.tipo === 'reunion').length,
+      llamadas7: ultimas7.filter((a) => a.tipo === 'llamada').length,
+      clientes: clientes.length,
+      sinContacto,
+    };
+  }, [actividades, empresas]);
 
   const [filtroTipo, setFiltroTipo] = useState<string>('todos');
   const [filtroAutor, setFiltroAutor] = useState<string>('todos');
@@ -73,6 +96,11 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
           <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>Registrar Actividad</span>
         </button>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Kpi etiqueta="Últimos 7 días" valor={indicadores.n7} nota={`${indicadores.llamadas7} llamadas · ${indicadores.reuniones7} reuniones`} />
+        <Kpi etiqueta="Clientes sin contacto" valor={`${indicadores.sinContacto} de ${indicadores.clientes}`} tono={indicadores.sinContacto > 0 ? 'aviso' : 'normal'} nota="sin actividad registrada en 30 días" />
       </div>
 
       {/* Barra de Filtros */}
