@@ -190,7 +190,7 @@ const CRMAppContent: React.FC = () => {
           )}
 
           {currentView === 'proyectos' && (
-            <ProjectsView onEditTask={(t) => setTaskModalState({ isOpen: true, tarea: t, k: Date.now() })} />
+            <ProjectsView ambito="clientes" onEditTask={(t) => setTaskModalState({ isOpen: true, tarea: t, k: Date.now() })} />
           )}
 
           {currentView === 'agencia' && (
