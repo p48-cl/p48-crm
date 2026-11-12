@@ -10,18 +10,19 @@ interface NewDealModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreated: (id: string) => void;
+  empresaIdInicial?: string;
 }
 
 const input =
   'w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]';
 const label = 'block text-xs font-medium text-[var(--c-text-2)] mb-1';
 
-export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onCreated }) => {
+export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onCreated, empresaIdInicial }) => {
   const { empresas, etapas, miembros, fuentes, crearOportunidad, crearEmpresa } = useCRM();
   const { currentUser } = useAuth();
 
   const [nombre, setNombre] = useState('');
-  const [empresaId, setEmpresaId] = useState('');
+  const [empresaId, setEmpresaId] = useState(empresaIdInicial ?? '');
   const [altaEmpresa, setAltaEmpresa] = useState(false);
   const [nuevaEmpresa, setNuevaEmpresa] = useState({ nombre: '', dominio: '' });
   const [plan, setPlan] = useState<PlanEmpresa | ''>('A');

@@ -16,6 +16,10 @@ import { formatCLP, formatFecha, formatMoneda, formatRUT, formatTelefonoCL } fro
 import { ClientePanel } from '../components/clientes/ClientePanel';
 import { CotizacionesCliente } from '../components/clientes/CotizacionesCliente';
 import { DatosFacturacion } from '../components/clientes/DatosFacturacion';
+import { FacturasCliente } from '../components/clientes/FacturasCliente';
+import { ActivityModal } from '../components/common/ActivityModal';
+import { NewDealModal } from '../components/common/NewDealModal';
+import type { Actividad } from '../types/crm';
 import { CuentasCliente } from '../components/clientes/CuentasCliente';
 import { SubirLogo } from '../components/clientes/Logo';
 import { FichaMarketing } from '../components/marketing/FichaMarketing';
@@ -24,7 +28,7 @@ import { useConfiguracionCRM } from '../lib/configuracion';
 import { FranjaDecision, TonoFranja } from '../components/common/FranjaDecision';
 import { ResumenCuenta, AlertaResumen } from '../components/clientes/ResumenCuenta';
 
-type Tab = 'resumen' | 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'cotizaciones' | 'estrategia' | 'marketing' | 'info' | 'cliente';
+type Tab = 'resumen' | 'contactos' | 'oportunidades' | 'facturacion' | 'actividades' | 'tareas' | 'estrategia' | 'marketing' | 'cliente';
 
 interface CompanyDetailDrawerProps {
   empresa: Empresa | null;
@@ -103,6 +107,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
     crearContacto,
     miembros,
     industrias,
+    facturas,
   } = useCRM();
   const { config: cfg } = useConfiguracionCRM();
   const DIAS_ALERTA_RENOVACION = cfg.dias_alerta_renovacion;
@@ -114,6 +119,8 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
     if (isOpen) setActiveTab(tabInicial ?? 'resumen');
   }, [isOpen, empresa?.id, tabInicial]);
   const [showAddContact, setShowAddContact] = useState(false);
+  const [actividadEditando, setActividadEditando] = useState<Actividad | null>(null);
+  const [showNuevoNegocio, setShowNuevoNegocio] = useState(false);
   const [newContact, setNewContact] = useState<{
     nombre: string;
     apellido: string;
@@ -202,6 +209,8 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
       ? { label: '+ Actividad', onClick: () => onOpenNewActivity(empresa.id) }
       : activeTab === 'tareas'
       ? { label: '+ Tarea', onClick: () => onOpenNewTask(empresa.id) }
+      : activeTab === 'oportunidades'
+      ? { label: '+ Negocio', onClick: () => setShowNuevoNegocio(true) }
       : null;
 
   const handleCreateContact = async (e: React.FormEvent) => {
@@ -346,12 +355,11 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
               { id: 'resumen' as const, label: 'Resumen' },
               { id: 'contactos' as const, label: `Contactos (${contactosEmpresa.length})` },
               { id: 'oportunidades' as const, label: `Negocios (${oportunidadesEmpresa.length})` },
+              { id: 'facturacion' as const, label: 'Facturación' },
               { id: 'actividades' as const, label: 'Actividad' },
               { id: 'tareas' as const, label: `Tareas (${tareasPendientes.length})` },
-              { id: 'cotizaciones' as const, label: 'Cotizaciones' },
               { id: 'estrategia' as const, label: 'Estrategia' },
               ...(empresa.estado === 'cliente' ? [{ id: 'marketing' as const, label: 'Marketing' }] : []),
-              { id: 'info' as const, label: 'Contrato y datos' },
               ...(empresa.estado === 'cliente' ? [{ id: 'cliente' as const, label: 'Portal y activos' }] : []),
             ] as const
           ).map((tab) => (
@@ -383,7 +391,9 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
               alertas={riesgos}
               accesosConcedidos={[accesos.google_ads, accesos.ga4, accesos.meta_bm, accesos.gtm_cmp].filter(Boolean).length}
               accesosTotal={empresa.estado === 'cliente' ? 4 : 0}
-                            onIr={(d) => setActiveTab(d)}
+                            onIr={(d) => setActiveTab(d === 'info' ? 'resumen' : d)}
+              miembros={miembros.filter((m) => m.activo)}
+              facturas={facturas}
               onAbrirNegocio={onSelectOportunidad}
               onActualizar={(datos) => actualizarEmpresa(empresa.id, datos)}
               estrategia={<ResumenEstrategia empresaId={empresa.id} onVerTodo={() => setActiveTab('estrategia')} />}
@@ -400,176 +410,6 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                 </>
               }
             />
-          )}
-
-          {/* TAB CONTRATO Y DATOS: administrativo, legal y facturable */}
-          {activeTab === 'info' && (
-            <div className="space-y-6">
-              {/* Parámetros Comerciales & Operativos */}
-              <div className="ficha-card p-4 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-semibold text-[var(--c-text)]">Contrato y estado</h3>
-                  <span className="text-[10px] font-mono text-[var(--c-muted)]">Lo que define la relación</span>
-                </div>
-
-                <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)] -mb-1">Estado</p>
-                <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-3 gap-3 text-xs">
-                  <div>
-                    <label className="block text-[11px] text-[var(--c-muted)] mb-1">Estado del cliente</label>
-                    <select
-                      value={empresa.estado}
-                      onChange={(e) => actualizarEmpresa(empresa.id, { estado: e.target.value as any })}
-                      className="w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
-                    >
-                      <option value="prospecto">Prospecto</option>
-                      <option value="cliente">Cliente activo</option>
-                      <option value="ex_cliente">Ex cliente</option>
-                      <option value="descartado">Descartado</option>
-                      <option value="proveedor">Proveedor</option>
-                      <option value="interno">Interno</option>
-                      <option value="archivado">Archivado</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] text-[var(--c-muted)] mb-1">Plan Contratado</label>
-                    <select
-                      value={empresa.plan || ''}
-                      onChange={(e) => actualizarEmpresa(empresa.id, { plan: (e.target.value as any) || null })}
-                      className="w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
-                    >
-                      <option value="">Sin plan</option>
-                      <option value="A">Plan A</option>
-                      <option value="B">Plan B</option>
-                      <option value="C">Plan C</option>
-                      <option value="D">Plan D</option>
-                      <option value="E">Plan E</option>
-                      <option value="personalizado">Personalizado</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] text-[var(--c-muted)] mb-1">Salud de Cuenta</label>
-                    <select
-                      value={empresa.salud || ''}
-                      onChange={(e) => actualizarEmpresa(empresa.id, { salud: (e.target.value as any) || null })}
-                      className="w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
-                    >
-                      <option value="">Sin definir</option>
-                      <option value="verde">Verde (Saludable)</option>
-                      <option value="amarillo">Amarillo (Alerta)</option>
-                      <option value="rojo">Rojo (Riesgo)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="h-px bg-[var(--c-line)]" />
-                <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)] -mb-1">Económico</p>
-                <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-3 gap-3 text-xs">
-                  <div>
-                    <label className="block text-[11px] text-[var(--c-muted)] mb-1">Fee Mensual (CLP)</label>
-                    <input
-                      type="number"
-                      value={empresa.fee_mensual_clp ?? ''}
-                      onChange={(e) =>
-                        actualizarEmpresa(empresa.id, {
-                          fee_mensual_clp: e.target.value ? Number(e.target.value) : null,
-                          
-                        })
-                      }
-                      placeholder="Ej: 1500000"
-                      className="w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] font-mono"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] text-[var(--c-muted)] mb-1">Setup Fee (CLP)</label>
-                    <input
-                      type="number"
-                      value={empresa.setup_fee_clp ?? ''}
-                      onChange={(e) =>
-                        actualizarEmpresa(empresa.id, {
-                          setup_fee_clp: e.target.value ? Number(e.target.value) : null,
-                        })
-                      }
-                      placeholder="Ej: 800000"
-                      className="w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] font-mono"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] text-[var(--c-muted)] mb-1">Fecha Renovación</label>
-                    <input
-                      type="date"
-                      value={empresa.fecha_renovacion ? empresa.fecha_renovacion.slice(0, 10) : ''}
-                      onChange={(e) =>
-                        actualizarEmpresa(empresa.id, {
-                          fecha_renovacion: e.target.value || null,
-                        })
-                      }
-                      className="w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] font-mono"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] text-[var(--c-muted)] mb-1">Tipo de renovación</label>
-                    <select
-                      value={empresa.renovacion_tipo || 'manual'}
-                      onChange={(e) => actualizarEmpresa(empresa.id, { renovacion_tipo: e.target.value as 'manual' | 'automatica' })}
-                      className="w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
-                    >
-                      <option value="manual">Manual (se renueva con firma)</option>
-                      <option value="automatica">Automática</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="h-px bg-[var(--c-line)]" />
-                <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--c-muted)] -mb-1">Responsable</p>
-                <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-3 text-xs">
-                  <div>
-                    <label className="block text-[11px] text-[var(--c-muted)] mb-1">Responsable Comercial</label>
-                    <select
-                      value={empresa.responsable_id || ''}
-                      onChange={(e) =>
-                        actualizarEmpresa(empresa.id, {
-                          responsable_id: e.target.value || null,
-                        })
-                      }
-                      className="w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
-                    >
-                      <option value="">Sin asignar</option>
-                      {miembros.map((m) => (
-                        <option key={m.id} value={m.id}>
-                          {m.nombre} ({m.rol})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] text-[var(--c-muted)] mb-1">MRR calculado (automático)</label>
-                    <div className="px-3 py-1.5 bg-[var(--c-surface)] rounded border border-[var(--c-line)] font-mono text-xs text-[var(--c-accent)]">
-                      {empresa.mrr_actual_clp ? formatCLP(empresa.mrr_actual_clp) : '—'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-[minmax(0,1fr)] xl:grid-cols-2 gap-6 items-start">
-              {/* Datos legales y tributarios */}
-              <DatosFacturacion empresa={empresa} onGuardar={(c) => actualizarEmpresa(empresa.id, c)} />
-
-              <div className="space-y-6">
-              {/* Cuentas y permisos del cliente (registro por plataforma) */}
-              <CuentasCliente
-                empresaId={empresa.id}
-                notas={accesos.notas_accesos || ''}
-                onNotas={(v) => actualizarAccesosAdmin(empresa.id, { notas_accesos: v })}
-              />
-              </div>
-              </div>
-            </div>
           )}
 
           {/* TAB 2: CONTACTOS */}
@@ -746,7 +586,13 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
           {/* TAB 3: OPORTUNIDADES */}
           {activeTab === 'oportunidades' && (
             <div className="space-y-3">
-              <h3 className="text-xs font-semibold text-[var(--c-text)]">Historial de Negocios</h3>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-xs font-semibold text-[var(--c-text)]">Negocios de este cliente</h3>
+                  <p className="text-[11px] text-[var(--c-muted)] mt-0.5">Ventas en curso: renovación, expansión o servicio nuevo. Cada uno avanza por etapas en Pipeline.</p>
+                </div>
+                <button onClick={() => setShowNuevoNegocio(true)} className="shrink-0 text-xs text-[var(--c-on-accent)] bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] px-2.5 py-1 rounded font-medium">+ Negocio</button>
+              </div>
               {oportunidadesEmpresa.length === 0 ? (
                 <p className="text-xs text-[var(--c-muted)] py-4 text-center">Sin oportunidades asociadas.</p>
               ) : (
@@ -816,9 +662,12 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                         {act.resultado && (
                           <p className="text-[var(--c-accent)] text-[11px]">Resultado: {act.resultado}</p>
                         )}
-                        <p className="text-[10px] text-[var(--c-muted-2)] font-mono">
-                          Registrado por {autor?.nombre ?? 'Equipo'}
-                        </p>
+                        <div className="flex items-center justify-between gap-2 pt-1">
+                          <p className="text-[10px] text-[var(--c-muted-2)] font-mono">
+                            Registrado por {autor?.nombre ?? 'Equipo'}
+                          </p>
+                          <button onClick={() => setActividadEditando(act)} className="text-[11px] text-[var(--c-accent)] hover:underline">Editar</button>
+                        </div>
                       </div>
                     );
                   })}
@@ -890,15 +739,43 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
               )}
             </div>
           )}
-          {activeTab === 'cotizaciones' && (
-            <CotizacionesCliente empresa={empresa} iniciarNueva={!!iniciarNuevaCotizacion} onNuevaUsada={onNuevaCotizacionUsada} />
+          {activeTab === 'facturacion' && (
+            <div className="space-y-8">
+              <section className="space-y-3">
+                <h3 className="text-xs font-semibold text-[var(--c-text)]">Cotizaciones</h3>
+                <CotizacionesCliente empresa={empresa} iniciarNueva={!!iniciarNuevaCotizacion} onNuevaUsada={onNuevaCotizacionUsada} />
+              </section>
+              <section className="space-y-3">
+                <FacturasCliente empresa={empresa} />
+              </section>
+            </div>
           )}
           {activeTab === 'estrategia' && <EstrategiaEditor empresaId={empresa.id} nombreCliente={empresa.nombre} />}
           {activeTab === 'marketing' && empresa.estado === 'cliente' && <FichaMarketing empresaId={empresa.id} />}
           {activeTab === 'cliente' && empresa.estado === 'cliente' && (
-            <ClientePanel empresaId={empresa.id} />
+            <div className="space-y-6">
+              <ClientePanel empresaId={empresa.id} />
+                            <CuentasCliente
+                empresaId={empresa.id}
+                notas={accesos.notas_accesos || ''}
+                onNotas={(v) => actualizarAccesosAdmin(empresa.id, { notas_accesos: v })}
+              />
+            </div>
           )}
         </div>
+
+        {actividadEditando && (
+          <ActivityModal isOpen onClose={() => setActividadEditando(null)} actividadEditar={actividadEditando} />
+        )}
+        <NewDealModal
+          isOpen={showNuevoNegocio}
+          onClose={() => setShowNuevoNegocio(false)}
+          empresaIdInicial={empresa.id}
+          onCreated={(id) => {
+            setShowNuevoNegocio(false);
+            onSelectOportunidad(id);
+          }}
+        />
 
         {/* Footer */}
         <div className="p-4 border-t border-[var(--c-line)] bg-[var(--c-surface-2)] flex items-center justify-between text-xs text-[var(--c-muted)]">

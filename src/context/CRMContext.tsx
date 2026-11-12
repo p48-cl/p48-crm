@@ -16,6 +16,7 @@ import {
   Miembro,
   KPIsDashboard,
 } from '../types/crm';
+import type { Factura } from '../types/crm';
 import {
   INITIAL_EMPRESAS,
   INITIAL_CONTACTOS,
@@ -100,6 +101,12 @@ interface CRMContextType {
 
   // Actividades & Tareas
   registrarActividad: (datos: Omit<Actividad, 'id' | 'created_at' | 'autor_id'>) => Promise<void>;
+  actualizarActividad: (actividadId: string, datos: Partial<Omit<Actividad, 'id' | 'created_at' | 'autor_id'>>) => Promise<void>;
+  eliminarActividad: (actividadId: string) => Promise<void>;
+  facturas: Factura[];
+  crearFactura: (datos: Omit<Factura, 'id' | 'created_at' | 'updated_at' | 'creada_por' | 'archivado'>) => Promise<Factura | null>;
+  actualizarFactura: (facturaId: string, datos: Partial<Factura>) => Promise<void>;
+  eliminarFactura: (facturaId: string) => Promise<void>;
   crearTarea: (datos: Omit<Tarea, 'id' | 'created_at'>) => Promise<void>;
   toggleTareaCompletada: (tareaId: string, completadaActual: boolean) => Promise<void>;
   actualizarTarea: (tareaId: string, datos: Partial<Tarea>) => Promise<void>;
@@ -157,6 +164,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [calificaciones, setCalificaciones] = useState<Record<string, VCalificacionOportunidad>>({});
   const [actividades, setActividades] = useState<Actividad[]>([]);
   const [tareas, setTareas] = useState<Tarea[]>([]);
+  const [facturas, setFacturas] = useState<Factura[]>([]);
   const [fuentes, setFuentes] = useState<CatalogoItem[]>([]);
   const [motivosPerdida, setMotivosPerdida] = useState<CatalogoItem[]>([]);
   const [industrias, setIndustrias] = useState<CatalogoItem[]>([]);
@@ -236,13 +244,15 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (dbVOportunidades) setOportunidades(dbVOportunidades as VOportunidad[]);
 
         // 5. Cargar actividades y tareas
-        const [{ data: dbActividades }, { data: dbTareas }] = await Promise.all([
-          supabase.from('actividades').select('*').order('fecha_actividad', { ascending: false }).limit(100),
+        const [{ data: dbActividades }, { data: dbTareas }, { data: dbFacturas }] = await Promise.all([
+          supabase.from('actividades').select('*').order('fecha_actividad', { ascending: false }).limit(2000),
           supabase.from('tareas').select('*').order('fecha_vencimiento', { ascending: true }),
+          supabase.from('facturas').select('*').eq('archivado', false).order('fecha_emision', { ascending: false }),
         ]);
 
         if (dbActividades) setActividades(dbActividades as Actividad[]);
         if (dbTareas) setTareas(dbTareas as Tarea[]);
+        if (dbFacturas) setFacturas(dbFacturas as Factura[]);
 
         // 6. Cargar KPIs vía RPC
         const soloMios = filtroAlcance === 'mis_datos';
@@ -714,6 +724,61 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setContactos((prev) => prev.filter((c) => c.id !== contactoId));
   };
 
+  const actualizarActividad = async (actividadId: string, datos: Partial<Omit<Actividad, 'id' | 'created_at' | 'autor_id'>>) => {
+    if (!supabase) return;
+    const { error } = await supabase.from('actividades').update(datos).eq('id', actividadId);
+    if (error) {
+      setErrorMensaje(parseSupabaseError(error));
+      return;
+    }
+    setActividades((prev) => prev.map((a) => (a.id === actividadId ? { ...a, ...datos } : a)));
+  };
+
+  const eliminarActividad = async (actividadId: string) => {
+    if (!supabase) return;
+    const { error } = await supabase.from('actividades').delete().eq('id', actividadId);
+    if (error) {
+      setErrorMensaje(parseSupabaseError(error));
+      return;
+    }
+    setActividades((prev) => prev.filter((a) => a.id !== actividadId));
+  };
+
+  const crearFactura = async (datos: Omit<Factura, 'id' | 'created_at' | 'updated_at' | 'creada_por' | 'archivado'>) => {
+    if (!supabase) return null;
+    const { data, error } = await supabase.from('facturas').insert(datos).select('*').single();
+    if (error) {
+      setErrorMensaje(parseSupabaseError(error));
+      return null;
+    }
+    const factura = data as Factura;
+    setFacturas((prev) => [factura, ...prev]);
+    return factura;
+  };
+
+  const actualizarFactura = async (facturaId: string, datos: Partial<Factura>) => {
+    if (!supabase) return;
+    const { error } = await supabase
+      .from('facturas')
+      .update({ ...datos, updated_at: new Date().toISOString() })
+      .eq('id', facturaId);
+    if (error) {
+      setErrorMensaje(parseSupabaseError(error));
+      return;
+    }
+    setFacturas((prev) => prev.map((f) => (f.id === facturaId ? { ...f, ...datos } : f)));
+  };
+
+  const eliminarFactura = async (facturaId: string) => {
+    if (!supabase) return;
+    const { error } = await supabase.from('facturas').delete().eq('id', facturaId);
+    if (error) {
+      setErrorMensaje(parseSupabaseError(error));
+      return;
+    }
+    setFacturas((prev) => prev.filter((f) => f.id !== facturaId));
+  };
+
   // ACTIVIDADES & TAREAS (el autor lo asigna la base)
   const registrarActividad = async (datos: Omit<Actividad, 'id' | 'created_at' | 'autor_id'>) => {
     if (!supabase) {
@@ -740,7 +805,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       .from('actividades')
       .select('*')
       .order('fecha_actividad', { ascending: false })
-      .limit(100);
+      .limit(2000);
 
     if (data) setActividades(data as Actividad[]);
   };
@@ -1305,6 +1370,12 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         actualizarContacto,
         archivarContacto,
         registrarActividad,
+        actualizarActividad,
+        eliminarActividad,
+        facturas,
+        crearFactura,
+        actualizarFactura,
+        eliminarFactura,
         crearTarea,
         toggleTareaCompletada,
         actualizarTarea,

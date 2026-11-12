@@ -4,9 +4,10 @@ import { DatosFacturacion } from './DatosFacturacion';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { formatCLP, formatFecha, formatMoneda, formatCorrelativo } from '../../lib/formatters';
 import { estadoEfectivo, redondear, MonedaCotizacion } from '../../lib/cotizaciones';
-import type { Actividad, Contacto, EstadoPago, Empresa, Oportunidad, Tarea } from '../../types/crm';
+import type { Actividad, Contacto, EstadoPago, Empresa, Factura, Miembro, Oportunidad, Tarea } from '../../types/crm';
+import { estaVencida } from './FacturasCliente';
 
-export type DestinoResumen = 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'cotizaciones' | 'estrategia' | 'marketing' | 'info';
+export type DestinoResumen = 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'facturacion' | 'estrategia' | 'marketing' | 'info';
 
 export interface AlertaResumen {
   texto: string;
@@ -37,6 +38,8 @@ interface ProyectoRes {
 interface Props {
   empresa: Empresa;
   responsable?: string;
+  miembros: Miembro[];
+  facturas: Factura[];
   contactoPrincipal?: Contacto;
   oportunidadesAbiertas: Oportunidad[];
   actividades: Actividad[];
@@ -64,6 +67,26 @@ const ESTADOS_PAGO: { valor: EstadoPago | ''; texto: string }[] = [
   { valor: 'al_dia', texto: 'Al día' },
   { valor: 'por_vencer', texto: 'Por vencer' },
   { valor: 'atrasado', texto: 'Atrasado' },
+];
+
+const ESTADOS_CLIENTE: { valor: Empresa['estado']; texto: string }[] = [
+  { valor: 'prospecto', texto: 'Prospecto' },
+  { valor: 'cliente', texto: 'Cliente activo' },
+  { valor: 'ex_cliente', texto: 'Ex cliente' },
+  { valor: 'descartado', texto: 'Descartado' },
+  { valor: 'proveedor', texto: 'Proveedor' },
+  { valor: 'interno', texto: 'Interno' },
+  { valor: 'archivado', texto: 'Archivado' },
+];
+
+const PLANES = [
+  { valor: '', texto: 'Sin plan' },
+  { valor: 'A', texto: 'Plan A' },
+  { valor: 'B', texto: 'Plan B' },
+  { valor: 'C', texto: 'Plan C' },
+  { valor: 'D', texto: 'Plan D' },
+  { valor: 'E', texto: 'Plan E' },
+  { valor: 'personalizado', texto: 'Personalizado' },
 ];
 
 const ETIQUETA_PROYECTO: Record<ProyectoRes['estado'], string> = {
@@ -117,7 +140,7 @@ const Campo: React.FC<{ etiqueta: string; nota?: string; editable?: boolean; chi
 );
 
 export const ResumenCuenta: React.FC<Props> = ({
-  empresa, responsable, contactoPrincipal, oportunidadesAbiertas, actividades, tareasPendientes,
+  empresa, responsable, miembros, facturas, contactoPrincipal, oportunidadesAbiertas, actividades, tareasPendientes,
   alertas, accesosConcedidos, accesosTotal, enlaces, estrategia, onIr, onAbrirNegocio, onActualizar, diasAlertaCotizacion = 7,
 }) => {
   const [cotizaciones, setCotizaciones] = useState<CotRes[]>([]);
@@ -170,13 +193,19 @@ export const ResumenCuenta: React.FC<Props> = ({
     .filter((c) => c.estado === 'enviada')
     .flatMap((c) => {
       const dias = Math.ceil((new Date(`${c.vence_el.slice(0, 10)}T00:00:00`).getTime() - hoyMs) / 86400000);
-      if (dias < 0) return [{ texto: `${formatCorrelativo('COT', c.numero)} venció sin respuesta`, tono: 'alerta' as const, destino: 'cotizaciones' as const }];
-      if (dias <= diasAlertaCotizacion) return [{ texto: `${formatCorrelativo('COT', c.numero)} vence en ${dias} día(s)`, tono: 'alerta' as const, destino: 'cotizaciones' as const }];
+      if (dias < 0) return [{ texto: `${formatCorrelativo('COT', c.numero)} venció sin respuesta`, tono: 'alerta' as const, destino: 'facturacion' as const }];
+      if (dias <= diasAlertaCotizacion) return [{ texto: `${formatCorrelativo('COT', c.numero)} vence en ${dias} día(s)`, tono: 'alerta' as const, destino: 'facturacion' as const }];
       return [];
     });
   const alertasFicha: AlertaResumen[] = [];
-  if (empresa.estado_pago === 'atrasado') alertasFicha.push({ texto: 'Pago atrasado', tono: 'alerta', destino: 'info' });
-  if (empresa.estado_pago === 'por_vencer') alertasFicha.push({ texto: 'Pago por vencer', tono: 'info', destino: 'info' });
+  const facturasCliente = facturas.filter((f) => f.empresa_id === empresa.id);
+  const facturasVencidas = facturasCliente.filter(estaVencida);
+  if (facturasVencidas.length) {
+    const montoVencido = facturasVencidas.reduce((acc, f) => acc + Number(f.monto_total), 0);
+    alertasFicha.push({ texto: `${facturasVencidas.length} factura(s) vencida(s) por ${formatCLP(montoVencido)}`, tono: 'alerta', destino: 'facturacion' });
+  }
+  if (empresa.estado_pago === 'atrasado') alertasFicha.push({ texto: 'Pago atrasado', tono: 'alerta', destino: 'facturacion' });
+  if (empresa.estado_pago === 'por_vencer') alertasFicha.push({ texto: 'Pago por vencer', tono: 'info', destino: 'facturacion' });
   if (empresa.proxima_facturacion && soloFecha(empresa.proxima_facturacion) < hoyISO) {
     alertasFicha.push({ texto: `Facturación vencida desde ${formatFecha(empresa.proxima_facturacion)}`, tono: 'alerta', destino: 'info' });
   }
@@ -238,7 +267,7 @@ export const ResumenCuenta: React.FC<Props> = ({
 
       {/* Derecha: contrato, lo que requiere atención y lo que sigue */}
       <div className="space-y-4 min-w-0">
-        <Bloque titulo="Contrato y datos" accion={{ texto: 'Plan y fee', onClick: () => onIr('info') }}>
+        <Bloque titulo="Contrato y datos">
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-4 text-xs">
             <Campo etiqueta="Salud" editable>
               <SelectColor valor={empresa.salud ?? ''} tono={TONO_SALUD[empresa.salud ?? '']} opciones={SALUDES} onChange={(v) => onActualizar({ salud: (v || null) as Empresa['salud'] })} />
@@ -250,11 +279,27 @@ export const ResumenCuenta: React.FC<Props> = ({
               <input type="date" value={soloFecha(empresa.fecha_ultimo_pago)} onChange={(e) => onActualizar({ fecha_ultimo_pago: e.target.value || null })} className={`${input} font-mono`} />
             </Campo>
 
-            <Campo etiqueta="Plan">
-              <span className="text-[var(--c-text)]">{empresa.plan ? (empresa.plan === 'personalizado' ? 'Personalizado' : `Plan ${empresa.plan}`) : 'Sin plan'}</span>
+            <Campo etiqueta="Estado del cliente" editable>
+              <select value={empresa.estado} onChange={(e) => onActualizar({ estado: e.target.value as Empresa['estado'] })} className={input}>
+                {ESTADOS_CLIENTE.map((o) => <option key={o.valor} value={o.valor}>{o.texto}</option>)}
+              </select>
             </Campo>
-            <Campo etiqueta="Fee mensual">
-              <span className="font-mono text-[var(--c-text)]">{empresa.fee_mensual_clp ? formatCLP(empresa.fee_mensual_clp) : '—'}</span>
+            <Campo etiqueta="Plan" editable>
+              <select value={empresa.plan ?? ''} onChange={(e) => onActualizar({ plan: (e.target.value || null) as Empresa['plan'] })} className={input}>
+                {PLANES.map((o) => <option key={o.valor} value={o.valor}>{o.texto}</option>)}
+              </select>
+            </Campo>
+            <Campo etiqueta="Fee mensual (CLP)" editable>
+              <input type="number" min={0} className={`${input} font-mono`} value={empresa.fee_mensual_clp ?? ''} placeholder="Sin fee" onChange={(e) => onActualizar({ fee_mensual_clp: e.target.value ? Number(e.target.value) : null })} />
+            </Campo>
+            <Campo etiqueta="Setup fee (CLP)" editable>
+              <input type="number" min={0} className={`${input} font-mono`} value={empresa.setup_fee_clp ?? ''} placeholder="Sin setup" onChange={(e) => onActualizar({ setup_fee_clp: e.target.value ? Number(e.target.value) : null })} />
+            </Campo>
+            <Campo etiqueta="Responsable" editable>
+              <select value={empresa.responsable_id ?? ''} onChange={(e) => onActualizar({ responsable_id: e.target.value || null })} className={input}>
+                <option value="">Sin asignar</option>
+                {miembros.map((m) => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+              </select>
             </Campo>
             <Campo etiqueta="Inicio de contrato" editable>
               <input type="date" value={soloFecha(empresa.inicio_contrato)} onChange={(e) => onActualizar({ inicio_contrato: e.target.value || null })} className={`${input} font-mono`} />
@@ -263,8 +308,14 @@ export const ResumenCuenta: React.FC<Props> = ({
             <Campo etiqueta="Próxima facturación" nota={`Pago a ${empresa.dias_pago ?? 30} días`} editable>
               <input type="date" value={soloFecha(empresa.proxima_facturacion)} onChange={(e) => onActualizar({ proxima_facturacion: e.target.value || null })} className={`${input} font-mono`} />
             </Campo>
-            <Campo etiqueta="Próxima renovación" nota={empresa.renovacion_tipo === 'automatica' ? 'Automática' : 'Manual'} editable>
-              <input type="date" value={soloFecha(empresa.fecha_renovacion)} onChange={(e) => onActualizar({ fecha_renovacion: e.target.value || null })} className={`${input} font-mono`} />
+            <Campo etiqueta="Próxima renovación" editable>
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-1.5">
+                <input type="date" value={soloFecha(empresa.fecha_renovacion)} onChange={(e) => onActualizar({ fecha_renovacion: e.target.value || null })} className={`${input} font-mono`} />
+                <select value={empresa.renovacion_tipo ?? 'manual'} onChange={(e) => onActualizar({ renovacion_tipo: e.target.value as Empresa['renovacion_tipo'] })} className={input} title="Tipo de renovación">
+                  <option value="manual">Manual</option>
+                  <option value="automatica">Auto</option>
+                </select>
+              </div>
             </Campo>
             <Campo etiqueta="LTV estimado" nota={mesesContrato !== null ? `MRR × ${mesesContrato} meses` : 'Falta inicio de contrato'}>
               <span className="font-mono text-[var(--c-text)]">{ltvEstimado !== null ? formatCLP(ltvEstimado) : '—'}</span>
@@ -335,19 +386,60 @@ export const ResumenCuenta: React.FC<Props> = ({
               )}
             </Bloque>
 
-            <Bloque titulo="Cotización vigente" accion={{ texto: 'Ver', onClick: () => onIr('cotizaciones') }}>
-              {!vigente ? (
-                <p className="text-xs text-[var(--c-muted)]">Sin cotización enviada ni aceptada.</p>
-              ) : (
-                <div className="space-y-1 text-xs">
-                  <p className="text-[var(--c-text)] truncate">{formatCorrelativo('COT', vigente.numero)} · {vigente.titulo}</p>
-                  <p className="font-mono text-[var(--c-text)]">
-                    {formatMoneda(redondear(vigente.neto_mensual * (1 + vigente.iva_pct / 100), vigente.moneda), vigente.moneda)} /mes c/IVA
-                  </p>
-                  <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">{estadoEfectivo(vigente)} · vence {formatFecha(vigente.vence_el)}</p>
+            <div className="space-y-4 min-w-0">
+          <Bloque titulo={`Cotizaciones (${cotizaciones.length})`} accion={{ texto: 'Ver todas', onClick: () => onIr('facturacion') }}>
+            {cotizaciones.length === 0 ? (
+              <p className="text-xs text-[var(--c-muted)]">Sin cotizaciones.</p>
+            ) : (
+              <ul className="divide-y divide-[var(--c-line)] text-xs">
+                {cotizaciones.slice(0, 3).map((c) => (
+                  <li key={c.id} className="flex items-center justify-between gap-3 py-1.5 first:pt-0 last:pb-0">
+                    <span className="font-mono text-[var(--c-text)]">{formatCorrelativo('COT', c.numero)}</span>
+                    <span className="font-mono text-[var(--c-text)]">
+                      {c.neto_mensual > 0
+                        ? `${formatMoneda(redondear(c.neto_mensual * (1 + c.iva_pct / 100), c.moneda), c.moneda)} /mes`
+                        : formatMoneda(redondear(c.neto_unico * (1 + c.iva_pct / 100), c.moneda), c.moneda)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Bloque>
+
+          <Bloque titulo={`Facturas (${facturasCliente.length})`} accion={{ texto: 'Registrar', onClick: () => onIr('facturacion') }}>
+            {facturasCliente.length === 0 ? (
+              <p className="text-xs text-[var(--c-muted)]">Sin facturas registradas.</p>
+            ) : (
+              <>
+                <div className="grid grid-cols-3 gap-2 text-xs pb-3 mb-2 border-b border-[var(--c-line)]">
+                  <div>
+                    <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Pendiente</p>
+                    <p className="font-mono text-[var(--c-text)]">{formatCLP(facturasCliente.filter((f) => f.estado_pago === 'pendiente').reduce((a, f) => a + Number(f.monto_total), 0))}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Vencido</p>
+                    <p className={`font-mono ${facturasVencidas.length ? 'text-[var(--c-danger)]' : 'text-[var(--c-text)]'}`}>{formatCLP(facturasVencidas.reduce((a, f) => a + Number(f.monto_total), 0))}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Pagado</p>
+                    <p className="font-mono text-[var(--c-ok)]">{formatCLP(facturasCliente.filter((f) => f.estado_pago === 'pagada').reduce((a, f) => a + Number(f.monto_total), 0))}</p>
+                  </div>
                 </div>
-              )}
-            </Bloque>
+                <ul className="divide-y divide-[var(--c-line)] text-xs">
+                  {[...facturasCliente].sort((a, b) => b.fecha_emision.localeCompare(a.fecha_emision)).slice(0, 3).map((f) => (
+                    <li key={f.id} className="flex items-center justify-between gap-3 py-1.5 first:pt-0 last:pb-0">
+                      <span className="font-mono text-[var(--c-text)]">{f.tipo_documento}-{String(f.folio).padStart(6, '0')}</span>
+                      <span className="font-mono text-[var(--c-text)]">{formatCLP(Number(f.monto_total))}</span>
+                      <span className={`text-[10px] font-mono uppercase ${estaVencida(f) ? 'text-[var(--c-danger)]' : f.estado_pago === 'pagada' ? 'text-[var(--c-ok)]' : 'text-[var(--c-muted)]'}`}>
+                        {estaVencida(f) ? 'Vencida' : f.estado_pago}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </Bloque>
+        </div>
           </div>
         </div>
 

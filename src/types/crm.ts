@@ -344,3 +344,29 @@ export interface PortalReporte {
   periodo: string | null;
   url: string;
 }
+
+export type EstadoFactura = 'pendiente' | 'pagada' | 'anulada';
+
+// Factura registrada a mano desde el SII (afecta 33 o exenta 34).
+export interface Factura {
+  id: string;
+  empresa_id: string;
+  cotizacion_id?: string | null;
+  oportunidad_id?: string | null;
+  tipo_documento: 33 | 34;
+  folio: number;
+  fecha_emision: string;
+  fecha_vencimiento?: string | null;
+  monto_neto: number;
+  monto_iva: number;
+  monto_total: number;
+  estado_pago: EstadoFactura;
+  fecha_pago?: string | null;
+  medio_pago?: string | null;
+  url_documento?: string | null;
+  notas?: string | null;
+  creada_por?: string | null;
+  archivado: boolean;
+  created_at?: string;
+  updated_at?: string;
+}

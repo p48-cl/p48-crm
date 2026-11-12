@@ -49,7 +49,7 @@ const CRMAppContent: React.FC = () => {
   const [isNewDealOpen, setIsNewDealOpen] = useState(false);
   const [selectedOpId, setSelectedOpId] = useState<string | null>(null);
   const [selectedEmpId, setSelectedEmpId] = useState<string | null>(null);
-  const [fichaTab, setFichaTab] = useState<'marketing' | 'cotizaciones' | undefined>(undefined);
+  const [fichaTab, setFichaTab] = useState<'marketing' | 'facturacion' | undefined>(undefined);
   const [fichaNuevaCotizacion, setFichaNuevaCotizacion] = useState(false);
   // Sube al cerrar la ficha de un cliente para que la vista de Cotizaciones recargue sus datos
   const [cotizacionesVersion, setCotizacionesVersion] = useState(0);
@@ -163,7 +163,7 @@ const CRMAppContent: React.FC = () => {
           )}
 
           {currentView === 'cotizaciones' && (
-            <CotizacionesView version={cotizacionesVersion} onAbrirFicha={(id, nueva) => { setFichaTab('cotizaciones'); setFichaNuevaCotizacion(!!nueva); setSelectedEmpId(id); }} />
+            <CotizacionesView version={cotizacionesVersion} onAbrirFicha={(id, nueva) => { setFichaTab('facturacion'); setFichaNuevaCotizacion(!!nueva); setSelectedEmpId(id); }} />
           )}
 
           {currentView === 'contactos' && (

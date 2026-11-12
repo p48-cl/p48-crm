@@ -1,14 +1,16 @@
 import { fondoCerrable } from '../../lib/fondo';
 import React, { useState } from 'react';
-import { Clock, Phone, Video, FileText, Mail, X } from 'lucide-react';
+import { Clock, Phone, Video, FileText, Mail, X, Trash2 } from 'lucide-react';
 import { useCRM } from '../../context/CRMContext';
-import { TipoActividad } from '../../types/crm';
+import { useAuth } from '../../context/AuthContext';
+import { Actividad, TipoActividad } from '../../types/crm';
 
 interface ActivityModalProps {
   isOpen: boolean;
   onClose: () => void;
   empresaIdInicial?: string;
   oportunidadIdInicial?: string;
+  actividadEditar?: Actividad | null; // si viene, el modal edita en vez de crear
 }
 
 export const ActivityModal: React.FC<ActivityModalProps> = ({
@@ -16,17 +18,22 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
   onClose,
   empresaIdInicial,
   oportunidadIdInicial,
+  actividadEditar,
 }) => {
-  const { empresas, oportunidades, contactos, registrarActividad } = useCRM();
+  const { empresas, oportunidades, contactos, registrarActividad, actualizarActividad, eliminarActividad } = useCRM();
+  const { isAdmin } = useAuth();
+  const editando = !!actividadEditar;
 
-  const [tipo, setTipo] = useState<TipoActividad>('llamada');
-  const [empresaId, setEmpresaId] = useState(empresaIdInicial || '');
-  const [oportunidadId, setOportunidadId] = useState(oportunidadIdInicial || '');
-  const [contactoId, setContactoId] = useState('');
-  const [titulo, setTitulo] = useState('');
-  const [descripcion, setDescripcion] = useState('');
-  const [resultado, setResultado] = useState('');
-  const [fechaActividad, setFechaActividad] = useState(new Date().toISOString().slice(0, 16));
+  const [tipo, setTipo] = useState<TipoActividad>(actividadEditar?.tipo ?? 'llamada');
+  const [empresaId, setEmpresaId] = useState(actividadEditar?.empresa_id ?? empresaIdInicial ?? '');
+  const [oportunidadId, setOportunidadId] = useState(actividadEditar?.oportunidad_id ?? oportunidadIdInicial ?? '');
+  const [contactoId, setContactoId] = useState(actividadEditar?.contacto_id ?? '');
+  const [titulo, setTitulo] = useState(actividadEditar?.titulo ?? '');
+  const [descripcion, setDescripcion] = useState(actividadEditar?.descripcion ?? '');
+  const [resultado, setResultado] = useState(actividadEditar?.resultado ?? '');
+  const [fechaActividad, setFechaActividad] = useState(
+    actividadEditar ? actividadEditar.fecha_actividad.slice(0, 16) : new Date().toISOString().slice(0, 16),
+  );
 
   if (!isOpen) return null;
 
@@ -34,21 +41,34 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
     e.preventDefault();
     if (!titulo.trim()) return;
 
-    await registrarActividad({
+    // En edición se envía null para que un campo vaciado se borre en la base
+    const payload = {
       tipo,
       titulo,
       descripcion,
-      resultado: resultado || undefined,
+      resultado: resultado || null,
       fecha_actividad: new Date(fechaActividad).toISOString(),
-      empresa_id: empresaId || undefined,
-      oportunidad_id: oportunidadId || undefined,
-      contacto_id: contactoId || undefined,
-    });
+      empresa_id: empresaId || null,
+      oportunidad_id: oportunidadId || null,
+      contacto_id: contactoId || null,
+    };
 
+    if (actividadEditar) {
+      await actualizarActividad(actividadEditar.id, payload as Partial<Actividad>);
+    } else {
+      await registrarActividad({ ...payload, resultado: resultado || undefined, empresa_id: empresaId || undefined, oportunidad_id: oportunidadId || undefined, contacto_id: contactoId || undefined });
+      setTitulo('');
+      setDescripcion('');
+      setResultado('');
+    }
     onClose();
-    setTitulo('');
-    setDescripcion('');
-    setResultado('');
+  };
+
+  const handleEliminar = async () => {
+    if (!actividadEditar) return;
+    if (!window.confirm('¿Eliminar esta actividad? No se puede deshacer.')) return;
+    await eliminarActividad(actividadEditar.id);
+    onClose();
   };
 
   const contactosFiltrados = empresaId
@@ -68,7 +88,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
               <Clock className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-[var(--c-text)]">Registrar Actividad</h2>
+              <h2 className="text-base font-bold text-[var(--c-text)]">{editando ? 'Editar Actividad' : 'Registrar Actividad'}</h2>
               <p className="text-xs text-[var(--c-muted)]">Bitácora de contacto comercial</p>
             </div>
           </div>
@@ -204,7 +224,18 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
             />
           </div>
 
-          <div className="flex justify-end gap-2.5 pt-3 border-t border-[var(--c-line)]">
+          <div className="flex items-center gap-2.5 pt-3 border-t border-[var(--c-line)]">
+            {editando && isAdmin && (
+              <button
+                type="button"
+                onClick={handleEliminar}
+                className="px-3 py-2 text-xs text-[var(--c-danger)] hover:bg-[var(--c-surface-3)] rounded flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Eliminar
+              </button>
+            )}
+            <div className="flex-1" />
             <button
               type="button"
               onClick={onClose}
@@ -216,7 +247,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
               type="submit"
               className="px-4 py-2 text-xs font-semibold bg-[var(--c-accent)] text-black rounded"
             >
-              Guardar Actividad
+              {editando ? 'Guardar cambios' : 'Guardar Actividad'}
             </button>
           </div>
         </form>
