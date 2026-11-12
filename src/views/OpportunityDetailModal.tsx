@@ -27,6 +27,8 @@ interface OpportunityDetailModalProps {
   onSelectEmpresa: (id: string) => void;
   onOpenNewActivity: (empresaId?: string, oportunidadId?: string) => void;
   onOpenNewTask: (empresaId?: string, oportunidadId?: string) => void;
+  // Abre el formulario de factura de la ficha (desde el kanban de negocios)
+  abrirFactura?: boolean;
 }
 
 export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
@@ -36,6 +38,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
   onSelectEmpresa,
   onOpenNewActivity,
   onOpenNewTask,
+  abrirFactura,
 }) => {
   const {
     oportunidades,
@@ -263,6 +266,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
           {/* Izquierda: datos del negocio, cliente y contactos */}
           <DatosNegocio
             oportunidad={oportunidad}
+            abrirFactura={abrirFactura}
             onVerCliente={(id) => { onClose(); onSelectEmpresa(id); }}
           />
 

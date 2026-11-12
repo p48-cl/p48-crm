@@ -14,6 +14,7 @@ const caja = 'p-4 bg-[var(--c-surface-2)] rounded-lg border border-[var(--c-line
 interface Props {
   oportunidad: Oportunidad;
   onVerCliente: (empresaId: string) => void;
+  abrirFactura?: boolean;
 }
 
 interface DatosContacto {
@@ -37,7 +38,7 @@ const contactoVacio: DatosContacto = {
 };
 
 // Columna izquierda de la ficha: todos los datos del negocio, del cliente y de sus contactos, editables.
-export const DatosNegocio: React.FC<Props> = ({ oportunidad, onVerCliente }) => {
+export const DatosNegocio: React.FC<Props> = ({ oportunidad, onVerCliente, abrirFactura }) => {
   const { empresas, contactos, fuentes, miembros, actualizarOportunidad, actualizarEmpresa, crearContacto, actualizarContacto, cotizaciones, facturas } = useCRM();
   const { PLANES, codigos } = usePlanes();
   const empresa = empresas.find((e) => e.id === oportunidad.empresa_id);
@@ -53,6 +54,9 @@ export const DatosNegocio: React.FC<Props> = ({ oportunidad, onVerCliente }) => 
   const [errorCon, setErrorCon] = useState<string | null>(null);
   const [guardandoCon, setGuardandoCon] = useState(false);
   const [formFactura, setFormFactura] = useState(false);
+  useEffect(() => {
+    if (abrirFactura) setFormFactura(true);
+  }, [abrirFactura]);
 
   useEffect(() => {
     setNombre(oportunidad.nombre);

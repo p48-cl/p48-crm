@@ -15,6 +15,29 @@ import { formatMoneda, formatFecha, esFechaAtrasada, formatCorrelativo, codigoNe
 import { ConfirmWonModal } from '../components/common/ConfirmWonModal';
 import { LossReasonModal } from '../components/common/LossReasonModal';
 import { ChipSenal } from '../components/common/ChipSenal';
+import { estadoEfectivo } from '../lib/cotizaciones';
+
+// Resumen de documentos por oportunidad: cotizaciones (ambos pipelines) y facturas (solo negocios)
+interface ResumenDocs {
+  cot: { enviada: number; aceptada: number; rechazada: number; vencida: number };
+  fac: { pendientes: number; vencidas: number; pagadas: number };
+}
+
+const LineaDocs: React.FC<{ etiqueta: string; titulo: string; partes: { n: number; texto: string; color: string }[] }> = ({ etiqueta, titulo, partes }) => {
+  const activas = partes.filter((p) => p.n > 0);
+  return (
+    <p title={titulo} className="flex items-center gap-1.5 font-mono text-[10px] leading-none whitespace-nowrap">
+      <span className="w-7 text-[var(--c-muted)]">{etiqueta}</span>
+      {activas.length === 0 ? (
+        <span className="text-[var(--c-muted-2)]">—</span>
+      ) : (
+        activas.map((p) => (
+          <span key={p.texto} style={{ color: p.color }} className="font-semibold">{p.n} {p.texto}</span>
+        ))
+      )}
+    </p>
+  );
+};
 
 const iniciales = (nombre?: string | null): string => {
   if (!nombre) return '—';
@@ -32,12 +55,15 @@ interface KanbanViewProps {
   pipeline: 'captacion' | 'expansion';
   onSelectOportunidad: (id: string) => void;
   onOpenNewDeal: () => void;
+  // Abre la ficha del negocio directamente en el formulario de factura
+  onRegistrarFactura?: (id: string) => void;
 }
 
 export const KanbanView: React.FC<KanbanViewProps> = ({
   pipeline,
   onSelectOportunidad,
   onOpenNewDeal,
+  onRegistrarFactura,
 }) => {
   const {
     oportunidades,
@@ -49,6 +75,8 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
     moverOportunidadEtapa,
     actualizarEmpresa,
     calificaciones,
+    cotizaciones,
+    facturas,
   } = useCRM();
 
   const [vistaModo, setVistaModo] = useState<'kanban' | 'tabla'>('kanban');
@@ -60,6 +88,37 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
   const pipelineSel = pipeline;
   const pipelineDe = (etapaId: string) => etapas.find((e) => e.id === etapaId)?.pipeline ?? 'captacion';
   const [filtroSeguimiento, setFiltroSeguimiento] = useState<string>('todos');
+
+  // Conteo de cotizaciones y facturas por oportunidad (una pasada sobre los datos)
+  const docsPorOp = useMemo(() => {
+    const hoy = new Date().toLocaleDateString('en-CA');
+    const mapa = new Map<string, ResumenDocs>();
+    for (const op of oportunidades) {
+      mapa.set(op.id, { cot: { enviada: 0, aceptada: 0, rechazada: 0, vencida: 0 }, fac: { pendientes: 0, vencidas: 0, pagadas: 0 } });
+    }
+    const opDeCot = new Map<string, string>();
+    for (const c of cotizaciones) {
+      if (c.archivado || !c.oportunidad_id) continue;
+      opDeCot.set(c.id, c.oportunidad_id);
+      const r = mapa.get(c.oportunidad_id);
+      if (!r) continue;
+      const e = estadoEfectivo({ estado: c.estado, vence_el: c.vence_el }) as keyof ResumenDocs['cot'];
+      if (e in r.cot) r.cot[e] += 1;
+    }
+    for (const f of facturas) {
+      if (f.estado_pago === 'anulada') continue;
+      const opId = f.oportunidad_id ?? (f.cotizacion_id ? opDeCot.get(f.cotizacion_id) : undefined);
+      const r = opId ? mapa.get(opId) : undefined;
+      if (!r) continue;
+      if (f.estado_pago === 'pagada') r.fac.pagadas += 1;
+      else if (f.estado_pago === 'pendiente') {
+        const vence = f.fecha_vencimiento?.slice(0, 10);
+        if (vence && vence < hoy) r.fac.vencidas += 1;
+        else r.fac.pendientes += 1;
+      }
+    }
+    return mapa;
+  }, [oportunidades, cotizaciones, facturas]);
 
   // Drag and Drop
   const [draggedOpId, setDraggedOpId] = useState<string | null>(null);
@@ -409,12 +468,53 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                                 </p>
                               )}
                             </div>
-                            <span className="flex items-center gap-1.5 text-[11px] text-[var(--c-text-2)] shrink-0" title={resp?.nombre ?? 'Equipo'}>
-                              <span className="grid place-items-center w-5 h-5 rounded bg-[var(--c-surface-3)] text-[9px] font-bold text-[var(--c-text)]">
-                                {iniciales(resp?.nombre)}
+                            <div className="flex items-end gap-3 min-w-0">
+                              {docsPorOp.get(op.id) && (() => {
+                                const d = docsPorOp.get(op.id)!;
+                                return (
+                                  <div className="flex flex-col items-end gap-1 min-w-0" onClick={(ev) => ev.stopPropagation()}>
+                                    <LineaDocs
+                                      etiqueta="COT"
+                                      titulo="Cotizaciones: enviadas, aceptadas, rechazadas y vencidas"
+                                      partes={[
+                                        { n: d.cot.enviada, texto: 'env', color: 'var(--c-info)' },
+                                        { n: d.cot.aceptada, texto: 'acep', color: 'var(--c-ok)' },
+                                        { n: d.cot.rechazada, texto: 'rech', color: 'var(--c-danger)' },
+                                        { n: d.cot.vencida, texto: 'venc', color: 'var(--c-warn)' },
+                                      ]}
+                                    />
+                                    {esNegocio && (
+                                      <div className="flex items-center gap-2">
+                                        <LineaDocs
+                                          etiqueta="FAC"
+                                          titulo="Facturas: pendientes, vencidas y pagadas"
+                                          partes={[
+                                            { n: d.fac.pendientes, texto: 'pend', color: 'var(--c-warn)' },
+                                            { n: d.fac.vencidas, texto: 'venc', color: 'var(--c-danger)' },
+                                            { n: d.fac.pagadas, texto: 'pag', color: 'var(--c-ok)' },
+                                          ]}
+                                        />
+                                        {onRegistrarFactura && (
+                                          <button
+                                            type="button"
+                                            onClick={() => onRegistrarFactura(op.id)}
+                                            className="font-mono text-[10px] text-[var(--c-accent)] hover:underline whitespace-nowrap"
+                                          >
+                                            + registrar
+                                          </button>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })()}
+                              <span className="flex items-center gap-1.5 text-[11px] text-[var(--c-text-2)] shrink-0" title={resp?.nombre ?? 'Equipo'}>
+                                <span className="grid place-items-center w-5 h-5 rounded bg-[var(--c-surface-3)] text-[9px] font-bold text-[var(--c-text)]">
+                                  {iniciales(resp?.nombre)}
+                                </span>
+                                <span className="truncate max-w-[72px]">{resp?.nombre.split(' ')[0] ?? 'Equipo'}</span>
                               </span>
-                              <span className="truncate max-w-[72px]">{resp?.nombre.split(' ')[0] ?? 'Equipo'}</span>
-                            </span>
+                            </div>
                           </div>
 
                           {/* Calificación (vista v_calificacion_oportunidad) */}
