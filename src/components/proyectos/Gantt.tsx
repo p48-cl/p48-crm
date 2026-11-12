@@ -5,7 +5,7 @@ import { aFecha, diasEntre, diaCorto, hoyIso, sumarDias } from './fechas';
 
 const ALTO_FILA = 32;
 const ALTO_CABECERA = 40;
-const ANCHO_NOMBRES = 232;
+const ANCHO_NOMBRES = 280;
 const ESCALAS = { dia: { px: 28, etiqueta: 'Día' }, semana: { px: 12, etiqueta: 'Semana' }, mes: { px: 4, etiqueta: 'Mes' } } as const;
 type Escala = keyof typeof ESCALAS;
 
@@ -28,6 +28,11 @@ interface Props {
 }
 
 const inicioDe = (t: Tarea) => t.fecha_inicio ?? t.fecha_vencimiento;
+
+// Etiqueta de nivel en la columna de nombres: deja explícito qué es cada fila
+const Nivel: React.FC<{ children: string }> = ({ children }) => (
+  <span className="w-[56px] shrink-0 text-[9px] font-mono uppercase tracking-wide text-[var(--c-muted)]">{children}</span>
+);
 
 export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiembro, onToggle, onEditar, proyectos, onEditarProyecto }) => {
   const [escala, setEscala] = useState<Escala>('semana');
@@ -151,13 +156,13 @@ export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiem
           {/* Columna de nombres (fija al desplazar) */}
           <div className="sticky left-0 z-10 shrink-0 bg-[var(--c-surface)] border-r border-[var(--c-line)]" style={{ width: ANCHO_NOMBRES }}>
             <div style={{ height: ALTO_CABECERA }} className="border-b border-[var(--c-line)] px-3 flex items-end pb-1.5 text-[11px] text-[var(--c-muted)]">
-              Cliente · proyecto · fase · tarea
+              Nivel · nombre
             </div>
             {filas.map((f) => {
               if (f.tipo === 'cliente') {
                 return (
                   <div key={f.id} style={{ height: ALTO_FILA }} className="px-3 flex items-center justify-between gap-2 bg-[var(--c-surface-3)] border-b border-[var(--c-line)]">
-                    <span className="text-xs font-bold text-[var(--c-text)] truncate">{f.nombre}</span>
+                    <span className="flex items-center gap-2 min-w-0"><Nivel>Cliente</Nivel><span className="text-xs font-bold text-[var(--c-text)] truncate">{f.nombre}</span></span>
                     <span className="text-[10px] font-mono text-[var(--c-muted)] shrink-0">{f.hechas}/{f.total}</span>
                   </div>
                 );
@@ -165,7 +170,7 @@ export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiem
               if (f.tipo === 'proyecto') {
                 return (
                   <div key={f.id} style={{ height: ALTO_FILA }} className={`${conClientes ? 'pl-5' : 'px-3'} pr-3 flex items-center justify-between gap-2 bg-[var(--c-surface-2)] border-b border-[var(--c-line)]`}>
-                    <span className="text-xs font-semibold text-[var(--c-text)] truncate">{f.nombre}</span>
+                    <span className="flex items-center gap-2 min-w-0"><Nivel>Proyecto</Nivel><span className="text-xs font-semibold text-[var(--c-text)] truncate">{f.nombre}</span></span>
                     <span className="flex items-center gap-2 shrink-0">
                       <span className="text-[10px] font-mono text-[var(--c-muted)]">{f.hechas}/{f.total}</span>
                       {onEditarProyecto && (
@@ -180,13 +185,14 @@ export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiem
               if (f.tipo === 'fase') {
                 return (
                   <div key={f.id} style={{ height: ALTO_FILA }} className={`${conClientes ? 'pl-8' : 'pl-5'} pr-3 flex items-center justify-between gap-2 border-b border-[var(--c-line)]/60`}>
-                    <span className="text-[11px] font-medium text-[var(--c-muted)] truncate">{f.nombre}</span>
+                    <span className="flex items-center gap-2 min-w-0"><Nivel>Fase</Nivel><span className="text-[11px] font-medium text-[var(--c-muted)] truncate">{f.nombre}</span></span>
                     <span className="text-[10px] font-mono text-[var(--c-muted)] shrink-0">{f.hechas}/{f.total}</span>
                   </div>
                 );
               }
               return (
                 <div key={f.id} style={{ height: ALTO_FILA }} className={`${conClientes ? 'pl-11' : 'pl-8'} pr-2 flex items-center gap-2 border-b border-[var(--c-line)]/60`}>
+                  <Nivel>Tarea</Nivel>
                   <button
                     type="button"
                     onClick={() => onToggle(f.tarea)}
@@ -257,9 +263,9 @@ export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiem
               const top = ALTO_CABECERA + i * ALTO_FILA;
               const left = x(f.inicio);
               const w = Math.max((diasEntre(f.inicio, f.fin) + 1) * px, 6);
-              if (f.tipo === 'cliente' || f.tipo === 'proyecto' || f.tipo === 'fase') {
+              if (f.tipo === 'cliente' || f.tipo === 'proyecto') {
                 const pct = f.total ? f.hechas / f.total : 0;
-                const alt = f.tipo === 'cliente' ? 8 : f.tipo === 'proyecto' ? 6 : 5;
+                const alt = f.tipo === 'cliente' ? 8 : 6;
                 return (
                   <div
                     key={f.id}
@@ -271,6 +277,7 @@ export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiem
                   </div>
                 );
               }
+              if (f.tipo !== 'tarea') return null;
               const t = f.tarea;
               return (
                 <button
