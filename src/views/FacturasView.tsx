@@ -37,6 +37,8 @@ interface FacturasViewProps {
 export const FacturasView: React.FC<FacturasViewProps> = ({ onAbrirFicha }) => {
   const { facturas, empresas, empresasTodas, agencia, actualizarFactura } = useCRM();
   const [abiertaId, setAbiertaId] = useState<string | null>(null);
+  const [nueva, setNueva] = useState(false);
+  const clientesDisponibles = useMemo(() => empresasTodas.filter((e) => e.id !== agencia?.id && !e.archivado).sort((a, b) => a.nombre.localeCompare(b.nombre)), [empresasTodas, agencia]);
   const [busqueda, setBusqueda] = useState('');
   const [estado, setEstado] = useState('todos');
   const { clave, dir, alternar, ordenar } = useOrden<ClaveOrden>('emision', 'desc');
@@ -85,12 +87,25 @@ export const FacturasView: React.FC<FacturasViewProps> = ({ onAbrirFicha }) => {
 
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-5">
-      <div>
-        <h1 className="text-xl font-bold font-sans text-[var(--c-text)]">Facturas</h1>
-        <p className="text-xs text-[var(--c-muted)] mt-0.5">
-          {filas.length} facturas · registradas desde el SII. Para registrar una nueva, abre la ficha del cliente › Facturación.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold font-sans text-[var(--c-text)]">Facturas</h1>
+          <p className="text-xs text-[var(--c-muted)] mt-0.5">{filas.length} facturas · registradas desde el SII</p>
+        </div>
+        <button onClick={() => setNueva(true)} className="px-3.5 py-2 text-xs font-semibold rounded bg-[var(--c-accent)] text-black">+ Registrar factura</button>
       </div>
+
+      {nueva && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onMouseDown={(e) => e.target === e.currentTarget && setNueva(false)}>
+          <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl max-h-[92dvh] overflow-y-auto" role="dialog" aria-label="Registrar factura">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-bold text-[var(--c-text)]">Registrar factura</h2>
+              <button onClick={() => setNueva(false)} className="text-xs text-[var(--c-muted)] hover:text-[var(--c-text)]">Cerrar</button>
+            </div>
+            <FacturaFormulario empresasDisponibles={clientesDisponibles} onGuardado={() => setNueva(false)} onCancelar={() => setNueva(false)} />
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Kpi etiqueta="Por cobrar" acento="var(--c-warn)" valor={formatCLP(kpis.porCobrar)} nota={`${kpis.nPendientes} factura(s) pendientes`} />
