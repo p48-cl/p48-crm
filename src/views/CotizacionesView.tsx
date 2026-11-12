@@ -12,6 +12,15 @@ import { ThOrdenable } from '../components/common/ThOrdenable';
 import { useOrden } from '../lib/orden';
 import { CotizacionDetalle } from '../components/clientes/CotizacionesCliente';
 
+// Factura derivada de una cotización (facturas.cotizacion_id). Si hay varias, se muestra la más reciente.
+interface FacturaDerivada {
+  tipo_documento: 33 | 34;
+  folio: number;
+  estado_pago: string;
+}
+
+const etiquetaFactura = (f: FacturaDerivada) => `${f.tipo_documento}-${String(f.folio).padStart(6, '0')}`;
+
 interface Fila {
   id: string;
   numero: number;
@@ -54,6 +63,7 @@ export const CotizacionesView: React.FC<CotizacionesViewProps> = ({ onAbrirFicha
   const [mostrarNueva, setMostrarNueva] = useState(false);
   const [abierta, setAbierta] = useState<string | null>(null);
   const [recarga, setRecarga] = useState(0);
+  const [facturas, setFacturas] = useState<Record<string, FacturaDerivada>>({});
   const { clave: sortKey, dir: sortDir, alternar: alternarOrden, ordenar } = useOrden<ClaveOrden>('numero', 'desc');
 
   useEffect(() => {
@@ -61,6 +71,18 @@ export const CotizacionesView: React.FC<CotizacionesViewProps> = ({ onAbrirFicha
       setCargando(false);
       return;
     }
+    supabase
+      .from('facturas')
+      .select('cotizacion_id, tipo_documento, folio, estado_pago, fecha_emision')
+      .not('cotizacion_id', 'is', null)
+      .order('fecha_emision', { ascending: false })
+      .then(({ data }) => {
+        const mapa: Record<string, FacturaDerivada> = {};
+        for (const f of (data ?? []) as (FacturaDerivada & { cotizacion_id: string })[]) {
+          if (!mapa[f.cotizacion_id]) mapa[f.cotizacion_id] = f;
+        }
+        setFacturas(mapa);
+      });
     supabase
       .from('v_cotizaciones')
       .select('*')
@@ -278,21 +300,22 @@ export const CotizacionesView: React.FC<CotizacionesViewProps> = ({ onAbrirFicha
                 {cabecera('vence', 'Vence')}
                 {cabecera('mensual', 'Mensual c/IVA', 'right')}
                 {cabecera('unico', 'Único c/IVA', 'right')}
+                <th className="py-2.5 px-3 text-left">Factura</th>
                 <th className="py-2.5 px-3 text-right"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--c-line)]">
               {cargando ? (
                 <tr>
-                  <td colSpan={9} className="py-8 text-center text-[var(--c-muted)]">Cargando…</td>
+                  <td colSpan={10} className="py-8 text-center text-[var(--c-muted)]">Cargando…</td>
                 </tr>
               ) : error ? (
                 <tr>
-                  <td colSpan={9} className="py-8 text-center text-[var(--c-danger)]">{error}</td>
+                  <td colSpan={10} className="py-8 text-center text-[var(--c-danger)]">{error}</td>
                 </tr>
               ) : visibles.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-8 text-center text-[var(--c-muted)]">
+                  <td colSpan={10} className="py-8 text-center text-[var(--c-muted)]">
                     {filas.length === 0
                       ? 'Aún no hay cotizaciones. Pulsa «Nueva cotización» para empezar.'
                       : 'No hay cotizaciones con esos filtros.'}
@@ -321,6 +344,15 @@ export const CotizacionesView: React.FC<CotizacionesViewProps> = ({ onAbrirFicha
                       <td className="py-2.5 px-3 text-right font-mono text-[var(--c-text-2)]">
                         {c.neto_unico > 0 ? formatMoneda(redondear(c.neto_unico * f, c.moneda), c.moneda) : '—'}
                       </td>
+                      <td className="py-2.5 px-3 font-mono text-[11px] text-[var(--c-text-2)] whitespace-nowrap">
+                        {facturas[c.id] ? (
+                          <span className={facturas[c.id].estado_pago === 'anulada' ? 'line-through text-[var(--c-muted)]' : ''}>
+                            {etiquetaFactura(facturas[c.id])}
+                          </span>
+                        ) : (
+                          <span className="text-[var(--c-muted-2)]">—</span>
+                        )}
+                      </td>
                       <td className="py-2.5 px-3 text-right">
                         <ChevronRight className="w-4 h-4 text-[var(--c-muted-2)] group-hover:text-[var(--c-text)] inline" />
                       </td>
@@ -336,6 +368,13 @@ export const CotizacionesView: React.FC<CotizacionesViewProps> = ({ onAbrirFicha
       {abierta && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onMouseDown={(e) => e.target === e.currentTarget && setAbierta(null)}>
           <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl max-h-[92dvh] overflow-y-auto" role="dialog" aria-label="Cotización">
+            {facturas[abierta] && (
+              <p className="mb-3 text-xs text-[var(--c-text-2)]">
+                Factura emitida: <span className="font-mono text-[var(--c-text)]">{etiquetaFactura(facturas[abierta])}</span>
+                {' · '}
+                <span className="font-mono uppercase text-[11px]">{facturas[abierta].estado_pago}</span>
+              </p>
+            )}
             <CotizacionDetalle cotizacionId={abierta} onCerrar={() => setAbierta(null)} onCambio={() => setRecarga((n) => n + 1)} />
           </div>
         </div>
