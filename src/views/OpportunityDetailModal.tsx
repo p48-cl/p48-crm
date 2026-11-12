@@ -114,6 +114,8 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
   const calificacion = calificaciones[oportunidad.id];
   const fallaEliminatorio = Boolean(calificacion?.falla_eliminatorio);
   const tieneCalificacion = Boolean(calificacion && calificacion.puntaje_maximo > 0);
+  // Calificación y criterio eliminatorio aplican solo a leads (captación)
+  const esNegocio = oportunidad.pipeline === 'expansion';
 
   const criteriosOrdenados = [...criterios].sort((a, b) => a.orden - b.orden);
 
@@ -225,7 +227,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
         </div>
 
         {/* Alerta de Criterio Eliminatorio (v_calificacion_oportunidad.falla_eliminatorio) */}
-        {fallaEliminatorio && (
+        {fallaEliminatorio && !esNegocio && (
           <div className="px-5 py-3 bg-[var(--c-surface-2)] border-b border-[var(--c-danger)]/40 text-[var(--c-danger)] text-xs flex items-center justify-between">
             <div className="flex items-center gap-2 font-medium">
               <ShieldAlert className="w-4 h-4 text-[var(--c-danger)]" />
@@ -252,21 +254,6 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
               nota: cierreTexto,
               tonoNota: cierreTono,
             },
-            {
-              etiqueta: 'Próxima acción',
-              valor: oportunidad.proxima_accion_fecha ? formatFecha(oportunidad.proxima_accion_fecha) : 'Sin fecha',
-              mono: true,
-              tonoValor: atrasada ? 'danger' : 'normal',
-              nota:
-                diasAccion === null
-                  ? null
-                  : diasAccion < 0
-                    ? `atrasada hace ${-diasAccion} d`
-                    : diasAccion === 0
-                      ? 'vence hoy'
-                      : `en ${diasAccion} d`,
-              tonoNota: atrasada ? 'danger' : 'muted',
-            },
             { etiqueta: 'Responsable', valor: responsable ? responsable.nombre : 'Sin asignar' },
           ]}
         />
@@ -286,7 +273,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
             {/* Señales de la oportunidad */}
             <div className="flex flex-wrap gap-1.5">
               {atrasada && <ChipSenal tono="danger">Acción atrasada</ChipSenal>}
-              {!tieneCalificacion && <ChipSenal tono="warn">Sin calificar</ChipSenal>}
+              {!esNegocio && !tieneCalificacion && <ChipSenal tono="warn">Sin calificar</ChipSenal>}
               {diasSinActividad === null ? (
                 <ChipSenal tono="warn">Sin actividades registradas</ChipSenal>
               ) : (
@@ -305,7 +292,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                 onChange={(e) => moverOportunidadEtapa(oportunidad.id, e.target.value)}
                 className="w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-3 py-2 text-xs text-[var(--c-text)] font-mono"
               >
-                {etapas.map((et) => (
+                {etapas.filter((et) => et.pipeline === oportunidad.pipeline).map((et) => (
                   <option key={et.id} value={et.id}>
                     {et.nombre} ({et.probabilidad_default}%)
                   </option>
@@ -392,7 +379,8 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
               )}
             </div>
 
-            {/* Calificación según plantilla activa (criterios en orden) */}
+            {!esNegocio && (
+            /* Calificación según plantilla activa (criterios en orden) */
             <div className="bg-[var(--c-surface-2)] p-4 rounded-lg border border-[var(--c-line)] space-y-4">
               <div className="flex items-center justify-between border-b border-[var(--c-line)] pb-3">
                 <div>
@@ -475,6 +463,8 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                 ))}
               </div>
             </div>
+
+            )}
 
             {/* Cotizaciones del negocio */}
             {empresa && (

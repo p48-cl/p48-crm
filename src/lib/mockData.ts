@@ -421,17 +421,17 @@ export const INITIAL_OPORTUNIDADES: VOportunidad[] = [
 
 export const INITIAL_EVALUACIONES: EvaluacionOportunidad[] = [
   {
-    oportunidad_id: 'op-1',
+    lead_id: 'op-1',
     criterio_id: 'crit-1',
     valor_respuesta: 'si',
   },
   {
-    oportunidad_id: 'op-1',
+    lead_id: 'op-1',
     criterio_id: 'crit-2',
     valor_respuesta: '4',
   },
   {
-    oportunidad_id: 'op-1',
+    lead_id: 'op-1',
     criterio_id: 'crit-3',
     valor_respuesta: 'no', // Criterio eliminatorio fallido
     excepcion_aplicada: true,
@@ -439,12 +439,12 @@ export const INITIAL_EVALUACIONES: EvaluacionOportunidad[] = [
     fecha_revision_excepcion: '2026-11-10',
   },
   {
-    oportunidad_id: 'op-1',
+    lead_id: 'op-1',
     criterio_id: 'crit-4',
     valor_respuesta: 'si',
   },
   {
-    oportunidad_id: 'op-1',
+    lead_id: 'op-1',
     criterio_id: 'crit-5',
     valor_respuesta: '5',
   },

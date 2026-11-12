@@ -27,7 +27,7 @@ export type EstadoPago = 'al_dia' | 'por_vencer' | 'atrasado';
 
 export interface Empresa {
   origen?: 'lead' | 'referido' | 'prospeccion_directa' | 'cliente_existente' | 'otro' | null;
-  origen_oportunidad_id?: string | null;
+  origen_lead_id?: string | null;
   id: string; // uuid
   nombre: string;
   rut?: string | null;
@@ -168,10 +168,10 @@ export interface CriterioCalificacion {
   es_eliminatorio: boolean;
 }
 
-// Para guardar en evaluaciones_oportunidad (upsert por oportunidad_id, criterio_id)
+// Para guardar en evaluaciones_oportunidad (solo leads; upsert por oportunidad_id, criterio_id)
 // NO incluye puntaje_obtenido (lo calcula la base)
 export interface EvaluacionOportunidad {
-  oportunidad_id: string;
+  lead_id: string;
   criterio_id: string;
   valor_respuesta: string; // 'si'|'no' o '1'..'5'
   excepcion_aplicada?: boolean;
