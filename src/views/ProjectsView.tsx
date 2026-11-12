@@ -10,6 +10,7 @@ import { EditarProyectoModal } from '../components/proyectos/EditarProyectoModal
 import { Gantt } from '../components/proyectos/Gantt';
 import { NuevoProyectoModal } from '../components/proyectos/NuevoProyectoModal';
 import { ProyectoDetalle } from '../components/proyectos/ProyectoDetalle';
+import { ProyectosArbol } from '../components/proyectos/ProyectosArbol';
 import { useProyectos } from '../components/proyectos/useProyectos';
 import { diaCorto, hoyIso } from '../components/proyectos/fechas';
 import type { EstadoProyecto, Proyecto, Tarea } from '../types/crm';
@@ -106,13 +107,13 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-6 gap-2">
-            <Kpi etiqueta="Activos" valor={indicadores.activos} nota={`${indicadores.enCurso} en curso`} />
-            <Kpi etiqueta="Proyectos vencidos" valor={indicadores.vencidos} tono={indicadores.vencidos > 0 ? 'peligro' : 'normal'} nota="fecha de término pasada sin finalizar" />
-            <Kpi etiqueta="Con tareas atrasadas" valor={indicadores.conTareasAtrasadas} tono={indicadores.conTareasAtrasadas > 0 ? 'aviso' : 'normal'} nota="al menos una tarea vencida" />
-            <Kpi etiqueta="Tareas atrasadas" valor={indicadores.atrasadas} tono={indicadores.atrasadas > 0 ? 'peligro' : 'normal'} />
-            <Kpi etiqueta="Vencen hoy" valor={indicadores.hoy} tono={indicadores.hoy > 0 ? 'aviso' : 'normal'} />
-            <Kpi etiqueta="Avance promedio" valor={`${indicadores.avance}%`} progreso={indicadores.avance} />
-            <Kpi etiqueta="Visibles" valor={visibles.length} nota={tipo === 'todos' ? 'internos y clientes' : tipo === 'interno' ? 'internos' : 'de clientes'} />
+            <Kpi etiqueta="Activos" acento="var(--c-accent)" valor={indicadores.activos} nota={`${indicadores.enCurso} en curso`} />
+            <Kpi etiqueta="Proyectos vencidos" acento="var(--c-danger)" valor={indicadores.vencidos} tono={indicadores.vencidos > 0 ? 'peligro' : 'normal'} nota="fecha de término pasada sin finalizar" />
+            <Kpi etiqueta="Con tareas atrasadas" acento="var(--c-warn)" valor={indicadores.conTareasAtrasadas} tono={indicadores.conTareasAtrasadas > 0 ? 'aviso' : 'normal'} nota="al menos una tarea vencida" />
+            <Kpi etiqueta="Tareas atrasadas" acento="var(--c-danger)" valor={indicadores.atrasadas} tono={indicadores.atrasadas > 0 ? 'peligro' : 'normal'} />
+            <Kpi etiqueta="Vencen hoy" acento="var(--c-warn)" valor={indicadores.hoy} tono={indicadores.hoy > 0 ? 'aviso' : 'normal'} />
+            <Kpi etiqueta="Avance promedio" acento="var(--c-ok)" valor={`${indicadores.avance}%`} progreso={indicadores.avance} />
+            <Kpi etiqueta="Visibles" acento="var(--c-info)" valor={visibles.length} nota={tipo === 'todos' ? 'internos y clientes' : tipo === 'interno' ? 'internos' : 'de clientes'} />
           </div>
 
           <div role="tablist" aria-label="Vista" className="inline-flex gap-1 p-0.5 rounded-md bg-[var(--c-surface-2)]">
@@ -193,29 +194,18 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
                   <p className="text-xs text-[var(--c-muted)]">Crea uno desde una plantilla (Implementar GA4, Remodelar sitio web, Desplegar ecosistema) o vacío.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-[minmax(0,1fr)] md:grid-cols-2 xl:grid-cols-3 gap-3">
-                  {lista.map(({ p, fase, total, hechas, atrasadas, cliente, responsable }) => {
-                    const pct = total ? Math.round((hechas / total) * 100) : 0;
-                    return (
-                      <button key={p.id} onClick={() => setAbierto(p.id)} className="surface p-4 text-left space-y-3 hover:ring-1 hover:ring-[var(--module)] transition">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="text-sm font-semibold text-[var(--c-text)] min-w-0 break-words">{p.nombre}</p>
-                          <ChipSenal tono={p.estado === 'finalizado' ? 'ok' : p.estado === 'pausado' ? 'warn' : 'neutro'}>{ESTADO[p.estado]}</ChipSenal>
-                        </div>
-                        <p className="text-[11px] text-[var(--c-muted)]">{p.tipo === 'interno' ? 'Interno de la agencia' : cliente ?? 'Cliente'}{responsable ? ` · ${responsable}` : ''}</p>
-                        {fase && <p className="text-[11px] text-[var(--c-text-2)]">Fase actual: <span className="font-medium">{fase}</span></p>}
-                        <div className="h-1.5 rounded-full bg-[var(--c-surface-3)] overflow-hidden"><div className="h-full bg-[var(--c-ok)]" style={{ width: `${pct}%` }} /></div>
-                        <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono text-[var(--c-muted)]">
-                          <span>{hechas}/{total} tareas</span>
-                          <span>·</span>
-                          <span>{p.fecha_inicio ? diaCorto(p.fecha_inicio) : '—'} → {p.fecha_fin ? diaCorto(p.fecha_fin) : '—'}</span>
-                          {p.fecha_fin && p.fecha_fin < hoy && p.estado !== 'finalizado' && <ChipSenal tono="danger">Vencido</ChipSenal>}
-                          {atrasadas > 0 && <ChipSenal tono="warn">{atrasadas} tarea{atrasadas > 1 ? 's' : ''} atrasada{atrasadas > 1 ? 's' : ''}</ChipSenal>}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+                <ProyectosArbol
+                  proyectos={visibles}
+                  fases={fases}
+                  tareas={tareas}
+                  clienteDe={(p) => (p.empresa_id ? empresas.find((e) => e.id === p.empresa_id)?.nombre : undefined)}
+                  responsableDe={(p) => miembros.find((m) => m.id === p.responsable_id)?.nombre}
+                  nombreMiembro={(id) => miembros.find((m) => m.id === id)?.nombre ?? 'Sin asignar'}
+                  onAbrir={(id) => setAbierto(id)}
+                  onEditarProyecto={(p) => setEditando(p)}
+                  onEditarTarea={(t) => onEditTask(t)}
+                  onToggleTarea={(t) => toggleTareaCompletada(t.id, t.completada)}
+                />
               )}
             </>
           )}
