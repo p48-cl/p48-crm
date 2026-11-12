@@ -2,6 +2,13 @@
 <html lang="es" class="dark">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      // Aplica el tema guardado antes del primer pintado: evita el destello de modo claro
+      try {
+        var t = localStorage.getItem('jamp-tema') === 'light' ? 'light' : 'dark';
+        document.documentElement.className = t;
+      } catch (e) {}
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>JAMP CRM</title>
     <meta name="theme-color" content="#020617" />

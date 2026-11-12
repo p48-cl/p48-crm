@@ -38,11 +38,13 @@ const CRMAppContent: React.FC = () => {
   const [masAbierto, setMasAbierto] = useState(false);
   const [mktSeccion, setMktSeccion] = useState<SeccionMarketing>('resumen');
   const abrirMarketing = (s: SeccionMarketing) => { setMktSeccion(s); setCurrentView('marketing'); };
-  const { config: configCRM } = useConfiguracionCRM(isLoggedIn);
-  const [theme, setTheme] = useState<'dark' | 'light'>('light');
+  const { config: configCRM, lista: configLista } = useConfiguracionCRM(isLoggedIn);
+  // El tema parte del último guardado en este navegador (lo aplica index.html antes de pintar), sin pasar por claro
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => (localStorage.getItem('jamp-tema') === 'light' ? 'light' : 'dark'));
   useEffect(() => {
-    setTheme(configCRM.tema_defecto === 'oscuro' ? 'dark' : 'light');
-  }, [configCRM.tema_defecto]);
+    // La elección personal (botón del encabezado) manda sobre el tema por defecto del equipo
+    if (configLista && !localStorage.getItem('jamp-tema-personal')) setTheme(configCRM.tema_defecto === 'oscuro' ? 'dark' : 'light');
+  }, [configCRM.tema_defecto, configLista]);
 
   // Modales y Drawers globales
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -72,6 +74,7 @@ const CRMAppContent: React.FC = () => {
   // Manejo de tema claro/oscuro en documento HTML
   useEffect(() => {
     const root = document.documentElement;
+    try { localStorage.setItem('jamp-tema', theme); } catch { /* ignorar */ }
     if (theme === 'dark') {
       root.classList.add('dark');
       root.classList.remove('light');
@@ -121,7 +124,7 @@ const CRMAppContent: React.FC = () => {
       <Header
         onOpenSearch={() => setIsSearchOpen(true)}
         theme={theme}
-        setTheme={setTheme}
+        setTheme={(t) => { try { localStorage.setItem('jamp-tema-personal', '1'); } catch { /* ignorar */ } setTheme(t); }}
       />
 
       {/* Workspace: Sidebar + Main View */}

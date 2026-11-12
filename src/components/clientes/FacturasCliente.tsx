@@ -4,9 +4,9 @@ import { useCRM } from '../../context/CRMContext';
 import { useAuth } from '../../context/AuthContext';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { formatCLP, formatFecha } from '../../lib/formatters';
+import { useConfiguracionCRM } from '../../lib/configuracion';
 import type { Empresa, EstadoFactura, Factura } from '../../types/crm';
 
-const IVA = 0.19;
 const input = 'w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] hover:border-[var(--c-muted)] focus:border-[var(--c-accent)] outline-none transition-colors';
 const etiqueta = 'block text-[11px] text-[var(--c-muted)] mb-1';
 
@@ -70,6 +70,7 @@ export const estaVencida = (f: Factura) => f.estado_pago === 'pendiente' && !!f.
 export const FacturasCliente: React.FC<{ empresa: Empresa }> = ({ empresa }) => {
   const { facturas, crearFactura, actualizarFactura, eliminarFactura } = useCRM();
   const { isAdmin } = useAuth();
+  const { config: cfg } = useConfiguracionCRM();
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [mostrarForm, setMostrarForm] = useState(false);
   const [form, setForm] = useState<Form>(() => formVacio(empresa));
@@ -99,7 +100,7 @@ export const FacturasCliente: React.FC<{ empresa: Empresa }> = ({ empresa }) => 
   }, [empresa.id]);
 
   const neto = Number(form.monto_neto) || 0;
-  const iva = form.tipo_documento === 33 ? Math.round(neto * IVA) : 0;
+  const iva = form.tipo_documento === 33 ? Math.round(neto * (cfg.iva_pct / 100)) : 0;
   const total = neto + iva;
 
   const abrirNueva = () => {
@@ -204,7 +205,7 @@ export const FacturasCliente: React.FC<{ empresa: Empresa }> = ({ empresa }) => 
 
       {mostrarForm && (
         <form onSubmit={guardar} className="ficha-card p-4 space-y-3 text-xs">
-          <p className="text-[11px] text-[var(--c-muted)]">Copia los datos desde el SII. El IVA se calcula al 19% para facturas afectas.</p>
+          <p className="text-[11px] text-[var(--c-muted)]">Copia los datos desde el SII. El IVA se calcula al {cfg.iva_pct}% para facturas afectas.</p>
           <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-3 gap-3">
             <div>
               <label className={etiqueta}>Tipo</label>
@@ -266,7 +267,10 @@ export const FacturasCliente: React.FC<{ empresa: Empresa }> = ({ empresa }) => 
           <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-3">
             <div>
               <label className={etiqueta}>Medio de pago</label>
-              <input className={input} placeholder="Transferencia, cheque…" value={form.medio_pago} onChange={(e) => setForm({ ...form, medio_pago: e.target.value })} />
+              <>
+                <input className={input} list="medios-pago" placeholder="Transferencia, cheque…" value={form.medio_pago} onChange={(e) => setForm({ ...form, medio_pago: e.target.value })} />
+                <datalist id="medios-pago">{cfg.medios_pago.map((m) => <option key={m} value={m} />)}</datalist>
+              </>
             </div>
             <div>
               <label className={etiqueta}>Enlace al PDF</label>

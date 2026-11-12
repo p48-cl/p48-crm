@@ -3,7 +3,7 @@ import { Mail, Phone, Star } from 'lucide-react';
 import { useCRM } from '../../context/CRMContext';
 import { DatosFacturacion } from '../clientes/DatosFacturacion';
 import { formatCorrelativo, formatRUT } from '../../lib/formatters';
-import { PLANES } from '../../lib/planes';
+import { usePlanes } from '../../lib/planes';
 import { Moneda, Oportunidad, PlanEmpresa } from '../../types/crm';
 
 const input = 'w-full bg-[var(--c-surface)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]';
@@ -18,6 +18,7 @@ interface Props {
 // Columna izquierda de la ficha: todos los datos del negocio, del cliente y de sus contactos, editables.
 export const DatosNegocio: React.FC<Props> = ({ oportunidad, onVerCliente }) => {
   const { empresas, contactos, fuentes, miembros, actualizarOportunidad, actualizarEmpresa } = useCRM();
+  const { PLANES, codigos } = usePlanes();
   const empresa = empresas.find((e) => e.id === oportunidad.empresa_id);
   const contactosCliente = contactos.filter((c) => c.empresa_id === oportunidad.empresa_id && !c.archivado);
 
@@ -79,7 +80,7 @@ export const DatosNegocio: React.FC<Props> = ({ oportunidad, onVerCliente }) => 
             <label className={label}>Plan</label>
             <select className={input} value={oportunidad.plan ?? ''} onChange={(e) => guardar({ plan: (e.target.value || null) as PlanEmpresa | null })}>
               <option value="">Sin plan</option>
-              {(Object.keys(PLANES) as PlanEmpresa[]).map((p) => <option key={p} value={p}>{PLANES[p].nombre}</option>)}
+              {codigos.map((p) => <option key={p} value={p}>{PLANES[p].nombre}</option>)}
             </select>
           </div>
           <div>
