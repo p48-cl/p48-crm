@@ -12,7 +12,7 @@ import { Tarea } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
 import { useProyectos } from '../components/proyectos/useProyectos';
 import { formatFecha, esFechaAtrasada, esFechaHoy } from '../lib/formatters';
-import { Kpi } from '../components/dashboard/ui';
+import { Dona, Kpi, estilos } from '../components/dashboard/ui';
 import { Archive, ArchiveRestore } from 'lucide-react';
 
 interface TasksViewProps {
@@ -147,18 +147,30 @@ export const TasksView: React.FC<TasksViewProps> = ({
         </button>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <Kpi etiqueta="Abiertas" acento="var(--c-accent)" valor={indicadores.abiertas} nota="pendientes en total" onClick={() => setTab('todas')} />
-        <Kpi etiqueta="Atrasadas" acento="var(--c-danger)" tono={indicadores.atrasadas > 0 ? 'peligro' : 'normal'} valor={indicadores.atrasadas} nota={indicadores.atrasadas > 0 ? `${indicadores.diasAtrasoProm} días de atraso en promedio` : 'al día'} onClick={() => setTab('atrasadas')} />
-        <Kpi etiqueta="Vencen hoy" acento="var(--c-warn)" tono={indicadores.hoy > 0 ? 'aviso' : 'normal'} valor={indicadores.hoy} nota="con vencimiento hoy" onClick={() => setTab('hoy')} />
-        <Kpi etiqueta="Próximas 7 días" acento="var(--c-info)" valor={indicadores.proximas} nota="vencen en la próxima semana" onClick={() => setTab('semana')} />
-      </div>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <Kpi etiqueta="Completadas" acento="var(--c-ok)" valor={indicadores.completadas7} nota={`últimos 7 días · ${indicadores.completadas30} en 30 días`} />
-        <Kpi etiqueta="Cumplimiento a tiempo" acento="var(--c-ok)" valor={indicadores.aTiempoPct != null ? `${indicadores.aTiempoPct}%` : '—'} progreso={indicadores.aTiempoPct} nota="completadas antes o el día del vencimiento (30 días)" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className={estilos.tarjeta} style={{ borderTop: '3px solid var(--c-accent)' }}>
+          <p className={estilos.etiqueta} style={{ color: 'var(--c-accent)' }}>Abiertas por vencimiento</p>
+          <Dona
+            rotulo={`${indicadores.abiertas} tareas abiertas por vencimiento`}
+            tamano={88}
+            centro={<span className="text-base font-bold font-mono text-[var(--c-text)] leading-none">{indicadores.abiertas}</span>}
+            segmentos={[
+              { clave: 'atrasadas', etiqueta: 'Atrasadas', n: indicadores.atrasadas, color: 'var(--c-danger)' },
+              { clave: 'hoy', etiqueta: 'Vencen hoy', n: indicadores.hoy, color: 'var(--c-warn)' },
+              { clave: 'semana', etiqueta: 'Próximos 7 días', n: indicadores.proximas - indicadores.hoy, color: 'var(--c-info)' },
+              { clave: 'resto', etiqueta: 'Más adelante', n: indicadores.abiertas - indicadores.atrasadas - indicadores.proximas, color: 'var(--c-muted-2)' },
+            ]}
+          />
+          <p className={estilos.nota}>{indicadores.sinVinculo} sin cliente, negocio ni proyecto</p>
+        </div>
+        <Kpi
+          etiqueta="Cumplimiento a tiempo"
+          acento="var(--c-ok)"
+          valor={indicadores.aTiempoPct != null ? `${indicadores.aTiempoPct}%` : '—'}
+          progreso={indicadores.aTiempoPct}
+          nota={`${indicadores.completadas7} completadas en 7 días · ${indicadores.completadas30} en 30`}
+        />
         <Kpi etiqueta="Alta prioridad abiertas" acento="var(--c-danger)" tono={indicadores.altaAbiertas > 0 ? 'aviso' : 'normal'} valor={indicadores.altaAbiertas} nota="prioridad alta sin completar" />
-        <Kpi etiqueta="Sin vínculo" acento="var(--c-muted)" tono={indicadores.sinVinculo > 0 ? 'aviso' : 'normal'} valor={indicadores.sinVinculo} nota="sin cliente, negocio ni proyecto" />
       </div>
 
       {/* Pestañas: Hoy, Esta semana, Atrasadas (resaltadas en Magenta), Todas */}
