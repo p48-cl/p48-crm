@@ -10,7 +10,7 @@ import { EditarProyectoModal } from '../components/proyectos/EditarProyectoModal
 import { Gantt } from '../components/proyectos/Gantt';
 import { NuevoProyectoModal } from '../components/proyectos/NuevoProyectoModal';
 import { ProyectoDetalle } from '../components/proyectos/ProyectoDetalle';
-import { ProyectosArbol } from '../components/proyectos/ProyectosArbol';
+import { Anillo, ProyectosArbol } from '../components/proyectos/ProyectosArbol';
 import { useProyectos } from '../components/proyectos/useProyectos';
 import { diaCorto, hoyIso } from '../components/proyectos/fechas';
 import type { EstadoProyecto, Proyecto, Tarea } from '../types/crm';
@@ -106,13 +106,24 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
             <button onClick={() => setNuevo(true)} className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded bg-[var(--c-accent)] text-[var(--c-on-accent)]"><Plus className="w-3.5 h-3.5" />Nuevo proyecto</button>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-6 gap-2">
-            <Kpi etiqueta="Activos" acento="var(--c-accent)" valor={indicadores.activos} nota={`${indicadores.enCurso} en curso`} />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+            <Kpi etiqueta="Activos" acento="var(--c-accent)" valor={indicadores.activos} nota="proyectos no finalizados" />
+            <Kpi etiqueta="En curso" acento="var(--c-ok)" valor={indicadores.enCurso} nota="con trabajo en marcha" />
             <Kpi etiqueta="Proyectos vencidos" acento="var(--c-danger)" valor={indicadores.vencidos} tono={indicadores.vencidos > 0 ? 'peligro' : 'normal'} nota="fecha de término pasada sin finalizar" />
             <Kpi etiqueta="Con tareas atrasadas" acento="var(--c-warn)" valor={indicadores.conTareasAtrasadas} tono={indicadores.conTareasAtrasadas > 0 ? 'aviso' : 'normal'} nota="al menos una tarea vencida" />
             <Kpi etiqueta="Tareas atrasadas" acento="var(--c-danger)" valor={indicadores.atrasadas} tono={indicadores.atrasadas > 0 ? 'peligro' : 'normal'} />
-            <Kpi etiqueta="Vencen hoy" acento="var(--c-warn)" valor={indicadores.hoy} tono={indicadores.hoy > 0 ? 'aviso' : 'normal'} />
-            <Kpi etiqueta="Avance promedio" acento="var(--c-ok)" valor={`${indicadores.avance}%`} progreso={indicadores.avance} />
+            <Kpi etiqueta="Vencen hoy" acento="var(--c-warn)" valor={indicadores.hoy} tono={indicadores.hoy > 0 ? 'aviso' : 'normal'} nota="tareas con vencimiento hoy" />
+            <Kpi
+              etiqueta="Avance promedio"
+              acento="var(--c-ok)"
+              valor={
+                <span className="inline-flex items-center gap-2">
+                  <Anillo pct={indicadores.avance} size={30} />
+                  <span>{indicadores.avance}%</span>
+                </span>
+              }
+              nota="promedio de proyectos activos"
+            />
             <Kpi etiqueta="Visibles" acento="var(--c-info)" valor={visibles.length} nota={tipo === 'todos' ? 'internos y clientes' : tipo === 'interno' ? 'internos' : 'de clientes'} />
           </div>
 
