@@ -173,7 +173,7 @@ interface EditorProps {
   onVolver: () => void;
 }
 
-const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creadaPor, oportunidadInicial, onVolver }) => {
+export const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades, creadaPor, oportunidadInicial, onVolver }) => {
   const { PLANES, codigos, SETUP_LISTA } = usePlanes();
   const { config: cfg } = useConfiguracionCRM();
   const [titulo, setTitulo] = useState(inicial?.titulo ?? `Propuesta ${empresa.nombre}`);
@@ -414,5 +414,53 @@ ${urlLogo(empresa.logo_path) ? `<img src="${urlLogo(empresa.logo_path)}" alt="" 
         <button onClick={guardar} disabled={guardando} className="px-4 py-2 text-xs font-semibold bg-[var(--c-accent)] text-[var(--c-on-accent)] rounded disabled:opacity-50">{guardando ? 'Guardando…' : 'Guardar'}</button>
       </div>
     </div>
+  );
+};
+
+interface DetalleProps {
+  cotizacionId: string;
+  onCerrar: () => void;
+  // Avisa al cerrar para que la vista que lo abrió recargue sus datos
+  onCambio: () => void;
+}
+
+// Cotización abierta por id (desde la vista global): muestra el editor directamente, sin pasar por la ficha del cliente.
+export const CotizacionDetalle: React.FC<DetalleProps> = ({ cotizacionId, onCerrar, onCambio }) => {
+  const { empresasTodas, oportunidades } = useCRM();
+  const { currentUser } = useAuth();
+  const [fila, setFila] = useState<CotizacionFila | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) return;
+    supabase
+      .from('v_cotizaciones')
+      .select('*')
+      .eq('id', cotizacionId)
+      .maybeSingle()
+      .then(({ data, error: err }) => {
+        if (err) setError(parseSupabaseError(err));
+        else if (!data) setError('No encontramos esta cotización.');
+        else {
+          const d = data as CotizacionFila;
+          setFila({ ...d, neto_mensual: Number(d.neto_mensual), neto_unico: Number(d.neto_unico), iva_pct: Number(d.iva_pct) });
+        }
+      });
+  }, [cotizacionId]);
+
+  const empresa = fila ? empresasTodas.find((e) => e.id === fila.empresa_id) : undefined;
+
+  if (error) return <p className="text-xs text-[var(--c-danger)]">{error}</p>;
+  if (!fila || !empresa) return <p className="text-xs text-[var(--c-muted)]">Cargando…</p>;
+
+  return (
+    <Editor
+      empresa={empresa}
+      inicial={fila}
+      oportunidades={oportunidades.filter((o) => o.empresa_id === empresa.id && !o.archivado).map((o) => ({ id: o.id, nombre: o.nombre }))}
+      creadaPor={currentUser?.id ?? null}
+      oportunidadInicial={undefined}
+      onVolver={() => { onCambio(); onCerrar(); }}
+    />
   );
 };

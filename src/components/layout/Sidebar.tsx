@@ -76,9 +76,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   const operacion: NavItem[] = [
-    { key: 'contactos', label: 'Contactos', icon: Users, active: currentView === 'contactos', onClick: () => onChangeView('contactos') },
-    { key: 'cotizaciones', label: 'Cotizaciones', icon: FileText, active: currentView === 'cotizaciones', onClick: () => onChangeView('cotizaciones') },
     { key: 'facturas', label: 'Facturas', icon: Receipt, active: currentView === 'facturas', onClick: () => onChangeView('facturas') },
+    { key: 'cotizaciones', label: 'Cotizaciones', icon: FileText, active: currentView === 'cotizaciones', onClick: () => onChangeView('cotizaciones') },
+    { key: 'contactos', label: 'Contactos', icon: Users, active: currentView === 'contactos', onClick: () => onChangeView('contactos') },
     { key: 'proyectos', label: 'Proyectos', icon: FolderKanban, active: currentView === 'proyectos', onClick: () => onChangeView('proyectos') },
     {
       key: 'tareas',

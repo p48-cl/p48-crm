@@ -13,6 +13,7 @@ import { Tarea } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
 import { useProyectos } from '../components/proyectos/useProyectos';
 import { formatFecha, esFechaAtrasada, esFechaHoy } from '../lib/formatters';
+import { Kpi } from '../components/dashboard/ui';
 
 interface TasksViewProps {
   onOpenNewTask: () => void;
@@ -64,6 +65,21 @@ export const TasksView: React.FC<TasksViewProps> = ({
     });
   }, [tareas, tab, filtroResponsable]);
 
+  // Indicadores que no están ya en las pestañas: carga sin responsable y quién acumula atrasos
+  const indicadores = useMemo(() => {
+    const abiertas = tareas.filter((t) => !t.completada);
+    const atrasadas = abiertas.filter((t) => esFechaAtrasada(t.fecha_vencimiento));
+    const porResp = new Map<string, number>();
+    for (const t of atrasadas) if (t.responsable_id) porResp.set(t.responsable_id, (porResp.get(t.responsable_id) ?? 0) + 1);
+    const top = [...porResp.entries()].sort((a, b) => b[1] - a[1])[0];
+    return {
+      abiertas: abiertas.length,
+      sinResponsable: abiertas.filter((t) => !t.responsable_id).length,
+      topNombre: top ? miembros.find((m) => m.id === top[0])?.nombre ?? 'Sin asignar' : null,
+      topAtrasos: top ? top[1] : 0,
+    };
+  }, [tareas, miembros]);
+
   // Contadores para pestañas
   const counts = useMemo(() => {
     const hoy = new Date();
@@ -103,6 +119,12 @@ export const TasksView: React.FC<TasksViewProps> = ({
           <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>Nueva Tarea</span>
         </button>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Kpi etiqueta="Abiertas" valor={indicadores.abiertas} nota="pendientes en total" />
+        <Kpi etiqueta="Sin responsable" valor={indicadores.sinResponsable} tono={indicadores.sinResponsable > 0 ? 'aviso' : 'normal'} nota="asígnalas para que alguien las tome" />
+        <Kpi etiqueta="Más atrasos" valor={indicadores.topNombre ?? '—'} tono={indicadores.topAtrasos > 0 ? 'peligro' : 'normal'} nota={indicadores.topAtrasos > 0 ? `${indicadores.topAtrasos} tarea(s) atrasada(s)` : 'sin atrasos por persona'} />
       </div>
 
       {/* Pestañas: Hoy, Esta semana, Atrasadas (resaltadas en Magenta), Todas */}
