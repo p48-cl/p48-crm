@@ -60,6 +60,8 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
   const [filtroResponsable, setFiltroResponsable] = useState<string>('todos');
   const [filtroFuente, setFiltroFuente] = useState<string>('todos');
   const [filtroEtapa] = useState<string>('todos');
+  const [pipelineSel, setPipelineSel] = useState<'captacion' | 'expansion'>('captacion');
+  const pipelineDe = (etapaId: string) => etapas.find((e) => e.id === etapaId)?.pipeline ?? 'captacion';
   const [filtroSeguimiento, setFiltroSeguimiento] = useState<string>('todos');
 
   // Drag and Drop
@@ -74,6 +76,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
   const filteredOportunidades = useMemo(() => {
     return oportunidades.filter((op) => {
       if (op.archivado) return false;
+      if (pipelineDe(op.etapa_id) !== pipelineSel) return false;
 
       if (filtroResponsable !== 'todos' && op.responsable_id !== filtroResponsable) return false;
       if (filtroFuente !== 'todos' && op.fuente_id !== filtroFuente) return false;
@@ -88,7 +91,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
 
       return true;
     });
-  }, [oportunidades, filtroResponsable, filtroFuente, filtroEtapa, filtroSeguimiento]);
+  }, [oportunidades, etapas, pipelineSel, filtroResponsable, filtroFuente, filtroEtapa, filtroSeguimiento]);
 
   const handleDragStart = (e: React.DragEvent, opId: string) => {
     e.dataTransfer.setData('text/plain', opId);
@@ -132,7 +135,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
 
   const handleConfirmWon = async () => {
     if (!opParaGanar) return;
-    const etapaGanada = etapas.find((e) => e.es_ganada);
+    const etapaGanada = etapas.find((e) => e.es_ganada && e.pipeline === pipelineDe(opParaGanar.etapa_id));
     if (etapaGanada) {
       await moverOportunidadEtapa(opParaGanar.id, etapaGanada.id);
     }
@@ -141,7 +144,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
 
   const handleConfirmLoss = async (motivoId: string, detalle: string) => {
     if (!opParaPerder) return;
-    const etapaPerdida = etapas.find((e) => e.es_perdida);
+    const etapaPerdida = etapas.find((e) => e.es_perdida && e.pipeline === pipelineDe(opParaPerder.etapa_id));
     if (etapaPerdida) {
       await moverOportunidadEtapa(opParaPerder.id, etapaPerdida.id, motivoId, detalle);
     }
@@ -152,7 +155,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-5">
-      <PipelineKpis />
+      <PipelineKpis pipeline={pipelineSel} />
       {/* Header del CRM */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -165,6 +168,20 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
         </div>
 
         <div className="flex items-center gap-3">
+          <div className="flex items-center p-0.5 bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded text-xs">
+            <button
+              onClick={() => setPipelineSel('captacion')}
+              className={`px-3 py-1.5 rounded transition-colors ${pipelineSel === 'captacion' ? 'bg-[var(--c-surface-3)] text-[var(--c-text)] font-medium shadow-sm' : 'text-[var(--c-muted)] hover:text-[var(--c-text-2)]'}`}
+            >
+              Captación
+            </button>
+            <button
+              onClick={() => setPipelineSel('expansion')}
+              className={`px-3 py-1.5 rounded transition-colors ${pipelineSel === 'expansion' ? 'bg-[var(--c-surface-3)] text-[var(--c-text)] font-medium shadow-sm' : 'text-[var(--c-muted)] hover:text-[var(--c-text-2)]'}`}
+            >
+              Expansión
+            </button>
+          </div>
           <div className="flex items-center p-0.5 bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded text-xs">
             <button
               onClick={() => setVistaModo('kanban')}
@@ -254,7 +271,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
       {/* VISTA KANBAN */}
       {vistaModo === 'kanban' && (
         <div className="flex md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 overflow-x-auto snap-x snap-mandatory pb-6">
-          {etapas.filter((e) => e.activa).map((etapa) => {
+          {etapas.filter((e) => e.activa && e.pipeline === pipelineSel).map((etapa) => {
             const opsEtapa = filteredOportunidades.filter((o) => o.etapa_id === etapa.id);
             const totalEtapaCLP = opsEtapa
               .filter((o) => o.moneda === 'CLP')
@@ -458,7 +475,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                               onChange={(ev) => moverAEtapa(op.id, ev.target.value)}
                               className="w-full min-h-[44px] px-2 text-xs bg-[var(--c-surface)] border border-[var(--c-line)] rounded text-[var(--c-text)]"
                             >
-                              {etapas.map((et) => (
+                              {etapas.filter((et) => et.pipeline === pipelineDe(op.etapa_id)).map((et) => (
                                 <option key={et.id} value={et.id}>{et.nombre}</option>
                               ))}
                             </select>

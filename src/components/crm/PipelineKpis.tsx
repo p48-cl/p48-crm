@@ -4,10 +4,10 @@ import { formatCLP } from '../../lib/formatters';
 import { Kpi, Dona, estilos } from '../dashboard/ui';
 import { metricasPipeline, resultadosPeriodo } from '../dashboard/metricas';
 
-export const PipelineKpis: React.FC = () => {
+export const PipelineKpis: React.FC<{ pipeline?: 'captacion' | 'expansion' }> = ({ pipeline }) => {
   const { oportunidades, etapas } = useCRM();
-  const p = useMemo(() => metricasPipeline(oportunidades, etapas), [oportunidades, etapas]);
-  const r = useMemo(() => resultadosPeriodo(oportunidades, etapas, null), [oportunidades, etapas]);
+  const p = useMemo(() => metricasPipeline(oportunidades, etapas, pipeline), [oportunidades, etapas, pipeline]);
+  const r = useMemo(() => resultadosPeriodo(oportunidades, etapas, null, null, pipeline), [oportunidades, etapas, pipeline]);
   const pctPonderado = p.valorCLP > 0 ? (p.ponderadoCLP / p.valorCLP) * 100 : null;
 
   return (

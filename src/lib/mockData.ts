@@ -81,11 +81,11 @@ export const INITIAL_MOTIVOS_PERDIDA: CatalogoItem[] = [
 ];
 
 export const INITIAL_ETAPAS: Etapa[] = [
-  { id: 'et-1', nombre: 'Lead Calificado', orden: 1, probabilidad_default: 20, es_ganada: false, es_perdida: false, activa: true },
-  { id: 'et-2', nombre: 'Diagnóstico & Propuesta', orden: 2, probabilidad_default: 40, es_ganada: false, es_perdida: false, activa: true },
-  { id: 'et-3', nombre: 'Negociación', orden: 3, probabilidad_default: 70, es_ganada: false, es_perdida: false, activa: true },
-  { id: 'et-4', nombre: 'Ganado', orden: 4, probabilidad_default: 100, es_ganada: true, es_perdida: false, activa: true },
-  { id: 'et-5', nombre: 'Perdido', orden: 5, probabilidad_default: 0, es_ganada: false, es_perdida: true, activa: true },
+  { id: 'et-1', nombre: 'Lead Calificado', orden: 1, probabilidad_default: 20, es_ganada: false, es_perdida: false, activa: true, pipeline: 'captacion' as const },
+  { id: 'et-2', nombre: 'Diagnóstico & Propuesta', orden: 2, probabilidad_default: 40, es_ganada: false, es_perdida: false, activa: true, pipeline: 'captacion' as const },
+  { id: 'et-3', nombre: 'Negociación', orden: 3, probabilidad_default: 70, es_ganada: false, es_perdida: false, activa: true, pipeline: 'captacion' as const },
+  { id: 'et-4', nombre: 'Ganado', orden: 4, probabilidad_default: 100, es_ganada: true, es_perdida: false, activa: true, pipeline: 'captacion' as const },
+  { id: 'et-5', nombre: 'Perdido', orden: 5, probabilidad_default: 0, es_ganada: false, es_perdida: true, activa: true, pipeline: 'captacion' as const },
 ];
 
 export const INITIAL_EMPRESAS: Empresa[] = [
