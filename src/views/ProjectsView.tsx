@@ -3,14 +3,14 @@ import { CalendarDays, FolderKanban, Plus, GanttChart, Pencil } from 'lucide-rea
 import { useAuth } from '../context/AuthContext';
 import { useCRM } from '../context/CRMContext';
 import { ChipSenal } from '../components/common/ChipSenal';
-import { Kpi } from '../components/dashboard/ui';
+import { Dona, Kpi, estilos } from '../components/dashboard/ui';
 import { metricasProyectos, faseActual } from '../components/dashboard/metricas';
 import { Calendario } from '../components/proyectos/Calendario';
 import { EditarProyectoModal } from '../components/proyectos/EditarProyectoModal';
 import { Gantt } from '../components/proyectos/Gantt';
 import { NuevoProyectoModal } from '../components/proyectos/NuevoProyectoModal';
 import { ProyectoDetalle } from '../components/proyectos/ProyectoDetalle';
-import { Anillo, ProyectosArbol } from '../components/proyectos/ProyectosArbol';
+import { ProyectosArbol } from '../components/proyectos/ProyectosArbol';
 import { useProyectos } from '../components/proyectos/useProyectos';
 import { diaCorto, hoyIso } from '../components/proyectos/fechas';
 import type { EstadoProyecto, Proyecto, Tarea } from '../types/crm';
@@ -25,6 +25,14 @@ interface Props {
   /** 'agencia': solo proyectos internos de la agencia (sin selector de tipo). */
   ambito?: 'agencia' | 'clientes';
 }
+
+// Estados de proyecto en el orden y color de la dona
+const ESTADOS_SEGMENTO: [EstadoProyecto, string, string][] = [
+  ['planificado', 'Planificado', 'var(--c-info)'],
+  ['en_curso', 'En curso', 'var(--c-ok)'],
+  ['pausado', 'Pausado', 'var(--c-warn)'],
+  ['finalizado', 'Finalizado', 'var(--c-muted-2)'],
+];
 
 export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
   const { isAdmin } = useAuth();
@@ -106,27 +114,26 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
             <button onClick={() => setNuevo(true)} className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded bg-[var(--c-accent)] text-[var(--c-on-accent)]"><Plus className="w-3.5 h-3.5" />Nuevo proyecto</button>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-            <Kpi etiqueta="Activos" acento="var(--c-accent)" valor={indicadores.activos} nota="proyectos no finalizados" />
-            <Kpi etiqueta="En curso" acento="var(--c-ok)" valor={indicadores.enCurso} nota="con trabajo en marcha" />
-            <Kpi etiqueta="Proyectos vencidos" acento="var(--c-danger)" valor={indicadores.vencidos} tono={indicadores.vencidos > 0 ? 'peligro' : 'normal'} nota="fecha de término pasada sin finalizar" />
-            <Kpi etiqueta="Con tareas atrasadas" acento="var(--c-warn)" valor={indicadores.conTareasAtrasadas} tono={indicadores.conTareasAtrasadas > 0 ? 'aviso' : 'normal'} nota="al menos una tarea vencida" />
-            <Kpi etiqueta="Tareas atrasadas" acento="var(--c-danger)" valor={indicadores.atrasadas} tono={indicadores.atrasadas > 0 ? 'peligro' : 'normal'} />
-            <Kpi etiqueta="Vencen hoy" acento="var(--c-warn)" valor={indicadores.hoy} tono={indicadores.hoy > 0 ? 'aviso' : 'normal'} nota="tareas con vencimiento hoy" />
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+            <div className={`${estilos.tarjeta} col-span-2 lg:col-span-1`} style={{ borderTop: '3px solid var(--c-accent)' }}>
+              <p className={estilos.etiqueta} style={{ color: 'var(--c-accent)' }}>Proyectos por estado</p>
+              <Dona
+                rotulo={`${visibles.length} proyectos visibles por estado`}
+                tamano={80}
+                centro={<span className="text-base font-bold font-mono text-[var(--c-text)] leading-none">{visibles.length}</span>}
+                segmentos={ESTADOS_SEGMENTO.map(([clave, etiqueta, color]) => ({ clave, etiqueta, n: visibles.filter((p) => p.estado === clave).length, color }))}
+              />
+              <p className={estilos.nota}>{indicadores.vencidos} vencidos · {indicadores.conTareasAtrasadas} con tareas atrasadas</p>
+            </div>
             <Kpi
-              etiqueta="Avance promedio"
-              acento="var(--c-ok)"
-              valor={
-                <span className="inline-flex items-center gap-2">
-                  <Anillo pct={indicadores.avance} size={30} />
-                  <span>{indicadores.avance}%</span>
-                </span>
-              }
-              nota="promedio de proyectos activos"
+              etiqueta="Tareas atrasadas"
+              acento="var(--c-danger)"
+              valor={indicadores.atrasadas}
+              tono={indicadores.atrasadas > 0 ? 'peligro' : 'normal'}
+              nota={`${indicadores.hoy} vencen hoy`}
             />
-            <Kpi etiqueta="Visibles" acento="var(--c-info)" valor={visibles.length} nota={tipo === 'todos' ? 'internos y clientes' : tipo === 'interno' ? 'internos' : 'de clientes'} />
+            <Kpi etiqueta="Avance promedio" acento="var(--c-ok)" valor={`${indicadores.avance}%`} progreso={indicadores.avance} nota="promedio de proyectos activos" />
           </div>
-
           <div role="tablist" aria-label="Vista" className="inline-flex gap-1 p-0.5 rounded-md bg-[var(--c-surface-2)]">
             {pestanas.map(([k, t, Icono]) => (
               <button key={k} role="tab" aria-selected={pestana === k} onClick={() => setPestana(k)} className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded ${pestana === k ? 'bg-[var(--c-surface)] text-[var(--c-text)] font-semibold ring-1 ring-[var(--module)]' : 'text-[var(--c-muted)]'}`}>
