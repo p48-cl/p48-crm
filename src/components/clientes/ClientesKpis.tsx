@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useCRM } from '../../context/CRMContext';
 import { formatCLP } from '../../lib/formatters';
-import { Kpi, BarraApilada, COLOR_SALUD, estilos } from '../dashboard/ui';
+import { Kpi, Dona, COLOR_SALUD, estilos } from '../dashboard/ui';
 import { metricasCartera, hoyIso } from '../dashboard/metricas';
 import { resumen360 } from '../../lib/cliente360';
 import { estadoEfectivo } from '../../lib/cotizaciones';
@@ -11,6 +11,9 @@ import { IngresosChart } from './IngresosChart';
 const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`;
 const netoCotizacion = (q: { neto_mensual: number | null; neto_unico: number | null }) =>
   Number(q.neto_mensual ?? 0) + Number(q.neto_unico ?? 0);
+
+// Las 8 tarjetas comparten altura para que la grilla no cambie de tamaño según su contenido.
+const ALTO_TARJETA = 'h-44';
 
 export const ClientesKpis: React.FC = () => {
   const { empresas, oportunidades, etapas, facturas, cotizaciones, proyectos, tareas, reportes, actividades, contactos, agencia } = useCRM();
@@ -60,18 +63,21 @@ export const ClientesKpis: React.FC = () => {
     <div className="space-y-3">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Kpi
+          className={ALTO_TARJETA}
           acento="var(--c-accent)"
           etiqueta="MRR"
           valor={formatCLP(c.mrr)}
           nota={n > 0 ? `${n} clientes · ${formatCLP(c.mrr / n)} promedio` : 'Sin clientes activos'}
         />
         <Kpi
+          className={ALTO_TARJETA}
           acento="var(--c-ok)"
           etiqueta="Facturado del mes"
           valor={formatCLP(ingresos.facturadoMes)}
           nota="Neto, sin IVA"
         />
         <Kpi
+          className={ALTO_TARJETA}
           acento="var(--c-warn)"
           etiqueta="Por cobrar"
           valor={formatCLP(porCobrar)}
@@ -79,26 +85,30 @@ export const ClientesKpis: React.FC = () => {
           nota={vencidas > 0 ? plural(vencidas, 'factura vencida', 'facturas vencidas') : 'Sin facturas vencidas'}
         />
         <Kpi
+          className={ALTO_TARJETA}
           acento="var(--c-danger)"
-          etiqueta="Facturas vencidas"
+          etiqueta="Vencido"
           valor={formatCLP(ingresos.montoVencido)}
           tono={vencidas > 0 ? 'peligro' : 'normal'}
           nota={vencidas > 0 ? plural(vencidas, 'factura', 'facturas') : 'Ninguna'}
         />
         <Kpi
+          className={ALTO_TARJETA}
           acento="var(--c-muted)"
           etiqueta="Cotizaciones abiertas"
           valor={formatCLP(cot.montoAbiertas)}
           nota={plural(cot.abiertas, 'cotización enviada', 'cotizaciones enviadas')}
         />
         <Kpi
+          className={ALTO_TARJETA}
           acento="var(--c-info)"
-          etiqueta="Aceptadas sin facturar"
+          etiqueta="Por facturar"
           valor={formatCLP(cot.montoSinFacturar)}
           tono={cot.sinFacturar > 0 ? 'aviso' : 'normal'}
           nota={plural(cot.sinFacturar, 'cotización aceptada', 'cotizaciones aceptadas')}
         />
         <Kpi
+          className={ALTO_TARJETA}
           acento="var(--c-info)"
           etiqueta="Renovaciones ≤ 60 días"
           valor={c.renovaciones.length}
@@ -111,16 +121,21 @@ export const ClientesKpis: React.FC = () => {
                 : 'Ninguna en el período'
           }
         />
-        <div className={estilos.tarjeta} style={{ borderTop: '3px solid var(--c-ok)' }}>
+        <div className={`${estilos.tarjeta} ${ALTO_TARJETA} flex flex-col`} style={{ borderTop: '3px solid var(--c-ok)' }}>
           <p className={estilos.etiqueta} style={{ color: 'var(--c-ok)' }}>Salud de clientes</p>
           {n === 0 ? (
             <p className={estilos.nota}>Sin clientes activos</p>
           ) : (
-            <>
-              <p className={estilos.valor}>{plural(n, 'cliente', 'clientes')}</p>
-              <p className={estilos.nota}>{c.salud.rojo > 0 ? `${c.salud.rojo} en riesgo` : 'Ninguno en riesgo'}</p>
-              <BarraApilada
+            <div className="flex-1 flex items-center min-h-0">
+              <Dona
                 rotulo={`Salud de ${n} clientes`}
+                tamano={88}
+                centro={
+                  <>
+                    <span className="font-mono text-lg text-[var(--c-text)] leading-none">{n}</span>
+                    <span className="text-[10px] text-[var(--c-muted)] mt-0.5">{n === 1 ? 'cliente' : 'clientes'}</span>
+                  </>
+                }
                 segmentos={[
                   { clave: 'verde', etiqueta: SALUD_ETIQUETA.verde, n: c.salud.verde, color: COLOR_SALUD.verde },
                   { clave: 'amarillo', etiqueta: SALUD_ETIQUETA.amarillo, n: c.salud.amarillo, color: COLOR_SALUD.amarillo },
@@ -128,7 +143,7 @@ export const ClientesKpis: React.FC = () => {
                   { clave: 'sin', etiqueta: 'Sin evaluar', n: c.salud.sin, color: COLOR_SALUD.sin },
                 ]}
               />
-            </>
+            </div>
           )}
         </div>
       </div>
