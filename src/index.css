@@ -147,3 +147,13 @@ button, a { -webkit-tap-highlight-color: transparent; }
   border-radius: 12px;
   box-shadow: 0 1px 2px rgba(2, 6, 23, 0.12);
 }
+
+/* Alertas que piden atención: parpadeo suave (se desactiva con reduce motion) */
+@keyframes alerta-parpadeo {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.alerta-parpadeo { animation: alerta-parpadeo 1.6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .alerta-parpadeo { animation: none; }
+}
