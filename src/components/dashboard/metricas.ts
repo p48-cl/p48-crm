@@ -1,4 +1,4 @@
-import type { Empresa, Etapa, Tarea, VOportunidad, Proyecto } from '../../types/crm';
+import type { Empresa, Etapa, Tarea, VOportunidad, Proyecto, ProyectoFase } from '../../types/crm';
 
 // Cálculos compartidos de Overview, Pipeline y Clientes. Funciones puras: no leen la base.
 
@@ -170,7 +170,20 @@ export function metricasTareas(tareas: Tarea[]) {
   };
 }
 
-/** Avance y atraso de cada proyecto activo según sus tareas. */
+/** Fase en curso: la que contiene hoy; si no hay, la primera que aún no termina; si no, la última. */
+export function faseActual(fases: ProyectoFase[], hoy = hoyIso()) {
+  const ordenadas = [...fases].sort((a, b) => a.orden - b.orden);
+  return (
+    ordenadas.find((f) => f.fecha_inicio && f.fecha_fin && f.fecha_inicio <= hoy && f.fecha_fin >= hoy) ??
+    ordenadas.find((f) => !f.fecha_fin || f.fecha_fin >= hoy) ??
+    ordenadas[ordenadas.length - 1]
+  );
+}
+
+/**
+ * Avance y atraso de cada proyecto activo.
+ * Separa dos cosas distintas: proyecto vencido (fecha_fin pasada sin finalizar) y tareas atrasadas dentro del proyecto.
+ */
 export function metricasProyectos(proyectos: Proyecto[], tareas: Tarea[]) {
   const hoy = hoyIso();
   const activos = proyectos.filter((p) => !p.archivado && p.estado !== 'finalizado');
@@ -181,8 +194,13 @@ export function metricasProyectos(proyectos: Proyecto[], tareas: Tarea[]) {
     const vencido = !!p.fecha_fin && p.fecha_fin < hoy;
     return { proyecto: p, total: ts.length, hechas, atrasadas, avance: ts.length ? (hechas / ts.length) * 100 : 0, vencido };
   });
+  const vencidos = filas.filter((f) => f.vencido).length;
+  const conTareasAtrasadas = filas.filter((f) => f.atrasadas > 0).length;
   return {
     activos: filas.sort((a, b) => b.atrasadas - a.atrasadas || Number(b.vencido) - Number(a.vencido)),
+    vencidos,
+    conTareasAtrasadas,
+    /** Compatibilidad: proyectos vencidos o con tareas atrasadas (usar vencidos / conTareasAtrasadas por separado). */
     conAtraso: filas.filter((f) => f.atrasadas > 0 || f.vencido).length,
   };
 }

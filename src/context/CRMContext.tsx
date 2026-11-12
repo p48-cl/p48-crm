@@ -799,6 +799,16 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setErrorMensaje(parseSupabaseError(error));
       return;
     }
+    // Archivar la saca de la lista activa; restaurar la vuelve a traer desde la base
+    if (datos.archivado === true) {
+      setFacturas((prev) => prev.filter((f) => f.id !== facturaId));
+      return;
+    }
+    if (datos.archivado === false) {
+      const { data } = await supabase.from('facturas').select('*').eq('id', facturaId).maybeSingle();
+      if (data) setFacturas((prev) => [...prev.filter((f) => f.id !== facturaId), data as Factura]);
+      return;
+    }
     setFacturas((prev) => prev.map((f) => (f.id === facturaId ? { ...f, ...datos } : f)));
   };
 

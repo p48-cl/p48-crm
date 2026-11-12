@@ -54,6 +54,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
     fuentes,
     motivosPerdida,
     moverOportunidadEtapa,
+    actualizarEmpresa,
     calificaciones,
   } = useCRM();
 
@@ -141,6 +142,11 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
     const etapaGanada = etapas.find((e) => e.es_ganada && e.pipeline === pipelineDe(opParaGanar.etapa_id));
     if (etapaGanada) {
       await moverOportunidadEtapa(opParaGanar.id, etapaGanada.id);
+    }
+    // Lead ganado: el cliente queda con su origen (sin duplicar la empresa) si aún no tiene uno
+    const emp = empresas.find((e) => e.id === opParaGanar.empresa_id);
+    if (emp && !emp.origen && pipelineDe(opParaGanar.etapa_id) === 'captacion') {
+      await actualizarEmpresa(emp.id, { origen: 'lead', origen_oportunidad_id: opParaGanar.id });
     }
     setOpParaGanar(null);
   };

@@ -28,7 +28,7 @@ import { FacturasView } from './views/FacturasView';
 import { ActivityModal } from './components/common/ActivityModal';
 import { CheckSquare, Kanban, Clock, Building2, LayoutDashboard, MoreHorizontal, Users, Upload, Settings, Activity, BarChart3, FileText, FolderKanban, Receipt } from 'lucide-react';
 import { NewTaskModal } from './components/common/NewTaskModal';
-import { Tarea } from './types/crm';
+import { Actividad, Tarea } from './types/crm';
 import { useConfiguracionCRM } from './lib/configuracion';
 
 const CRMAppContent: React.FC = () => {
@@ -62,6 +62,8 @@ const CRMAppContent: React.FC = () => {
     isOpen: boolean;
     empresaId?: string;
     oportunidadId?: string;
+    actividad?: Actividad | null;
+    k?: number;
   }>({ isOpen: false });
 
   const [taskModalState, setTaskModalState] = useState<{
@@ -195,6 +197,7 @@ const CRMAppContent: React.FC = () => {
               onEditTask={(t) => setTaskModalState({ isOpen: true, tarea: t, k: Date.now() })}
               onSelectEmpresa={(id) => setSelectedEmpId(id)}
               onSelectOportunidad={(id) => setSelectedOpId(id)}
+              onSelectProyecto={() => setCurrentView('proyectos')}
             />
           )}
 
@@ -211,7 +214,8 @@ const CRMAppContent: React.FC = () => {
 
           {currentView === 'actividades' && (
             <ActivitiesView
-              onOpenNewActivity={() => setActivityModalState({ isOpen: true })}
+              onOpenNewActivity={() => setActivityModalState({ isOpen: true, k: Date.now() })}
+              onEditActividad={(a) => setActivityModalState({ isOpen: true, actividad: a, k: Date.now() })}
               onSelectEmpresa={(id) => setSelectedEmpId(id)}
               onSelectOportunidad={(id) => setSelectedOpId(id)}
             />
@@ -277,6 +281,8 @@ const CRMAppContent: React.FC = () => {
 
       {/* Modal Registrar Actividad Rápida */}
       <ActivityModal
+        key={activityModalState.k ?? 0}
+        actividadEditar={activityModalState.actividad}
         isOpen={activityModalState.isOpen}
         empresaIdInicial={activityModalState.empresaId}
         oportunidadIdInicial={activityModalState.oportunidadId}

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Filter, Search, Check } from 'lucide-react';
+import { Filter, Search, Check, ArchiveRestore } from 'lucide-react';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { useCRM } from '../context/CRMContext';
 import { formatCLP, formatFecha } from '../lib/formatters';
 import { Kpi } from '../components/dashboard/ui';
@@ -38,6 +39,8 @@ export const FacturasView: React.FC<FacturasViewProps> = ({ onAbrirFicha }) => {
   const { facturas, empresas, empresasTodas, agencia, actualizarFactura } = useCRM();
   const [abiertaId, setAbiertaId] = useState<string | null>(null);
   const [nueva, setNueva] = useState(false);
+  const [verArchivadas, setVerArchivadas] = useState(false);
+  const [archivadas, setArchivadas] = useState<Factura[]>([]);
   const clientesDisponibles = useMemo(() => empresasTodas.filter((e) => e.id !== agencia?.id && !e.archivado).sort((a, b) => a.nombre.localeCompare(b.nombre)), [empresasTodas, agencia]);
   const [busqueda, setBusqueda] = useState('');
   const [estado, setEstado] = useState('todos');
@@ -104,6 +107,49 @@ export const FacturasView: React.FC<FacturasViewProps> = ({ onAbrirFicha }) => {
             </div>
             <FacturaFormulario empresasDisponibles={clientesDisponibles} onGuardado={() => setNueva(false)} onCancelar={() => setNueva(false)} />
           </div>
+        </div>
+      )}
+
+      <div className="flex justify-end">
+        <button
+          onClick={async () => {
+            const nuevo = !verArchivadas;
+            setVerArchivadas(nuevo);
+            if (nuevo && isSupabaseConfigured && supabase) {
+              const { data } = await supabase.from('facturas').select('*').eq('archivado', true).order('fecha_emision', { ascending: false });
+              setArchivadas((data ?? []) as Factura[]);
+            }
+          }}
+          className="text-xs text-[var(--c-muted)] hover:text-[var(--c-text)] font-mono"
+        >
+          {verArchivadas ? 'Ocultar archivadas' : 'Ver archivadas'}
+        </button>
+      </div>
+
+      {verArchivadas && (
+        <div className="bg-[var(--c-surface)] border border-[var(--c-line)] rounded-lg overflow-hidden">
+          <div className="px-4 py-2 border-b border-[var(--c-line)] text-[11px] font-mono uppercase text-[var(--c-muted)]">Facturas archivadas</div>
+          {archivadas.length === 0 ? (
+            <p className="p-4 text-xs text-[var(--c-muted)]">No hay facturas archivadas.</p>
+          ) : (
+            <ul className="divide-y divide-[var(--c-line)]">
+              {archivadas.map((f) => (
+                <li key={f.id} className="px-4 py-2.5 flex items-center justify-between gap-3 text-xs">
+                  <span className="font-mono text-[var(--c-text)]">{f.tipo_documento}-{String(f.folio).padStart(6, '0')}</span>
+                  <span className="text-[var(--c-muted)] font-mono">{formatCLP(Number(f.monto_total))} · {formatFecha(f.fecha_emision)}</span>
+                  <button
+                    onClick={async () => {
+                      await actualizarFactura(f.id, { archivado: false });
+                      setArchivadas((prev) => prev.filter((x) => x.id !== f.id));
+                    }}
+                    className="flex items-center gap-1 text-[var(--c-accent)] hover:underline"
+                  >
+                    <ArchiveRestore className="w-3.5 h-3.5" /> Restaurar
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 

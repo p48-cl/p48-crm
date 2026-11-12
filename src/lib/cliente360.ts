@@ -32,7 +32,8 @@ export interface Resumen360 {
   montoVencidoCLP: number;
   cobradoMesCLP: number;
   proyectosActivos: number;
-  proyectosAtrasados: number;
+  proyectosVencidos: number;
+  proyectosConTareasAtrasadas: number;
   ultimoReporte: string | null;
   ultimaActividad: string | null;
   completitud: number;
@@ -83,7 +84,7 @@ export function resumen360(empresa: Empresa, d: DatosCliente360): Resumen360 {
 
   // Proyectos y reportes
   const proys = d.proyectos.filter((p) => p.empresa_id === empresa.id && !p.archivado && p.estado !== 'finalizado');
-  const proyectosAtrasados = metricasProyectos(proys, d.tareas).conAtraso;
+  const metProy = metricasProyectos(proys, d.tareas);
   const reps = d.reportes.filter((r) => r.empresa_id === empresa.id && !r.archivado);
   const ultimoReporte = maxFecha(reps.map((r) => r.periodo ?? r.created_at ?? null));
 
@@ -114,7 +115,8 @@ export function resumen360(empresa: Empresa, d: DatosCliente360): Resumen360 {
   }
   if (cotizacionesVencidas) alertas.push({ nivel: 'aviso', texto: plural(cotizacionesVencidas, 'cotización vencida', 'cotizaciones vencidas') });
   if (sinRespuesta) alertas.push({ nivel: 'aviso', texto: `${plural(sinRespuesta, 'cotización', 'cotizaciones')} sin respuesta hace más de 7 días` });
-  if (proyectosAtrasados) alertas.push({ nivel: 'aviso', texto: `${plural(proyectosAtrasados, 'proyecto atrasado', 'proyectos atrasados')}` });
+  if (metProy.vencidos) alertas.push({ nivel: 'aviso', texto: `${plural(metProy.vencidos, 'proyecto vencido', 'proyectos vencidos')}` });
+  if (metProy.conTareasAtrasadas) alertas.push({ nivel: 'aviso', texto: `${plural(metProy.conTareasAtrasadas, 'proyecto con tareas atrasadas', 'proyectos con tareas atrasadas')}` });
   if (esCliente) {
     if (!ultimoReporte) alertas.push({ nivel: 'aviso', texto: 'Sin reportes cargados' });
     else if (diasEntre(ultimoReporte, hoy) > 45) alertas.push({ nivel: 'aviso', texto: `Último reporte hace ${diasEntre(ultimoReporte, hoy)} días` });
@@ -137,7 +139,8 @@ export function resumen360(empresa: Empresa, d: DatosCliente360): Resumen360 {
     montoVencidoCLP: vencidas.reduce((a, f) => a + Number(f.monto_total || 0), 0),
     cobradoMesCLP,
     proyectosActivos: proys.length,
-    proyectosAtrasados,
+    proyectosVencidos: metProy.vencidos,
+    proyectosConTareasAtrasadas: metProy.conTareasAtrasadas,
     ultimoReporte,
     ultimaActividad,
     completitud,
