@@ -51,6 +51,7 @@ const CRMAppContent: React.FC = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNewDealOpen, setIsNewDealOpen] = useState(false);
   const [selectedOpId, setSelectedOpId] = useState<string | null>(null);
+  const [abrirFactura, setAbrirFactura] = useState(false);
   const [selectedEmpId, setSelectedEmpId] = useState<string | null>(null);
   const [fichaTab, setFichaTab] = useState<'marketing' | 'facturacion' | undefined>(undefined);
   const [fichaNuevaCotizacion, setFichaNuevaCotizacion] = useState(false);
@@ -167,6 +168,7 @@ const CRMAppContent: React.FC = () => {
               pipeline="expansion"
               onSelectOportunidad={(id) => setSelectedOpId(id)}
               onOpenNewDeal={() => setIsNewDealOpen(true)}
+              onRegistrarFactura={(id) => { setAbrirFactura(true); setSelectedOpId(id); }}
             />
           )}
 
@@ -244,7 +246,8 @@ const CRMAppContent: React.FC = () => {
       <OpportunityDetailModal
         oportunidadId={selectedOpId}
         isOpen={Boolean(selectedOpId)}
-        onClose={() => setSelectedOpId(null)}
+        abrirFactura={abrirFactura}
+        onClose={() => { setSelectedOpId(null); setAbrirFactura(false); }}
         onSelectEmpresa={(empId) => setSelectedEmpId(empId)}
         onOpenNewActivity={(empId, opId) =>
           setActivityModalState({ isOpen: true, empresaId: empId, oportunidadId: opId })
