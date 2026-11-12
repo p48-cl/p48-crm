@@ -49,7 +49,7 @@ export const ClientePanel: React.FC<Props> = ({ empresaId, vista }) => {
   const [entProyecto, setEntProyecto] = useState<string | null>(null);
   const [fe, setFe] = useState({ titulo: '', estado: 'pendiente' as EstadoEntregable, fecha_comprometida: '', url_documento: '', notas_internas: '', visible_cliente: true });
   const [nuevoReporte, setNuevoReporte] = useState(false);
-  const [fr, setFr] = useState({ titulo: '', tipo: 'mensual' as TipoReporte, periodo: '', url: '', visible_cliente: true });
+  const [fr, setFr] = useState({ titulo: '', tipo: 'mensual' as TipoReporte, periodo: '', url: '', visible_cliente: false });
   const [archivo, setArchivo] = useState<File | null>(null);
   const [fu, setFu] = useState({ nombre: '', email: '' });
 
@@ -191,7 +191,7 @@ export const ClientePanel: React.FC<Props> = ({ empresaId, vista }) => {
     if (ok) {
       setNuevoReporte(false);
       setArchivo(null);
-      setFr({ titulo: '', tipo: 'mensual', periodo: '', url: '', visible_cliente: true });
+      setFr({ titulo: '', tipo: 'mensual', periodo: '', url: '', visible_cliente: false });
     } else if (archivo_path) {
       await supabase.storage.from('reportes').remove([archivo_path]);
     }
