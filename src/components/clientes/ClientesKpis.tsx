@@ -27,79 +27,77 @@ export const ClientesKpis: React.FC = () => {
 
   return (
     <div className="space-y-3">
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      <Kpi
-        acento="var(--c-accent)"
-        etiqueta="MRR"
-        valor={formatCLP(c.mrr)}
-        nota={n > 0 ? `${n} clientes · ${formatCLP(c.mrr / n)} promedio` : 'Sin clientes activos'}
-      />
-      <Kpi
-        acento="var(--c-warn)"
-        etiqueta="Por cobrar"
-        valor={formatCLP(porCobrar)}
-        tono={vencidas > 0 ? 'peligro' : 'normal'}
-        nota={vencidas > 0 ? `${vencidas} factura${vencidas > 1 ? 's' : ''} vencida${vencidas > 1 ? 's' : ''}` : 'Sin facturas vencidas'}
-      />
-      <Kpi
-        acento="var(--c-info)"
-        etiqueta="Renovaciones ≤ 60 días"
-        valor={c.renovaciones.length}
-        tono={c.renovacionesVencidas > 0 ? 'peligro' : 'normal'}
-        nota={
-          c.renovacionesVencidas > 0
-            ? `${c.renovacionesVencidas} vencida${c.renovacionesVencidas > 1 ? 's' : ''}`
-            : proxima
-              ? `Próxima: ${proxima.empresa.nombre} en ${proxima.dias} días`
-              : 'Ninguna en el período'
-        }
-      />
-      <Kpi
-        acento="var(--c-ok)"
-        etiqueta="Expansión abierta"
-        valor={formatCLP(expansion)}
-        nota={`${negociosExpansion} negocio${negociosExpansion === 1 ? '' : 's'} en pipeline de expansión`}
-      />
-    </div>
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      <div className={`${estilos.tarjeta} col-span-2`} style={{ borderTop: '3px solid var(--c-ok)' }}>
-        <p className={estilos.etiqueta} style={{ color: 'var(--c-ok)' }}>Salud de clientes</p>
-        {n === 0 ? (
-          <p className={estilos.nota}>Sin clientes activos</p>
-        ) : (
-          <Dona
-            rotulo={`Salud de ${n} clientes`}
-            centro={
-              <>
-                <span className="text-lg font-bold font-mono text-[var(--c-text)] leading-none">{n}</span>
-                <span className="text-[9px] font-mono uppercase text-[var(--c-muted)] mt-0.5">clientes</span>
-              </>
-            }
-            segmentos={[
-              { clave: 'verde', etiqueta: SALUD_ETIQUETA.verde, n: c.salud.verde, color: COLOR_SALUD.verde },
-              { clave: 'amarillo', etiqueta: SALUD_ETIQUETA.amarillo, n: c.salud.amarillo, color: COLOR_SALUD.amarillo },
-              { clave: 'rojo', etiqueta: SALUD_ETIQUETA.rojo, n: c.salud.rojo, color: COLOR_SALUD.rojo },
-              { clave: 'sin', etiqueta: 'Sin evaluar', n: c.salud.sin, color: COLOR_SALUD.sin },
-            ]}
-          />
-        )}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className={`${estilos.tarjeta} col-span-2 lg:col-span-1 lg:row-span-2`} style={{ borderTop: '3px solid var(--c-ok)' }}>
+          <p className={estilos.etiqueta} style={{ color: 'var(--c-ok)' }}>Salud de clientes</p>
+          {n === 0 ? (
+            <p className={estilos.nota}>Sin clientes activos</p>
+          ) : (
+            <Dona
+              rotulo={`Salud de ${n} clientes`}
+              centro={
+                <>
+                  <span className="text-lg font-bold font-mono text-[var(--c-text)] leading-none">{n}</span>
+                  <span className="text-[9px] font-mono uppercase text-[var(--c-muted)] mt-0.5">clientes</span>
+                </>
+              }
+              segmentos={[
+                { clave: 'verde', etiqueta: SALUD_ETIQUETA.verde, n: c.salud.verde, color: COLOR_SALUD.verde },
+                { clave: 'amarillo', etiqueta: SALUD_ETIQUETA.amarillo, n: c.salud.amarillo, color: COLOR_SALUD.amarillo },
+                { clave: 'rojo', etiqueta: SALUD_ETIQUETA.rojo, n: c.salud.rojo, color: COLOR_SALUD.rojo },
+                { clave: 'sin', etiqueta: 'Sin evaluar', n: c.salud.sin, color: COLOR_SALUD.sin },
+              ]}
+            />
+          )}
+        </div>
+        <Kpi
+          acento="var(--c-accent)"
+          etiqueta="MRR"
+          valor={formatCLP(c.mrr)}
+          nota={n > 0 ? `${n} clientes · ${formatCLP(c.mrr / n)} promedio` : 'Sin clientes activos'}
+        />
+        <Kpi
+          acento="var(--c-warn)"
+          etiqueta="Por cobrar"
+          valor={formatCLP(porCobrar)}
+          tono={vencidas > 0 ? 'peligro' : 'normal'}
+          nota={vencidas > 0 ? `${vencidas} factura${vencidas > 1 ? 's' : ''} vencida${vencidas > 1 ? 's' : ''}` : 'Sin facturas vencidas'}
+        />
+        <Kpi
+          acento="var(--c-info)"
+          etiqueta="Renovaciones ≤ 60 días"
+          valor={c.renovaciones.length}
+          tono={c.renovacionesVencidas > 0 ? 'peligro' : 'normal'}
+          nota={
+            c.renovacionesVencidas > 0
+              ? `${c.renovacionesVencidas} vencida${c.renovacionesVencidas > 1 ? 's' : ''}`
+              : proxima
+                ? `Próxima: ${proxima.empresa.nombre} en ${proxima.dias} días`
+                : 'Ninguna en el período'
+          }
+        />
+        <Kpi
+          acento="var(--c-ok)"
+          etiqueta="Expansión abierta"
+          valor={formatCLP(expansion)}
+          nota={`${negociosExpansion} negocio${negociosExpansion === 1 ? '' : 's'} en pipeline de expansión`}
+        />
+        <Kpi
+          acento="var(--c-danger)"
+          etiqueta="Clientes con alerta crítica"
+          valor={conCritica}
+          tono={conCritica > 0 ? 'peligro' : 'normal'}
+          nota={conCritica > 0 ? 'Factura o renovación vencida' : 'Ninguna'}
+        />
+        <Kpi
+          acento="var(--c-muted)"
+          etiqueta="Clientes por completar"
+          valor={incompletos}
+          tono={incompletos > 0 ? 'aviso' : 'normal'}
+          nota={incompletos > 0 ? 'Faltan RUT, responsable, salud, contacto, plan o renovación' : 'Ficha completa'}
+        />
       </div>
-      <Kpi
-        acento="var(--c-danger)"
-        etiqueta="Clientes con alerta crítica"
-        valor={conCritica}
-        tono={conCritica > 0 ? 'peligro' : 'normal'}
-        nota={conCritica > 0 ? 'Factura o renovación vencida' : 'Ninguna'}
-      />
-      <Kpi
-        acento="var(--c-muted)"
-        etiqueta="Clientes por completar"
-        valor={incompletos}
-        tono={incompletos > 0 ? 'aviso' : 'normal'}
-        nota={incompletos > 0 ? 'Faltan RUT, responsable, salud, contacto, plan o renovación' : 'Ficha completa'}
-      />
-    </div>
-    <IngresosChart />
+      <IngresosChart />
     </div>
   );
 };
