@@ -25,10 +25,12 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
   const [empresaId, setEmpresaId] = useState(empresaIdInicial ?? '');
   const [altaEmpresa, setAltaEmpresa] = useState(false);
   const [nuevaEmpresa, setNuevaEmpresa] = useState({ nombre: '', dominio: '' });
+  const desdeFicha = !!empresaIdInicial;
+  const empresaFicha = empresas.find((e) => e.id === empresaIdInicial);
   const [plan, setPlan] = useState<PlanEmpresa | ''>('A');
   const [moneda, setMoneda] = useState<Moneda>('CLP');
   const [valorNeto, setValorNeto] = useState<number>(PLANES.A.valor);
-  const [setupNeto, setSetupNeto] = useState<number>(SETUP_LISTA);
+  const [setupNeto, setSetupNeto] = useState<number>(desdeFicha && empresaFicha?.estado === 'cliente' ? 0 : SETUP_LISTA);
   const [probabilidad, setProbabilidad] = useState<number>(20);
   const [etapaId] = useState(etapas.find((e) => e.activa)?.id || '');
   const [fuenteId, setFuenteId] = useState(fuentes[0]?.id || '');
@@ -51,7 +53,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
     setPlan(p);
     if (p) {
       setValorNeto(PLANES[p].valor);
-      setSetupNeto(SETUP_LISTA);
+      setSetupNeto(desdeFicha && empresaFicha?.estado === 'cliente' ? 0 : SETUP_LISTA);
     }
   };
 
@@ -124,8 +126,8 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
               <Kanban className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-[var(--c-text)]">Nueva Oportunidad</h2>
-              <p className="text-xs text-[var(--c-muted)]">Pipeline comercial de performance marketing</p>
+              <h2 className="text-base font-bold text-[var(--c-text)]">{desdeFicha ? 'Nuevo negocio' : 'Nueva Oportunidad'}</h2>
+              <p className="text-xs text-[var(--c-muted)]">{desdeFicha ? `Con ${empresaFicha?.nombre ?? 'este cliente'}: renovación, expansión o servicio nuevo` : 'Pipeline comercial de performance marketing'}</p>
             </div>
           </div>
           <button onClick={onClose} className="text-[var(--c-muted)] hover:text-[var(--c-text)]" aria-label="Cerrar">
@@ -136,18 +138,19 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
             <label className="block text-xs font-medium text-[var(--c-text)] mb-1">
-              Nombre de la oportunidad <span className="text-[var(--c-accent)]">*</span>
+              {desdeFicha ? 'Nombre del negocio' : 'Nombre de la oportunidad'} <span className="text-[var(--c-accent)]">*</span>
             </label>
             <input
               type="text"
               required
-              placeholder="Ej: Escalamiento PMax & Search B2B"
+              placeholder={desdeFicha ? 'Ej: Renovación anual 2027, Expansión a Meta Ads' : 'Ej: Escalamiento PMax & Search B2B'}
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
               className={input}
             />
           </div>
 
+          {!desdeFicha && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className={label}>Cliente *</label>
@@ -188,6 +191,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
               </select>
             )}
           </div>
+          )}
 
           <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-3 gap-3">
             <div>
@@ -255,7 +259,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
               <label className={label}>Probabilidad (%)</label>
               <input type="number" min={0} max={100} value={probabilidad} onChange={(e) => setProbabilidad(Number(e.target.value))} className={`${input} font-mono`} />
             </div>
-            <div>
+            {!desdeFicha && <div>
               <label className={label}>Fuente</label>
               <select value={fuenteId} onChange={(e) => setFuenteId(e.target.value)} className={input}>
                 <option value="">Selecciona...</option>
@@ -265,21 +269,21 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
                   </option>
                 ))}
               </select>
-            </div>
+            </div>}
             <div>
               <label className={label}>Cierre estimado</label>
               <input type="date" value={fechaCierreEstimada} onChange={(e) => setFechaCierreEstimada(e.target.value)} className={`${input} font-mono`} />
             </div>
           </div>
 
-          <div className="pt-2 border-t border-[var(--c-line)] space-y-2">
+          {!desdeFicha && <div className="pt-2 border-t border-[var(--c-line)] space-y-2">
             <label className={label}>Origen (UTM, opcional)</label>
             <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-3 gap-2">
               <input className={input} placeholder="utm_fuente" value={utm.fuente} onChange={(e) => setUtm({ ...utm, fuente: e.target.value })} />
               <input className={input} placeholder="utm_campana" value={utm.campana} onChange={(e) => setUtm({ ...utm, campana: e.target.value })} />
               <input className={input} placeholder="utm_medio" value={utm.medio} onChange={(e) => setUtm({ ...utm, medio: e.target.value })} />
             </div>
-          </div>
+          </div>}
 
           <div className="pt-2 border-t border-[var(--c-line)] space-y-2">
             <label className={label}>Próxima acción y fecha</label>
@@ -300,7 +304,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
               disabled={guardando}
               className="px-4 py-2 text-xs font-semibold bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] text-[var(--c-on-accent)] rounded transition-colors disabled:opacity-50"
             >
-              {guardando ? 'Creando...' : 'Crear oportunidad'}
+              {guardando ? 'Creando...' : desdeFicha ? 'Crear negocio' : 'Crear oportunidad'}
             </button>
           </div>
         </form>

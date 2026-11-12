@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Mail, Phone, ChevronRight, Pencil } from 'lucide-react';
-import { DatosFacturacion } from './DatosFacturacion';
+import { Mail, Phone, ChevronRight, Pencil, Check, X } from 'lucide-react';
+import { formatRUTInput } from '../../lib/formatters';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { formatCLP, formatFecha, formatMoneda, formatCorrelativo } from '../../lib/formatters';
 import { estadoEfectivo, redondear, MonedaCotizacion } from '../../lib/cotizaciones';
@@ -118,25 +118,32 @@ const hoyISO = (() => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 })();
 
-const Bloque: React.FC<{ titulo: string; accion?: { texto: string; onClick: () => void }; children: React.ReactNode }> = ({ titulo, accion, children }) => (
+const Bloque: React.FC<{ titulo: string; accion?: { texto: string; onClick: () => void }; acciones?: React.ReactNode; children: React.ReactNode }> = ({ titulo, accion, acciones, children }) => (
   <section className="ficha-card p-4">
     <div className="flex items-center justify-between mb-3">
       <h3 className="text-[11px] font-mono uppercase tracking-wider text-[var(--c-muted)]">{titulo}</h3>
+      {acciones}
       {accion && <button onClick={accion.onClick} className="text-[11px] text-[var(--c-accent)] hover:underline">{accion.texto}</button>}
     </div>
     {children}
   </section>
 );
 
-const Campo: React.FC<{ etiqueta: string; nota?: string; editable?: boolean; children: React.ReactNode }> = ({ etiqueta, nota, editable = false, children }) => (
+const Campo: React.FC<{ etiqueta: string; nota?: string; children: React.ReactNode }> = ({ etiqueta, nota, children }) => (
   <div className="min-w-0">
     <p className="flex items-center gap-1 text-[10px] font-mono uppercase text-[var(--c-muted)] mb-1">
       {etiqueta}
-      {editable && <Pencil className="w-2.5 h-2.5 text-[var(--c-accent)] opacity-70" aria-label="Editable" />}
     </p>
     {children}
     {nota && <p className="text-[10px] font-mono text-[var(--c-muted)] mt-0.5">{nota}</p>}
   </div>
+);
+
+const Valor: React.FC<{ mono?: boolean; children?: React.ReactNode }> = ({ mono = false, children }) => (
+  <span className={`block truncate ${mono ? 'font-mono' : ''} ${children ? 'text-[var(--c-text)]' : 'text-[var(--c-muted-2)]'}`}>{children || '—'}</span>
+);
+const Estado: React.FC<{ tono: 'ok' | 'warn' | 'danger' | 'muted'; texto: string }> = ({ tono, texto }) => (
+  <span className={`flex items-center gap-1.5 font-medium ${CLASE_TEXTO[tono]}`}><span className={`w-2 h-2 rounded-full ${CLASE_PUNTO[tono]}`} />{texto}</span>
 );
 
 export const ResumenCuenta: React.FC<Props> = ({
@@ -146,6 +153,74 @@ export const ResumenCuenta: React.FC<Props> = ({
   const [cotizaciones, setCotizaciones] = useState<CotRes[]>([]);
   const [proyectos, setProyectos] = useState<ProyectoRes[]>([]);
   const [riesgosTxt, setRiesgosTxt] = useState(empresa.riesgos_oportunidades ?? '');
+  const [editando, setEditando] = useState(false);
+  const [d, setD] = useState<Record<string, string>>({});
+  const [errorEdicion, setErrorEdicion] = useState<string | null>(null);
+
+  useEffect(() => { setEditando(false); setErrorEdicion(null); }, [empresa.id]);
+
+  const abrirEdicion = () => {
+    setD({
+      salud: empresa.salud ?? '',
+      estado_pago: empresa.estado_pago ?? '',
+      fecha_ultimo_pago: soloFecha(empresa.fecha_ultimo_pago),
+      estado: empresa.estado,
+      plan: empresa.plan ?? '',
+      fee_mensual_clp: empresa.fee_mensual_clp != null ? String(empresa.fee_mensual_clp) : '',
+      setup_fee_clp: empresa.setup_fee_clp != null ? String(empresa.setup_fee_clp) : '',
+      responsable_id: empresa.responsable_id ?? '',
+      inicio_contrato: soloFecha(empresa.inicio_contrato),
+      proxima_facturacion: soloFecha(empresa.proxima_facturacion),
+      fecha_renovacion: soloFecha(empresa.fecha_renovacion),
+      renovacion_tipo: empresa.renovacion_tipo ?? 'manual',
+      razon_social: empresa.razon_social ?? '',
+      rut: empresa.rut ?? '',
+      giro: empresa.giro ?? '',
+      direccion_facturacion: empresa.direccion_facturacion ?? '',
+      email_facturacion: empresa.email_facturacion ?? '',
+      dias_pago: String(empresa.dias_pago ?? 30),
+    });
+    setErrorEdicion(null);
+    setEditando(true);
+  };
+
+  const guardarEdicion = () => {
+    const email = d.email_facturacion.trim().toLowerCase();
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setErrorEdicion('Correo de facturación inválido');
+    const dias = Number(d.dias_pago);
+    if (!Number.isInteger(dias) || dias < 0 || dias > 365) return setErrorEdicion('Días de pago entre 0 y 365');
+    const num = (v: string) => (v.trim() === '' ? null : Number(v));
+    const txt = (v: string) => v.trim() || null;
+    const nuevo: Partial<Empresa> = {
+      salud: (d.salud || null) as Empresa['salud'],
+      estado_pago: (d.estado_pago || null) as EstadoPago | null,
+      fecha_ultimo_pago: d.fecha_ultimo_pago || null,
+      estado: d.estado as Empresa['estado'],
+      plan: (d.plan || null) as Empresa['plan'],
+      fee_mensual_clp: num(d.fee_mensual_clp),
+      setup_fee_clp: num(d.setup_fee_clp),
+      responsable_id: d.responsable_id || null,
+      inicio_contrato: d.inicio_contrato || null,
+      proxima_facturacion: d.proxima_facturacion || null,
+      fecha_renovacion: d.fecha_renovacion || null,
+      renovacion_tipo: d.renovacion_tipo as Empresa['renovacion_tipo'],
+      razon_social: txt(d.razon_social),
+      rut: txt(d.rut),
+      giro: txt(d.giro),
+      direccion_facturacion: txt(d.direccion_facturacion),
+      email_facturacion: email || null,
+      dias_pago: dias,
+    };
+    // Solo se envía lo que cambió
+    const cambios: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(nuevo)) {
+      const actual = (empresa as unknown as Record<string, unknown>)[k] ?? null;
+      const comparable = k.startsWith('fecha_') || k === 'inicio_contrato' || k === 'proxima_facturacion' ? soloFecha(actual as string | null) || null : actual;
+      if (v !== comparable) cambios[k] = v;
+    }
+    if (Object.keys(cambios).length) onActualizar(cambios as Partial<Empresa>);
+    setEditando(false);
+  };
 
   useEffect(() => {
     setRiesgosTxt(empresa.riesgos_oportunidades ?? '');
@@ -267,63 +342,87 @@ export const ResumenCuenta: React.FC<Props> = ({
 
       {/* Derecha: contrato, lo que requiere atención y lo que sigue */}
       <div className="space-y-4 min-w-0">
-        <Bloque titulo="Contrato y datos">
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-4 text-xs">
-            <Campo etiqueta="Salud" editable>
-              <SelectColor valor={empresa.salud ?? ''} tono={TONO_SALUD[empresa.salud ?? '']} opciones={SALUDES} onChange={(v) => onActualizar({ salud: (v || null) as Empresa['salud'] })} />
-            </Campo>
-            <Campo etiqueta="Estado de pago" editable>
-              <SelectColor valor={empresa.estado_pago ?? ''} tono={TONO_PAGO[empresa.estado_pago ?? '']} opciones={ESTADOS_PAGO} onChange={(v) => onActualizar({ estado_pago: (v || null) as EstadoPago | null })} />
-            </Campo>
-            <Campo etiqueta="Último pago" editable>
-              <input type="date" value={soloFecha(empresa.fecha_ultimo_pago)} onChange={(e) => onActualizar({ fecha_ultimo_pago: e.target.value || null })} className={`${input} font-mono`} />
-            </Campo>
-
-            <Campo etiqueta="Estado del cliente" editable>
-              <select value={empresa.estado} onChange={(e) => onActualizar({ estado: e.target.value as Empresa['estado'] })} className={input}>
-                {ESTADOS_CLIENTE.map((o) => <option key={o.valor} value={o.valor}>{o.texto}</option>)}
-              </select>
-            </Campo>
-            <Campo etiqueta="Plan" editable>
-              <select value={empresa.plan ?? ''} onChange={(e) => onActualizar({ plan: (e.target.value || null) as Empresa['plan'] })} className={input}>
-                {PLANES.map((o) => <option key={o.valor} value={o.valor}>{o.texto}</option>)}
-              </select>
-            </Campo>
-            <Campo etiqueta="Fee mensual (CLP)" editable>
-              <input type="number" min={0} className={`${input} font-mono`} value={empresa.fee_mensual_clp ?? ''} placeholder="Sin fee" onChange={(e) => onActualizar({ fee_mensual_clp: e.target.value ? Number(e.target.value) : null })} />
-            </Campo>
-            <Campo etiqueta="Setup fee (CLP)" editable>
-              <input type="number" min={0} className={`${input} font-mono`} value={empresa.setup_fee_clp ?? ''} placeholder="Sin setup" onChange={(e) => onActualizar({ setup_fee_clp: e.target.value ? Number(e.target.value) : null })} />
-            </Campo>
-            <Campo etiqueta="Responsable" editable>
-              <select value={empresa.responsable_id ?? ''} onChange={(e) => onActualizar({ responsable_id: e.target.value || null })} className={input}>
-                <option value="">Sin asignar</option>
-                {miembros.map((m) => <option key={m.id} value={m.id}>{m.nombre}</option>)}
-              </select>
-            </Campo>
-            <Campo etiqueta="Inicio de contrato" editable>
-              <input type="date" value={soloFecha(empresa.inicio_contrato)} onChange={(e) => onActualizar({ inicio_contrato: e.target.value || null })} className={`${input} font-mono`} />
-            </Campo>
-
-            <Campo etiqueta="Próxima facturación" nota={`Pago a ${empresa.dias_pago ?? 30} días`} editable>
-              <input type="date" value={soloFecha(empresa.proxima_facturacion)} onChange={(e) => onActualizar({ proxima_facturacion: e.target.value || null })} className={`${input} font-mono`} />
-            </Campo>
-            <Campo etiqueta="Próxima renovación" editable>
-              <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-1.5">
-                <input type="date" value={soloFecha(empresa.fecha_renovacion)} onChange={(e) => onActualizar({ fecha_renovacion: e.target.value || null })} className={`${input} font-mono`} />
-                <select value={empresa.renovacion_tipo ?? 'manual'} onChange={(e) => onActualizar({ renovacion_tipo: e.target.value as Empresa['renovacion_tipo'] })} className={input} title="Tipo de renovación">
-                  <option value="manual">Manual</option>
-                  <option value="automatica">Auto</option>
-                </select>
+        <Bloque
+          titulo="Contrato y datos"
+          acciones={
+            editando ? (
+              <div className="flex items-center gap-1.5">
+                <button onClick={() => { setEditando(false); setErrorEdicion(null); }} className="flex items-center gap-1 text-[11px] text-[var(--c-muted)] hover:text-[var(--c-text)] px-2 py-1 rounded"><X className="w-3 h-3" />Cancelar</button>
+                <button onClick={guardarEdicion} className="flex items-center gap-1 text-[11px] font-medium text-[var(--c-on-accent)] bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] px-2.5 py-1 rounded"><Check className="w-3 h-3" />Guardar</button>
               </div>
-            </Campo>
-            <Campo etiqueta="LTV estimado" nota={mesesContrato !== null ? `MRR × ${mesesContrato} meses` : 'Falta inicio de contrato'}>
-              <span className="font-mono text-[var(--c-text)]">{ltvEstimado !== null ? formatCLP(ltvEstimado) : '—'}</span>
-            </Campo>
-          </div>
-          <div className="mt-4 pt-4 border-t border-[var(--c-line)]">
-            <DatosFacturacion empresa={empresa} onGuardar={onActualizar} embebido />
-          </div>
+            ) : (
+              <button onClick={abrirEdicion} className="p-1.5 rounded text-[var(--c-muted)] hover:text-[var(--c-accent)] hover:bg-[var(--c-surface-2)]" aria-label="Editar contrato y datos" title="Editar"><Pencil className="w-3.5 h-3.5" /></button>
+            )
+          }
+        >
+          {editando ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-4 text-xs">
+                <Campo etiqueta="Salud"><SelectColor valor={d.salud} tono={TONO_SALUD[d.salud]} opciones={SALUDES} onChange={(v) => setD({ ...d, salud: v })} /></Campo>
+                <Campo etiqueta="Estado de pago"><SelectColor valor={d.estado_pago} tono={TONO_PAGO[d.estado_pago]} opciones={ESTADOS_PAGO} onChange={(v) => setD({ ...d, estado_pago: v })} /></Campo>
+                <Campo etiqueta="Último pago"><input type="date" value={d.fecha_ultimo_pago} onChange={(e) => setD({ ...d, fecha_ultimo_pago: e.target.value })} className={`${input} font-mono`} /></Campo>
+                <Campo etiqueta="Estado del cliente">
+                  <select value={d.estado} onChange={(e) => setD({ ...d, estado: e.target.value })} className={input}>{ESTADOS_CLIENTE.map((o) => <option key={o.valor} value={o.valor}>{o.texto}</option>)}</select>
+                </Campo>
+                <Campo etiqueta="Plan">
+                  <select value={d.plan} onChange={(e) => setD({ ...d, plan: e.target.value })} className={input}>{PLANES.map((o) => <option key={o.valor} value={o.valor}>{o.texto}</option>)}</select>
+                </Campo>
+                <Campo etiqueta="Responsable">
+                  <select value={d.responsable_id} onChange={(e) => setD({ ...d, responsable_id: e.target.value })} className={input}>
+                    <option value="">Sin asignar</option>
+                    {miembros.map((m) => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+                  </select>
+                </Campo>
+                <Campo etiqueta="Fee mensual (CLP)"><input type="number" min={0} className={`${input} font-mono`} value={d.fee_mensual_clp} placeholder="Sin fee" onChange={(e) => setD({ ...d, fee_mensual_clp: e.target.value })} /></Campo>
+                <Campo etiqueta="Setup fee (CLP)"><input type="number" min={0} className={`${input} font-mono`} value={d.setup_fee_clp} placeholder="Sin setup" onChange={(e) => setD({ ...d, setup_fee_clp: e.target.value })} /></Campo>
+                <Campo etiqueta="Inicio de contrato"><input type="date" value={d.inicio_contrato} onChange={(e) => setD({ ...d, inicio_contrato: e.target.value })} className={`${input} font-mono`} /></Campo>
+                <Campo etiqueta="Próxima facturación"><input type="date" value={d.proxima_facturacion} onChange={(e) => setD({ ...d, proxima_facturacion: e.target.value })} className={`${input} font-mono`} /></Campo>
+                <Campo etiqueta="Próxima renovación">
+                  <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-1.5">
+                    <input type="date" value={d.fecha_renovacion} onChange={(e) => setD({ ...d, fecha_renovacion: e.target.value })} className={`${input} font-mono`} />
+                    <select value={d.renovacion_tipo} onChange={(e) => setD({ ...d, renovacion_tipo: e.target.value })} className={input} title="Tipo de renovación"><option value="manual">Manual</option><option value="automatica">Auto</option></select>
+                  </div>
+                </Campo>
+              </div>
+              <div className="pt-4 border-t border-[var(--c-line)] grid grid-cols-[minmax(0,1fr)] sm:grid-cols-3 gap-3 text-xs">
+                <Campo etiqueta="Razón social"><input className={input} value={d.razon_social} onChange={(e) => setD({ ...d, razon_social: e.target.value })} /></Campo>
+                <Campo etiqueta="RUT"><input className={`${input} font-mono`} placeholder="76.123.456-7" value={d.rut} onChange={(e) => setD({ ...d, rut: formatRUTInput(e.target.value) })} /></Campo>
+                <Campo etiqueta="Giro"><input className={input} value={d.giro} onChange={(e) => setD({ ...d, giro: e.target.value })} /></Campo>
+                <Campo etiqueta="Dirección de facturación"><input className={input} value={d.direccion_facturacion} onChange={(e) => setD({ ...d, direccion_facturacion: e.target.value })} /></Campo>
+                <Campo etiqueta="Correo para facturas"><input type="email" className={input} value={d.email_facturacion} onChange={(e) => setD({ ...d, email_facturacion: e.target.value })} /></Campo>
+                <Campo etiqueta="Condición de pago (días)"><input type="number" min={0} max={365} className={`${input} font-mono`} value={d.dias_pago} onChange={(e) => setD({ ...d, dias_pago: e.target.value })} /></Campo>
+              </div>
+              {errorEdicion && <p className="text-[11px] text-[var(--c-danger)]">{errorEdicion}</p>}
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-4 text-xs">
+                <Campo etiqueta="Salud"><Estado tono={TONO_SALUD[empresa.salud ?? '']} texto={SALUDES.find((o) => o.valor === (empresa.salud ?? ''))?.texto ?? 'Sin definir'} /></Campo>
+                <Campo etiqueta="Estado de pago"><Estado tono={TONO_PAGO[empresa.estado_pago ?? '']} texto={ESTADOS_PAGO.find((o) => o.valor === (empresa.estado_pago ?? ''))?.texto ?? 'Sin definir'} /></Campo>
+                <Campo etiqueta="Último pago"><Valor>{empresa.fecha_ultimo_pago ? formatFecha(empresa.fecha_ultimo_pago) : null}</Valor></Campo>
+                <Campo etiqueta="Estado del cliente"><Valor>{ESTADOS_CLIENTE.find((o) => o.valor === empresa.estado)?.texto}</Valor></Campo>
+                <Campo etiqueta="Plan"><Valor>{PLANES.find((o) => o.valor === (empresa.plan ?? ''))?.valor ? PLANES.find((o) => o.valor === empresa.plan)?.texto : null}</Valor></Campo>
+                <Campo etiqueta="Responsable"><Valor>{responsable}</Valor></Campo>
+                <Campo etiqueta="Fee mensual"><Valor mono>{empresa.fee_mensual_clp != null ? formatCLP(empresa.fee_mensual_clp) : null}</Valor></Campo>
+                <Campo etiqueta="Setup fee"><Valor mono>{empresa.setup_fee_clp != null ? formatCLP(empresa.setup_fee_clp) : null}</Valor></Campo>
+                <Campo etiqueta="Inicio de contrato"><Valor mono>{empresa.inicio_contrato ? formatFecha(empresa.inicio_contrato) : null}</Valor></Campo>
+                <Campo etiqueta="Próxima facturación" nota={`Pago a ${empresa.dias_pago ?? 30} días`}><Valor mono>{empresa.proxima_facturacion ? formatFecha(empresa.proxima_facturacion) : null}</Valor></Campo>
+                <Campo etiqueta="Próxima renovación" nota={empresa.fecha_renovacion ? (empresa.renovacion_tipo === 'automatica' ? 'Automática' : 'Manual') : undefined}><Valor mono>{empresa.fecha_renovacion ? formatFecha(empresa.fecha_renovacion) : null}</Valor></Campo>
+                <Campo etiqueta="LTV estimado" nota={mesesContrato !== null ? `MRR × ${mesesContrato} meses` : 'Falta inicio de contrato'}><Valor mono>{ltvEstimado !== null ? formatCLP(ltvEstimado) : null}</Valor></Campo>
+              </div>
+              <dl className="mt-4 pt-4 border-t border-[var(--c-line)] grid grid-cols-[minmax(0,1fr)] sm:grid-cols-3 gap-x-4 gap-y-4 text-xs">
+                <Campo etiqueta="Razón social"><Valor>{empresa.razon_social}</Valor></Campo>
+                <Campo etiqueta="RUT"><Valor mono>{empresa.rut}</Valor></Campo>
+                <Campo etiqueta="Giro"><Valor>{empresa.giro}</Valor></Campo>
+                <Campo etiqueta="Dirección de facturación"><Valor>{empresa.direccion_facturacion}</Valor></Campo>
+                <Campo etiqueta="Correo para facturas"><Valor>{empresa.email_facturacion}</Valor></Campo>
+                <Campo etiqueta="Condición de pago"><Valor mono>{`${empresa.dias_pago ?? 30} días`}</Valor></Campo>
+              </dl>
+              {(!empresa.razon_social || !empresa.rut || !empresa.giro || !empresa.direccion_facturacion) && (
+                <p className="mt-3 text-[11px] text-[var(--c-warn)]">Faltan datos obligatorios (razón social, RUT, giro, dirección) para cotizar o facturar. Usa el lápiz para completarlos.</p>
+              )}
+            </>
+          )}
         </Bloque>
 
         {todasAlertas.length > 0 && (
