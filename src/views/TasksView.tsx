@@ -12,7 +12,7 @@ import { Tarea } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
 import { useProyectos } from '../components/proyectos/useProyectos';
 import { formatFecha, esFechaAtrasada, esFechaHoy } from '../lib/formatters';
-import { Dona, Kpi, estilos } from '../components/dashboard/ui';
+import { ALTO_TARJETA, Dona, Kpi, estilos } from '../components/dashboard/ui';
 import { Archive, ArchiveRestore } from 'lucide-react';
 
 interface TasksViewProps {
@@ -148,7 +148,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        <div className={estilos.tarjeta} style={{ borderTop: '3px solid var(--c-accent)' }}>
+        <div className={`${estilos.tarjeta} ${ALTO_TARJETA}`} style={{ borderTop: '3px solid var(--c-accent)' }}>
           <p className={estilos.etiqueta} style={{ color: 'var(--c-accent)' }}>Abiertas por vencimiento</p>
           <Dona
             rotulo={`${indicadores.abiertas} tareas abiertas por vencimiento`}
@@ -164,13 +164,22 @@ export const TasksView: React.FC<TasksViewProps> = ({
           <p className={estilos.nota}>{indicadores.sinVinculo} sin cliente, negocio ni proyecto</p>
         </div>
         <Kpi
+          className={ALTO_TARJETA}
           etiqueta="Cumplimiento a tiempo"
           acento="var(--c-ok)"
           valor={indicadores.aTiempoPct != null ? `${indicadores.aTiempoPct}%` : '—'}
           progreso={indicadores.aTiempoPct}
           nota={`${indicadores.completadas7} completadas en 7 días · ${indicadores.completadas30} en 30`}
         />
-        <Kpi etiqueta="Alta prioridad abiertas" acento="var(--c-danger)" tono={indicadores.altaAbiertas > 0 ? 'aviso' : 'normal'} valor={indicadores.altaAbiertas} nota="prioridad alta sin completar" />
+        <Kpi
+          className={ALTO_TARJETA}
+          etiqueta="Alta prioridad abiertas"
+          acento="var(--c-danger)"
+          tono={indicadores.altaAbiertas > 0 ? 'aviso' : 'normal'}
+          valor={indicadores.altaAbiertas}
+          progreso={indicadores.abiertas > 0 ? Math.round((indicadores.altaAbiertas / indicadores.abiertas) * 100) : 0}
+          nota={`${indicadores.abiertas > 0 ? Math.round((indicadores.altaAbiertas / indicadores.abiertas) * 100) : 0}% de ${indicadores.abiertas} abiertas sin completar`}
+        />
       </div>
 
       {/* Pestañas: Hoy, Esta semana, Atrasadas (resaltadas en Magenta), Todas */}

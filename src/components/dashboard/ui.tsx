@@ -11,6 +11,10 @@ export const estilos = {
   barra: 'h-1.5 w-full rounded-full bg-[var(--c-surface-3)] overflow-hidden flex',
 };
 
+// Altura común de las tarjetas de una fila de indicadores (Clientes, Tareas, Proyectos).
+// Reparte el contenido de arriba abajo para que no quede hueco.
+export const ALTO_TARJETA = 'h-44 justify-between';
+
 type Tono = 'normal' | 'peligro' | 'aviso';
 const colorTono: Record<Tono, string> = {
   normal: '',
