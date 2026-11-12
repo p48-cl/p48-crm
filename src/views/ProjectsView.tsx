@@ -22,7 +22,7 @@ type Pestana = 'gantt' | 'proyectos' | 'calendario';
 interface Props {
   onEditTask: (t: Tarea) => void;
   /** 'agencia': solo proyectos internos de la agencia (sin selector de tipo). */
-  ambito?: 'agencia';
+  ambito?: 'agencia' | 'clientes';
 }
 
 export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
@@ -34,7 +34,7 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
   const [abierto, setAbierto] = useState<string | null>(null);
   const [nuevo, setNuevo] = useState(false);
   const [editando, setEditando] = useState<Proyecto | null>(null);
-  const [tipo, setTipo] = useState<'todos' | 'interno' | 'cliente'>(ambito === 'agencia' ? 'interno' : 'todos');
+  const [tipo, setTipo] = useState<'todos' | 'interno' | 'cliente'>(ambito === 'agencia' ? 'interno' : ambito === 'clientes' ? 'cliente' : 'todos');
   const [estado, setEstado] = useState<'activos' | EstadoProyecto | 'todos'>('activos');
   const hoy = hoyIso();
 
@@ -155,7 +155,7 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
                     nombreMiembro={nombreMiembro}
                     onToggle={(t) => toggleTareaCompletada(t.id, t.completada)}
                     onEditar={(t) => onEditTask(t)}
-                    proyectos={todos ? visibles.map((p) => ({ id: p.id, nombre: p.nombre })) : undefined}
+                    proyectos={todos ? visibles.map((p) => ({ id: p.id, nombre: p.nombre, cliente: p.empresa_id ? empresas.find((e) => e.id === p.empresa_id)?.nombre ?? 'Sin cliente' : undefined })) : undefined}
                     onEditarProyecto={(id) => setEditando(proyectos.find((p) => p.id === id) ?? null)}
                   />
                 )}
@@ -168,7 +168,7 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
           ) : (
             <>
               <div className="flex flex-wrap items-center gap-2">
-                {ambito !== 'agencia' && (
+                {!ambito && (
                   <select className={select} value={tipo} onChange={(e) => setTipo(e.target.value as typeof tipo)} aria-label="Tipo">
                     <option value="todos">Internos y de clientes</option>
                     <option value="interno">Internos</option>
@@ -216,7 +216,7 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
         </>
       )}
 
-      {nuevo && <NuevoProyectoModal tipoFijo={ambito === 'agencia' ? 'interno' : undefined} onCerrar={() => setNuevo(false)} onCreado={async (id) => { setNuevo(false); await cambio(); setAbierto(id); setPestana('proyectos'); }} />}
+      {nuevo && <NuevoProyectoModal tipoFijo={ambito === 'agencia' ? 'interno' : ambito === 'clientes' ? 'cliente' : undefined} onCerrar={() => setNuevo(false)} onCreado={async (id) => { setNuevo(false); await cambio(); setAbierto(id); setPestana('proyectos'); }} />}
       {editando && <EditarProyectoModal proyecto={editando} onCerrar={() => setEditando(null)} onGuardado={cambio} />}
     </div>
   );

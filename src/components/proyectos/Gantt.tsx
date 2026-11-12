@@ -10,6 +10,7 @@ const ESCALAS = { dia: { px: 28, etiqueta: 'Día' }, semana: { px: 12, etiqueta:
 type Escala = keyof typeof ESCALAS;
 
 type Fila =
+  | { tipo: 'cliente'; id: string; nombre: string; inicio: string; fin: string; hechas: number; total: number }
   | { tipo: 'proyecto'; id: string; proyectoId: string; nombre: string; inicio: string; fin: string; hechas: number; total: number }
   | { tipo: 'fase'; id: string; nombre: string; inicio: string; fin: string; hechas: number; total: number }
   | { tipo: 'tarea'; id: string; tarea: Tarea; inicio: string; fin: string };
@@ -22,7 +23,7 @@ interface Props {
   onToggle: (t: Tarea) => void;
   onEditar: (t: Tarea) => void;
   // Si hay varios proyectos, agrupa por proyecto (cada uno con sus fases)
-  proyectos?: { id: string; nombre: string }[];
+  proyectos?: { id: string; nombre: string; cliente?: string }[];
   onEditarProyecto?: (proyectoId: string) => void;
 }
 
@@ -52,9 +53,17 @@ export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiem
       }
     };
     if (proyectos && proyectos.length > 1) {
-      for (const p of proyectos) {
+      const clientes = [...new Set(proyectos.map((p) => p.cliente ?? ''))].sort((a, b) => a.localeCompare(b));
+      const ordenados = clientes.flatMap((c) => proyectos.filter((p) => (p.cliente ?? '') === c));
+      let clienteActual: string | null = null;
+      for (const p of ordenados) {
         const tP = tareas.filter((t) => t.proyecto_id === p.id);
         if (tP.length === 0) continue;
+        if (p.cliente && p.cliente !== clienteActual) {
+          clienteActual = p.cliente;
+          const tC = tareas.filter((t) => proyectos.some((q) => q.cliente === p.cliente && q.id === t.proyecto_id));
+          out.push({ tipo: 'cliente', id: `cli-${p.cliente}`, nombre: p.cliente, inicio: tC.map(inicioDe).sort()[0], fin: tC.map((t) => t.fecha_vencimiento).sort().slice(-1)[0], hechas: tC.filter((t) => t.completada).length, total: tC.length });
+        }
         const bloque: Fila[] = [];
         agregarGrupos(tP, fases.filter((f) => f.proyecto_id === p.id), bloque, `${p.id}-`);
         const ini = tP.map(inicioDe).sort()[0];
@@ -111,6 +120,7 @@ export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiem
 
   const color = (t: Tarea) => (t.completada ? 'var(--c-ok)' : t.fecha_vencimiento < hoy ? 'var(--c-danger)' : 'var(--c-accent)');
   const alto = filas.length * ALTO_FILA;
+  const conClientes = filas.some((f) => f.tipo === 'cliente');
 
   return (
     <div className="surface overflow-hidden">
@@ -141,12 +151,20 @@ export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiem
           {/* Columna de nombres (fija al desplazar) */}
           <div className="sticky left-0 z-10 shrink-0 bg-[var(--c-surface)] border-r border-[var(--c-line)]" style={{ width: ANCHO_NOMBRES }}>
             <div style={{ height: ALTO_CABECERA }} className="border-b border-[var(--c-line)] px-3 flex items-end pb-1.5 text-[11px] text-[var(--c-muted)]">
-              Proyecto · fase · tarea
+              Cliente · proyecto · fase · tarea
             </div>
             {filas.map((f) => {
+              if (f.tipo === 'cliente') {
+                return (
+                  <div key={f.id} style={{ height: ALTO_FILA }} className="px-3 flex items-center justify-between gap-2 bg-[var(--c-surface-3)] border-b border-[var(--c-line)]">
+                    <span className="text-xs font-bold text-[var(--c-text)] truncate">{f.nombre}</span>
+                    <span className="text-[10px] font-mono text-[var(--c-muted)] shrink-0">{f.hechas}/{f.total}</span>
+                  </div>
+                );
+              }
               if (f.tipo === 'proyecto') {
                 return (
-                  <div key={f.id} style={{ height: ALTO_FILA }} className="px-3 flex items-center justify-between gap-2 bg-[var(--c-surface-2)] border-b border-[var(--c-line)]">
+                  <div key={f.id} style={{ height: ALTO_FILA }} className={`${conClientes ? 'pl-5' : 'px-3'} pr-3 flex items-center justify-between gap-2 bg-[var(--c-surface-2)] border-b border-[var(--c-line)]`}>
                     <span className="text-xs font-semibold text-[var(--c-text)] truncate">{f.nombre}</span>
                     <span className="flex items-center gap-2 shrink-0">
                       <span className="text-[10px] font-mono text-[var(--c-muted)]">{f.hechas}/{f.total}</span>
@@ -161,14 +179,14 @@ export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiem
               }
               if (f.tipo === 'fase') {
                 return (
-                  <div key={f.id} style={{ height: ALTO_FILA }} className="pl-5 pr-3 flex items-center justify-between gap-2 border-b border-[var(--c-line)]/60">
+                  <div key={f.id} style={{ height: ALTO_FILA }} className={`${conClientes ? 'pl-8' : 'pl-5'} pr-3 flex items-center justify-between gap-2 border-b border-[var(--c-line)]/60`}>
                     <span className="text-[11px] font-medium text-[var(--c-muted)] truncate">{f.nombre}</span>
                     <span className="text-[10px] font-mono text-[var(--c-muted)] shrink-0">{f.hechas}/{f.total}</span>
                   </div>
                 );
               }
               return (
-                <div key={f.id} style={{ height: ALTO_FILA }} className="pl-8 pr-2 flex items-center gap-2 border-b border-[var(--c-line)]/60">
+                <div key={f.id} style={{ height: ALTO_FILA }} className={`${conClientes ? 'pl-11' : 'pl-8'} pr-2 flex items-center gap-2 border-b border-[var(--c-line)]/60`}>
                   <button
                     type="button"
                     onClick={() => onToggle(f.tarea)}
@@ -205,7 +223,7 @@ export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiem
               <div
                 key={f.id}
                 style={{ top: ALTO_CABECERA + i * ALTO_FILA, height: ALTO_FILA }}
-                className={`absolute inset-x-0 border-b border-[var(--c-line)]/60 ${f.tipo === 'proyecto' ? 'bg-[var(--c-surface-2)]' : ''}`}
+                className={`absolute inset-x-0 border-b border-[var(--c-line)]/60 ${f.tipo === 'cliente' ? 'bg-[var(--c-surface-3)]' : f.tipo === 'proyecto' ? 'bg-[var(--c-surface-2)]' : ''}`}
               />
             ))}
 
@@ -239,9 +257,9 @@ export const Gantt: React.FC<Props> = ({ tareas, fases, dependencias, nombreMiem
               const top = ALTO_CABECERA + i * ALTO_FILA;
               const left = x(f.inicio);
               const w = Math.max((diasEntre(f.inicio, f.fin) + 1) * px, 6);
-              if (f.tipo === 'proyecto' || f.tipo === 'fase') {
+              if (f.tipo === 'cliente' || f.tipo === 'proyecto' || f.tipo === 'fase') {
                 const pct = f.total ? f.hechas / f.total : 0;
-                const alt = f.tipo === 'proyecto' ? 6 : 5;
+                const alt = f.tipo === 'cliente' ? 8 : f.tipo === 'proyecto' ? 6 : 5;
                 return (
                   <div
                     key={f.id}
