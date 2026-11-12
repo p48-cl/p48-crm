@@ -134,7 +134,15 @@ export const ProyectosArbol: React.FC<Props> = ({
               <React.Fragment key={g.clave}>
                 <tr className="bg-[var(--c-surface-2)]/60">
                   <td colSpan={7} className="py-1.5 px-3 font-mono text-[11px] uppercase text-[var(--c-text-2)] tracking-wide">
-                    {g.nombre} <span className="text-[var(--c-muted)] normal-case">· {g.items.length} proyecto{g.items.length === 1 ? '' : 's'}</span>
+                    {g.nombre}{' '}
+                    <span className="text-[var(--c-muted)] normal-case">
+                      · {g.items.length} proyecto{g.items.length === 1 ? '' : 's'}
+                    </span>
+                    {g.items.some((p) => p.estado === 'en_curso') && (
+                      <span className="ml-2 text-[var(--c-ok)] normal-case">
+                        · {g.items.filter((p) => p.estado === 'en_curso').length} en curso
+                      </span>
+                    )}
                   </td>
                 </tr>
                 {g.items.map((p) => {
