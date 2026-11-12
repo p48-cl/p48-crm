@@ -6,13 +6,14 @@ import { Empresa } from '../../types/crm';
 interface Props {
   empresa: Empresa;
   onGuardar: (cambios: Partial<Empresa>) => void;
+  embebido?: boolean; // dentro de otro bloque: sin tarjeta ni encabezado
 }
 
 const input = 'w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]';
 const label = 'block text-[11px] text-[var(--c-muted)] mb-1';
 
 // Datos que necesita una cotización o factura. Se guarda al salir de cada campo.
-export const DatosFacturacion: React.FC<Props> = ({ empresa, onGuardar }) => {
+export const DatosFacturacion: React.FC<Props> = ({ empresa, onGuardar, embebido = false }) => {
   const [f, setF] = useState({
     razon_social: empresa.razon_social ?? '',
     rut: empresa.rut ?? '',
@@ -63,13 +64,15 @@ export const DatosFacturacion: React.FC<Props> = ({ empresa, onGuardar }) => {
   };
 
   return (
-    <div className="surface p-4 space-y-3">
-      <div className="flex items-center gap-2">
-        <Receipt className="w-4 h-4 text-[var(--c-muted)]" />
-        <h3 className="text-xs font-semibold text-[var(--c-text)]">Datos legales y tributarios</h3>
-        <span className="ml-auto text-[10px] text-[var(--c-muted)]">Necesarios para cotizar y facturar</span>
-      </div>
-      <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-3 text-xs">
+    <div className={embebido ? 'space-y-3' : 'surface p-4 space-y-3'}>
+      {!embebido && (
+        <div className="flex items-center gap-2">
+          <Receipt className="w-4 h-4 text-[var(--c-muted)]" />
+          <h3 className="text-xs font-semibold text-[var(--c-text)]">Datos legales y tributarios</h3>
+          <span className="ml-auto text-[10px] text-[var(--c-muted)]">Necesarios para cotizar y facturar</span>
+        </div>
+      )}
+      <div className={`grid grid-cols-[minmax(0,1fr)] gap-3 text-xs ${embebido ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
         <div>
           <label className={label}>Razón social *</label>
           <input className={input} value={f.razon_social} onChange={(e) => setF({ ...f, razon_social: e.target.value })} onBlur={() => guardarTexto('razon_social')} />
