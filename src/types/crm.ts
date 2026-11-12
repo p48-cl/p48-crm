@@ -231,6 +231,7 @@ export interface ProyectoFase {
   fecha_inicio?: string | null;
   fecha_fin?: string | null;
   visible_cliente: boolean;
+  completada: boolean;
 }
 
 export interface ProyectoMiembro {

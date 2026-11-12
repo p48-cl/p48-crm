@@ -29,6 +29,8 @@ export const NuevoProyectoModal: React.FC<Props> = ({ onCerrar, onCreado, empres
   const [inicio, setInicio] = useState(hoyIso());
   const [fin, setFin] = useState('');
   const [plantillaId, setPlantillaId] = useState('');
+  const [fasesNuevas, setFasesNuevas] = useState<string[]>([]);
+  const [faseTxt, setFaseTxt] = useState('');
   const [responsableId, setResponsableId] = useState(currentUser?.id ?? '');
   const [colaboradores, setColaboradores] = useState<string[]>([]);
   const [visibleCliente, setVisibleCliente] = useState(false);
@@ -40,6 +42,14 @@ export const NuevoProyectoModal: React.FC<Props> = ({ onCerrar, onCreado, empres
   const plantillas = PLANTILLAS.filter((p) => p.tipo === tipo);
   const plantilla = PLANTILLAS.find((p) => p.id === plantillaId && p.tipo === tipo);
   const plan = useMemo(() => (plantilla && inicio ? planificar(plantilla, inicio) : null), [plantilla, inicio]);
+
+  const agregarFase = () => {
+    const n = faseTxt.trim();
+    if (!n) return;
+    setFasesNuevas((f) => [...f, n]);
+    setFaseTxt('');
+  };
+  const quitarFase = (i: number) => setFasesNuevas((f) => f.filter((_, k) => k !== i));
 
   const crear = async () => {
     if (!supabase || !currentUser) return;
@@ -109,6 +119,13 @@ export const NuevoProyectoModal: React.FC<Props> = ({ onCerrar, onCreado, empres
         }
       }
 
+      // 3b) Fases propias: se suman después de las de la plantilla, si la hay
+      if (fasesNuevas.length > 0) {
+        const base = plantilla && plan ? plan.fases.length : 0;
+        const { error: e7 } = await supabase.from('proyecto_fases').insert(fasesNuevas.map((n, i) => ({ proyecto_id: pid, nombre: n, orden: base + i })));
+        if (e7) throw e7;
+      }
+
       // 4) Responsable distinto de quien crea (solo admin): se cambia al final, ya con todo asignado
       if (isAdmin && responsableId && responsableId !== currentUser.id) {
         await supabase.from('proyecto_miembros').upsert({ proyecto_id: pid, miembro_id: responsableId, rol: 'responsable' });
@@ -172,6 +189,24 @@ export const NuevoProyectoModal: React.FC<Props> = ({ onCerrar, onCreado, empres
             </div>
           </div>
 
+          <div className="space-y-2">
+            <label className={etiqueta} htmlFor="p-fase">Fases (opcional)</label>
+            <div className="flex gap-2">
+              <input id="p-fase" className={campo} value={faseTxt} onChange={(e) => setFaseTxt(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); agregarFase(); } }} placeholder="Ej. Diagnóstico" />
+              <button type="button" onClick={agregarFase} className="px-3 py-1.5 text-xs rounded border border-[var(--c-line)] text-[var(--c-text-2)] shrink-0">Agregar</button>
+            </div>
+            {fasesNuevas.length > 0 && (
+              <ol className="space-y-1">
+                {fasesNuevas.map((n, i) => (
+                  <li key={`${n}-${i}`} className="flex items-center gap-2 text-xs text-[var(--c-text-2)] px-2 py-1 rounded border border-[var(--c-line)]">
+                    <span className="font-mono text-[var(--c-muted)] w-5">{i + 1}</span>
+                    <span className="flex-1 min-w-0 truncate">{n}</span>
+                    <button type="button" onClick={() => quitarFase(i)} aria-label={`Quitar fase ${n}`} className="text-[var(--c-muted)] hover:text-[var(--c-danger)]"><X className="w-3.5 h-3.5" /></button>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
           <div><label className={etiqueta} htmlFor="p-desc">Descripción</label><textarea id="p-desc" rows={2} className={campo} value={descripcion} onChange={(e) => setDescripcion(e.target.value)} /></div>
 
           {isAdmin && (
