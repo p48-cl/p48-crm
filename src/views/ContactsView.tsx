@@ -1,6 +1,6 @@
 import { fondoCerrable } from '../lib/fondo';
 import React, { useState, useMemo } from 'react';
-import { Search, Plus, Mail, Phone, Linkedin, Building2, Archive, PhoneCall } from 'lucide-react';
+import { Search, Plus, Mail, MailX, Phone, PhoneOff, Linkedin, Link2Off, Building2, Archive, PhoneCall } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';
 import { SelectorCliente } from '../components/common/SelectorCliente';
 import { formatFecha, formatTelefonoCL } from '../lib/formatters';
@@ -167,8 +167,8 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                 {cabecera('cliente', 'Cliente')}
                 {cabecera('cargo', 'Cargo')}
                 {cabecera('rol', 'Rol Decisión')}
-                {cabecera('email', 'Email')}
-                {cabecera('telefono', 'Teléfono')}
+                {cabecera('email', 'Email', 'center')}
+                {cabecera('telefono', 'Teléfono', 'center')}
                 {cabecera('linkedin', 'LinkedIn', 'center')}
                 {cabecera('registrado', 'Registrado', 'right', 'px-4')}
               </tr>
@@ -243,29 +243,34 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                           {con.rol_decision || 'decisor'}
                         </span>
                       </td>
-                      <td className="py-2.5 px-3 font-mono text-[11px] text-[var(--c-text-2)] whitespace-nowrap">
-                        <a href={`mailto:${con.email}`} title={con.email} className="hover:text-[var(--c-text)] inline-flex items-center gap-1 max-w-[220px]">
-                          <Mail className="w-3 h-3 shrink-0 text-[var(--c-muted-2)]" />
-                          <span className="truncate">{con.email}</span>
-                        </a>
-                      </td>
-                      <td className="py-2.5 px-3 font-mono text-[11px] text-[var(--c-text-2)] whitespace-nowrap">
-                        {con.telefono ? (
-                          <span className="inline-flex items-center gap-2">
-                            <a href={`tel:${(con.telefono ?? '').replace(/\s/g, '')}`} className="hover:text-[var(--c-text)] inline-flex items-center gap-1" title="Celular">
-                              <Phone className="w-3 h-3 shrink-0 text-[var(--c-muted-2)]" />
-                              <span>{con.telefono}</span>
-                            </a>
-                            {con.telefono_fijo && (
-                              <a href={`tel:${con.telefono_fijo.replace(/\s/g, '')}`} className="hover:text-[var(--c-text)] inline-flex items-center gap-1 text-[var(--c-muted)]" title="Fijo">
-                                <PhoneCall className="w-3 h-3 shrink-0" />
-                                <span>{con.telefono_fijo}</span>
-                              </a>
-                            )}
-                          </span>
+                      <td className="py-2.5 px-3 text-center">
+                        {con.email ? (
+                          <a href={`mailto:${con.email}`} title={con.email} aria-label={`Correo: ${con.email}`} className="inline-flex text-[var(--c-muted)] hover:text-[var(--c-accent)]">
+                            <Mail className="w-3.5 h-3.5" />
+                          </a>
                         ) : (
-                          <span className="text-[var(--c-muted-2)]">—</span>
+                          <span title="Sin correo registrado" aria-label="Sin correo registrado" className="inline-flex text-[var(--c-muted-2)]">
+                            <MailX className="w-3.5 h-3.5" />
+                          </span>
                         )}
+                      </td>
+                      <td className="py-2.5 px-3 text-center">
+                        <span className="inline-flex items-center justify-center gap-2">
+                          {con.telefono ? (
+                            <a href={`tel:${con.telefono.replace(/\s/g, '')}`} title={`Celular: ${con.telefono}`} aria-label={`Celular: ${con.telefono}`} className="inline-flex text-[var(--c-muted)] hover:text-[var(--c-accent)]">
+                              <Phone className="w-3.5 h-3.5" />
+                            </a>
+                          ) : (
+                            <span title="Sin celular registrado" aria-label="Sin celular registrado" className="inline-flex text-[var(--c-muted-2)]">
+                              <PhoneOff className="w-3.5 h-3.5" />
+                            </span>
+                          )}
+                          {con.telefono_fijo && (
+                            <a href={`tel:${con.telefono_fijo.replace(/\s/g, '')}`} title={`Fijo: ${con.telefono_fijo}`} aria-label={`Fijo: ${con.telefono_fijo}`} className="inline-flex text-[var(--c-muted)] hover:text-[var(--c-accent)]">
+                              <PhoneCall className="w-3.5 h-3.5" />
+                            </a>
+                          )}
+                        </span>
                       </td>
                       <td className="py-2.5 px-3 text-center">
                         {con.linkedin_url ? (
@@ -273,12 +278,16 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                             href={con.linkedin_url}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-[var(--c-muted)] hover:text-[var(--c-accent)] inline-block"
+                            title="Perfil de LinkedIn"
+                            aria-label="Perfil de LinkedIn"
+                            className="inline-flex text-[var(--c-muted)] hover:text-[var(--c-accent)]"
                           >
                             <Linkedin className="w-3.5 h-3.5" />
                           </a>
                         ) : (
-                          <span className="text-[var(--c-muted-2)]">—</span>
+                          <span title="Sin LinkedIn registrado" aria-label="Sin LinkedIn registrado" className="inline-flex text-[var(--c-muted-2)]">
+                            <Link2Off className="w-3.5 h-3.5" />
+                          </span>
                         )}
                       </td>
                       <td className="py-2.5 px-4 font-mono text-[11px] text-[var(--c-muted)] text-right">
