@@ -35,10 +35,16 @@ export const TasksView: React.FC<TasksViewProps> = ({
 
   const [tab, setTab] = useState<'todas' | 'atrasadas' | 'hoy' | 'semana'>('todas');
   const [verArchivadas, setVerArchivadas] = useState(false);
+  // Las completadas salen de la vista; con este toggle se vuelven a ver (y se pueden reabrir desmarcándolas)
+  const [verCompletadas, setVerCompletadas] = useState(false);
 
   // Solo tareas vigentes en indicadores y pestañas; con el toggle se ven las archivadas
   const tareasVigentes = useMemo(() => tareas.filter((t) => !t.archivado), [tareas]);
-  const base = useMemo(() => tareas.filter((t) => !!t.archivado === verArchivadas), [tareas, verArchivadas]);
+  const base = useMemo(
+    () => tareas.filter((t) => !!t.archivado === verArchivadas && (verCompletadas || !t.completada)),
+    [tareas, verArchivadas, verCompletadas],
+  );
+  const completadasCount = useMemo(() => tareasVigentes.filter((t) => t.completada).length, [tareasVigentes]);
 
   // Cálculos de fecha para tabs
   const tareasFiltradas = useMemo(() => {
@@ -123,11 +129,13 @@ export const TasksView: React.FC<TasksViewProps> = ({
       (t) => esFechaAtrasada(t.fecha_vencimiento) && !t.completada
     ).length;
 
-    return { hoyCount, semanaCount, atrasadasCount, todasCount: tareasVigentes.length };
-  }, [tareasVigentes]);
+    const todasCount = tareasVigentes.filter((t) => verCompletadas || !t.completada).length;
+
+    return { hoyCount, semanaCount, atrasadasCount, todasCount };
+  }, [tareasVigentes, verCompletadas]);
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold font-sans text-[var(--c-text)]">
@@ -222,7 +230,15 @@ export const TasksView: React.FC<TasksViewProps> = ({
           })}
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-[var(--c-muted)] shrink-0">
+        <div className="flex items-center gap-4 text-xs text-[var(--c-muted)] shrink-0">
+          {!verArchivadas && (
+            <button
+              onClick={() => setVerCompletadas((v) => !v)}
+              className={`font-mono text-[11px] hover:text-[var(--c-text)] ${verCompletadas ? 'text-[var(--c-accent)]' : ''}`}
+            >
+              {verCompletadas ? 'Ocultar completadas' : `Ver completadas (${completadasCount})`}
+            </button>
+          )}
           <button onClick={() => setVerArchivadas((v) => !v)} className="font-mono text-[11px] hover:text-[var(--c-text)]">
             {verArchivadas ? 'Ver activas' : 'Ver archivadas'}
           </button>

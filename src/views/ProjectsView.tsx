@@ -117,7 +117,7 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
             <button onClick={() => setNuevo(true)} className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded bg-[var(--c-accent)] text-[var(--c-on-accent)]"><Plus className="w-3.5 h-3.5" />Nuevo proyecto</button>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
             <div className={`${estilos.tarjeta} ${ALTO_TARJETA} col-span-2 lg:col-span-1`} style={{ borderTop: '3px solid var(--c-accent)' }}>
               <p className={estilos.etiqueta} style={{ color: 'var(--c-accent)' }}>Proyectos por estado · {visibles.length}</p>
               <BarraVertical
