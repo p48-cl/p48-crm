@@ -136,6 +136,20 @@ export const CotizacionesCliente: React.FC<CotizacionesClienteProps> = ({ empres
         </button>
       </div>
       {error && <p className="text-xs text-[var(--c-danger)]">{error}</p>}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {(['enviada', 'aceptada', 'rechazada', 'vencida'] as Estado[]).map((e) => {
+          const grupo = filas.filter((c) => (estadoEfectivo(c) as Estado) === e);
+          const monedas = new Set(grupo.map((c) => c.moneda));
+          const monto = grupo.reduce((acc, c) => acc + totales([{ concepto: '', plan: '', cantidad: 1, precio_neto: c.neto_mensual, recurrente: true }], c.iva_pct, c.moneda).mensualIva, 0);
+          return (
+            <div key={e} className="surface p-3 space-y-0.5">
+              <p className={`text-[10px] font-mono uppercase tracking-wider ${COLOR_ESTADO[e]}`}>{e === 'enviada' ? 'Enviadas' : e === 'aceptada' ? 'Aceptadas' : e === 'rechazada' ? 'Rechazadas' : 'Vencidas'}</p>
+              <p className="text-lg font-bold font-mono text-[var(--c-text)]">{grupo.length}</p>
+              <p className="text-[10px] font-mono text-[var(--c-muted)]">{grupo.length > 0 && monedas.size === 1 ? `${formatMoneda(monto, grupo[0].moneda)} /mes` : '—'}</p>
+            </div>
+          );
+        })}
+      </div>
       {cargando && filas.length === 0 ? (
         <p className="text-xs text-[var(--c-muted)]">Cargando…</p>
       ) : filas.length === 0 ? (
@@ -161,7 +175,7 @@ export const CotizacionesCliente: React.FC<CotizacionesClienteProps> = ({ empres
           })}
         </div>
       )}
-      <p className="text-[10px] text-[var(--c-muted)]">Totales con IVA. Cotización de referencia en CLP; las facturas se emiten en CLP y se registran aparte (etapa siguiente).</p>
+      <p className="text-[10px] text-[var(--c-muted)]">Totales con IVA. Las tarjetas suman el valor mensual por estado.</p>
     </div>
   );
 };

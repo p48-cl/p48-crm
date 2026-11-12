@@ -28,7 +28,7 @@ import { useConfiguracionCRM } from '../lib/configuracion';
 import { FranjaDecision, TonoFranja } from '../components/common/FranjaDecision';
 import { ResumenCuenta, AlertaResumen } from '../components/clientes/ResumenCuenta';
 
-type Tab = 'resumen' | 'contactos' | 'oportunidades' | 'facturacion' | 'actividades' | 'tareas' | 'estrategia' | 'marketing' | 'cliente';
+type Tab = 'resumen' | 'contactos' | 'oportunidades' | 'facturacion' | 'actividades' | 'tareas' | 'marketing' | 'cliente';
 
 interface CompanyDetailDrawerProps {
   empresa: Empresa | null;
@@ -358,8 +358,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
               { id: 'facturacion' as const, label: 'Facturación' },
               { id: 'actividades' as const, label: 'Actividad' },
               { id: 'tareas' as const, label: `Tareas (${tareasPendientes.length})` },
-              { id: 'estrategia' as const, label: 'Estrategia' },
-              ...(empresa.estado === 'cliente' ? [{ id: 'marketing' as const, label: 'Marketing' }] : []),
+              { id: 'marketing' as const, label: 'Marketing' },
               ...(empresa.estado === 'cliente' ? [{ id: 'cliente' as const, label: 'Portal y activos' }] : []),
             ] as const
           ).map((tab) => (
@@ -391,12 +390,12 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
               alertas={riesgos}
               accesosConcedidos={[accesos.google_ads, accesos.ga4, accesos.meta_bm, accesos.gtm_cmp].filter(Boolean).length}
               accesosTotal={empresa.estado === 'cliente' ? 4 : 0}
-                            onIr={(d) => setActiveTab(d === 'info' ? 'resumen' : d)}
+                            onIr={(d) => setActiveTab(d === 'info' ? 'resumen' : d === 'estrategia' ? 'marketing' : d)}
               miembros={miembros.filter((m) => m.activo)}
               facturas={facturas}
               onAbrirNegocio={onSelectOportunidad}
               onActualizar={(datos) => actualizarEmpresa(empresa.id, datos)}
-              estrategia={<ResumenEstrategia empresaId={empresa.id} onVerTodo={() => setActiveTab('estrategia')} />}
+              estrategia={<ResumenEstrategia empresaId={empresa.id} onVerTodo={() => setActiveTab(empresa.estado === 'cliente' ? 'marketing' : 'resumen')} />}
               enlaces={
                 <>
                   <div className="space-y-1">
@@ -589,12 +588,12 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h3 className="text-xs font-semibold text-[var(--c-text)]">Negocios de este cliente</h3>
-                  <p className="text-[11px] text-[var(--c-muted)] mt-0.5">Ventas en curso: renovación, expansión o servicio nuevo. Cada uno avanza por etapas en Pipeline.</p>
+                  <p className="text-[11px] text-[var(--c-muted)] mt-0.5">Ventas con este cliente: renovación, expansión o servicio nuevo. Se ven también en Pipeline; haz clic en uno para abrirlo.</p>
                 </div>
                 <button onClick={() => setShowNuevoNegocio(true)} className="shrink-0 text-xs text-[var(--c-on-accent)] bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] px-2.5 py-1 rounded font-medium">+ Negocio</button>
               </div>
               {oportunidadesEmpresa.length === 0 ? (
-                <p className="text-xs text-[var(--c-muted)] py-4 text-center">Sin oportunidades asociadas.</p>
+                <p className="text-xs text-[var(--c-muted)] py-4 text-center">Sin negocios con este cliente.</p>
               ) : (
                 oportunidadesEmpresa.map((op) => (
                   <button
@@ -742,7 +741,6 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
           {activeTab === 'facturacion' && (
             <div className="space-y-8">
               <section className="space-y-3">
-                <h3 className="text-xs font-semibold text-[var(--c-text)]">Cotizaciones</h3>
                 <CotizacionesCliente empresa={empresa} iniciarNueva={!!iniciarNuevaCotizacion} onNuevaUsada={onNuevaCotizacionUsada} />
               </section>
               <section className="space-y-3">
@@ -750,18 +748,20 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
               </section>
             </div>
           )}
-          {activeTab === 'estrategia' && <EstrategiaEditor empresaId={empresa.id} nombreCliente={empresa.nombre} />}
-          {activeTab === 'marketing' && empresa.estado === 'cliente' && <FichaMarketing empresaId={empresa.id} />}
-          {activeTab === 'cliente' && empresa.estado === 'cliente' && (
+          {activeTab === 'marketing' && (
             <div className="space-y-6">
-              <ClientePanel empresaId={empresa.id} />
-                            <CuentasCliente
-                empresaId={empresa.id}
-                notas={accesos.notas_accesos || ''}
-                onNotas={(v) => actualizarAccesosAdmin(empresa.id, { notas_accesos: v })}
-              />
+              {empresa.estado === 'cliente' && <FichaMarketing empresaId={empresa.id} />}
+              <EstrategiaEditor empresaId={empresa.id} nombreCliente={empresa.nombre} />
+              {empresa.estado === 'cliente' && (
+                <CuentasCliente
+                  empresaId={empresa.id}
+                  notas={accesos.notas_accesos || ''}
+                  onNotas={(v) => actualizarAccesosAdmin(empresa.id, { notas_accesos: v })}
+                />
+              )}
             </div>
           )}
+          {activeTab === 'cliente' && empresa.estado === 'cliente' && <ClientePanel empresaId={empresa.id} />}
         </div>
 
         {actividadEditando && (
@@ -771,10 +771,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
           isOpen={showNuevoNegocio}
           onClose={() => setShowNuevoNegocio(false)}
           empresaIdInicial={empresa.id}
-          onCreated={(id) => {
-            setShowNuevoNegocio(false);
-            onSelectOportunidad(id);
-          }}
+          onCreated={() => setShowNuevoNegocio(false)}
         />
 
         {/* Footer */}
