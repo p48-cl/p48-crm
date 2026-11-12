@@ -34,7 +34,7 @@ export const ESTADO_DEFECTO: Record<string, { etiqueta: string; color: string }>
   enviada: { etiqueta: 'Enviada', color: 'info' },
   aceptada: { etiqueta: 'Aceptada', color: 'ok' },
   rechazada: { etiqueta: 'Rechazada', color: 'danger' },
-  vencida: { etiqueta: 'Vencida', color: 'warn' },
+  vencida: { etiqueta: 'Vencida', color: 'danger' },
 };
 export const estiloEstado = (cfg: Record<string, { etiqueta?: string; color?: string }> | undefined, estado: string) => {
   const base = ESTADO_DEFECTO[estado] ?? { etiqueta: estado, color: 'muted' };

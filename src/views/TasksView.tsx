@@ -109,14 +109,14 @@ export const TasksView: React.FC<TasksViewProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--c-line)] pb-1">
         <div className="flex gap-2 text-xs font-medium overflow-x-auto">
           {[
-            { id: 'hoy' as const, label: 'Hoy', count: counts.hoyCount },
-            { id: 'semana' as const, label: 'Esta semana', count: counts.semanaCount },
             {
               id: 'atrasadas' as const,
               label: 'Atrasadas',
               count: counts.atrasadasCount,
               alert: counts.atrasadasCount > 0,
             },
+            { id: 'hoy' as const, label: 'Hoy', count: counts.hoyCount },
+            { id: 'semana' as const, label: 'Esta semana', count: counts.semanaCount },
             { id: 'todas' as const, label: 'Todas', count: counts.todasCount },
           ].map((item) => {
             const active = tab === item.id;

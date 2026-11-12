@@ -26,10 +26,11 @@ export const Kpi: React.FC<{
   progreso?: number | null; // 0–100
   onClick?: () => void;
   className?: string;
-}> = ({ etiqueta, valor, nota, tono = 'normal', progreso, onClick, className = '' }) => {
+  acento?: string; // color de estado (CSS var): borde superior y etiqueta
+}> = ({ etiqueta, valor, nota, tono = 'normal', progreso, onClick, className = '', acento }) => {
   const contenido = (
     <>
-      <p className={estilos.etiqueta}>{etiqueta}</p>
+      <p className={estilos.etiqueta} style={acento ? { color: acento } : undefined}>{etiqueta}</p>
       <p className={`${estilos.valor} ${colorTono[tono]}`}>{valor}</p>
       {progreso != null && (
         <div className={estilos.barra} aria-hidden>
@@ -40,11 +41,11 @@ export const Kpi: React.FC<{
     </>
   );
   return onClick ? (
-    <button type="button" onClick={onClick} className={`${estilos.tarjeta} text-left hover:border-[var(--c-accent)] transition-colors ${className}`}>
+    <button type="button" onClick={onClick} style={acento ? { borderTop: `3px solid ${acento}` } : undefined} className={`${estilos.tarjeta} text-left hover:border-[var(--c-accent)] transition-colors ${className}`}>
       {contenido}
     </button>
   ) : (
-    <div className={`${estilos.tarjeta} ${className}`}>{contenido}</div>
+    <div className={`${estilos.tarjeta} ${className}`} style={acento ? { borderTop: `3px solid ${acento}` } : undefined}>{contenido}</div>
   );
 };
 

@@ -17,14 +17,14 @@ export const EncabezadoDoc: React.FC<{ titulo: string; subtitulo?: string; boton
   </div>
 );
 
-export interface KpiDocProps { etiqueta: string; valor: string; sub?: string; claseEtiqueta?: string; claseValor?: string }
+export interface KpiDocProps { etiqueta: string; valor: string; sub?: string; claseEtiqueta?: string; claseValor?: string; color?: string }
 
 // Siempre 4 tarjetas por sección
 export const FilaKpis: React.FC<{ items: KpiDocProps[] }> = ({ items }) => (
-  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+  <div className={`grid grid-cols-2 gap-3 ${items.length >= 5 ? 'lg:grid-cols-5' : 'lg:grid-cols-4'}`}>
     {items.map((k) => (
-      <div key={k.etiqueta} className="surface p-3 space-y-0.5 min-w-0">
-        <p className={`text-[10px] font-mono uppercase tracking-wider ${k.claseEtiqueta ?? 'text-[var(--c-muted)]'}`}>{k.etiqueta}</p>
+      <div key={k.etiqueta} className="surface p-3 space-y-0.5 min-w-0" style={k.color ? { borderTop: `3px solid ${k.color}` } : undefined}>
+        <p className={`text-[10px] font-mono uppercase tracking-wider ${k.claseEtiqueta ?? 'text-[var(--c-muted)]'}`} style={k.color ? { color: k.color } : undefined}>{k.etiqueta}</p>
         <p className={`text-sm font-bold font-mono truncate ${k.claseValor ?? 'text-[var(--c-text)]'}`}>{k.valor}</p>
         <p className="text-[10px] font-mono text-[var(--c-muted)] truncate">{k.sub ?? '—'}</p>
       </div>
