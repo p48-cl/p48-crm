@@ -6,7 +6,7 @@ import { useConfiguracionCRM } from '../../lib/configuracion';
 
 const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
-// Ventas mensuales en CLP: facturado (base) y, encima, cotizaciones aceptadas que aún no tienen factura.
+// Facturado por mes (ingreso) y, en barra separada, cotizaciones aceptadas que aún no tienen factura.
 // Una cotización facturada cuenta solo en su factura, así no se suma dos veces.
 export const IngresosChart: React.FC = () => {
   const { facturas, cotizaciones, agencia } = useCRM();
@@ -19,7 +19,7 @@ export const IngresosChart: React.FC = () => {
     const hoy = new Date();
     const meses = Array.from({ length: rango }, (_, i) => {
       const d = new Date(hoy.getFullYear(), hoy.getMonth() - (rango - 1 - i), 1);
-      return { clave: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`, etiqueta: MESES[d.getMonth()], facturado: 0, pendiente: 0 };
+      return { clave: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`, etiqueta: MESES[d.getMonth()], facturado: 0, porFacturar: 0 };
     });
     const idx = new Map(meses.map((m, i) => [m.clave, i]));
     const cotizacionesFacturadas = new Set<string>();
@@ -35,25 +35,26 @@ export const IngresosChart: React.FC = () => {
       const i = idx.get(c.fecha_emision.slice(0, 7));
       if (i === undefined) continue;
       const neto = Number(c.neto_mensual ?? 0) + Number(c.neto_unico ?? 0);
-      meses[i].pendiente += conIva ? neto * (1 + ivaPct / 100) : neto;
+      meses[i].porFacturar += conIva ? neto * (1 + ivaPct / 100) : neto;
     }
-    const maximo = Math.max(1, ...meses.map((m) => m.facturado + m.pendiente));
+    const maximo = Math.max(1, ...meses.flatMap((m) => [m.facturado, m.porFacturar]));
     return {
       meses,
       maximo,
       totalFact: meses.reduce((a, m) => a + m.facturado, 0),
-      totalPend: meses.reduce((a, m) => a + m.pendiente, 0),
+      totalPorFact: meses.reduce((a, m) => a + m.porFacturar, 0),
     };
   }, [facturas, cotizaciones, agencia, conIva, rango, ivaPct]);
 
   const W = 720, H = 190, base = 165, alto = 140;
   const paso = W / datos.meses.length;
-  const ancho = Math.min(28, paso * 0.5);
+  const ancho = Math.min(14, paso * 0.3);
+  const separacion = 2;
 
   return (
     <div className={estilos.tarjeta} style={{ borderTop: '3px solid var(--c-accent)' }}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className={estilos.etiqueta} style={{ color: 'var(--c-accent)' }}>Ventas por mes · CLP {conIva ? 'con IVA' : 'sin IVA'}</p>
+        <p className={estilos.etiqueta} style={{ color: 'var(--c-accent)' }}>Facturado por mes · CLP {conIva ? 'con IVA' : 'sin IVA'}</p>
         <div className="flex items-center gap-3 text-[11px] font-mono text-[var(--c-muted)]">
           <button type="button" onClick={() => setConIva((v) => !v)} className="hover:text-[var(--c-text)]">{conIva ? 'Ver sin IVA' : 'Ver con IVA'}</button>
           <button type="button" onClick={() => setRango((r) => (r === 12 ? 6 : 12))} className="hover:text-[var(--c-text)]">{rango === 12 ? 'Últimos 6 meses' : 'Últimos 12 meses'}</button>
@@ -61,9 +62,9 @@ export const IngresosChart: React.FC = () => {
       </div>
       <div className="flex flex-wrap gap-4 mt-1 text-[11px] text-[var(--c-muted)]">
         <span><span className="inline-block w-2 h-2 rounded-sm mr-1" style={{ background: 'var(--c-ok)' }} />Facturado {formatCLP(datos.totalFact)}</span>
-        <span><span className="inline-block w-2 h-2 rounded-sm mr-1" style={{ background: 'var(--c-info)' }} />Aceptadas sin factura {formatCLP(datos.totalPend)}</span>
+        <span><span className="inline-block w-2 h-2 rounded-sm mr-1" style={{ background: 'var(--c-info)' }} />Por facturar (aceptadas sin factura) {formatCLP(datos.totalPorFact)}</span>
       </div>
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full mt-2" role="img" aria-label="Ventas mensuales: facturado y cotizaciones aceptadas sin factura">
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full mt-2" role="img" aria-label="Facturado por mes y cotizaciones aceptadas por facturar">
         {[0, 0.5, 1].map((p) => (
           <g key={p}>
             <line x1="0" x2={W} y1={base - alto * p} y2={base - alto * p} stroke="var(--c-line)" strokeWidth="1" />
@@ -73,12 +74,12 @@ export const IngresosChart: React.FC = () => {
         {datos.meses.map((m, i) => {
           const cx = paso * i + paso / 2;
           const hF = (m.facturado / datos.maximo) * alto;
-          const hP = (m.pendiente / datos.maximo) * alto;
+          const hP = (m.porFacturar / datos.maximo) * alto;
           return (
             <g key={m.clave}>
-              <title>{`${m.etiqueta} · Facturado ${formatCLP(m.facturado)} · Aceptadas sin factura ${formatCLP(m.pendiente)}`}</title>
-              <rect x={cx - ancho / 2} y={base - hF} width={ancho} height={hF} fill="var(--c-ok)" />
-              <rect x={cx - ancho / 2} y={base - hF - hP} width={ancho} height={hP} rx="2" fill="var(--c-info)" />
+              <title>{`${m.etiqueta} · Facturado ${formatCLP(m.facturado)} · Por facturar ${formatCLP(m.porFacturar)}`}</title>
+              <rect x={cx - ancho - separacion / 2} y={base - hF} width={ancho} height={hF} rx="2" fill="var(--c-ok)" />
+              <rect x={cx + separacion / 2} y={base - hP} width={ancho} height={hP} rx="2" fill="var(--c-info)" />
               <text x={cx} y={base + 14} textAnchor="middle" fontSize="10" fontFamily="monospace" fill="var(--c-muted)">{m.etiqueta}</text>
             </g>
           );
