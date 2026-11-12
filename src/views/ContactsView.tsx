@@ -1,6 +1,6 @@
 import { fondoCerrable } from '../lib/fondo';
 import React, { useState, useMemo } from 'react';
-import { Search, Plus, Mail, Phone, Linkedin, Building2, Archive } from 'lucide-react';
+import { Search, Plus, Mail, Phone, Linkedin, Building2, Archive, PhoneCall } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';
 import { SelectorCliente } from '../components/common/SelectorCliente';
 import { formatFecha, formatTelefonoCL } from '../lib/formatters';
@@ -42,6 +42,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
     cargo: string;
     email: string;
     telefono: string;
+    telefono_fijo: string;
     linkedin_url: string;
     rol_decision: 'decisor' | 'influenciador' | 'usuario';
     es_principal: boolean;
@@ -52,10 +53,13 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
     cargo: '',
     email: '',
     telefono: '',
+    telefono_fijo: '',
     linkedin_url: '',
     rol_decision: 'decisor',
     es_principal: false,
   });
+
+  const [intentoGuardar, setIntentoGuardar] = useState(false);
 
   const filteredContactos = useMemo(() => {
     return contactos.filter((con) => {
@@ -90,7 +94,8 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newContact.nombre || !newContact.email) return;
+    setIntentoGuardar(true);
+    if (!newContact.nombre || !newContact.email || !newContact.telefono.trim()) return;
     if (!newContact.empresa_id) {
       setSelectorCliente(true);
       return;
@@ -110,6 +115,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
       cargo: '',
       email: '',
       telefono: '',
+      telefono_fijo: '',
       linkedin_url: '',
       rol_decision: 'decisor',
       es_principal: false,
@@ -129,7 +135,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
         </div>
 
         <button
-          onClick={() => { setEditId(null); setNewContact({ empresa_id: '', nombre: '', apellido: '', cargo: '', email: '', telefono: '', linkedin_url: '', rol_decision: 'decisor', es_principal: false }); setShowNewModal(true); }}
+          onClick={() => { setEditId(null); setNewContact({ empresa_id: '', nombre: '', apellido: '', cargo: '', email: '', telefono: '', telefono_fijo: '', linkedin_url: '', rol_decision: 'decisor', es_principal: false }); setShowNewModal(true); }}
           className="bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] active:scale-[0.98] text-[var(--c-on-accent)] font-semibold text-xs py-2 px-3.5 rounded flex items-center gap-1.5 transition-all shadow-sm font-sans"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
@@ -190,6 +196,7 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                           cargo: con.cargo || '',
                           email: con.email,
                           telefono: con.telefono || '',
+                          telefono_fijo: con.telefono_fijo || '',
                           linkedin_url: con.linkedin_url || '',
                           rol_decision: (con.rol_decision as 'decisor' | 'influenciador' | 'usuario') || 'decisor',
                           es_principal: con.es_principal,
@@ -236,18 +243,26 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                           {con.rol_decision || 'decisor'}
                         </span>
                       </td>
-                      <td className="py-2.5 px-3 font-mono text-[11px] text-[var(--c-text-2)]">
-                        <a href={`mailto:${con.email}`} className="hover:text-[var(--c-text)] flex items-center gap-1">
-                          <Mail className="w-3 h-3 text-[var(--c-muted-2)]" />
-                          <span>{con.email}</span>
+                      <td className="py-2.5 px-3 font-mono text-[11px] text-[var(--c-text-2)] whitespace-nowrap">
+                        <a href={`mailto:${con.email}`} title={con.email} className="hover:text-[var(--c-text)] inline-flex items-center gap-1 max-w-[220px]">
+                          <Mail className="w-3 h-3 shrink-0 text-[var(--c-muted-2)]" />
+                          <span className="truncate">{con.email}</span>
                         </a>
                       </td>
-                      <td className="py-2.5 px-3 font-mono text-[11px] text-[var(--c-text-2)]">
+                      <td className="py-2.5 px-3 font-mono text-[11px] text-[var(--c-text-2)] whitespace-nowrap">
                         {con.telefono ? (
-                          <a href={`tel:${(con.telefono ?? '').replace(/\s/g, '')}`} className="hover:text-[var(--c-text)] flex items-center gap-1">
-                            <Phone className="w-3 h-3 text-[var(--c-muted-2)]" />
-                            <span>{con.telefono}</span>
-                          </a>
+                          <span className="inline-flex items-center gap-2">
+                            <a href={`tel:${(con.telefono ?? '').replace(/\s/g, '')}`} className="hover:text-[var(--c-text)] inline-flex items-center gap-1" title="Celular">
+                              <Phone className="w-3 h-3 shrink-0 text-[var(--c-muted-2)]" />
+                              <span>{con.telefono}</span>
+                            </a>
+                            {con.telefono_fijo && (
+                              <a href={`tel:${con.telefono_fijo.replace(/\s/g, '')}`} className="hover:text-[var(--c-text)] inline-flex items-center gap-1 text-[var(--c-muted)]" title="Fijo">
+                                <PhoneCall className="w-3 h-3 shrink-0" />
+                                <span>{con.telefono_fijo}</span>
+                              </a>
+                            )}
+                          </span>
                         ) : (
                           <span className="text-[var(--c-muted-2)]">—</span>
                         )}
@@ -357,13 +372,23 @@ export const ContactsView: React.FC<ContactsViewProps> = ({ onSelectEmpresa }) =
                 />
               </div>
 
-              <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-3 gap-2">
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Celular +569 *"
+                    value={newContact.telefono}
+                    onChange={(e) => setNewContact({ ...newContact, telefono: formatTelefonoCL(e.target.value) })}
+                    className={`w-full bg-[var(--c-surface-2)] border rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] ${intentoGuardar && !newContact.telefono.trim() ? 'border-[var(--c-danger)]' : 'border-[var(--c-line)]'}`}
+                  />
+                  {intentoGuardar && !newContact.telefono.trim() && <p className="text-[10px] text-[var(--c-danger)] mt-1">El celular es obligatorio</p>}
+                </div>
                 <input
                   type="text"
-                  placeholder="Celular +569"
-                  value={newContact.telefono}
-                  onChange={(e) => setNewContact({ ...newContact, telefono: formatTelefonoCL(e.target.value) })}
-                  className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
+                  placeholder="Fijo (opcional)"
+                  value={newContact.telefono_fijo}
+                  onChange={(e) => setNewContact({ ...newContact, telefono_fijo: formatTelefonoCL(e.target.value) })}
+                  className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] h-fit"
                 />
                 <input
                   type="text"

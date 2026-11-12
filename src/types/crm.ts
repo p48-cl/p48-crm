@@ -81,6 +81,7 @@ export interface Contacto {
   rol_decision?: RolDecisionContacto | null;
   email: string;
   telefono?: string | null;
+  telefono_fijo?: string | null;
   linkedin_url?: string | null;
   es_principal: boolean;
   archivado?: boolean;
