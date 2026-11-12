@@ -8,7 +8,6 @@ import { EncabezadoDoc, FilaKpis, TablaDoc, COLUMNAS_DOC, celda, filaClase } fro
 import { useConfiguracionCRM } from '../../lib/configuracion';
 import { estadoEfectivo, convertirMoneda, redondear, MonedaCotizacion, estiloEstado, ESTADOS_COTIZACION } from '../../lib/cotizaciones';
 import { useCRM } from '../../context/CRMContext';
-import { urlLogo } from './Logo';
 import { useAuth } from '../../context/AuthContext';
 import { Empresa, PlanEmpresa } from '../../types/crm';
 
@@ -314,24 +313,64 @@ export const Editor: React.FC<EditorProps> = ({ empresa, inicial, oportunidades,
   };
 
   const imprimir = () => {
+    const numero = inicial ? formatCorrelativo('COT', inicial.numero) : 'Borrador';
     const filasHtml = lineas
-      .map((l) => `<tr><td>${esc(l.concepto)}</td><td class="n">${l.cantidad}</td><td class="n">${esc(formatMoneda(l.precio_neto, moneda))}</td><td class="n">${esc(formatMoneda(l.cantidad * l.precio_neto, moneda))}</td><td>${l.recurrente ? 'Mensual' : 'Pago único'}</td></tr>`)
+      .map((l) => `<tr><td>${esc(l.concepto)}</td><td class="n">${l.cantidad}</td><td class="n">${esc(formatMoneda(l.precio_neto, moneda))}</td><td class="n">${esc(formatMoneda(l.cantidad * l.precio_neto, moneda))}</td><td><span class="tag ${l.recurrente ? 'm' : 'u'}">${l.recurrente ? 'Mensual' : 'Pago único'}</span></td></tr>`)
       .join('');
-    const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${inicial ? formatCorrelativo('COT', inicial.numero) : 'Cotización'} · ${esc(empresa.nombre)}</title>
-<style>body{font-family:Arial,sans-serif;color:#0A0A0A;margin:40px;font-size:13px}h1{font-size:20px;margin:0}table{width:100%;border-collapse:collapse;margin:16px 0}th,td{border-bottom:1px solid #ddd;padding:8px;text-align:left}th{background:#F5F5F5}.n{text-align:right}.tot td{border:0;padding:3px 8px}.sm{color:#555;font-size:12px}.box{margin-top:14px}</style></head><body>
-${urlLogo(empresa.logo_path) ? `<img src="${urlLogo(empresa.logo_path)}" alt="" style="height:48px;float:right">` : ''}<h1>Cotización ${inicial ? formatCorrelativo('COT', inicial.numero) : '(borrador)'} · P48</h1>
-<p class="sm">${esc(titulo)}<br>Emisión: ${esc(formatFecha(inicial?.fecha_emision ?? new Date()))} · Válida ${esc(validez)} días</p>
-<p><b>${esc(empresa.razon_social || empresa.nombre)}</b><br>${empresa.rut ? 'RUT ' + esc(formatRUT(empresa.rut)) + '<br>' : ''}${empresa.giro ? esc(empresa.giro) + '<br>' : ''}${empresa.direccion_facturacion ? esc(empresa.direccion_facturacion) : ''}</p>
-<table><thead><tr><th>Concepto</th><th class="n">Cant.</th><th class="n">Precio neto</th><th class="n">Subtotal neto</th><th>Tipo</th></tr></thead><tbody>${filasHtml}</tbody></table>
-<table class="tot" style="width:320px;margin-left:auto">
+    const ivaMonto = t.mensualIva + t.unicoIva - t.mensual - t.unico;
+    const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${esc(numero)} · P48 · ${esc(empresa.nombre)}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+@page{size:A4;margin:0}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;background:#F5F5F5;color:#0A0A0A;font-family:'Lexend',Arial,sans-serif;font-size:12px;line-height:1.5}
+.cab{background:#0A0A0A;color:#F5F5F5;padding:30px 40px 24px;border-bottom:4px solid #BEFF00;display:flex;justify-content:space-between;align-items:flex-end}
+.marca{font-size:32px;font-weight:700;letter-spacing:-0.02em;line-height:1}
+.marca span{color:#BEFF00}
+.meta{font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;text-align:right}
+.meta b{color:#BEFF00;font-weight:700;font-size:12px}
+.cuerpo{padding:30px 40px 36px}
+.mono{font-family:'Space Mono',monospace;text-transform:uppercase;font-size:9px;letter-spacing:.08em;color:#525252;margin:0 0 4px}
+h1{font-size:20px;font-weight:600;margin:4px 0 0}
+.bloque{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:22px 0 26px;padding-top:14px;border-top:1px solid #0A0A0A}
+.bloque p{margin:2px 0}
+table{width:100%;border-collapse:collapse}
+th{background:#0A0A0A;color:#F5F5F5;font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.06em;text-align:left;padding:8px 10px;font-weight:400}
+td{border-bottom:1px solid #D4D4D4;padding:9px 10px;vertical-align:top}
+.n{text-align:right;font-family:'Space Mono',monospace;font-size:11px;white-space:nowrap}
+th.n{text-align:right}
+.tag{font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;padding:2px 6px;border:1px solid #0A0A0A;white-space:nowrap}
+.tag.m{background:#0A0A0A;color:#BEFF00}
+.tot{width:360px;margin:16px 0 0 auto}
+.tot td{border:0;padding:4px 10px}
+.tot .fin td{background:#0A0A0A;color:#F5F5F5;padding:14px 12px}
+.tot .fin .n{color:#BEFF00;font-size:15px;font-weight:700}
+.tot .sub td{border-top:1px solid #0A0A0A;font-weight:600}
+.sec{margin-top:22px}
+.caja{background:#FFFFFF;border:1px solid #D4D4D4;padding:12px 14px;font-size:11px}
+.pie{margin-top:36px;padding-top:12px;border-top:1px solid #0A0A0A;display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:#525252}
+</style></head><body>
+<header class="cab"><div class="marca">P48<span>.</span></div><div class="meta">Propuesta comercial<br><b>${esc(numero)}</b></div></header>
+<main class="cuerpo">
+<p class="mono">Propuesta para</p>
+<h1>${esc(titulo)}</h1>
+<div class="bloque">
+<div><p class="mono">Cliente</p><p><b>${esc(empresa.razon_social || empresa.nombre)}</b></p>${empresa.rut ? `<p>RUT ${esc(formatRUT(empresa.rut))}</p>` : ''}${empresa.giro ? `<p>${esc(empresa.giro)}</p>` : ''}${empresa.direccion_facturacion ? `<p>${esc(empresa.direccion_facturacion)}</p>` : ''}</div>
+<div><p class="mono">Emisión y validez</p><p>Emisión: ${esc(formatFecha(inicial?.fecha_emision ?? new Date()))}</p><p>Válida ${esc(validez)} días</p><p>Condición de pago: ${empresa.dias_pago ?? 30} días</p>${moneda === 'UF' && uf ? `<p>UF del ${esc(uf.fecha)}: ${esc(formatCLP(uf.valor))}</p>` : ''}</div>
+</div>
+<table><thead><tr><th>Concepto</th><th class="n">Cant.</th><th class="n">Precio neto</th><th class="n">Subtotal neto</th><th>Cobro</th></tr></thead><tbody>${filasHtml}</tbody></table>
+<table class="tot">
 <tr><td>Neto mensual</td><td class="n">${esc(formatMoneda(t.mensual, moneda))}</td></tr>
 <tr><td>Neto pago único</td><td class="n">${esc(formatMoneda(t.unico, moneda))}</td></tr>
-<tr><td>IVA ${esc(ivaPct)}%</td><td class="n">${esc(formatMoneda(t.mensualIva + t.unicoIva - t.mensual - t.unico, moneda))}</td></tr>
-<tr><td><b>Total mensual con IVA</b></td><td class="n"><b>${esc(formatMoneda(t.mensualIva, moneda))}</b></td></tr>
-<tr><td><b>Total único con IVA</b></td><td class="n"><b>${esc(formatMoneda(t.unicoIva, moneda))}</b></td></tr></table>
-<div class="box"><b>Comisión de pauta</b><br>${esc(comision)}</div>
-<div class="box"><b>Condiciones</b><br>${esc(condiciones)}</div>
-<p class="sm box">Condición de pago: ${empresa.dias_pago ?? 30} días.</p></body></html>`;
+<tr><td>IVA ${esc(ivaPct)}%</td><td class="n">${esc(formatMoneda(ivaMonto, moneda))}</td></tr>
+<tr class="fin"><td><span class="mono" style="color:#F5F5F5;margin:0">Total mensual con IVA</span></td><td class="n">${esc(formatMoneda(t.mensualIva, moneda))} /mes</td></tr>
+<tr class="sub"><td>Pago único con IVA</td><td class="n">${esc(formatMoneda(t.unicoIva, moneda))}</td></tr>
+</table>
+<div class="sec"><p class="mono">Comisión de pauta</p><div class="caja">${esc(comision)}</div></div>
+<div class="sec"><p class="mono">Condiciones comerciales</p><div class="caja">${esc(condiciones)}</div></div>
+<footer class="pie"><span>P48 · Proyecto 48</span><span>No operamos campañas, operamos negocios</span></footer>
+</main></body></html>`;
     const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
     const w = window.open(url, '_blank', 'noopener');
     if (w) setTimeout(() => URL.revokeObjectURL(url), 60000);
@@ -340,7 +379,7 @@ ${urlLogo(empresa.logo_path) ? `<img src="${urlLogo(empresa.logo_path)}" alt="" 
   const etiquetaResumen = 'text-xs text-[var(--c-muted)]';
   const bloque = 'bg-[var(--c-surface)] border border-[var(--c-line)] rounded-lg p-4 space-y-3 min-w-0';
   const encabezadoBloque = 'text-[11px] font-mono uppercase text-[var(--c-muted)]';
-  const columnasLinea = 'sm:grid-cols-[120px_minmax(0,1fr)_64px_110px_120px_104px_28px]';
+  const columnasLinea = 'xl:grid-cols-[104px_minmax(0,1fr)_56px_96px_112px_96px_24px]';
 
   return (
     <div className="space-y-4">
@@ -357,7 +396,7 @@ ${urlLogo(empresa.logo_path) ? `<img src="${urlLogo(empresa.logo_path)}" alt="" 
         </div>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">
+      <div className="grid gap-4 2xl:grid-cols-[minmax(0,1fr)_280px] 2xl:items-start">
         <div className="space-y-4 min-w-0">
           <section className={bloque}>
             <p className={encabezadoBloque}>Propuesta</p>
@@ -397,7 +436,7 @@ ${urlLogo(empresa.logo_path) ? `<img src="${urlLogo(empresa.logo_path)}" alt="" 
               <p className="text-xs text-[var(--c-muted)]">Sin líneas. Agrega un setup o una línea.</p>
             ) : (
               <>
-                <div className={`hidden sm:grid ${columnasLinea} gap-2 text-[10px] font-mono uppercase text-[var(--c-muted)]`}>
+                <div className={`hidden xl:grid ${columnasLinea} gap-2 text-[10px] font-mono uppercase text-[var(--c-muted)]`}>
                   <span>Plan</span><span>Concepto</span><span className="text-right">Cant.</span><span className="text-right">Precio neto</span><span>Tipo</span><span className="text-right">Subtotal</span><span />
                 </div>
                 <div className="space-y-2">
@@ -436,7 +475,7 @@ ${urlLogo(empresa.logo_path) ? `<img src="${urlLogo(empresa.logo_path)}" alt="" 
           </section>
         </div>
 
-        <aside className="space-y-4 min-w-0 lg:sticky lg:top-4">
+        <aside className="space-y-4 min-w-0 2xl:sticky 2xl:top-4">
           <section className={bloque}>
             <p className={encabezadoBloque}>Resumen</p>
             <div className="space-y-2 font-mono text-xs">
