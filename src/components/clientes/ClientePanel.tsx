@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Plus, Eye, EyeOff, Archive } from 'lucide-react';
+import { Plus, Eye, EyeOff, Archive, Paperclip, FileText } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { parseSupabaseError } from '../../lib/errorHandler';
 import {
@@ -21,17 +21,22 @@ const filaCard = 'p-3 bg-[var(--c-surface-2)] rounded border border-[var(--c-lin
 
 const ESTADOS_PROYECTO: EstadoProyecto[] = ['planificado', 'en_curso', 'pausado', 'finalizado'];
 const ESTADOS_ENTREGABLE: EstadoEntregable[] = ['pendiente', 'en_progreso', 'en_revision', 'entregado'];
-const TIPOS_REPORTE: TipoReporte[] = ['mensual', 'auditoria', 'otro'];
+const TIPOS_REPORTE: TipoReporte[] = ['mensual', 'auditoria', 'presentacion', 'otro'];
+const MAX_BYTES = 50 * 1024 * 1024;
+const tamano = (b?: number | null) => (!b ? '' : b > 1048576 ? `${(b / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(b / 1024))} KB`);
 const etiqueta = (v: string) => v.replace('_', ' ');
 
 type SubTab = 'proyectos' | 'reportes' | 'portal';
 
 interface Props {
   empresaId: string;
+  // Si se indica, el panel muestra solo esa sección (cada una es un sub menú de la ficha)
+  vista?: SubTab;
 }
 
-export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
-  const [sub, setSub] = useState<SubTab>('proyectos');
+export const ClientePanel: React.FC<Props> = ({ empresaId, vista }) => {
+  const [subInterno, setSub] = useState<SubTab>('proyectos');
+  const sub = vista ?? subInterno;
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [entregables, setEntregables] = useState<Entregable[]>([]);
   const [reportes, setReportes] = useState<Reporte[]>([]);
@@ -45,6 +50,7 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
   const [fe, setFe] = useState({ titulo: '', estado: 'pendiente' as EstadoEntregable, fecha_comprometida: '', url_documento: '', notas_internas: '', visible_cliente: true });
   const [nuevoReporte, setNuevoReporte] = useState(false);
   const [fr, setFr] = useState({ titulo: '', tipo: 'mensual' as TipoReporte, periodo: '', url: '', visible_cliente: true });
+  const [archivo, setArchivo] = useState<File | null>(null);
   const [fu, setFu] = useState({ nombre: '', email: '' });
 
   const cargar = useCallback(async () => {
@@ -147,21 +153,58 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
   };
 
   const crearReporte = async () => {
-    if (!supabase || !fr.titulo.trim() || !fr.url.trim()) return;
+    if (!supabase || !fr.titulo.trim() || (!fr.url.trim() && !archivo)) {
+      setError('Pon un título y sube un archivo o pega un enlace.');
+      return;
+    }
+    if (archivo && archivo.size > MAX_BYTES) {
+      setError('El archivo supera los 50 MB. Súbelo a Drive y pega el enlace.');
+      return;
+    }
+    setGuardando(true);
+    setError(null);
+    let archivo_path: string | null = null;
+    if (archivo) {
+      const limpio = archivo.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9._-]+/g, '_');
+      archivo_path = `${empresaId}/${Date.now()}_${limpio}`;
+      const { error: errUp } = await supabase.storage.from('reportes').upload(archivo_path, archivo, { upsert: false });
+      if (errUp) {
+        setGuardando(false);
+        setError(parseSupabaseError(errUp));
+        return;
+      }
+    }
+    setGuardando(false);
     const ok = await ejecutar(() =>
       supabase!.from('reportes').insert({
         empresa_id: empresaId,
         titulo: fr.titulo.trim(),
         tipo: fr.tipo,
         periodo: fr.periodo || null,
-        url: fr.url.trim(),
+        url: fr.url.trim() || null,
+        archivo_path,
+        archivo_nombre: archivo?.name ?? null,
+        archivo_bytes: archivo?.size ?? null,
         visible_cliente: fr.visible_cliente,
       })
     );
     if (ok) {
       setNuevoReporte(false);
+      setArchivo(null);
       setFr({ titulo: '', tipo: 'mensual', periodo: '', url: '', visible_cliente: true });
+    } else if (archivo_path) {
+      await supabase.storage.from('reportes').remove([archivo_path]);
     }
+  };
+
+  const abrirArchivo = async (r: Reporte) => {
+    if (!supabase || !r.archivo_path) return;
+    const { data, error: errS } = await supabase.storage.from('reportes').createSignedUrl(r.archivo_path, 300, { download: r.archivo_nombre ?? true });
+    if (errS || !data) {
+      setError(parseSupabaseError(errS ?? { message: 'No se pudo abrir el archivo' }));
+      return;
+    }
+    window.open(data.signedUrl, '_blank', 'noopener');
   };
 
   const invitarUsuario = async () => {
@@ -187,7 +230,7 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-3 text-[11px] font-mono uppercase">
+      {!vista && <div className="flex gap-3 text-[11px] font-mono uppercase">
         {(['proyectos', 'reportes', 'portal'] as const).map((t) => (
           <button
             key={t}
@@ -197,7 +240,7 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
             {t === 'portal' ? 'Accesos de portal' : t}
           </button>
         ))}
-      </div>
+      </div>}
 
       {ocultos > 0 && (
         <p className="text-[11px] text-[var(--c-muted)] border border-[var(--c-line)] rounded p-2">
@@ -330,7 +373,12 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
                 </select>
                 <input type="date" className={input} value={fr.periodo} onChange={(e) => setFr({ ...fr, periodo: e.target.value })} />
               </div>
-              <input className={input} placeholder="Enlace (Drive o Looker)" value={fr.url} onChange={(e) => setFr({ ...fr, url: e.target.value })} />
+              <label className="flex items-center gap-2 px-2.5 py-2 text-xs border border-dashed border-[var(--c-line)] rounded cursor-pointer hover:border-[var(--c-accent)] text-[var(--c-text-2)]">
+                <Paperclip className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">{archivo ? `${archivo.name} · ${tamano(archivo.size)}` : 'Subir archivo (PDF, PPTX, XLSX, DOCX, imagen… hasta 50 MB)'}</span>
+                <input type="file" className="hidden" onChange={(e) => setArchivo(e.target.files?.[0] ?? null)} />
+              </label>
+              <input className={input} placeholder="o pega un enlace (Drive, Looker, Canva…)" value={fr.url} onChange={(e) => setFr({ ...fr, url: e.target.value })} />
               <label className="flex items-center gap-2 text-[11px] text-[var(--c-text-2)]">
                 <input type="checkbox" checked={fr.visible_cliente} onChange={(e) => setFr({ ...fr, visible_cliente: e.target.checked })} /> Visible para el cliente
               </label>
@@ -345,7 +393,12 @@ export const ClientePanel: React.FC<Props> = ({ empresaId }) => {
                 <div className="min-w-0">
                   <p className="text-[var(--c-text)] truncate">{r.titulo}</p>
                   <p className="font-mono text-[10px] text-[var(--c-muted)]">{r.tipo}{r.periodo ? ` · ${r.periodo}` : ''}</p>
-                  <a href={r.url} target="_blank" rel="noreferrer" className="text-[11px] text-[var(--c-accent)] hover:underline">Abrir</a>
+                  {r.archivo_path && (
+                    <button onClick={() => abrirArchivo(r)} className="flex items-center gap-1 text-[11px] text-[var(--c-accent)] hover:underline">
+                      <FileText className="w-3 h-3" />{r.archivo_nombre ?? 'Archivo'}{r.archivo_bytes ? ` · ${tamano(r.archivo_bytes)}` : ''}
+                    </button>
+                  )}
+                  {r.url && <a href={r.url} target="_blank" rel="noreferrer" className="block text-[11px] text-[var(--c-accent)] hover:underline">Abrir enlace</a>}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <button title="Visibilidad para el cliente" onClick={() => ejecutar(() => supabase!.from('reportes').update({ visible_cliente: !r.visible_cliente }).eq('id', r.id))} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[var(--c-muted)] hover:text-[var(--c-accent)]">

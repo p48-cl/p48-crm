@@ -1,15 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  X,
-  ExternalLink,
-  Folder,
-  Plus,
-  Archive,
-  Phone,
-  Mail,
-  Linkedin,
-  Check,
-} from 'lucide-react';
+import { X, ExternalLink, Folder, Plus, Archive, Phone, Mail, Linkedin, Check, Pencil } from 'lucide-react';
 import { Empresa, AccesosAdminMarketing, Tarea } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
 import { formatCLP, formatFecha, formatMoneda, formatRUT, formatTelefonoCL } from '../lib/formatters';
@@ -28,7 +18,7 @@ import { useConfiguracionCRM } from '../lib/configuracion';
 import { FranjaDecision, TonoFranja } from '../components/common/FranjaDecision';
 import { ResumenCuenta, AlertaResumen } from '../components/clientes/ResumenCuenta';
 
-type Tab = 'resumen' | 'contactos' | 'oportunidades' | 'facturacion' | 'actividades' | 'tareas' | 'marketing' | 'cliente';
+type Tab = 'resumen' | 'contactos' | 'oportunidades' | 'facturacion' | 'actividades' | 'tareas' | 'marketing' | 'proyectos' | 'reportes' | 'cliente';
 
 interface CompanyDetailDrawerProps {
   empresa: Empresa | null;
@@ -105,6 +95,8 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
     actualizarEmpresa,
     toggleTareaCompletada,
     crearContacto,
+    actualizarContacto,
+    archivarContacto,
     miembros,
     industrias,
     facturas,
@@ -119,6 +111,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
     if (isOpen) setActiveTab(tabInicial ?? 'resumen');
   }, [isOpen, empresa?.id, tabInicial]);
   const [showAddContact, setShowAddContact] = useState(false);
+  const [contactoEditandoId, setContactoEditandoId] = useState<string | null>(null);
   const [actividadEditando, setActividadEditando] = useState<Actividad | null>(null);
   const [showNuevoNegocio, setShowNuevoNegocio] = useState(false);
   const [newContact, setNewContact] = useState<{
@@ -213,26 +206,65 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
       ? { label: '+ Negocio', onClick: () => setShowNuevoNegocio(true) }
       : null;
 
+  const contactoVacio = {
+    nombre: '',
+    apellido: '',
+    cargo: '',
+    email: '',
+    telefono: '',
+    linkedin_url: '',
+    rol_decision: 'decisor' as 'decisor' | 'influenciador' | 'usuario',
+    es_principal: false,
+  };
+
+  const cerrarFormContacto = () => {
+    setNewContact(contactoVacio);
+    setContactoEditandoId(null);
+    setShowAddContact(false);
+  };
+
+  const editarContacto = (c: (typeof contactosEmpresa)[number]) => {
+    setNewContact({
+      nombre: c.nombre,
+      apellido: c.apellido ?? '',
+      cargo: c.cargo ?? '',
+      email: c.email,
+      telefono: c.telefono ?? '',
+      linkedin_url: c.linkedin_url ?? '',
+      rol_decision: (c.rol_decision ?? 'decisor') as 'decisor' | 'influenciador' | 'usuario',
+      es_principal: c.es_principal,
+    });
+    setContactoEditandoId(c.id);
+    setShowAddContact(true);
+  };
+
   const handleCreateContact = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newContact.nombre || !newContact.email) return;
 
-    await crearContacto({
-      empresa_id: empresa.id,
+    const datos = {
       ...newContact,
-    });
+      apellido: newContact.apellido.trim() || null,
+      cargo: newContact.cargo.trim() || null,
+      telefono: newContact.telefono.trim() || null,
+      linkedin_url: newContact.linkedin_url.trim() || null,
+    };
+    if (contactoEditandoId) {
+      await actualizarContacto(contactoEditandoId, datos);
+    } else {
+      await crearContacto({ empresa_id: empresa.id, ...datos });
+    }
+    // Un solo contacto principal por cliente
+    if (datos.es_principal) {
+      for (const otro of contactosEmpresa.filter((x) => x.es_principal && x.id !== contactoEditandoId)) {
+        await actualizarContacto(otro.id, { es_principal: false });
+      }
+    }
+    cerrarFormContacto();
+  };
 
-    setNewContact({
-      nombre: '',
-      apellido: '',
-      cargo: '',
-      email: '',
-      telefono: '',
-      linkedin_url: '',
-      rol_decision: 'decisor',
-      es_principal: false,
-    });
-    setShowAddContact(false);
+  const handleArchivarContacto = async (c: (typeof contactosEmpresa)[number]) => {
+    if (window.confirm(`¿Archivar a ${c.nombre} ${c.apellido ?? ''}? Dejará de verse en la ficha.`)) await archivarContacto(c.id);
   };
 
   const handleArchive = async () => {
@@ -359,7 +391,13 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
               { id: 'actividades' as const, label: 'Actividad' },
               { id: 'tareas' as const, label: `Tareas (${tareasPendientes.length})` },
               { id: 'marketing' as const, label: 'Marketing' },
-              ...(empresa.estado === 'cliente' ? [{ id: 'cliente' as const, label: 'Portal y activos' }] : []),
+              ...(empresa.estado === 'cliente'
+                ? [
+                    { id: 'proyectos' as const, label: 'Proyectos' },
+                    { id: 'reportes' as const, label: 'Reportes' },
+                    { id: 'cliente' as const, label: 'Portal y activos' },
+                  ]
+                : []),
             ] as const
           ).map((tab) => (
             <button
@@ -417,7 +455,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-semibold text-[var(--c-text)]">Personas de Contacto</h3>
                 <button
-                  onClick={() => setShowAddContact(!showAddContact)}
+                  onClick={() => (showAddContact ? cerrarFormContacto() : setShowAddContact(true))}
                   className="text-xs text-[var(--c-on-accent)] bg-[var(--c-accent)] hover:bg-[var(--c-accent-hover)] px-2.5 py-1 rounded font-medium flex items-center gap-1 transition-colors"
                 >
                   <Plus className="w-3.5 h-3.5" />
@@ -497,10 +535,13 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                       <option value="usuario">Usuario (Equipo de medios)</option>
                     </select>
                   </div>
+                  <label className="flex items-center gap-2 text-[11px] text-[var(--c-text-2)]">
+                    <input type="checkbox" checked={newContact.es_principal} onChange={(e) => setNewContact({ ...newContact, es_principal: e.target.checked })} /> Contacto principal
+                  </label>
                   <div className="flex justify-end gap-2 pt-2">
                     <button
                       type="button"
-                      onClick={() => setShowAddContact(false)}
+                      onClick={cerrarFormContacto}
                       className="px-2.5 py-1 text-xs text-[var(--c-muted)] hover:text-[var(--c-text)]"
                     >
                       Cancelar
@@ -509,7 +550,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                       type="submit"
                       className="px-3 py-1 text-xs font-semibold bg-[var(--c-accent)] text-black rounded"
                     >
-                      Guardar Contacto
+                      {contactoEditandoId ? 'Guardar cambios' : 'Guardar Contacto'}
                     </button>
                   </div>
                 </form>
@@ -565,16 +606,20 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                         </div>
                       </div>
 
-                      {c.linkedin_url && (
-                        <a
-                          href={c.linkedin_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-accent)] transition-colors"
-                        >
-                          <Linkedin className="w-4 h-4" />
-                        </a>
-                      )}
+                      <div className="flex items-center gap-0.5 shrink-0">
+                        {c.linkedin_url && (
+                          <a
+                            href={c.linkedin_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-accent)] transition-colors"
+                          >
+                            <Linkedin className="w-4 h-4" />
+                          </a>
+                        )}
+                        <button onClick={() => editarContacto(c)} title="Editar contacto" aria-label="Editar contacto" className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-accent)] transition-colors"><Pencil className="w-4 h-4" /></button>
+                        <button onClick={() => handleArchivarContacto(c)} title="Archivar contacto" aria-label="Archivar contacto" className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-danger)] transition-colors"><Archive className="w-4 h-4" /></button>
+                      </div>
                     </div>
                   ))
                 )}
@@ -761,7 +806,9 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
               )}
             </div>
           )}
-          {activeTab === 'cliente' && empresa.estado === 'cliente' && <ClientePanel empresaId={empresa.id} />}
+          {activeTab === 'proyectos' && empresa.estado === 'cliente' && <ClientePanel empresaId={empresa.id} vista="proyectos" />}
+          {activeTab === 'reportes' && empresa.estado === 'cliente' && <ClientePanel empresaId={empresa.id} vista="reportes" />}
+          {activeTab === 'cliente' && empresa.estado === 'cliente' && <ClientePanel empresaId={empresa.id} vista="portal" />}
         </div>
 
         {actividadEditando && (

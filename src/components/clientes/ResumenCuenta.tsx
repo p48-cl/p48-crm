@@ -6,8 +6,9 @@ import { formatCLP, formatFecha, formatMoneda, formatCorrelativo } from '../../l
 import { estadoEfectivo, redondear, MonedaCotizacion } from '../../lib/cotizaciones';
 import type { Actividad, Contacto, EstadoPago, Empresa, Factura, Miembro, Oportunidad, Tarea } from '../../types/crm';
 import { estaVencida } from './FacturasCliente';
+import { useCRM } from '../../context/CRMContext';
 
-export type DestinoResumen = 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'facturacion' | 'estrategia' | 'marketing' | 'info';
+export type DestinoResumen = 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'facturacion' | 'estrategia' | 'marketing' | 'proyectos' | 'info';
 
 export interface AlertaResumen {
   texto: string;
@@ -146,10 +147,54 @@ const Estado: React.FC<{ tono: 'ok' | 'warn' | 'danger' | 'muted'; texto: string
   <span className={`flex items-center gap-1.5 font-medium ${CLASE_TEXTO[tono]}`}><span className={`w-2 h-2 rounded-full ${CLASE_PUNTO[tono]}`} />{texto}</span>
 );
 
+interface Rebanada { etiqueta: string; valor: number; monto?: string; color: string }
+
+// Gráfico circular en SVG puro: una rebanada por categoría, total al centro
+const Dona: React.FC<{ titulo: string; total: string; rebanadas: Rebanada[]; vacio: string; onClick?: () => void; accion?: string }> = ({ titulo, total, rebanadas, vacio, onClick, accion }) => {
+  const suma = rebanadas.reduce((a, r) => a + r.valor, 0);
+  const R = 38;
+  const C = 2 * Math.PI * R;
+  let acumulado = 0;
+  return (
+    <section className="ficha-card p-4 min-w-0">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-[11px] font-mono uppercase tracking-wider text-[var(--c-muted)]">{titulo}</h3>
+        {onClick && <button onClick={onClick} className="text-[11px] text-[var(--c-accent)] hover:underline">{accion ?? 'Ver'}</button>}
+      </div>
+      <div className="flex items-center gap-4">
+        <div className="relative w-[104px] h-[104px] shrink-0">
+          <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90" role="img" aria-label={`${titulo}: ${total}`}>
+            <circle cx="50" cy="50" r={R} fill="none" stroke="var(--c-line)" strokeWidth="14" />
+            {suma > 0 && rebanadas.filter((r) => r.valor > 0).map((r) => {
+              const largo = (r.valor / suma) * C;
+              const el = <circle key={r.etiqueta} cx="50" cy="50" r={R} fill="none" stroke={r.color} strokeWidth="14" strokeDasharray={`${largo} ${C - largo}`} strokeDashoffset={-acumulado} />;
+              acumulado += largo;
+              return el;
+            })}
+          </svg>
+          <span className="absolute inset-0 flex items-center justify-center text-sm font-bold font-mono text-[var(--c-text)]">{total}</span>
+        </div>
+        <ul className="flex-1 min-w-0 space-y-1.5 text-xs">
+          {suma === 0 && <li className="text-[var(--c-muted)]">{vacio}</li>}
+          {rebanadas.map((r) => (
+            <li key={r.etiqueta} className="flex items-center gap-2 min-w-0">
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: r.color }} />
+              <span className="truncate text-[var(--c-text-2)]">{r.etiqueta}</span>
+              <span className="ml-auto shrink-0 font-mono text-[var(--c-text)]">{r.valor}</span>
+              {r.monto && <span className="shrink-0 font-mono text-[10px] text-[var(--c-muted)]">{r.monto}</span>}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+};
+
 export const ResumenCuenta: React.FC<Props> = ({
   empresa, responsable, miembros, facturas, contactoPrincipal, oportunidadesAbiertas, actividades, tareasPendientes,
   alertas, accesosConcedidos, accesosTotal, enlaces, estrategia, onIr, onAbrirNegocio, onActualizar, diasAlertaCotizacion = 7,
 }) => {
+  const { etapas } = useCRM();
   const [cotizaciones, setCotizaciones] = useState<CotRes[]>([]);
   const [proyectos, setProyectos] = useState<ProyectoRes[]>([]);
   const [riesgosTxt, setRiesgosTxt] = useState(empresa.riesgos_oportunidades ?? '');
@@ -291,9 +336,51 @@ export const ResumenCuenta: React.FC<Props> = ({
     : null;
   const ltvEstimado = mesesContrato !== null && empresa.mrr_actual_clp ? empresa.mrr_actual_clp * mesesContrato : null;
 
+  // Datos de los 3 gráficos
+  const COLOR = { ok: 'var(--c-ok)', warn: 'var(--c-warn)', danger: 'var(--c-danger)', info: 'var(--c-info)', accent: 'var(--c-accent)', muted: 'var(--c-muted-2)' };
+  const monedaUnica = (xs: { moneda: string }[]) => (new Set(xs.map((x) => x.moneda)).size === 1 ? (xs[0]?.moneda as 'CLP' | 'USD' | 'UF') : null);
+  const PALETA_ETAPAS = [COLOR.info, COLOR.accent, COLOR.warn, COLOR.ok, COLOR.danger, COLOR.muted];
+  const etapasOrdenadas = [...etapas].sort((a, b) => a.orden - b.orden);
+  const rebanadasNegocios: Rebanada[] = etapasOrdenadas
+    .map((e, i) => {
+      const grupo = oportunidadesAbiertas.filter((o) => o.etapa_id === e.id);
+      const m = monedaUnica(grupo);
+      return { etiqueta: e.nombre, valor: grupo.length, monto: m && grupo.length ? formatMoneda(grupo.reduce((a, o) => a + Number(o.valor_neto), 0), m) : undefined, color: PALETA_ETAPAS[i % PALETA_ETAPAS.length] };
+    })
+    .filter((r) => r.valor > 0);
+
+  const cotConMonto = (estado: string) => {
+    const grupo = cotizaciones.filter((c) => estadoEfectivo(c) === estado);
+    const m = monedaUnica(grupo);
+    const monto = grupo.reduce((a, c) => a + redondear((c.neto_mensual > 0 ? c.neto_mensual : c.neto_unico) * (1 + c.iva_pct / 100), c.moneda), 0);
+    return { valor: grupo.length, monto: m && grupo.length ? formatMoneda(monto, m) : undefined };
+  };
+  const rebanadasCot: Rebanada[] = [
+    { etiqueta: 'Enviadas', color: COLOR.info, ...cotConMonto('enviada') },
+    { etiqueta: 'Aceptadas', color: COLOR.ok, ...cotConMonto('aceptada') },
+    { etiqueta: 'Rechazadas', color: COLOR.danger, ...cotConMonto('rechazada') },
+    { etiqueta: 'Vencidas', color: COLOR.warn, ...cotConMonto('vencida') },
+    { etiqueta: 'Borradores', color: COLOR.muted, ...cotConMonto('borrador') },
+  ];
+
+  const sumaFact = (xs: Factura[]) => xs.reduce((a, f) => a + Number(f.monto_total), 0);
+  const fPendientes = facturasCliente.filter((f) => f.estado_pago === 'pendiente' && !estaVencida(f));
+  const fPagadas = facturasCliente.filter((f) => f.estado_pago === 'pagada');
+  const rebanadasFact: Rebanada[] = [
+    { etiqueta: 'Pendientes', valor: fPendientes.length, monto: fPendientes.length ? formatCLP(sumaFact(fPendientes)) : undefined, color: COLOR.warn },
+    { etiqueta: 'Vencidas', valor: facturasVencidas.length, monto: facturasVencidas.length ? formatCLP(sumaFact(facturasVencidas)) : undefined, color: COLOR.danger },
+    { etiqueta: 'Pagadas', valor: fPagadas.length, monto: fPagadas.length ? formatCLP(sumaFact(fPagadas)) : undefined, color: COLOR.ok },
+  ];
+
   const ultimasActividades = [...actividades].sort((a, b) => b.fecha_actividad.localeCompare(a.fecha_actividad)).slice(0, 3);
 
   return (
+    <div className="space-y-4">
+    <div className="grid grid-cols-[minmax(0,1fr)] lg:grid-cols-3 gap-4">
+      <Dona titulo="Negocios abiertos" total={String(oportunidadesAbiertas.length)} rebanadas={rebanadasNegocios} vacio="Sin negocios abiertos." onClick={() => onIr('oportunidades')} accion="Ver negocios" />
+      <Dona titulo="Cotizaciones" total={String(cotizaciones.length)} rebanadas={rebanadasCot} vacio="Sin cotizaciones." onClick={() => onIr('facturacion')} accion="Ver cotizaciones" />
+      <Dona titulo="Facturas" total={String(facturasCliente.length)} rebanadas={rebanadasFact} vacio="Sin facturas registradas." onClick={() => onIr('facturacion')} accion="Registrar" />
+    </div>
     <div className="grid grid-cols-[minmax(0,1fr)] lg:grid-cols-[280px_minmax(0,1fr)] gap-4 items-start">
       {/* Izquierda: quién es el cliente y dónde está todo */}
       <aside className="space-y-4">
@@ -467,106 +554,34 @@ export const ResumenCuenta: React.FC<Props> = ({
             )}
           </Bloque>
 
-          <div className="space-y-4 min-w-0">
-            <Bloque titulo={`Negocios abiertos (${oportunidadesAbiertas.length})`} accion={{ texto: 'Ver todos', onClick: () => onIr('oportunidades') }}>
-              {oportunidadesAbiertas.length === 0 ? (
-                <p className="text-xs text-[var(--c-muted)]">Sin negocios abiertos.</p>
-              ) : (
-                <ul className="divide-y divide-[var(--c-line)] text-xs">
-                  {oportunidadesAbiertas.slice(0, 3).map((o) => (
-                    <li key={o.id}>
-                      <button onClick={() => onAbrirNegocio(o.id)} className="w-full flex items-center justify-between gap-2 py-1.5 first:pt-0 last:pb-0 text-left hover:text-[var(--c-accent)]">
-                        <span className="truncate text-[var(--c-text)]">{o.nombre}</span>
-                        <span className="font-mono text-[var(--c-muted)] shrink-0">{formatMoneda(o.valor_neto, o.moneda)}</span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </Bloque>
-
-            <div className="space-y-4 min-w-0">
-          <Bloque titulo={`Cotizaciones (${cotizaciones.length})`} accion={{ texto: 'Ver todas', onClick: () => onIr('facturacion') }}>
-            {cotizaciones.length === 0 ? (
-              <p className="text-xs text-[var(--c-muted)]">Sin cotizaciones.</p>
+          <Bloque titulo={`Proyectos activos (${proyectos.length})`} accion={{ texto: 'Ver proyectos', onClick: () => onIr('proyectos') }}>
+            {proyectos.length === 0 ? (
+              <p className="text-xs text-[var(--c-muted)]">Sin proyectos activos.</p>
             ) : (
-              <ul className="divide-y divide-[var(--c-line)] text-xs">
-                {cotizaciones.slice(0, 3).map((c) => (
-                  <li key={c.id} className="flex items-center justify-between gap-3 py-1.5 first:pt-0 last:pb-0">
-                    <span className="font-mono text-[var(--c-text)]">{formatCorrelativo('COT', c.numero)}</span>
-                    <span className="font-mono text-[var(--c-text)]">
-                      {c.neto_mensual > 0
-                        ? `${formatMoneda(redondear(c.neto_mensual * (1 + c.iva_pct / 100), c.moneda), c.moneda)} /mes`
-                        : formatMoneda(redondear(c.neto_unico * (1 + c.iva_pct / 100), c.moneda), c.moneda)}
-                    </span>
-                  </li>
-                ))}
+              <ul className="space-y-3">
+                {proyectos.slice(0, 4).map((p) => {
+                  const total = p.entregables.length;
+                  const hechos = p.entregables.filter((e) => e.estado === 'entregado').length;
+                  const pct = total ? Math.round((hechos / total) * 100) : 0;
+                  return (
+                    <li key={p.id} className="space-y-1.5 text-xs">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="truncate text-[var(--c-text)]">{p.nombre}</span>
+                        <span className="shrink-0 font-mono text-[10px] text-[var(--c-muted)]">{ETIQUETA_PROYECTO[p.estado]}</span>
+                      </div>
+                      <div className="h-1 bg-[var(--c-line)] rounded overflow-hidden">
+                        <div className="h-full bg-[var(--c-accent)]" style={{ width: `${pct}%` }} />
+                      </div>
+                      <p className="text-[10px] font-mono text-[var(--c-muted)]">
+                        {hechos}/{total} entregables{p.fecha_fin ? ` · cierre ${formatFecha(p.fecha_fin)}` : ''}
+                      </p>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </Bloque>
-
-          <Bloque titulo={`Facturas (${facturasCliente.length})`} accion={{ texto: 'Registrar', onClick: () => onIr('facturacion') }}>
-            {facturasCliente.length === 0 ? (
-              <p className="text-xs text-[var(--c-muted)]">Sin facturas registradas.</p>
-            ) : (
-              <>
-                <div className="grid grid-cols-3 gap-2 text-xs pb-3 mb-2 border-b border-[var(--c-line)]">
-                  <div>
-                    <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Pendiente</p>
-                    <p className="font-mono text-[var(--c-text)]">{formatCLP(facturasCliente.filter((f) => f.estado_pago === 'pendiente').reduce((a, f) => a + Number(f.monto_total), 0))}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Vencido</p>
-                    <p className={`font-mono ${facturasVencidas.length ? 'text-[var(--c-danger)]' : 'text-[var(--c-text)]'}`}>{formatCLP(facturasVencidas.reduce((a, f) => a + Number(f.monto_total), 0))}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-mono uppercase text-[var(--c-muted)]">Pagado</p>
-                    <p className="font-mono text-[var(--c-ok)]">{formatCLP(facturasCliente.filter((f) => f.estado_pago === 'pagada').reduce((a, f) => a + Number(f.monto_total), 0))}</p>
-                  </div>
-                </div>
-                <ul className="divide-y divide-[var(--c-line)] text-xs">
-                  {[...facturasCliente].sort((a, b) => b.fecha_emision.localeCompare(a.fecha_emision)).slice(0, 3).map((f) => (
-                    <li key={f.id} className="flex items-center justify-between gap-3 py-1.5 first:pt-0 last:pb-0">
-                      <span className="font-mono text-[var(--c-text)]">{f.tipo_documento}-{String(f.folio).padStart(6, '0')}</span>
-                      <span className="font-mono text-[var(--c-text)]">{formatCLP(Number(f.monto_total))}</span>
-                      <span className={`text-[10px] font-mono uppercase ${estaVencida(f) ? 'text-[var(--c-danger)]' : f.estado_pago === 'pagada' ? 'text-[var(--c-ok)]' : 'text-[var(--c-muted)]'}`}>
-                        {estaVencida(f) ? 'Vencida' : f.estado_pago}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-          </Bloque>
         </div>
-          </div>
-        </div>
-
-        {proyectos.length > 0 && (
-          <Bloque titulo={`Proyectos activos (${proyectos.length})`}>
-            <ul className="grid grid-cols-[minmax(0,1fr)] md:grid-cols-2 gap-4">
-              {proyectos.map((p) => {
-                const total = p.entregables.length;
-                const hechos = p.entregables.filter((e) => e.estado === 'entregado').length;
-                const pct = total ? Math.round((hechos / total) * 100) : 0;
-                return (
-                  <li key={p.id} className="space-y-1.5 text-xs">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="truncate text-[var(--c-text)]">{p.nombre}</span>
-                      <span className="shrink-0 font-mono text-[10px] text-[var(--c-muted)]">{ETIQUETA_PROYECTO[p.estado]}</span>
-                    </div>
-                    <div className="h-1 bg-[var(--c-line)] rounded overflow-hidden">
-                      <div className="h-full bg-[var(--c-accent)]" style={{ width: `${pct}%` }} />
-                    </div>
-                    <p className="text-[10px] font-mono text-[var(--c-muted)]">
-                      {hechos}/{total} entregables{p.fecha_fin ? ` · cierre ${formatFecha(p.fecha_fin)}` : ''}
-                    </p>
-                  </li>
-                );
-              })}
-            </ul>
-          </Bloque>
-        )}
 
         <Bloque titulo="Última actividad" accion={{ texto: 'Ver todas', onClick: () => onIr('actividades') }}>
           {ultimasActividades.length === 0 ? (
@@ -584,6 +599,7 @@ export const ResumenCuenta: React.FC<Props> = ({
         </Bloque>
 
       </div>
+    </div>
     </div>
   );
 };

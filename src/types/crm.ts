@@ -248,7 +248,7 @@ export interface KPIsDashboard {
 // ===== Capa de clientes (tablas proyectos, entregables, reportes, cliente_usuarios) =====
 export type EstadoProyecto = 'planificado' | 'en_curso' | 'pausado' | 'finalizado';
 export type EstadoEntregable = 'pendiente' | 'en_progreso' | 'en_revision' | 'entregado';
-export type TipoReporte = 'mensual' | 'auditoria' | 'otro';
+export type TipoReporte = 'mensual' | 'auditoria' | 'presentacion' | 'otro';
 
 export type TipoProyecto = 'interno' | 'cliente';
 
@@ -289,7 +289,10 @@ export interface Reporte {
   titulo: string;
   tipo: TipoReporte;
   periodo?: string | null;
-  url: string;
+  url?: string | null;
+  archivo_path?: string | null;
+  archivo_nombre?: string | null;
+  archivo_bytes?: number | null;
   visible_cliente: boolean;
   archivado: boolean;
 }
