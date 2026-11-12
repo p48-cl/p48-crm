@@ -4,6 +4,7 @@ import { ThOrdenable } from '../components/common/ThOrdenable';
 import { useOrden } from '../lib/orden';
 import { PipelineEditor } from '../components/admin/PipelineEditor';
 import { ComercialEditor } from '../components/admin/ComercialEditor';
+import { MetricasCanalEditor } from '../components/admin/MetricasCanalEditor';
 import {
   Users,
   Award,
@@ -48,7 +49,7 @@ export const AdminView: React.FC = () => {
     setDraftCfg(configCRM);
   }, [configCRM]);
 
-  const [activeTab, setActiveTab] = useState<'miembros' | 'calificacion' | 'catalogos' | 'pipeline' | 'comercial' | 'preferencias'>('miembros');
+  const [activeTab, setActiveTab] = useState<'miembros' | 'calificacion' | 'catalogos' | 'pipeline' | 'comercial' | 'metricas' | 'preferencias'>('miembros');
 
   // Estado para nuevo miembro
   const [showNewMemberModal, setShowNewMemberModal] = useState(false);
@@ -215,6 +216,7 @@ export const AdminView: React.FC = () => {
           { id: 'calificacion' as const, label: 'Criterios de Calificación', icon: Award },
           { id: 'pipeline' as const, label: 'Pipeline', icon: Layers },
           { id: 'comercial' as const, label: 'Planes y cotizaciones', icon: Award },
+          { id: 'metricas' as const, label: 'Métricas por canal', icon: Layers },
           { id: 'catalogos' as const, label: 'Catálogos Comerciales', icon: Layers },
           { id: 'preferencias' as const, label: 'Preferencias', icon: Settings },
         ].map((item) => {
@@ -649,6 +651,7 @@ export const AdminView: React.FC = () => {
       {/* TAB 3: CATÁLOGOS */}
       {activeTab === 'pipeline' && <PipelineEditor />}
       {activeTab === 'comercial' && <ComercialEditor />}
+      {activeTab === 'metricas' && <MetricasCanalEditor />}
 
       {activeTab === 'catalogos' && (
         <div className="space-y-6">

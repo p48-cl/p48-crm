@@ -13,8 +13,7 @@ import { NewDealModal } from '../components/common/NewDealModal';
 import type { Actividad } from '../types/crm';
 import { CuentasCliente } from '../components/clientes/CuentasCliente';
 import { SubirLogo } from '../components/clientes/Logo';
-import { UltimoAnalisis } from '../components/marketing/UltimoAnalisis';
-import { MetricasPorCanal } from '../components/marketing/MetricasPorCanal';
+import { MarketingFicha } from '../components/marketing/MarketingFicha';
 import { EstrategiaCard, ResumenEstrategia } from '../components/clientes/EstrategiaCliente';
 import { useConfiguracionCRM } from '../lib/configuracion';
 import { ORIGEN_ETIQUETA } from '../lib/origen';
@@ -802,18 +801,14 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
             </div>
           )}
           {activeTab === 'marketing' && (
-            <div className="space-y-6">
-              {empresa.estado === 'cliente' && <UltimoAnalisis empresaId={empresa.id} />}
-              <EstrategiaCard empresaId={empresa.id} nombreCliente={empresa.nombre} />
-              {empresa.estado === 'cliente' && (
-                <CuentasCliente
-                  empresaId={empresa.id}
-                  notas={accesos.notas_accesos || ''}
-                  onNotas={(v) => actualizarAccesosAdmin(empresa.id, { notas_accesos: v })}
-                />
-              )}
-              {empresa.estado === 'cliente' && <MetricasPorCanal empresaId={empresa.id} />}
-            </div>
+            <MarketingFicha
+              empresaId={empresa.id}
+              nombre={empresa.nombre}
+              industriaId={empresa.industria_id}
+              cliente={empresa.estado === 'cliente'}
+              notas={accesos.notas_accesos || ''}
+              onNotas={(v) => actualizarAccesosAdmin(empresa.id, { notas_accesos: v })}
+            />
           )}
           {activeTab === 'proyectos' && empresa.estado === 'cliente' && <ClientePanel empresaId={empresa.id} vista="proyectos" />}
           {activeTab === 'reportes' && empresa.estado === 'cliente' && <ClientePanel empresaId={empresa.id} vista="reportes" />}

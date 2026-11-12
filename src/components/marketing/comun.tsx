@@ -161,6 +161,7 @@ export interface Medida {
   metrica: string;
   periodo: string;
   valor: number;
+  es_prueba?: boolean;
 }
 
 export function useMetricasCliente(clienteId: string, plataformas: string[]) {
@@ -173,7 +174,7 @@ export function useMetricasCliente(clienteId: string, plataformas: string[]) {
     let vivo = true;
     supabase
       .from('metricas_snapshot')
-      .select('plataforma,metrica,periodo,valor')
+      .select('plataforma,metrica,periodo,valor,es_prueba')
       .eq('empresa_id', clienteId)
       .in('plataforma', clave.split(','))
       .order('periodo', { ascending: true })
