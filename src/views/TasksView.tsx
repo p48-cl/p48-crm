@@ -7,7 +7,6 @@ import {
   Building2,
   FolderKanban,
   Kanban,
-  Filter,
 } from 'lucide-react';
 import { Tarea } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
@@ -31,11 +30,10 @@ export const TasksView: React.FC<TasksViewProps> = ({
   onSelectOportunidad,
   onSelectProyecto,
 }) => {
-  const { tareas, empresasTodas: empresas, oportunidades, miembros, toggleTareaCompletada, actualizarTarea } = useCRM();
+  const { tareas, empresasTodas: empresas, oportunidades, toggleTareaCompletada, actualizarTarea } = useCRM();
   const { proyectos } = useProyectos();
 
   const [tab, setTab] = useState<'todas' | 'atrasadas' | 'hoy' | 'semana'>('todas');
-  const [filtroResponsable, setFiltroResponsable] = useState<string>('todos');
   const [verArchivadas, setVerArchivadas] = useState(false);
 
   // Solo tareas vigentes en indicadores y pestañas; con el toggle se ven las archivadas
@@ -51,9 +49,6 @@ export const TasksView: React.FC<TasksViewProps> = ({
     proximaSemana.setDate(proximaSemana.getDate() + 7);
 
     return base.filter((t) => {
-      // Filtro responsable
-      if (filtroResponsable !== 'todos' && t.responsable_id !== filtroResponsable) return false;
-
       const f = new Date(t.fecha_vencimiento);
       f.setHours(0, 0, 0, 0);
 
@@ -71,25 +66,43 @@ export const TasksView: React.FC<TasksViewProps> = ({
 
       return true; // 'todas'
     });
-  }, [base, tab, filtroResponsable]);
+  }, [base, tab]);
 
-  // Indicadores que no están ya en las pestañas: carga sin responsable y quién acumula atrasos
+  // Indicadores de estado (primera fila) y de gestión (segunda fila). Sin responsables: operación de una sola persona.
   const indicadores = useMemo(() => {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const en7 = new Date(hoy);
+    en7.setDate(en7.getDate() + 7);
+    const fechaLocal = (iso: string) => new Date(`${iso.slice(0, 10)}T00:00:00`);
+
     const abiertas = tareasVigentes.filter((t) => !t.completada);
     const atrasadas = abiertas.filter((t) => esFechaAtrasada(t.fecha_vencimiento));
+    const diasAtrasoProm = atrasadas.length
+      ? Math.round(atrasadas.reduce((n, t) => n + (hoy.getTime() - fechaLocal(t.fecha_vencimiento).getTime()) / 86400000, 0) / atrasadas.length)
+      : 0;
+
+    const hace7 = Date.now() - 7 * 86400000;
+    const hace30 = Date.now() - 30 * 86400000;
+    const completadas = tareasVigentes.filter((t) => t.completada && t.fecha_completada);
+    const completadas7 = completadas.filter((t) => new Date(t.fecha_completada as string).getTime() >= hace7).length;
+    const completadas30 = completadas.filter((t) => new Date(t.fecha_completada as string).getTime() >= hace30);
+    const aTiempo30 = completadas30.filter((t) => (t.fecha_completada as string).slice(0, 10) <= t.fecha_vencimiento.slice(0, 10)).length;
+
     return {
       abiertas: abiertas.length,
-      sinResponsable: abiertas.filter((t) => !t.responsable_id).length,
       atrasadas: atrasadas.length,
+      diasAtrasoProm,
+      hoy: abiertas.filter((t) => esFechaHoy(t.fecha_vencimiento)).length,
       proximas: abiertas.filter((t) => {
-        const f = new Date(t.fecha_vencimiento);
-        f.setHours(0, 0, 0, 0);
-        const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0);
-        const en7 = new Date(hoy);
-        en7.setDate(en7.getDate() + 7);
+        const f = fechaLocal(t.fecha_vencimiento);
         return f >= hoy && f <= en7;
       }).length,
+      completadas7,
+      completadas30: completadas30.length,
+      aTiempoPct: completadas30.length ? Math.round((aTiempo30 / completadas30.length) * 100) : null,
+      altaAbiertas: abiertas.filter((t) => t.prioridad === 'alta').length,
+      sinVinculo: abiertas.filter((t) => !t.empresa_id && !t.oportunidad_id && !t.proyecto_id).length,
     };
   }, [tareasVigentes]);
 
@@ -135,10 +148,17 @@ export const TasksView: React.FC<TasksViewProps> = ({
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <Kpi etiqueta="Abiertas" valor={indicadores.abiertas} nota="pendientes en total" />
-        <Kpi etiqueta="Atrasadas" valor={indicadores.atrasadas} tono={indicadores.atrasadas > 0 ? 'peligro' : 'normal'} nota={indicadores.atrasadas > 0 ? 'vencidas y sin completar' : 'al día'} />
-        <Kpi etiqueta="Próximas 7 días" valor={indicadores.proximas} nota="vencen en la próxima semana" />
-        <Kpi etiqueta="Sin responsable" valor={indicadores.sinResponsable} tono={indicadores.sinResponsable > 0 ? 'aviso' : 'normal'} nota="asígnalas para que alguien las tome" />
+        <Kpi etiqueta="Abiertas" acento="var(--c-accent)" valor={indicadores.abiertas} nota="pendientes en total" onClick={() => setTab('todas')} />
+        <Kpi etiqueta="Atrasadas" acento="var(--c-danger)" tono={indicadores.atrasadas > 0 ? 'peligro' : 'normal'} valor={indicadores.atrasadas} nota={indicadores.atrasadas > 0 ? `${indicadores.diasAtrasoProm} días de atraso en promedio` : 'al día'} onClick={() => setTab('atrasadas')} />
+        <Kpi etiqueta="Vencen hoy" acento="var(--c-warn)" tono={indicadores.hoy > 0 ? 'aviso' : 'normal'} valor={indicadores.hoy} nota="con vencimiento hoy" onClick={() => setTab('hoy')} />
+        <Kpi etiqueta="Próximas 7 días" acento="var(--c-info)" valor={indicadores.proximas} nota="vencen en la próxima semana" onClick={() => setTab('semana')} />
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <Kpi etiqueta="Completadas" acento="var(--c-ok)" valor={indicadores.completadas7} nota={`últimos 7 días · ${indicadores.completadas30} en 30 días`} />
+        <Kpi etiqueta="Cumplimiento a tiempo" acento="var(--c-ok)" valor={indicadores.aTiempoPct != null ? `${indicadores.aTiempoPct}%` : '—'} progreso={indicadores.aTiempoPct} nota="completadas antes o el día del vencimiento (30 días)" />
+        <Kpi etiqueta="Alta prioridad abiertas" acento="var(--c-danger)" tono={indicadores.altaAbiertas > 0 ? 'aviso' : 'normal'} valor={indicadores.altaAbiertas} nota="prioridad alta sin completar" />
+        <Kpi etiqueta="Sin vínculo" acento="var(--c-muted)" tono={indicadores.sinVinculo > 0 ? 'aviso' : 'normal'} valor={indicadores.sinVinculo} nota="sin cliente, negocio ni proyecto" />
       </div>
 
       {/* Pestañas: Hoy, Esta semana, Atrasadas (resaltadas en Magenta), Todas */}
@@ -183,24 +203,10 @@ export const TasksView: React.FC<TasksViewProps> = ({
           })}
         </div>
 
-        {/* Filtro por Responsable */}
         <div className="flex items-center gap-2 text-xs text-[var(--c-muted)] shrink-0">
           <button onClick={() => setVerArchivadas((v) => !v)} className="font-mono text-[11px] hover:text-[var(--c-text)]">
             {verArchivadas ? 'Ver activas' : 'Ver archivadas'}
           </button>
-          <Filter className="w-3.5 h-3.5 text-[var(--c-muted)]" />
-          <select
-            value={filtroResponsable}
-            onChange={(e) => setFiltroResponsable(e.target.value)}
-            className="bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1 text-xs text-[var(--c-text)] focus:outline-none"
-          >
-            <option value="todos">Todo el equipo</option>
-            {miembros.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.nombre}
-              </option>
-            ))}
-          </select>
         </div>
       </div>
 
@@ -215,7 +221,6 @@ export const TasksView: React.FC<TasksViewProps> = ({
             const emp = empresas.find((e) => e.id === t.empresa_id);
             const op = oportunidades.find((o) => o.id === t.oportunidad_id);
             const proy = t.proyecto_id ? proyectos.find((p) => p.id === t.proyecto_id) : undefined;
-            const resp = miembros.find((m) => m.id === t.responsable_id);
             const atrasada = esFechaAtrasada(t.fecha_vencimiento) && !t.completada;
 
             return (
@@ -291,8 +296,6 @@ export const TasksView: React.FC<TasksViewProps> = ({
                           <span>{proy.nombre}</span>
                         </button>
                       )}
-                      <span className="hidden sm:inline">·</span>
-                      <span>Resp: {resp?.nombre ?? 'Equipo'}</span>
                     </div>
                   </div>
                 </div>
