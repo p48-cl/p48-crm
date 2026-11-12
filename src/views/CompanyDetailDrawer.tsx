@@ -174,13 +174,6 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
 
   // Riesgos y oportunidades derivados de datos reales (no se inventan señales)
   const riesgos: AlertaResumen[] = [];
-  if (diasRenov !== null && diasRenov <= DIAS_ALERTA_RENOVACION) {
-    riesgos.push({
-      texto: diasRenov < 0 ? `Renovación vencida hace ${-diasRenov} días` : `Renovación en ${diasRenov} días`,
-      tono: 'alerta',
-      destino: 'info',
-    });
-  }
   if (empresa.salud === 'rojo' || empresa.salud === 'amarillo') {
     riesgos.push({ texto: `Salud de cuenta: ${salud?.texto ?? ''}`, tono: 'alerta', destino: 'info' });
   }
@@ -382,7 +375,6 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
           {activeTab === 'resumen' && (
             <ResumenCuenta
               empresa={empresa}
-              industria={industria?.nombre}
               responsable={responsable?.nombre}
               contactoPrincipal={contactosEmpresa.find((c) => c.es_principal) ?? contactosEmpresa[0]}
               oportunidadesAbiertas={oportunidadesEmpresa.filter((o) => !o.fecha_cierre_real)}

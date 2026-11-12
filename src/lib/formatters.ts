@@ -38,7 +38,10 @@ export function formatMoneda(monto: number | null | undefined, moneda: MonedaCRM
 export function formatFecha(fechaInput: string | Date | null | undefined): string {
   if (!fechaInput) return '—';
   try {
-    const d = typeof fechaInput === 'string' ? new Date(fechaInput) : fechaInput;
+    // Fechas solo-día (YYYY-MM-DD) se interpretan a mediodía local: new Date("2026-12-01") cae en el día anterior en Chile.
+    const d = typeof fechaInput === 'string'
+      ? new Date(/^\d{4}-\d{2}-\d{2}$/.test(fechaInput) ? `${fechaInput}T12:00:00` : fechaInput)
+      : fechaInput;
     if (isNaN(d.getTime())) return String(fechaInput);
 
     const partes = new Intl.DateTimeFormat('es-CL', {
