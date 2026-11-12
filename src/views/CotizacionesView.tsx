@@ -240,28 +240,28 @@ export const CotizacionesView: React.FC<CotizacionesViewProps> = ({ onAbrirFicha
             <Kpi
               etiqueta={estilo('aceptada').label}
               acento={estiloEstado(cfgCRM.estados_cotizacion, 'aceptada').color}
-              valor={`${kpis.aceptadas} · ${formatMoneda(kpis.mensualAceptado, 'CLP')}/mes`}
-              nota={`${kpis.clientesAceptados} clientes · único ${formatMoneda(kpis.unicoAceptado, 'CLP')} · ${kpis.tasa != null ? `${kpis.tasa}% de cerradas` : 'sin cerradas'}`}
+              valor={`${formatMoneda(kpis.mensualAceptado, 'CLP')}/mes`}
+              nota={`${kpis.aceptadas} cotizaciones · ${kpis.clientesAceptados} clientes · único ${formatMoneda(kpis.unicoAceptado, 'CLP')} · ${kpis.tasa != null ? `${kpis.tasa}% de cerradas` : 'sin cerradas'}`}
             />
             <Kpi
               etiqueta={estilo('enviada').label}
               acento={estiloEstado(cfgCRM.estados_cotizacion, 'enviada').color}
-              valor={kpis.enviadas}
+              valor={formatMoneda(kpis.enEspera, 'CLP')}
               tono={kpis.venceEn7 > 0 ? 'aviso' : 'normal'}
-              nota={`${formatMoneda(kpis.enEspera, 'CLP')} potencial c/IVA · ${kpis.venceEn7} vencen en 7 días`}
+              nota={`${kpis.enviadas} cotizaciones potenciales c/IVA · ${kpis.venceEn7} vencen en 7 días`}
             />
             <Kpi
               etiqueta={estilo('rechazada').label}
               acento={estiloEstado(cfgCRM.estados_cotizacion, 'rechazada').color}
-              valor={kpis.rechazadas}
-              nota={`${formatMoneda(kpis.montoRechazadas, 'CLP')} c/IVA`}
+              valor={formatMoneda(kpis.montoRechazadas, 'CLP')}
+              nota={`${kpis.rechazadas} cotizaciones c/IVA`}
             />
             <Kpi
               etiqueta={estilo('vencida').label}
               acento={estiloEstado(cfgCRM.estados_cotizacion, 'vencida').color}
               tono={kpis.vencidas > 0 ? 'peligro' : 'normal'}
-              valor={kpis.vencidas}
-              nota={`${formatMoneda(kpis.montoVencidas, 'CLP')} c/IVA`}
+              valor={formatMoneda(kpis.montoVencidas, 'CLP')}
+              nota={`${kpis.vencidas} cotizaciones c/IVA`}
             />
           </div>
           {kpis.otraMoneda > 0 && (
