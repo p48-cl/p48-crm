@@ -337,10 +337,18 @@ ${urlLogo(empresa.logo_path) ? `<img src="${urlLogo(empresa.logo_path)}" alt="" 
     if (w) setTimeout(() => URL.revokeObjectURL(url), 60000);
   };
 
+  const etiquetaResumen = 'text-xs text-[var(--c-muted)]';
+  const bloque = 'bg-[var(--c-surface)] border border-[var(--c-line)] rounded-lg p-4 space-y-3 min-w-0';
+  const encabezadoBloque = 'text-[11px] font-mono uppercase text-[var(--c-muted)]';
+  const columnasLinea = 'sm:grid-cols-[120px_minmax(0,1fr)_64px_110px_120px_104px_28px]';
+
   return (
     <div className="space-y-4">
-      <button onClick={onVolver} className="text-xs text-[var(--c-muted)] hover:text-[var(--c-text)] flex items-center gap-1"><ArrowLeft className="w-3.5 h-3.5" /> Volver a cotizaciones</button>
-      <h3 className="text-sm font-semibold text-[var(--c-text)]">{inicial ? `Cotización ${formatCorrelativo('COT', inicial.numero)}` : 'Nueva cotización'}</h3>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <button onClick={onVolver} className="text-xs text-[var(--c-muted)] hover:text-[var(--c-text)] flex items-center gap-1"><ArrowLeft className="w-3.5 h-3.5" /> Volver a cotizaciones</button>
+        <p className="text-[11px] font-mono text-[var(--c-muted)]">{empresa.nombre}</p>
+      </div>
+      <h3 className="text-base font-semibold text-[var(--c-text)]">{inicial ? `Cotización ${formatCorrelativo('COT', inicial.numero)}` : 'Nueva cotización'}</h3>
 
       {faltantesTributarios.length > 0 && (
         <div className="text-xs rounded border border-[var(--c-warn)] bg-[var(--c-surface-2)] p-3 text-[var(--c-text-2)]">
@@ -349,69 +357,109 @@ ${urlLogo(empresa.logo_path) ? `<img src="${urlLogo(empresa.logo_path)}" alt="" 
         </div>
       )}
 
-      <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-3">
-        <div className="sm:col-span-2"><label className={etiqueta}>Título</label><input className={campo} value={titulo} onChange={(e) => setTitulo(e.target.value)} /></div>
-        <div><label className={etiqueta}>Estado</label>
-          <select className={campo} value={estado} onChange={(e) => setEstado(e.target.value as Estado)}>
-            {(ESTADOS_COTIZACION as readonly Estado[]).map((e) => <option key={e} value={e}>{estiloEstado(cfg.estados_cotizacion, e).etiqueta}</option>)}
-          </select></div>
-        <div><label className={etiqueta}>Negocio asociado</label>
-          <select className={campo} value={oportunidadId} onChange={(e) => setOportunidadId(e.target.value)}>
-            <option value="">Sin negocio</option>
-            {oportunidades.map((o) => <option key={o.id} value={o.id}>{o.nombre}</option>)}
-          </select></div>
-        <div><label className={etiqueta}>Validez (días)</label><input type="number" className={`${campo} font-mono`} value={validez} onChange={(e) => setValidez(e.target.value)} /></div>
-        <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-3">
-          <div><label className={etiqueta}>Moneda</label>
-            <select className={campo} value={moneda} onChange={(e) => cambiarMoneda(e.target.value as MonedaCotizacion)}>
-              <option value="CLP">CLP</option>
-              <option value="UF">UF</option>
-            </select>
-            {ufError && <p className="text-[11px] text-[var(--c-danger)] mt-1">{ufError}</p>}</div>
-          <div><label className={etiqueta}>IVA %</label><input type="number" className={`${campo} font-mono`} value={ivaPct} onChange={(e) => setIvaPct(e.target.value)} /></div>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <p className="text-[11px] font-mono uppercase text-[var(--c-muted)]">Líneas</p>
-          <div className="flex gap-2">
-            <button disabled={!ufListo} onClick={() => setLineas((p) => [...p, { concepto: 'Setup inicial', plan: '', cantidad: 1, precio_neto: aMoneda(SETUP_LISTA), recurrente: false }])} className="text-[11px] text-[var(--c-accent)] disabled:opacity-40">+ Setup</button>
-            <button onClick={() => setLineas((p) => [...p, { concepto: '', plan: '', cantidad: 1, precio_neto: 0, recurrente: true }])} className="text-[11px] text-[var(--c-accent)]">+ Línea</button>
-          </div>
-        </div>
-        {lineas.map((l, i) => (
-          <div key={i} className="border border-[var(--c-line)] rounded p-2.5 space-y-2">
-            <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-[140px_1fr] gap-2">
-              <select className={campo} value={l.plan} disabled={!ufListo} onChange={(e) => elegirPlan(i, e.target.value as PlanEmpresa | '')} aria-label="Plan de la línea">
-                <option value="">Libre</option>
-                {codigos.map((p) => <option key={p} value={p}>{p === 'personalizado' ? 'Personalizado' : `Plan ${p}`}</option>)}
-              </select>
-              <input className={campo} placeholder="Concepto" value={l.concepto} onChange={(e) => cambiar(i, { concepto: e.target.value })} />
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">
+        <div className="space-y-4 min-w-0">
+          <section className={bloque}>
+            <p className={encabezadoBloque}>Propuesta</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="sm:col-span-2"><label className={etiqueta}>Título</label><input className={campo} value={titulo} onChange={(e) => setTitulo(e.target.value)} /></div>
+              <div><label className={etiqueta}>Estado</label>
+                <select className={campo} value={estado} onChange={(e) => setEstado(e.target.value as Estado)}>
+                  {(ESTADOS_COTIZACION as readonly Estado[]).map((e) => <option key={e} value={e}>{estiloEstado(cfg.estados_cotizacion, e).etiqueta}</option>)}
+                </select></div>
+              <div><label className={etiqueta}>Negocio asociado</label>
+                <select className={campo} value={oportunidadId} onChange={(e) => setOportunidadId(e.target.value)}>
+                  <option value="">Sin negocio</option>
+                  {oportunidades.map((o) => <option key={o.id} value={o.id}>{o.nombre}</option>)}
+                </select></div>
+              <div><label className={etiqueta}>Validez (días)</label><input type="number" className={`${campo} font-mono`} value={validez} onChange={(e) => setValidez(e.target.value)} /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className={etiqueta}>Moneda</label>
+                  <select className={campo} value={moneda} onChange={(e) => cambiarMoneda(e.target.value as MonedaCotizacion)}>
+                    <option value="CLP">CLP</option>
+                    <option value="UF">UF</option>
+                  </select>
+                  {ufError && <p className="text-[11px] text-[var(--c-danger)] mt-1">{ufError}</p>}</div>
+                <div><label className={etiqueta}>IVA %</label><input type="number" className={`${campo} font-mono`} value={ivaPct} onChange={(e) => setIvaPct(e.target.value)} /></div>
+              </div>
             </div>
-            <div className="grid grid-cols-[64px_1fr_auto] sm:grid-cols-[70px_1fr_auto_auto] gap-2 items-center">
-              <input type="number" min={0} step="any" className={`${campo} font-mono`} value={l.cantidad} onChange={(e) => cambiar(i, { cantidad: Number(e.target.value) })} aria-label="Cantidad" />
-              <input type="number" min={0} step={moneda === 'UF' ? '0.01' : '1'} className={`${campo} font-mono`} value={l.precio_neto} onChange={(e) => cambiar(i, { precio_neto: Number(e.target.value) })} aria-label="Precio neto" />
-              <label className="col-span-2 sm:col-span-1 text-[11px] text-[var(--c-muted)] flex items-center gap-1"><input type="checkbox" checked={l.recurrente} onChange={(e) => cambiar(i, { recurrente: e.target.checked })} /> Mensual</label>
-              <button onClick={() => setLineas((p) => p.filter((_, k) => k !== i))} aria-label="Quitar línea" className="justify-self-end text-[var(--c-muted)] hover:text-[var(--c-danger)] p-1"><Trash2 className="w-4 h-4" /></button>
+          </section>
+
+          <section className={bloque}>
+            <div className="flex items-center justify-between gap-2">
+              <p className={encabezadoBloque}>Líneas ({lineas.length})</p>
+              <div className="flex gap-3">
+                <button disabled={!ufListo} onClick={() => setLineas((p) => [...p, { concepto: 'Setup inicial', plan: '', cantidad: 1, precio_neto: aMoneda(SETUP_LISTA), recurrente: false }])} className="text-[11px] text-[var(--c-accent)] disabled:opacity-40">+ Setup</button>
+                <button onClick={() => setLineas((p) => [...p, { concepto: '', plan: '', cantidad: 1, precio_neto: 0, recurrente: true }])} className="text-[11px] text-[var(--c-accent)]">+ Línea</button>
+              </div>
             </div>
-          </div>
-        ))}
-        <div className="text-[11px] sm:text-xs font-mono text-right space-y-0.5 text-[var(--c-text-2)] break-words">
-          {moneda === 'UF' && uf && <p className="text-[11px] font-mono text-[var(--c-muted)]">UF del {uf.fecha}: {formatCLP(uf.valor)} · Total mensual ≈ {formatCLP(Math.round(t.mensualIva * uf.valor))}</p>}
-          <p>Mensual: {formatMoneda(t.mensual, moneda)} neto · <b className="text-[var(--c-text)]">{formatMoneda(t.mensualIva, moneda)}</b> con IVA</p>
-          <p>Único: {formatMoneda(t.unico, moneda)} neto · <b className="text-[var(--c-text)]">{formatMoneda(t.unicoIva, moneda)}</b> con IVA</p>
+            {lineas.length === 0 ? (
+              <p className="text-xs text-[var(--c-muted)]">Sin líneas. Agrega un setup o una línea.</p>
+            ) : (
+              <>
+                <div className={`hidden sm:grid ${columnasLinea} gap-2 text-[10px] font-mono uppercase text-[var(--c-muted)]`}>
+                  <span>Plan</span><span>Concepto</span><span className="text-right">Cant.</span><span className="text-right">Precio neto</span><span>Tipo</span><span className="text-right">Subtotal</span><span />
+                </div>
+                <div className="space-y-2">
+                  {lineas.map((l, i) => (
+                    <div key={i} className={`grid grid-cols-2 ${columnasLinea} gap-2 items-center pb-2 border-b border-[var(--c-line)] last:border-0 last:pb-0`}>
+                      <select className={campo} value={l.plan} disabled={!ufListo} onChange={(e) => elegirPlan(i, e.target.value as PlanEmpresa | '')} aria-label="Plan de la línea">
+                        <option value="">Libre</option>
+                        {codigos.map((p) => <option key={p} value={p}>{p === 'personalizado' ? 'Personalizado' : `Plan ${p}`}</option>)}
+                      </select>
+                      <input className={campo} placeholder="Concepto" value={l.concepto} onChange={(e) => cambiar(i, { concepto: e.target.value })} aria-label="Concepto" />
+                      <input type="number" min={0} step="any" className={`${campo} font-mono`} value={l.cantidad} onChange={(e) => cambiar(i, { cantidad: Number(e.target.value) })} aria-label="Cantidad" />
+                      <input type="number" min={0} step={moneda === 'UF' ? '0.01' : '1'} className={`${campo} font-mono`} value={l.precio_neto} onChange={(e) => cambiar(i, { precio_neto: Number(e.target.value) })} aria-label="Precio neto" />
+                      <select className={campo} value={l.recurrente ? 'mensual' : 'unico'} onChange={(e) => cambiar(i, { recurrente: e.target.value === 'mensual' })} aria-label="Tipo de cobro">
+                        <option value="mensual">Mensual</option>
+                        <option value="unico">Pago único</option>
+                      </select>
+                      <span className="font-mono text-xs text-right text-[var(--c-text-2)] whitespace-nowrap">{formatMoneda(l.cantidad * l.precio_neto, moneda)}</span>
+                      <button onClick={() => setLineas((p) => p.filter((_, k) => k !== i))} aria-label="Quitar línea" className="justify-self-end text-[var(--c-muted)] hover:text-[var(--c-danger)] p-1"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </section>
+
+          <section className={bloque}>
+            <p className={encabezadoBloque}>Condiciones de la propuesta (salen en la cotización)</p>
+            <div><label className={etiqueta}>Condición de comisión de pauta</label><textarea rows={3} className={campo} value={comision} onChange={(e) => setComision(e.target.value)} /></div>
+            <div><label className={etiqueta}>Condiciones comerciales</label><textarea rows={3} className={campo} value={condiciones} onChange={(e) => setCondiciones(e.target.value)} /></div>
+          </section>
+
+          <section className="border border-dashed border-[var(--c-line)] rounded-lg p-4 space-y-2 min-w-0">
+            <p className={encabezadoBloque}>Notas internas</p>
+            <p className="text-[11px] text-[var(--c-muted)]">Solo para el equipo. No sale en la cotización.</p>
+            <textarea rows={2} className={campo} value={notas} onChange={(e) => setNotas(e.target.value)} aria-label="Notas internas" />
+          </section>
         </div>
-      </div>
 
-      <div><label className={etiqueta}>Condición de comisión de pauta (editable)</label><textarea rows={3} className={campo} value={comision} onChange={(e) => setComision(e.target.value)} /></div>
-      <div><label className={etiqueta}>Condiciones comerciales (editable)</label><textarea rows={3} className={campo} value={condiciones} onChange={(e) => setCondiciones(e.target.value)} /></div>
-      <div><label className={etiqueta}>Notas internas (no salen en la cotización)</label><textarea rows={2} className={campo} value={notas} onChange={(e) => setNotas(e.target.value)} /></div>
+        <aside className="space-y-4 min-w-0 lg:sticky lg:top-4">
+          <section className={bloque}>
+            <p className={encabezadoBloque}>Resumen</p>
+            <div className="space-y-2 font-mono text-xs">
+              <div className="flex justify-between gap-3"><span className={etiquetaResumen}>Mensual neto</span><span className="text-[var(--c-text-2)]">{formatMoneda(t.mensual, moneda)}</span></div>
+              <div className="flex justify-between gap-3"><span className={etiquetaResumen}>Pago único neto</span><span className="text-[var(--c-text-2)]">{formatMoneda(t.unico, moneda)}</span></div>
+              <div className="flex justify-between gap-3"><span className={etiquetaResumen}>IVA {ivaPct}%</span><span className="text-[var(--c-text-2)]">{formatMoneda(t.mensualIva + t.unicoIva - t.mensual - t.unico, moneda)}</span></div>
+            </div>
+            <div className="border-t border-[var(--c-line)] pt-3 space-y-1">
+              <p className={etiquetaResumen}>Total mensual con IVA</p>
+              <p className="font-mono text-lg font-semibold text-[var(--c-text)]">{formatMoneda(t.mensualIva, moneda)}<span className="text-xs text-[var(--c-muted)]"> /mes</span></p>
+              <p className="font-mono text-xs text-[var(--c-text-2)]">Pago único con IVA: {formatMoneda(t.unicoIva, moneda)}</p>
+            </div>
+            {moneda === 'UF' && uf && (
+              <p className="text-[11px] font-mono text-[var(--c-muted)]">UF del {uf.fecha}: {formatCLP(uf.valor)} · Mensual ≈ {formatCLP(Math.round(t.mensualIva * uf.valor))}</p>
+            )}
+          </section>
 
-      {error && <p className="text-xs text-[var(--c-danger)]">{error}</p>}
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2 border-t border-[var(--c-line)]">
-        <button onClick={imprimir} className="px-3 py-2 text-xs border border-[var(--c-line)] rounded flex items-center gap-1.5 text-[var(--c-text-2)] hover:text-[var(--c-text)]"><Printer className="w-3.5 h-3.5" /> Vista imprimible</button>
-        <button onClick={guardar} disabled={guardando} className="px-4 py-2 text-xs font-semibold bg-[var(--c-accent)] text-[var(--c-on-accent)] rounded disabled:opacity-50">{guardando ? 'Guardando…' : 'Guardar'}</button>
+          <section className={bloque}>
+            {error && <p className="text-xs text-[var(--c-danger)]">{error}</p>}
+            <button onClick={guardar} disabled={guardando} className="w-full px-4 py-2 text-xs font-semibold bg-[var(--c-accent)] text-[var(--c-on-accent)] rounded disabled:opacity-50">{guardando ? 'Guardando…' : 'Guardar'}</button>
+            <button onClick={imprimir} className="w-full px-3 py-2 text-xs border border-[var(--c-line)] rounded flex items-center justify-center gap-1.5 text-[var(--c-text-2)] hover:text-[var(--c-text)]"><Printer className="w-3.5 h-3.5" /> Vista imprimible</button>
+          </section>
+        </aside>
       </div>
     </div>
   );
