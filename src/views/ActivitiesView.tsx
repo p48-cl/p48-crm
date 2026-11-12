@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Phone, Video, FileText, Mail, Plus, Building2, Kanban, User, Filter, FileSpreadsheet, Receipt, Archive, ArchiveRestore } from 'lucide-react';
+import { Phone, Video, FileText, Mail, Plus, Building2, Kanban, User, Filter, FileSpreadsheet, Receipt, Archive, ArchiveRestore, ChevronDown, ChevronRight } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';
 import { Actividad, TipoActividad } from '../types/crm';
 import { formatFecha, formatFechaHora, formatCLP, formatCorrelativo } from '../lib/formatters';
@@ -59,6 +59,9 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
   const [filtroCliente, setFiltroCliente] = useState<string>('todos');
   const [filtroTipo, setFiltroTipo] = useState<string>('todos');
   const [filtroAutor, setFiltroAutor] = useState<string>('todos');
+  // Estado explícito por cliente (true = abierta). Sin valor: abierta solo si hay un cliente filtrado.
+  const [seccionAbierta, setSeccionAbierta] = useState<Record<string, boolean>>({});
+  const estaAbierta = (clave: string) => seccionAbierta[clave] ?? filtroCliente !== 'todos';
 
   // Eventos combinados: actividades vigentes + cotizaciones + facturas (no archivadas)
   const eventos = useMemo<Evento[]>(() => {
@@ -208,6 +211,12 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
     );
   };
 
+  const tituloEvento = (ev: Evento): string => {
+    if (ev.kind === 'actividad') return ev.act.titulo;
+    if (ev.kind === 'cotizacion') return `${formatCorrelativo('COT', ev.numero)} · ${ev.titulo}`;
+    return `Factura ${ev.tipo}-${String(ev.folio).padStart(6, '0')}`;
+  };
+
   const selectClase = 'bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] focus:outline-none';
 
   return (
@@ -267,23 +276,60 @@ export const ActivitiesView: React.FC<ActivitiesViewProps> = ({
       {grupos.length === 0 ? (
         <p className="text-xs text-[var(--c-muted)] py-8 text-center">No hay eventos con estos filtros.</p>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => {
+                const abrirTodas = !grupos.every((g) => estaAbierta(g.clave));
+                setSeccionAbierta(Object.fromEntries(grupos.map((g) => [g.clave, abrirTodas])));
+              }}
+              className="text-[11px] font-mono text-[var(--c-muted)] hover:text-[var(--c-text)]"
+            >
+              {grupos.every((g) => estaAbierta(g.clave)) ? 'Contraer todo' : 'Expandir todo'}
+            </button>
+          </div>
           {grupos.map((g) => {
             const empresaId = g.clave !== SIN_CLIENTE ? g.clave : null;
+            const abierta = estaAbierta(g.clave);
+            const ultimo = g.items[0];
             return (
               <section key={g.clave} className="space-y-2">
                 <header className="flex items-center justify-between gap-3 border-b border-[var(--c-line)] pb-1.5">
-                  {empresaId ? (
-                    <button onClick={() => onSelectEmpresa(empresaId)} className="flex items-center gap-2 text-sm font-semibold text-[var(--c-text)] hover:text-[var(--c-accent)]">
-                      <Building2 className="w-4 h-4 text-[var(--c-muted-2)]" />
-                      {g.nombre}
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <button
+                      type="button"
+                      onClick={() => setSeccionAbierta((s) => ({ ...s, [g.clave]: !abierta }))}
+                      aria-expanded={abierta}
+                      aria-label={abierta ? `Contraer ${g.nombre}` : `Expandir ${g.nombre}`}
+                      className="p-0.5 text-[var(--c-muted)] hover:text-[var(--c-text)] shrink-0"
+                    >
+                      {abierta ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                     </button>
-                  ) : (
-                    <span className="text-sm font-semibold text-[var(--c-muted)]">{g.nombre}</span>
-                  )}
-                  <span className="font-mono text-[11px] text-[var(--c-muted)]">{g.items.length} eventos</span>
+                    {empresaId ? (
+                      <button onClick={() => onSelectEmpresa(empresaId)} className="flex items-center gap-2 text-sm font-semibold text-[var(--c-text)] hover:text-[var(--c-accent)] min-w-0">
+                        <Building2 className="w-4 h-4 text-[var(--c-muted-2)] shrink-0" />
+                        <span className="truncate">{g.nombre}</span>
+                      </button>
+                    ) : (
+                      <span className="text-sm font-semibold text-[var(--c-muted)] truncate">{g.nombre}</span>
+                    )}
+                    {!abierta && <span className="hidden md:inline text-[11px] text-[var(--c-muted-2)] truncate">· {tituloEvento(ultimo)}</span>}
+                  </div>
+                  <span className="font-mono text-[11px] text-[var(--c-muted)] shrink-0">
+                    {g.items.length} evento{g.items.length === 1 ? '' : 's'} · último {formatFecha(ultimo.fecha)}
+                  </span>
                 </header>
-                <div className="space-y-2">{g.items.map((ev) => <React.Fragment key={ev.id}>{renderEvento(ev)}</React.Fragment>)}</div>
+                {abierta && (
+                  <div className="relative pl-5 ml-2 border-l border-[var(--c-line)] space-y-2">
+                    {g.items.map((ev) => (
+                      <div key={ev.id} className="relative">
+                        <span aria-hidden="true" className="absolute -left-[25px] top-3.5 w-2.5 h-2.5 rounded-full border-2 border-[var(--c-surface)] bg-[var(--c-muted-2)]" />
+                        {renderEvento(ev)}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </section>
             );
           })}
