@@ -10,7 +10,7 @@ import { resumen360 } from '../../lib/cliente360';
 import { useCRM } from '../../context/CRMContext';
 import { usePlanes } from '../../lib/planes';
 import { useConfiguracionCRM } from '../../lib/configuracion';
-import { OPCIONES_ORIGEN } from '../../lib/origen';
+import { OPCIONES_ORIGEN, ORIGEN_ETIQUETA } from '../../lib/origen';
 
 export type DestinoResumen = 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'facturacion' | 'estrategia' | 'marketing' | 'proyectos' | 'info';
 
@@ -229,6 +229,7 @@ export const ResumenCuenta: React.FC<Props> = ({
       direccion_facturacion: empresa.direccion_facturacion ?? '',
       email_facturacion: empresa.email_facturacion ?? '',
       dias_pago: String(empresa.dias_pago ?? 30),
+      origen: empresa.origen ?? '',
     });
     setErrorEdicion(null);
     setEditando(true);
@@ -260,6 +261,7 @@ export const ResumenCuenta: React.FC<Props> = ({
       direccion_facturacion: txt(d.direccion_facturacion),
       email_facturacion: email || null,
       dias_pago: dias,
+      ...(leadOrigen ? {} : { origen: (d.origen || null) as Empresa['origen'] }),
     };
     // Solo se envía lo que cambió
     const cambios: Record<string, unknown> = {};
@@ -467,6 +469,15 @@ export const ResumenCuenta: React.FC<Props> = ({
                 <Campo etiqueta="Plan">
                   <select value={d.plan} onChange={(e) => setD({ ...d, plan: e.target.value })} className={input}>{PLANES.map((o) => <option key={o.valor} value={o.valor}>{o.texto}</option>)}</select>
                 </Campo>
+                <Campo etiqueta="Procedencia" nota={leadOrigen ? 'Desde lead: no editable' : undefined}>
+                  {leadOrigen ? (
+                    <Valor>{fuenteLead ? `Lead · ${fuenteLead}` : 'Lead'}</Valor>
+                  ) : (
+                    <select value={d.origen} onChange={(e) => setD({ ...d, origen: e.target.value })} aria-label="Procedencia" className={input}>
+                      {OPCIONES_ORIGEN.map((o) => <option key={o.valor} value={o.valor}>{o.texto}</option>)}
+                    </select>
+                  )}
+                </Campo>
                 <Campo etiqueta="Responsable">
                   <select value={d.responsable_id} onChange={(e) => setD({ ...d, responsable_id: e.target.value })} className={input}>
                     <option value="">Sin asignar</option>
@@ -509,14 +520,8 @@ export const ResumenCuenta: React.FC<Props> = ({
                 <Campo etiqueta="Próxima facturación" nota={`Pago a ${empresa.dias_pago ?? 30} días`}><Valor mono>{empresa.proxima_facturacion ? formatFecha(empresa.proxima_facturacion) : null}</Valor></Campo>
                 <Campo etiqueta="Próxima renovación" nota={empresa.fecha_renovacion ? (empresa.renovacion_tipo === 'automatica' ? 'Automática' : 'Manual') : undefined}><Valor mono>{empresa.fecha_renovacion ? formatFecha(empresa.fecha_renovacion) : null}</Valor></Campo>
                 <Campo etiqueta="LTV estimado" nota={mesesContrato !== null ? `MRR × ${mesesContrato} meses` : 'Falta inicio de contrato'}><Valor mono>{ltvEstimado !== null ? formatCLP(ltvEstimado) : null}</Valor></Campo>
-                <Campo etiqueta="Procedencia" nota={leadOrigen ? 'Desde lead (solo lectura)' : undefined}>
-                  {leadOrigen ? (
-                    <Valor>{fuenteLead ? `Lead · ${fuenteLead}` : 'Lead'}</Valor>
-                  ) : (
-                    <select value={empresa.origen ?? ''} onChange={(e) => onActualizar({ origen: (e.target.value || null) as Empresa['origen'] })} aria-label="Procedencia" className={input}>
-                      {OPCIONES_ORIGEN.map((o) => <option key={o.valor} value={o.valor}>{o.texto}</option>)}
-                    </select>
-                  )}
+                <Campo etiqueta="Procedencia" nota={leadOrigen ? 'Desde lead' : undefined}>
+                  <Valor>{leadOrigen ? (fuenteLead ? `Lead · ${fuenteLead}` : 'Lead') : empresa.origen ? ORIGEN_ETIQUETA[empresa.origen] : null}</Valor>
                 </Campo>
               </div>
               <dl className="mt-4 pt-4 border-t border-[var(--c-line)] grid grid-cols-[minmax(0,1fr)] sm:grid-cols-3 gap-x-4 gap-y-4 text-xs">
