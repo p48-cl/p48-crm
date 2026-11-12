@@ -142,7 +142,7 @@ const CRMAppContent: React.FC = () => {
           }}
           marketingSection={mktSeccion}
           onOpenMarketing={abrirMarketing}
-          onOpenQuickActivity={() => setActivityModalState({ isOpen: true })}
+          onOpenQuickActivity={() => setActivityModalState({ isOpen: true, k: Date.now() })}
           onOpenNewDeal={() => setIsNewDealOpen(true)}
         />
 
@@ -250,7 +250,7 @@ const CRMAppContent: React.FC = () => {
         onClose={() => { setSelectedOpId(null); setAbrirFactura(false); }}
         onSelectEmpresa={(empId) => setSelectedEmpId(empId)}
         onOpenNewActivity={(empId, opId) =>
-          setActivityModalState({ isOpen: true, empresaId: empId, oportunidadId: opId })
+          setActivityModalState({ isOpen: true, empresaId: empId, oportunidadId: opId, k: Date.now() })
         }
         onOpenNewTask={(empId, opId) =>
           setTaskModalState({ isOpen: true, empresaId: empId, oportunidadId: opId, k: Date.now() })
@@ -267,7 +267,7 @@ const CRMAppContent: React.FC = () => {
         onNuevaCotizacionUsada={() => setFichaNuevaCotizacion(false)}
         onSelectOportunidad={(opId) => setSelectedOpId(opId)}
         onOpenNewActivity={(empId) =>
-          setActivityModalState({ isOpen: true, empresaId: empId })
+          setActivityModalState({ isOpen: true, empresaId: empId, k: Date.now() })
         }
         onOpenNewTask={(empId) =>
           setTaskModalState({ isOpen: true, empresaId: empId, k: Date.now() })

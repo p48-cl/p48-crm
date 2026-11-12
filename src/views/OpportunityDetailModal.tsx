@@ -56,7 +56,6 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
     moverOportunidadEtapa,
     archivarOportunidad,
     toggleTareaCompletada,
-    fuentes,
   } = useCRM();
 
   const { config: configCRM } = useConfiguracionCRM(isOpen);
@@ -90,7 +89,6 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
   const actividadesOp = actividades.filter((a) => a.oportunidad_id === oportunidad.id);
   const tareasOp = tareas.filter((t) => t.oportunidad_id === oportunidad.id);
   const etapa = etapas.find((et) => et.id === oportunidad.etapa_id);
-  const fuente = fuentes.find((f) => f.id === oportunidad.fuente_id);
   // En ganadas/perdidas el cierre ya ocurrió: no se muestra "vencido".
   const cerrada = Boolean(etapa?.es_ganada || etapa?.es_perdida);
   const diasCierre = cerrada ? null : diasHastaFecha(oportunidad.fecha_cierre_estimada);
@@ -283,24 +281,8 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
             onVerCliente={(id) => { onClose(); onSelectEmpresa(id); }}
           />
 
-          {/* Derecha: gestión comercial */}
+          {/* Derecha: etapa comercial (alineada con Datos del negocio), señales y próxima acción */}
           <div className="space-y-6">
-            <h2 className="text-[11px] font-mono uppercase tracking-wider text-[var(--c-muted)]">Gestión comercial</h2>
-
-            {/* Señales de la oportunidad */}
-            <div className="flex flex-wrap gap-1.5">
-              {atrasada && <ChipSenal tono="danger">Acción atrasada</ChipSenal>}
-              {!esNegocio && !tieneCalificacion && <ChipSenal tono="warn">Sin calificar</ChipSenal>}
-              {diasSinActividad === null ? (
-                <ChipSenal tono="warn">Sin actividades registradas</ChipSenal>
-              ) : (
-                diasSinActividad >= configCRM.dias_sin_actividad && (
-                  <ChipSenal tono="warn">Sin actividad hace {diasSinActividad} d</ChipSenal>
-                )
-              )}
-              {fuente && <ChipSenal tono="neutro">Origen: {fuente.nombre}</ChipSenal>}
-            </div>
-
             {/* Etapa */}
             <div className="p-4 bg-[var(--c-surface-2)] rounded-lg border border-[var(--c-line)] space-y-3">
               <h3 className="text-xs font-semibold text-[var(--c-text)]">Etapa Comercial</h3>
@@ -318,6 +300,19 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
               <div className="text-[11px] font-mono text-[var(--c-muted)] pt-1">
                 <p>Ponderado (Base): {formatMoneda(oportunidad.valor_ponderado, oportunidad.moneda)}</p>
               </div>
+            </div>
+
+            {/* Señales de la oportunidad */}
+            <div className="flex flex-wrap gap-1.5">
+              {atrasada && <ChipSenal tono="danger">Acción atrasada</ChipSenal>}
+              {!esNegocio && !tieneCalificacion && <ChipSenal tono="warn">Sin calificar</ChipSenal>}
+              {diasSinActividad === null ? (
+                <ChipSenal tono="warn">Sin actividades registradas</ChipSenal>
+              ) : (
+                diasSinActividad >= configCRM.dias_sin_actividad && (
+                  <ChipSenal tono="warn">Sin actividad hace {diasSinActividad} d</ChipSenal>
+                )
+              )}
             </div>
 
             {/* Próxima Acción */}
