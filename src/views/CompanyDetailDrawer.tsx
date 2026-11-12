@@ -327,6 +327,11 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
               mono: true,
             },
             {
+              etiqueta: 'Próxima facturación',
+              valor: empresa.proxima_facturacion ? formatFecha(empresa.proxima_facturacion) : 'Sin fecha',
+              mono: true,
+            },
+            {
               etiqueta: 'Próxima renovación',
               valor: empresa.fecha_renovacion ? formatFecha(empresa.fecha_renovacion) : 'Sin fecha',
               mono: true,
@@ -338,7 +343,6 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                   : null,
               tonoNota: 'warn',
             },
-            { etiqueta: 'Responsable', valor: responsable ? responsable.nombre : 'Sin asignar' },
           ]}
         /></div>
 
@@ -389,6 +393,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
               accesosTotal={empresa.estado === 'cliente' ? 4 : 0}
                             onIr={(d) => setActiveTab(d)}
               onAbrirNegocio={onSelectOportunidad}
+              onActualizar={(datos) => actualizarEmpresa(empresa.id, datos)}
               estrategia={<ResumenEstrategia empresaId={empresa.id} onVerTodo={() => setActiveTab('estrategia')} />}
               enlaces={
                 <>

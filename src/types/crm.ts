@@ -23,6 +23,7 @@ export type EstadoEmpresa =
 export type PlanEmpresa = 'A' | 'B' | 'C' | 'D' | 'E' | 'personalizado';
 export type RenovacionTipo = 'manual' | 'automatica';
 export type SaludCliente = 'verde' | 'amarillo' | 'rojo';
+export type EstadoPago = 'al_dia' | 'por_vencer' | 'atrasado';
 
 export interface Empresa {
   id: string; // uuid
@@ -47,6 +48,11 @@ export interface Empresa {
   fecha_renovacion?: string | null;
   renovacion_tipo?: RenovacionTipo | null;
   salud?: SaludCliente | null;
+  inicio_contrato?: string | null;
+  estado_pago?: EstadoPago | null;
+  fecha_ultimo_pago?: string | null;
+  proxima_facturacion?: string | null;
+  riesgos_oportunidades?: string | null;
   responsable_id?: string | null;
   archivado?: boolean;
   created_at?: string;
