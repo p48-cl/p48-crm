@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useCRM } from '../../context/CRMContext';
 import { formatCLP } from '../../lib/formatters';
-import { Kpi, Dona, COLOR_SALUD, ALTO_TARJETA, estilos } from '../dashboard/ui';
+import { Kpi, BarraVertical, COLOR_SALUD, ALTO_TARJETA, estilos } from '../dashboard/ui';
 import { metricasCartera, hoyIso } from '../dashboard/metricas';
 import { resumen360 } from '../../lib/cliente360';
 import { estadoEfectivo } from '../../lib/cotizaciones';
@@ -118,29 +118,20 @@ export const ClientesKpis: React.FC = () => {
                 : 'Ninguna en el período'
           }
         />
-        <div className={`${estilos.tarjeta} ${ALTO_TARJETA} flex flex-col`} style={{ borderTop: '3px solid var(--c-ok)' }}>
-          <p className={estilos.etiqueta} style={{ color: 'var(--c-ok)' }}>Salud de clientes</p>
+        <div className={`${estilos.tarjeta} ${ALTO_TARJETA}`} style={{ borderTop: '3px solid var(--c-ok)' }}>
+          <p className={estilos.etiqueta} style={{ color: 'var(--c-ok)' }}>Salud de clientes · {n}</p>
           {n === 0 ? (
             <p className={estilos.nota}>Sin clientes activos</p>
           ) : (
-            <div className="flex-1 flex items-center min-h-0">
-              <Dona
-                rotulo={`Salud de ${n} clientes`}
-                tamano={88}
-                centro={
-                  <>
-                    <span className="font-mono text-lg text-[var(--c-text)] leading-none">{n}</span>
-                    <span className="text-[10px] text-[var(--c-muted)] mt-0.5">{n === 1 ? 'cliente' : 'clientes'}</span>
-                  </>
-                }
-                segmentos={[
-                  { clave: 'verde', etiqueta: SALUD_ETIQUETA.verde, n: c.salud.verde, color: COLOR_SALUD.verde },
-                  { clave: 'amarillo', etiqueta: SALUD_ETIQUETA.amarillo, n: c.salud.amarillo, color: COLOR_SALUD.amarillo },
-                  { clave: 'rojo', etiqueta: SALUD_ETIQUETA.rojo, n: c.salud.rojo, color: COLOR_SALUD.rojo },
-                  { clave: 'sin', etiqueta: 'Sin evaluar', n: c.salud.sin, color: COLOR_SALUD.sin },
-                ]}
-              />
-            </div>
+            <BarraVertical
+              rotulo={`Salud de ${n} clientes`}
+              segmentos={[
+                { clave: 'verde', etiqueta: SALUD_ETIQUETA.verde, corta: 'Saludable', n: c.salud.verde, color: COLOR_SALUD.verde },
+                { clave: 'amarillo', etiqueta: SALUD_ETIQUETA.amarillo, corta: 'Alerta', n: c.salud.amarillo, color: COLOR_SALUD.amarillo },
+                { clave: 'rojo', etiqueta: SALUD_ETIQUETA.rojo, corta: 'Riesgo', n: c.salud.rojo, color: COLOR_SALUD.rojo },
+                { clave: 'sin', etiqueta: 'Sin evaluar', corta: 'Sin eval.', n: c.salud.sin, color: COLOR_SALUD.sin },
+              ]}
+            />
           )}
         </div>
       </div>

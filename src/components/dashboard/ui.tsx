@@ -13,7 +13,7 @@ export const estilos = {
 
 // Altura común de las tarjetas de una fila de indicadores (Clientes, Tareas, Proyectos).
 // Reparte el contenido de arriba abajo para que no quede hueco.
-export const ALTO_TARJETA = 'h-44 justify-between';
+export const ALTO_TARJETA = 'h-32 justify-between';
 
 type Tono = 'normal' | 'peligro' | 'aviso';
 const colorTono: Record<Tono, string> = {
@@ -59,6 +59,7 @@ export interface Segmento {
   n: number;
   color: string;
   detalle?: string;
+  corta?: string; // etiqueta breve para barras verticales
 }
 
 const Leyenda: React.FC<{ segmentos: Segmento[]; total: number; vertical?: boolean }> = ({ segmentos, total, vertical }) => (
@@ -106,6 +107,27 @@ export const Dona: React.FC<{ segmentos: Segmento[]; centro: React.ReactNode; ro
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center">{centro}</div>
       </div>
       <Leyenda segmentos={visibles} total={total} vertical />
+    </div>
+  );
+};
+
+/** Barras verticales con cantidad arriba y etiqueta abajo. Compactas para tarjetas de altura fija. */
+export const BarraVertical: React.FC<{ segmentos: Segmento[]; rotulo: string; alto?: number }> = ({ segmentos, rotulo, alto = 36 }) => {
+  const max = Math.max(1, ...segmentos.map((s) => s.n));
+  return (
+    <div role="img" aria-label={rotulo} className="flex items-end gap-2 min-w-0">
+      {segmentos.map((s) => {
+        const px = s.n > 0 ? Math.max(3, Math.round((s.n / max) * alto)) : 0;
+        return (
+          <div key={s.clave} className="flex-1 min-w-0 flex flex-col items-center" title={`${s.etiqueta}: ${s.n}`}>
+            <span className="font-mono text-[11px] leading-none text-[var(--c-text)]">{s.n}</span>
+            <div className="w-full flex items-end mt-1" style={{ height: alto }}>
+              <div className="w-full rounded-t-sm" style={{ height: px, background: s.color }} />
+            </div>
+            <span className="mt-1 w-full truncate text-center text-[9px] leading-none text-[var(--c-muted)]">{s.corta ?? s.etiqueta}</span>
+          </div>
+        );
+      })}
     </div>
   );
 };

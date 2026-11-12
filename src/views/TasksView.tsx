@@ -12,7 +12,7 @@ import { Tarea } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
 import { useProyectos } from '../components/proyectos/useProyectos';
 import { formatFecha, esFechaAtrasada, esFechaHoy } from '../lib/formatters';
-import { ALTO_TARJETA, Dona, Kpi, estilos } from '../components/dashboard/ui';
+import { ALTO_TARJETA, BarraVertical, Kpi, estilos } from '../components/dashboard/ui';
 import { Archive, ArchiveRestore } from 'lucide-react';
 
 interface TasksViewProps {
@@ -149,16 +149,14 @@ export const TasksView: React.FC<TasksViewProps> = ({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         <div className={`${estilos.tarjeta} ${ALTO_TARJETA}`} style={{ borderTop: '3px solid var(--c-accent)' }}>
-          <p className={estilos.etiqueta} style={{ color: 'var(--c-accent)' }}>Abiertas por vencimiento</p>
-          <Dona
+          <p className={estilos.etiqueta} style={{ color: 'var(--c-accent)' }}>Abiertas por vencimiento · {indicadores.abiertas}</p>
+          <BarraVertical
             rotulo={`${indicadores.abiertas} tareas abiertas por vencimiento`}
-            tamano={88}
-            centro={<span className="text-base font-bold font-mono text-[var(--c-text)] leading-none">{indicadores.abiertas}</span>}
             segmentos={[
               { clave: 'atrasadas', etiqueta: 'Atrasadas', n: indicadores.atrasadas, color: 'var(--c-danger)' },
-              { clave: 'hoy', etiqueta: 'Vencen hoy', n: indicadores.hoy, color: 'var(--c-warn)' },
-              { clave: 'semana', etiqueta: 'Próximos 7 días', n: indicadores.proximas - indicadores.hoy, color: 'var(--c-info)' },
-              { clave: 'resto', etiqueta: 'Más adelante', n: indicadores.abiertas - indicadores.atrasadas - indicadores.proximas, color: 'var(--c-muted-2)' },
+              { clave: 'hoy', etiqueta: 'Vencen hoy', corta: 'Hoy', n: indicadores.hoy, color: 'var(--c-warn)' },
+              { clave: 'semana', etiqueta: 'Próximos 7 días', corta: '7 días', n: indicadores.proximas - indicadores.hoy, color: 'var(--c-info)' },
+              { clave: 'resto', etiqueta: 'Más adelante', corta: 'Más', n: indicadores.abiertas - indicadores.atrasadas - indicadores.proximas, color: 'var(--c-muted-2)' },
             ]}
           />
           <p className={estilos.nota}>{indicadores.sinVinculo} sin cliente, negocio ni proyecto</p>
