@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { SALUD_ETIQUETA } from '../lib/salud';
 import { X, ExternalLink, Folder, Plus, Archive, Phone, Mail, Linkedin, Check, Pencil } from 'lucide-react';
 import { Empresa, AccesosAdminMarketing, Tarea } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
@@ -310,7 +311,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                 {empresa.salud && (
                   <span className="flex items-center gap-1 font-mono text-[10px] uppercase text-[var(--c-muted)]">
                     <span className={`w-2 h-2 rounded-full ${empresa.salud === 'verde' ? 'bg-[var(--c-ok)]' : empresa.salud === 'amarillo' ? 'bg-[var(--c-warn)]' : 'bg-[var(--c-danger)]'}`} />
-                    {empresa.salud}
+                    {SALUD_ETIQUETA[empresa.salud]}
                   </span>
                 )}
               </div>

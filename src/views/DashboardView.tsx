@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { SALUD_ETIQUETA } from '../lib/salud';
 import { RefreshCw } from 'lucide-react';
 import { useCRM } from '../context/CRMContext';
 import { useAuth } from '../context/AuthContext';
@@ -320,9 +321,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               <Dona rotulo={`Salud de ${cart.clientes.length} clientes`}
                 centro={<><span className="text-lg font-bold font-mono text-[var(--c-text)] leading-none">{cart.clientes.length}</span><span className="text-[9px] font-mono uppercase text-[var(--c-muted)] mt-0.5">clientes</span></>}
                 segmentos={[
-                  { clave: 'verde', etiqueta: 'Verde', n: cart.salud.verde, color: COLOR_SALUD.verde },
-                  { clave: 'amarillo', etiqueta: 'Amarillo', n: cart.salud.amarillo, color: COLOR_SALUD.amarillo },
-                  { clave: 'rojo', etiqueta: 'Rojo', n: cart.salud.rojo, color: COLOR_SALUD.rojo },
+                  { clave: 'verde', etiqueta: SALUD_ETIQUETA.verde, n: cart.salud.verde, color: COLOR_SALUD.verde },
+                  { clave: 'amarillo', etiqueta: SALUD_ETIQUETA.amarillo, n: cart.salud.amarillo, color: COLOR_SALUD.amarillo },
+                  { clave: 'rojo', etiqueta: SALUD_ETIQUETA.rojo, n: cart.salud.rojo, color: COLOR_SALUD.rojo },
                   { clave: 'sin', etiqueta: 'Sin evaluar', n: cart.salud.sin, color: COLOR_SALUD.sin },
                 ]} />
             )}
