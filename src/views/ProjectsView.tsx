@@ -25,7 +25,7 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
   const { tareas, empresasTodas: empresas, miembros, refetchTodo, toggleTareaCompletada } = useCRM();
   const { proyectos, fases, miembrosProyecto, dependencias, cargando, error, recargar } = useProyectos();
   const [pestana, setPestana] = useState<'proyectos' | 'calendario' | 'gantt'>('proyectos');
-  const [proyGantt, setProyGantt] = useState<string>('');
+  const [proyGantt, setProyGantt] = useState<string>('todos');
   const [abierto, setAbierto] = useState<string | null>(null);
   const [nuevo, setNuevo] = useState(false);
   const [tipo, setTipo] = useState<'todos' | 'interno' | 'cliente'>(ambito === 'agencia' ? 'interno' : 'todos');
@@ -84,25 +84,35 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
 
           {pestana === 'gantt' ? (() => {
             const visibles = proyectos.filter((p) => (tipo === 'todos' || (p.tipo ?? 'cliente') === tipo) && (estado === 'todos' ? true : estado === 'activos' ? p.estado !== 'finalizado' : p.estado === estado));
-            const idG = visibles.some((p) => p.id === proyGantt) ? proyGantt : (visibles[0]?.id ?? '');
-            const tareasG = tareas.filter((t) => t.proyecto_id === idG);
+            const todos = proyGantt === 'todos' || !visibles.some((p) => p.id === proyGantt);
+            const idG = todos ? '' : proyGantt;
+            const idsVisibles = new Set(visibles.map((p) => p.id));
+            const tareasG = tareas.filter((t) => (todos ? !!t.proyecto_id && idsVisibles.has(t.proyecto_id) : t.proyecto_id === idG));
             const idsG = new Set(tareasG.map((t) => t.id));
-            const fasesG = fases.filter((f) => f.proyecto_id === idG);
+            const fasesG = fases.filter((f) => (todos ? idsVisibles.has(f.proyecto_id) : f.proyecto_id === idG));
             const depsG = dependencias.filter((d) => idsG.has(d.tarea_id));
             const nombreMiembro = (id?: string | null) => miembros.find((m) => m.id === id)?.nombre ?? 'Sin asignar';
             return (
               <div className="space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <select className={select} value={idG} onChange={(e) => setProyGantt(e.target.value)} aria-label="Proyecto">
-                    {visibles.length === 0 && <option value="">Sin proyectos</option>}
+                  <select className={select} value={todos ? 'todos' : idG} onChange={(e) => setProyGantt(e.target.value)} aria-label="Proyecto">
+                    <option value="todos">Todos los proyectos</option>
                     {visibles.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}
                   </select>
-                  {idG && <button type="button" onClick={() => { setAbierto(idG); setPestana('proyectos'); }} className="text-xs text-[var(--c-accent)] hover:underline">Abrir proyecto</button>}
+                  {!todos && <button type="button" onClick={() => { setAbierto(idG); setPestana('proyectos'); }} className="text-xs text-[var(--c-accent)] hover:underline">Abrir proyecto</button>}
                 </div>
-                {idG ? (
-                  <Gantt tareas={tareasG} fases={fasesG} dependencias={depsG} nombreMiembro={nombreMiembro} onToggle={(t) => toggleTareaCompletada(t.id, t.completada)} onEditar={(t) => onEditTask(t)} />
+                {tareasG.length === 0 && fasesG.length === 0 ? (
+                  <p className="text-xs text-[var(--c-muted)]">No hay tareas en {todos ? 'estos proyectos' : 'este proyecto'}.</p>
                 ) : (
-                  <p className="text-xs text-[var(--c-muted)]">No hay proyectos con estos filtros.</p>
+                  <Gantt
+                    tareas={tareasG}
+                    fases={fasesG}
+                    dependencias={depsG}
+                    nombreMiembro={nombreMiembro}
+                    onToggle={(t) => toggleTareaCompletada(t.id, t.completada)}
+                    onEditar={(t) => onEditTask(t)}
+                    proyectos={todos ? visibles.map((p) => ({ id: p.id, nombre: p.nombre })) : undefined}
+                  />
                 )}
               </div>
             );
