@@ -35,11 +35,14 @@ const iniciales = (nombre?: string | null): string => {
 };
 
 interface KanbanViewProps {
+  // 'captacion' = Leads (Centro de mando) · 'expansion' = Negocios (Operaciones)
+  pipeline: 'captacion' | 'expansion';
   onSelectOportunidad: (id: string) => void;
   onOpenNewDeal: () => void;
 }
 
 export const KanbanView: React.FC<KanbanViewProps> = ({
+  pipeline,
   onSelectOportunidad,
   onOpenNewDeal,
 }) => {
@@ -60,7 +63,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
   const [filtroResponsable, setFiltroResponsable] = useState<string>('todos');
   const [filtroFuente, setFiltroFuente] = useState<string>('todos');
   const [filtroEtapa] = useState<string>('todos');
-  const [pipelineSel, setPipelineSel] = useState<'captacion' | 'expansion'>('captacion');
+  const pipelineSel = pipeline;
   const pipelineDe = (etapaId: string) => etapas.find((e) => e.id === etapaId)?.pipeline ?? 'captacion';
   const [filtroSeguimiento, setFiltroSeguimiento] = useState<string>('todos');
 
@@ -160,7 +163,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold font-sans text-[var(--c-text)]">
-            Pipeline de Negocios
+            {pipeline === 'captacion' ? 'Pipeline de Leads' : 'Negocios'}
           </h1>
           <p className="text-xs text-[var(--c-muted)] mt-0.5">
             Gestión comercial basada en vista calculada de Supabase
@@ -168,20 +171,6 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center p-0.5 bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded text-xs">
-            <button
-              onClick={() => setPipelineSel('captacion')}
-              className={`px-3 py-1.5 rounded transition-colors ${pipelineSel === 'captacion' ? 'bg-[var(--c-surface-3)] text-[var(--c-text)] font-medium shadow-sm' : 'text-[var(--c-muted)] hover:text-[var(--c-text-2)]'}`}
-            >
-              Captación
-            </button>
-            <button
-              onClick={() => setPipelineSel('expansion')}
-              className={`px-3 py-1.5 rounded transition-colors ${pipelineSel === 'expansion' ? 'bg-[var(--c-surface-3)] text-[var(--c-text)] font-medium shadow-sm' : 'text-[var(--c-muted)] hover:text-[var(--c-text-2)]'}`}
-            >
-              Expansión
-            </button>
-          </div>
           <div className="flex items-center p-0.5 bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded text-xs">
             <button
               onClick={() => setVistaModo('kanban')}

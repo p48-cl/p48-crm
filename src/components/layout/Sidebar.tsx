@@ -14,6 +14,7 @@ import {
   Radio,
   FolderKanban,
   Building,
+  Briefcase,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCRM } from '../../context/CRMContext';
@@ -22,6 +23,7 @@ import { JampBrand } from '../brand/Jamp';
 export type ViewType =
   | 'inicio'
   | 'crm'
+  | 'negocios'
   | 'empresas'
   | 'contactos'
   | 'cotizaciones'
@@ -70,12 +72,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const principales: NavItem[] = [
     { key: 'inicio', label: 'Overview', icon: LayoutDashboard, active: currentView === 'inicio', onClick: () => onChangeView('inicio') },
-    { key: 'crm', label: 'Pipeline', icon: Kanban, active: currentView === 'crm', onClick: () => onChangeView('crm') },
+    { key: 'crm', label: 'Leads', icon: Kanban, active: currentView === 'crm', onClick: () => onChangeView('crm') },
     { key: 'marketing', label: 'Marketing', icon: Radio, active: enMkt, onClick: () => onOpenMarketing('resumen') },
-    { key: 'empresas', label: 'Clientes', icon: Building2, active: currentView === 'empresas', onClick: () => onChangeView('empresas') },
   ];
 
   const operacion: NavItem[] = [
+    { key: 'empresas', label: 'Clientes', icon: Building2, active: currentView === 'empresas', onClick: () => onChangeView('empresas') },
+    { key: 'negocios', label: 'Negocios', icon: Briefcase, active: currentView === 'negocios', onClick: () => onChangeView('negocios') },
     { key: 'facturas', label: 'Facturas', icon: Receipt, active: currentView === 'facturas', onClick: () => onChangeView('facturas') },
     { key: 'cotizaciones', label: 'Cotizaciones', icon: FileText, active: currentView === 'cotizaciones', onClick: () => onChangeView('cotizaciones') },
     { key: 'contactos', label: 'Contactos', icon: Users, active: currentView === 'contactos', onClick: () => onChangeView('contactos') },
