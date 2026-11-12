@@ -12,7 +12,7 @@ import { DatosFacturacion } from '../components/clientes/DatosFacturacion';
 import { SubirLogo } from '../components/clientes/Logo';
 import { useProyectos } from '../components/proyectos/useProyectos';
 import { hoyIso, diaCorto } from '../components/proyectos/fechas';
-import { formatFecha } from '../lib/formatters';
+import { formatFecha, formatRUT } from '../lib/formatters';
 import type { Tarea } from '../types/crm';
 
 type Seccion = 'resumen' | 'proyectos' | 'tareas' | 'cotizaciones' | 'estrategia' | 'marketing' | 'datos';
@@ -66,6 +66,12 @@ export const AgenciaView: React.FC<Props> = ({ onNuevaTarea, onEditTask }) => {
   const vencidas = pendientes.filter((t) => t.fecha_vencimiento.slice(0, 10) < hoy);
   const nombreResp = (id?: string | null) => miembros.find((m) => m.id === id)?.nombre ?? '—';
   const accesos = accesosAdmin[agencia.id];
+  const alertas: { texto: string; tono: 'alerta' | 'info'; destino: Seccion }[] = [];
+  if (vencidas.length > 0) alertas.push({ texto: `${vencidas.length} tarea(s) vencida(s)`, tono: 'alerta', destino: 'tareas' });
+  if (!agencia.razon_social || !agencia.rut || !agencia.giro || !agencia.direccion_facturacion)
+    alertas.push({ texto: 'Datos legales incompletos (se usan como emisor en cotizaciones)', tono: 'info', destino: 'datos' });
+  if (!agencia.drive_folder_url) alertas.push({ texto: 'Sin carpeta de Drive vinculada', tono: 'info', destino: 'datos' });
+  if (activos.length === 0) alertas.push({ texto: 'Sin proyectos internos activos', tono: 'info', destino: 'proyectos' });
 
   return (
     <div data-module="organic" className="p-4 sm:p-6 max-w-7xl mx-auto space-y-5">
@@ -93,27 +99,83 @@ export const AgenciaView: React.FC<Props> = ({ onNuevaTarea, onEditTask }) => {
       </nav>
 
       {seccion === 'resumen' && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <Kpi etiqueta="Proyectos internos" valor={activos.length} nota={`${propios.length} en total`} onClick={() => setSeccion('proyectos')} />
-            <Kpi etiqueta="Tareas pendientes" valor={pendientes.length} nota={`${misTareas.length - pendientes.length} completadas`} onClick={() => setSeccion('tareas')} />
-            <Kpi etiqueta="Tareas vencidas" valor={vencidas.length} tono={vencidas.length > 0 ? 'peligro' : 'normal'} nota={vencidas.length > 0 ? 'Requieren atención' : 'Todo al día'} onClick={() => setSeccion('tareas')} />
-            <Kpi etiqueta="Responsable" valor={nombreResp(agencia.responsable_id)} nota="Cuenta interna" />
+        <div className="grid grid-cols-[minmax(0,1fr)] lg:grid-cols-[300px_minmax(0,1fr)] gap-5 items-start">
+          {/* Izquierda: datos de la agencia y alertas */}
+          <div className="space-y-4">
+            <div className="ficha-card p-4 space-y-2">
+              <h3 className="text-xs font-semibold text-[var(--c-text)] mb-1">Agencia</h3>
+              {[
+                ['Responsable', nombreResp(agencia.responsable_id)],
+                ['Razón social', agencia.razon_social || '—'],
+                ['RUT', agencia.rut ? formatRUT(agencia.rut) : '—'],
+                ['Web', agencia.dominio_web || '—'],
+              ].map(([k, v]) => (
+                <div key={k} className="flex items-baseline justify-between gap-3 text-xs">
+                  <span className="text-[10px] font-mono uppercase text-[var(--c-muted)] shrink-0">{k}</span>
+                  <span className="text-[var(--c-text)] text-right truncate">{v}</span>
+                </div>
+              ))}
+              {agencia.drive_folder_url && (
+                <a href={agencia.drive_folder_url} target="_blank" rel="noopener noreferrer" className="block pt-2 mt-1 border-t border-[var(--c-line)] text-[11px] text-[var(--c-accent)] hover:underline">Abrir carpeta Drive</a>
+              )}
+            </div>
+
+            <div className="ficha-card p-4">
+              <h3 className="text-xs font-semibold text-[var(--c-text)] mb-3">Alertas{alertas.length ? ` (${alertas.length})` : ''}</h3>
+              {alertas.length === 0 ? (
+                <p className="text-xs text-[var(--c-muted)]">Sin alertas abiertas.</p>
+              ) : (
+                <ul className="space-y-1">
+                  {alertas.map((a) => (
+                    <li key={a.texto}>
+                      <button type="button" onClick={() => setSeccion(a.destino)} className="w-full flex items-start gap-2.5 text-left text-xs text-[var(--c-text-2)] p-1.5 -mx-1.5 rounded hover:bg-[var(--c-surface-2)]">
+                        <span className={`mt-1 w-2 h-2 rounded-full shrink-0 ${a.tono === 'alerta' ? 'bg-[var(--c-warn)]' : 'bg-[var(--c-info)]'}`} />
+                        <span className="flex-1">{a.texto}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
-          <div className="surface p-4 space-y-2">
-            <h3 className="text-xs font-semibold text-[var(--c-text)]">Próximas tareas de la agencia</h3>
-            {pendientes.length === 0 ? (
-              <p className="text-xs text-[var(--c-muted)]">No hay tareas pendientes.</p>
-            ) : (
-              <ul className="divide-y divide-[var(--c-line)]">
-                {pendientes.slice(0, 5).map((t) => (
-                  <li key={t.id} className="py-2 flex items-center justify-between gap-3 text-xs">
-                    <span className="text-[var(--c-text)] truncate">{t.titulo}</span>
-                    <span className={`font-mono shrink-0 ${t.fecha_vencimiento.slice(0, 10) < hoy ? 'text-[var(--c-danger)]' : 'text-[var(--c-muted)]'}`}>{diaCorto(t.fecha_vencimiento.slice(0, 10))}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
+
+          {/* Derecha: lo accionable */}
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+              <Kpi etiqueta="Proyectos internos" valor={activos.length} nota={`${propios.length} en total`} onClick={() => setSeccion('proyectos')} />
+              <Kpi etiqueta="Tareas pendientes" valor={pendientes.length} nota={`${misTareas.length - pendientes.length} completadas`} onClick={() => setSeccion('tareas')} />
+              <Kpi etiqueta="Tareas vencidas" valor={vencidas.length} tono={vencidas.length > 0 ? 'peligro' : 'normal'} nota={vencidas.length > 0 ? 'Requieren atención' : 'Todo al día'} onClick={() => setSeccion('tareas')} />
+            </div>
+            <div className="ficha-card p-4 space-y-2">
+              <h3 className="text-xs font-semibold text-[var(--c-text)]">Próximas tareas de la agencia</h3>
+              {pendientes.length === 0 ? (
+                <p className="text-xs text-[var(--c-muted)]">No hay tareas pendientes.</p>
+              ) : (
+                <ul className="divide-y divide-[var(--c-line)]">
+                  {pendientes.slice(0, 5).map((t) => (
+                    <li key={t.id} className="py-2 flex items-center justify-between gap-3 text-xs">
+                      <span className="text-[var(--c-text)] truncate">{t.titulo}</span>
+                      <span className={`font-mono shrink-0 ${t.fecha_vencimiento.slice(0, 10) < hoy ? 'text-[var(--c-danger)]' : 'text-[var(--c-muted)]'}`}>{diaCorto(t.fecha_vencimiento.slice(0, 10))}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div className="ficha-card p-4 space-y-2">
+              <h3 className="text-xs font-semibold text-[var(--c-text)]">Proyectos en curso</h3>
+              {activos.length === 0 ? (
+                <p className="text-xs text-[var(--c-muted)]">No hay proyectos internos activos.</p>
+              ) : (
+                <ul className="divide-y divide-[var(--c-line)]">
+                  {activos.slice(0, 5).map((p) => (
+                    <li key={p.id} className="py-2 flex items-center justify-between gap-3 text-xs">
+                      <span className="text-[var(--c-text)] truncate">{p.nombre}</span>
+                      <span className="font-mono text-[10px] uppercase text-[var(--c-muted)] shrink-0">{p.estado.replace('_', ' ')}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
         </div>
       )}
