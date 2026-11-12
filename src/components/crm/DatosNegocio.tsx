@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Mail, Phone, Star } from 'lucide-react';
 import { useCRM } from '../../context/CRMContext';
 import { DatosFacturacion } from '../clientes/DatosFacturacion';
-import { formatCorrelativo, formatRUT } from '../../lib/formatters';
+import { codigoNegocio, formatCorrelativo, formatRUT } from '../../lib/formatters';
 import { usePlanes } from '../../lib/planes';
 import { Moneda, Oportunidad, PlanEmpresa } from '../../types/crm';
 
@@ -41,7 +41,7 @@ export const DatosNegocio: React.FC<Props> = ({ oportunidad, onVerCliente }) => 
       <div className={caja}>
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-semibold text-[var(--c-text)]">Datos del negocio</h3>
-          <span className="font-mono text-[11px] text-[var(--c-text-2)]">{formatCorrelativo('NEG', oportunidad.numero)}</span>
+          <span className="font-mono text-[11px] text-[var(--c-text-2)]">{codigoNegocio(oportunidad)}</span>
         </div>
         <div>
           <label className={label}>Nombre del negocio</label>

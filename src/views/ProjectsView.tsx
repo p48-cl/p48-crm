@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { CalendarDays, FolderKanban, Plus } from 'lucide-react';
+import { CalendarDays, FolderKanban, Plus, GanttChart } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCRM } from '../context/CRMContext';
 import { ChipSenal } from '../components/common/ChipSenal';
 import { Calendario } from '../components/proyectos/Calendario';
+import { Gantt } from '../components/proyectos/Gantt';
 import { NuevoProyectoModal } from '../components/proyectos/NuevoProyectoModal';
 import { ProyectoDetalle } from '../components/proyectos/ProyectoDetalle';
 import { useProyectos } from '../components/proyectos/useProyectos';
@@ -21,9 +22,10 @@ interface Props {
 
 export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
   const { isAdmin } = useAuth();
-  const { tareas, empresasTodas: empresas, miembros, refetchTodo } = useCRM();
+  const { tareas, empresasTodas: empresas, miembros, refetchTodo, toggleTareaCompletada } = useCRM();
   const { proyectos, fases, miembrosProyecto, dependencias, cargando, error, recargar } = useProyectos();
-  const [pestana, setPestana] = useState<'proyectos' | 'calendario'>('proyectos');
+  const [pestana, setPestana] = useState<'proyectos' | 'calendario' | 'gantt'>('proyectos');
+  const [proyGantt, setProyGantt] = useState<string>('');
   const [abierto, setAbierto] = useState<string | null>(null);
   const [nuevo, setNuevo] = useState(false);
   const [tipo, setTipo] = useState<'todos' | 'interno' | 'cliente'>(ambito === 'agencia' ? 'interno' : 'todos');
@@ -71,7 +73,7 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
           </div>
 
           <div role="tablist" aria-label="Vista" className="inline-flex gap-1 p-0.5 rounded-md bg-[var(--c-surface-2)]">
-            {([['proyectos', 'Proyectos', FolderKanban], ['calendario', 'Calendario', CalendarDays]] as const).map(([k, t, Icono]) => (
+            {([['proyectos', 'Proyectos', FolderKanban], ['calendario', 'Calendario', CalendarDays], ['gantt', 'Gantt', GanttChart]] as const).map(([k, t, Icono]) => (
               <button key={k} role="tab" aria-selected={pestana === k} onClick={() => setPestana(k)} className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded ${pestana === k ? 'bg-[var(--c-surface)] text-[var(--c-text)] font-semibold ring-1 ring-[var(--module)]' : 'text-[var(--c-muted)]'}`}>
                 <Icono className="w-3.5 h-3.5" />{t}
               </button>
@@ -80,7 +82,31 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
 
           {error && <p className="text-xs text-[var(--c-danger)] border border-[var(--c-danger)]/40 rounded p-2">{error}</p>}
 
-          {pestana === 'calendario' ? (
+          {pestana === 'gantt' ? (() => {
+            const visibles = proyectos.filter((p) => (tipo === 'todos' || (p.tipo ?? 'cliente') === tipo) && (estado === 'todos' ? true : estado === 'activos' ? p.estado !== 'finalizado' : p.estado === estado));
+            const idG = visibles.some((p) => p.id === proyGantt) ? proyGantt : (visibles[0]?.id ?? '');
+            const tareasG = tareas.filter((t) => t.proyecto_id === idG);
+            const idsG = new Set(tareasG.map((t) => t.id));
+            const fasesG = fases.filter((f) => f.proyecto_id === idG);
+            const depsG = dependencias.filter((d) => idsG.has(d.tarea_id));
+            const nombreMiembro = (id?: string | null) => miembros.find((m) => m.id === id)?.nombre ?? 'Sin asignar';
+            return (
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <select className={select} value={idG} onChange={(e) => setProyGantt(e.target.value)} aria-label="Proyecto">
+                    {visibles.length === 0 && <option value="">Sin proyectos</option>}
+                    {visibles.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+                  </select>
+                  {idG && <button type="button" onClick={() => { setAbierto(idG); setPestana('proyectos'); }} className="text-xs text-[var(--c-accent)] hover:underline">Abrir proyecto</button>}
+                </div>
+                {idG ? (
+                  <Gantt tareas={tareasG} fases={fasesG} dependencias={depsG} nombreMiembro={nombreMiembro} onToggle={(t) => toggleTareaCompletada(t.id, t.completada)} onEditar={(t) => onEditTask(t)} />
+                ) : (
+                  <p className="text-xs text-[var(--c-muted)]">No hay proyectos con estos filtros.</p>
+                )}
+              </div>
+            );
+          })() : pestana === 'calendario' ? (
             <Calendario tareas={tareas} proyectos={proyectos} fases={fases} empresas={empresas} onAbrirProyecto={(id) => { setAbierto(id); setPestana('proyectos'); }} onEditarTarea={onEditTask} />
           ) : cargando ? (
             <p className="text-sm text-[var(--c-muted)]">Cargando...</p>

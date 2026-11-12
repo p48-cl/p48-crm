@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { CriterioCalificacion } from '../types/crm';
 import { useCRM } from '../context/CRMContext';
-import { formatFecha, formatMoneda, esFechaAtrasada, formatCorrelativo, diasHastaFecha } from '../lib/formatters';
+import { formatFecha, formatMoneda, esFechaAtrasada, formatCorrelativo, codigoNegocio, diasHastaFecha } from '../lib/formatters';
 import { useConfiguracionCRM } from '../lib/configuracion';
 import { DatosNegocio } from '../components/crm/DatosNegocio';
 import { CotizacionesCliente } from '../components/clientes/CotizacionesCliente';
@@ -183,7 +183,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--c-muted)]">
-                  Oportunidad · {formatCorrelativo('NEG', oportunidad.numero)}
+                  Oportunidad · {codigoNegocio(oportunidad)}
                 </span>
                 {etapa && (
                   <span className="px-2 py-0.5 rounded-full bg-[var(--c-accent)]/15 text-[var(--c-text)] text-[10px] font-semibold uppercase tracking-wide">

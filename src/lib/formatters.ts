@@ -161,6 +161,14 @@ export function formatCorrelativo(prefijo: 'COT' | 'NEG', numero?: number | null
   return `${prefijo}-${String(numero).padStart(4, '0')}`;
 }
 
+// Código de negocio por pipeline: LEAD-0001 (captación) o EXP-0001 (expansión)
+export function codigoNegocio(op: { pipeline?: string | null; numero_pipeline?: number | null; numero?: number | null }): string {
+  const n = op.numero_pipeline ?? op.numero;
+  if (n == null) return '';
+  const prefijo = op.pipeline === 'expansion' ? 'EXP' : op.pipeline === 'captacion' ? 'LEAD' : 'NEG';
+  return `${prefijo}-${String(n).padStart(4, '0')}`;
+}
+
 // Días desde hoy hasta una fecha YYYY-MM-DD (negativo = vencida)
 export function diasHastaFecha(fechaStr?: string | null): number | null {
   if (!fechaStr) return null;

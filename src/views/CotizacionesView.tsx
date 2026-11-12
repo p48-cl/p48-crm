@@ -131,6 +131,7 @@ export const CotizacionesView: React.FC<CotizacionesViewProps> = ({ onAbrirFicha
     const aceptadas = clp.filter((f) => estadoEfectivo(f) === 'aceptada');
     const enviadas = clp.filter((f) => estadoEfectivo(f) === 'enviada');
     const rechazadas = clp.filter((f) => estadoEfectivo(f) === 'rechazada');
+    const vencidas = clp.filter((f) => estadoEfectivo(f) === 'vencida');
     const cerradas = aceptadas.length + rechazadas.length;
     // Un cliente = una aceptada vigente: si tiene varias aceptadas, cuenta solo la más reciente (evita doble MRR)
     const vigentePorEmpresa = new Map<string, Fila>();
@@ -156,6 +157,11 @@ export const CotizacionesView: React.FC<CotizacionesViewProps> = ({ onAbrirFicha
       aceptadas: aceptadas.length,
       cerradas,
       venceEn7,
+      rechazadas: rechazadas.length,
+      montoRechazadas: rechazadas.reduce((a, f) => a + conIva(f, 'neto_mensual') + conIva(f, 'neto_unico'), 0),
+      vencidas: vencidas.length,
+      montoVencidas: vencidas.reduce((a, f) => a + conIva(f, 'neto_mensual') + conIva(f, 'neto_unico'), 0),
+      montoAceptadas: aceptadas.reduce((a, f) => a + conIva(f, 'neto_mensual') + conIva(f, 'neto_unico'), 0),
       otraMoneda: filas.length - clp.length,
     };
   }, [filas]);
@@ -196,26 +202,30 @@ export const CotizacionesView: React.FC<CotizacionesViewProps> = ({ onAbrirFicha
         <div className="space-y-2">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <Kpi
-              etiqueta="Aceptado mensual"
-              valor={formatMoneda(kpis.mensualAceptado, 'CLP')}
-              nota={`${kpis.clientesAceptados} clientes · único ${formatMoneda(kpis.unicoAceptado, 'CLP')}`}
+              etiqueta={estilo('aceptada').label}
+              acento={estiloEstado(cfgCRM.estados_cotizacion, 'aceptada').color}
+              valor={`${kpis.aceptadas} · ${formatMoneda(kpis.mensualAceptado, 'CLP')}/mes`}
+              nota={`${kpis.clientesAceptados} clientes · único ${formatMoneda(kpis.unicoAceptado, 'CLP')} · ${kpis.tasa != null ? `${kpis.tasa}% de cerradas` : 'sin cerradas'}`}
             />
             <Kpi
-              etiqueta="En espera"
+              etiqueta={estilo('enviada').label}
+              acento={estiloEstado(cfgCRM.estados_cotizacion, 'enviada').color}
               valor={kpis.enviadas}
-              nota={`${formatMoneda(kpis.enEspera, 'CLP')} potencial c/IVA`}
-            />
-            <Kpi
-              etiqueta="Tasa de aceptación"
-              valor={kpis.tasa != null ? `${kpis.tasa}%` : '—'}
-              progreso={kpis.tasa}
-              nota={`${kpis.aceptadas} de ${kpis.cerradas} cerradas`}
-            />
-            <Kpi
-              etiqueta="Vencen en 7 días"
-              valor={kpis.venceEn7}
               tono={kpis.venceEn7 > 0 ? 'aviso' : 'normal'}
-              nota="Enviadas sin respuesta"
+              nota={`${formatMoneda(kpis.enEspera, 'CLP')} potencial c/IVA · ${kpis.venceEn7} vencen en 7 días`}
+            />
+            <Kpi
+              etiqueta={estilo('rechazada').label}
+              acento={estiloEstado(cfgCRM.estados_cotizacion, 'rechazada').color}
+              valor={kpis.rechazadas}
+              nota={`${formatMoneda(kpis.montoRechazadas, 'CLP')} c/IVA`}
+            />
+            <Kpi
+              etiqueta={estilo('vencida').label}
+              acento={estiloEstado(cfgCRM.estados_cotizacion, 'vencida').color}
+              tono={kpis.vencidas > 0 ? 'peligro' : 'normal'}
+              valor={kpis.vencidas}
+              nota={`${formatMoneda(kpis.montoVencidas, 'CLP')} c/IVA`}
             />
           </div>
           {kpis.otraMoneda > 0 && (

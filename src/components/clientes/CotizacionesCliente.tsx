@@ -128,7 +128,7 @@ export const CotizacionesCliente: React.FC<CotizacionesClienteProps> = ({ empres
         items={(['enviada', 'aceptada', 'rechazada', 'vencida'] as Estado[]).map((e) => {
           const grupo = filas.filter((c) => (estadoEfectivo(c) as Estado) === e);
           const st = estiloEstado(cfg.estados_cotizacion, e);
-          return { etiqueta: st.etiqueta, claseEtiqueta: st.clase, valor: `${grupo.length} cotización(es)`, sub: sumaMes(grupo) };
+          return { etiqueta: st.etiqueta, claseEtiqueta: st.clase, color: st.color, valor: `${grupo.length} cotización(es)`, sub: sumaMes(grupo) };
         })}
       />
       {cargando && filas.length === 0 ? (

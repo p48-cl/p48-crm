@@ -180,9 +180,10 @@ export const FacturasCliente: React.FC<{ empresa: Empresa }> = ({ empresa }) => 
       <EncabezadoDoc titulo="Facturas" subtitulo="Registradas a mano desde el SII. Marca el pago cuando llegue." botonTexto={mostrarForm ? undefined : 'Registrar factura'} onBoton={abrirNueva} />
       <FilaKpis
         items={[
-          { etiqueta: 'Pendientes', claseEtiqueta: 'text-[var(--c-warn)]', valor: `${pendientes.length - vencidas.length} factura(s)`, sub: formatCLP(suma(pendientes.filter((f) => !estaVencida(f)))) },
-          { etiqueta: 'Vencidas', claseEtiqueta: 'text-[var(--c-danger)]', valor: `${vencidas.length} factura(s)`, sub: formatCLP(suma(vencidas)) },
-          { etiqueta: 'Pagadas', claseEtiqueta: 'text-[var(--c-ok)]', valor: `${pagadas.length} factura(s)`, sub: formatCLP(suma(pagadas)) },
+          { etiqueta: 'Pendientes', color: 'var(--c-warn)', valor: `${pendientes.length - vencidas.length} factura(s)`, sub: formatCLP(suma(pendientes.filter((f) => !estaVencida(f)))) },
+          { etiqueta: 'Vencidas', color: 'var(--c-danger)', valor: `${vencidas.length} factura(s)`, sub: formatCLP(suma(vencidas)) },
+          { etiqueta: 'Pagadas', color: 'var(--c-ok)', valor: `${pagadas.length} factura(s)`, sub: formatCLP(suma(pagadas)) },
+          { etiqueta: 'Anuladas', color: 'var(--c-danger)', valor: `${delCliente.filter((f) => f.estado_pago === 'anulada').length} factura(s)`, sub: formatCLP(suma(delCliente.filter((f) => f.estado_pago === 'anulada'))) },
           { etiqueta: 'Total facturado', valor: `${delCliente.filter((f) => f.estado_pago !== 'anulada').length} factura(s)`, sub: formatCLP(suma(delCliente.filter((f) => f.estado_pago !== 'anulada'))) },
         ]}
       />

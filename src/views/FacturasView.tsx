@@ -24,7 +24,7 @@ const ETIQUETA: Record<string, { texto: string; clase: string }> = {
   pendiente: { texto: 'Pendiente', clase: 'text-[var(--c-warn)]' },
   vencida: { texto: 'Vencida', clase: 'text-[var(--c-danger)]' },
   pagada: { texto: 'Pagada', clase: 'text-[var(--c-ok)]' },
-  anulada: { texto: 'Anulada', clase: 'text-[var(--c-muted)]' },
+  anulada: { texto: 'Anulada', clase: 'text-[var(--c-danger)]' },
 };
 
 interface FacturasViewProps {
@@ -90,9 +90,9 @@ export const FacturasView: React.FC<FacturasViewProps> = ({ onAbrirFicha }) => {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <Kpi etiqueta="Por cobrar" valor={formatCLP(kpis.porCobrar)} nota={`${kpis.nPendientes} factura(s) pendientes`} />
-        <Kpi etiqueta="Vencido" valor={formatCLP(kpis.vencido)} tono={kpis.nVencidas > 0 ? 'peligro' : 'normal'} nota={`${kpis.nVencidas} factura(s)`} />
-        <Kpi etiqueta="Cobrado este mes" valor={formatCLP(kpis.cobradoMes)} nota={`${kpis.nPagadasMes} factura(s)`} />
+        <Kpi etiqueta="Por cobrar" acento="var(--c-warn)" valor={formatCLP(kpis.porCobrar)} nota={`${kpis.nPendientes} factura(s) pendientes`} />
+        <Kpi etiqueta="Vencido" acento="var(--c-danger)" valor={formatCLP(kpis.vencido)} tono={kpis.nVencidas > 0 ? 'peligro' : 'normal'} nota={`${kpis.nVencidas} factura(s)`} />
+        <Kpi etiqueta="Cobrado este mes" acento="var(--c-ok)" valor={formatCLP(kpis.cobradoMes)} nota={`${kpis.nPagadasMes} factura(s)`} />
         <Kpi etiqueta="Total facturado" valor={formatCLP(kpis.facturado)} nota={`${kpis.nVivas} factura(s) sin anuladas`} />
       </div>
 
