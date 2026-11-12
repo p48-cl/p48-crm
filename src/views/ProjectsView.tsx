@@ -97,7 +97,7 @@ export const ProjectsView: React.FC<Props> = ({ onEditTask, ambito }) => {
         <>
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--c-text)]">Proyectos</h1>
+              <h1 className="text-xl font-bold font-sans text-[var(--c-text)]">Proyectos</h1>
               <p className="text-xs text-[var(--c-muted)] mt-0.5">
                 Proyectos internos y de clientes, con Gantt y calendario. {isAdmin ? 'Como admin ves todos.' : 'Ves solo los proyectos a los que tienes acceso.'}
               </p>

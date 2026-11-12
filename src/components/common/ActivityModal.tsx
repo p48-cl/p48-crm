@@ -245,7 +245,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-xs font-semibold bg-[var(--c-accent)] text-black rounded"
+              className="px-4 py-2 text-xs font-semibold bg-[var(--c-accent)] text-[var(--c-on-accent)] rounded"
             >
               {editando ? 'Guardar cambios' : 'Guardar Actividad'}
             </button>

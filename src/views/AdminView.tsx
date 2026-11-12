@@ -456,7 +456,7 @@ export const AdminView: React.FC = () => {
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-1.5 text-xs font-semibold bg-[var(--c-accent)] text-black rounded"
+                      className="px-4 py-1.5 text-xs font-semibold bg-[var(--c-accent)] text-[var(--c-on-accent)] rounded"
                     >
                       Guardar Miembro
                     </button>
@@ -583,7 +583,7 @@ export const AdminView: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-3.5 py-1 text-xs font-semibold bg-[var(--c-accent)] text-black rounded"
+                  className="px-3.5 py-1 text-xs font-semibold bg-[var(--c-accent)] text-[var(--c-on-accent)] rounded"
                 >
                   {criterioEditando ? 'Actualizar Criterio' : 'Guardar Criterio'}
                 </button>
@@ -668,7 +668,7 @@ export const AdminView: React.FC = () => {
                 }}
                 className={`px-3 py-1.5 rounded transition-colors ${
                   catalogoActivo === c.id
-                    ? 'bg-[var(--c-accent)] text-black font-semibold'
+                    ? 'bg-[var(--c-accent)] text-[var(--c-on-accent)] font-semibold'
                     : 'bg-[var(--c-surface-2)] text-[var(--c-text-2)] hover:text-[var(--c-text)]'
                 }`}
               >

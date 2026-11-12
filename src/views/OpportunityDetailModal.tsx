@@ -363,7 +363,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                       </button>
                       <button
                         onClick={handleSaveProximaAccion}
-                        className="px-3 py-1 text-xs font-semibold bg-[var(--c-accent)] text-black rounded"
+                        className="px-3 py-1 text-xs font-semibold bg-[var(--c-accent)] text-[var(--c-on-accent)] rounded"
                       >
                         Guardar
                       </button>
@@ -623,7 +623,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                   </button>
                   <button
                     type="submit"
-                    className="px-3.5 py-1.5 text-xs font-semibold bg-[var(--c-accent)] text-black rounded"
+                    className="px-3.5 py-1.5 text-xs font-semibold bg-[var(--c-accent)] text-[var(--c-on-accent)] rounded"
                   >
                     Guardar Excepción
                   </button>

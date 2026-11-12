@@ -787,7 +787,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-xs font-semibold bg-[var(--c-accent)] text-black rounded"
+                  className="px-4 py-2 text-xs font-semibold bg-[var(--c-accent)] text-[var(--c-on-accent)] rounded"
                 >
                   Guardar cliente
                 </button>

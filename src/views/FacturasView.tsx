@@ -95,7 +95,7 @@ export const FacturasView: React.FC<FacturasViewProps> = ({ onAbrirFicha }) => {
           <h1 className="text-xl font-bold font-sans text-[var(--c-text)]">Facturas</h1>
           <p className="text-xs text-[var(--c-muted)] mt-0.5">{filas.length} facturas · registradas desde el SII</p>
         </div>
-        <button onClick={() => setNueva(true)} className="px-3.5 py-2 text-xs font-semibold rounded bg-[var(--c-accent)] text-black">+ Registrar factura</button>
+        <button onClick={() => setNueva(true)} className="px-3.5 py-2 text-xs font-semibold rounded bg-[var(--c-accent)] text-[var(--c-on-accent)]">+ Registrar factura</button>
       </div>
 
       {nueva && (

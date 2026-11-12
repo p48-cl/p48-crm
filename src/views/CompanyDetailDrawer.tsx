@@ -561,7 +561,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
                     </button>
                     <button
                       type="submit"
-                      className="px-3 py-1 text-xs font-semibold bg-[var(--c-accent)] text-black rounded"
+                      className="px-3 py-1 text-xs font-semibold bg-[var(--c-accent)] text-[var(--c-on-accent)] rounded"
                     >
                       {contactoEditandoId ? 'Guardar cambios' : 'Guardar Contacto'}
                     </button>
