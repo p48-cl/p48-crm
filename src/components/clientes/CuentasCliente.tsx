@@ -75,7 +75,8 @@ export const CuentasCliente: React.FC<{ empresaId: string; notas: string; onNota
 }) => {
   const [cuentas, setCuentas] = useState<Cuenta[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [abierta, setAbierta] = useState<string | null>(null);
+  const [abierta, setAbierta] = useState<string | null>(null); // activo sin registrar que se está completando
+  const [cerradas, setCerradas] = useState<Set<string>>(new Set()); // cuentas registradas que el usuario contrajo
   const [nuevoTipo, setNuevoTipo] = useState<Plataforma>('sitio_web');
   const [nuevaEtiqueta, setNuevaEtiqueta] = useState('');
 
@@ -139,18 +140,31 @@ export const CuentasCliente: React.FC<{ empresaId: string; notas: string; onNota
     ...(abiertaPendiente ? [{ key: abiertaPendiente.id, def: abiertaPendiente, c: undefined } as Fila] : []),
   ];
   const pendientesVisibles = pendientes.filter((p) => p.id !== abierta);
+  const estaAbierta = (key: string) => (registradas.some((r) => r.key === key) ? !cerradas.has(key) : abierta === key);
+  const alternar = (key: string) => {
+    if (registradas.some((r) => r.key === key)) {
+      setCerradas((prev) => {
+        const siguiente = new Set(prev);
+        if (siguiente.has(key)) siguiente.delete(key);
+        else siguiente.add(key);
+        return siguiente;
+      });
+    } else {
+      setAbierta(abierta === key ? null : key);
+    }
+  };
 
   const renderFila = (f: Fila) => {
     const { c, def: p } = f;
     const estado: Estado = c?.estado ?? 'pendiente';
     const ui = ESTADO_UI[estado];
-    const abiertaEsta = abierta === f.key;
+    const abiertaEsta = estaAbierta(f.key);
     const titulo = c?.etiqueta ? `${p.nombre} · ${c.etiqueta}` : p.nombre;
     return (
       <div key={f.key} className="py-2.5">
         <button
           type="button"
-          onClick={() => setAbierta(abiertaEsta ? null : f.key)}
+          onClick={() => alternar(f.key)}
           className="w-full min-h-[44px] flex items-center justify-between gap-3 text-left"
         >
           <span className="text-sm font-medium text-[var(--c-text)]">{titulo}</span>
@@ -228,8 +242,6 @@ export const CuentasCliente: React.FC<{ empresaId: string; notas: string; onNota
         </div>
         <span className="text-[11px] text-[var(--c-muted)]">{concedidas} de {registradas.length} concedidos</span>
       </div>
-
-      {error && <p className="text-xs text-[var(--c-danger)] border border-[var(--c-danger)]/40 rounded p-2">{error}</p>}
 
       {error && <p className="text-xs text-[var(--c-danger)] border border-[var(--c-danger)]/40 rounded p-2">{error}</p>}
 
