@@ -14,14 +14,7 @@ import { PipelineKpis } from '../components/crm/PipelineKpis';
 import { formatMoneda, formatFecha, esFechaAtrasada, formatCorrelativo, codigoNegocio, diasHastaFecha } from '../lib/formatters';
 import { ConfirmWonModal } from '../components/common/ConfirmWonModal';
 import { LossReasonModal } from '../components/common/LossReasonModal';
-import { ChipSenal, TonoChip } from '../components/common/ChipSenal';
-
-const SEGUIMIENTO_UI: Record<string, { label: string; tono: TonoChip }> = {
-  atrasado: { label: 'Atrasado', tono: 'danger' },
-  sin_accion: { label: 'Sin acción', tono: 'warn' },
-  por_vencer: { label: 'Vence hoy', tono: 'warn' },
-  al_dia: { label: 'Al día', tono: 'ok' },
-};
+import { ChipSenal } from '../components/common/ChipSenal';
 
 const iniciales = (nombre?: string | null): string => {
   if (!nombre) return '—';
@@ -146,7 +139,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
     // Lead ganado: el cliente queda con su origen (sin duplicar la empresa) si aún no tiene uno
     const emp = empresas.find((e) => e.id === opParaGanar.empresa_id);
     if (emp && !emp.origen && pipelineDe(opParaGanar.etapa_id) === 'captacion') {
-      await actualizarEmpresa(emp.id, { origen: 'lead', origen_oportunidad_id: opParaGanar.id });
+      await actualizarEmpresa(emp.id, { origen: 'lead', origen_lead_id: opParaGanar.id });
     }
     setOpParaGanar(null);
   };
@@ -342,7 +335,11 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                         op.estado_seguimiento === 'sin_accion' ||
                         (!op.proxima_accion_texto?.trim() && !op.proxima_accion_fecha);
                       const esUSD = op.moneda !== 'CLP';
-                      const seguimiento = op.estado_seguimiento ? SEGUIMIENTO_UI[op.estado_seguimiento] : undefined;
+                      // Negocio de expansión: muestra MRR del cliente y renovación; calificación solo en leads
+                      const esNegocio = op.pipeline === 'expansion';
+                      const diasRenov = esNegocio ? diasHastaFecha(emp?.fecha_renovacion) : null;
+                      const renovacionTexto =
+                        diasRenov === null ? null : diasRenov < 0 ? 'Renovación vencida' : `Renueva en ${diasRenov} d`;
                       // En ganadas/perdidas el cierre ya ocurrió: no se muestra "vencido".
                       const cerrada = Boolean(etapa.es_ganada || etapa.es_perdida);
                       const diasCierre = cerrada ? null : diasHastaFecha(op.fecha_cierre_estimada);
@@ -395,15 +392,17 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                             </div>
                           </div>
 
-                          {/* Valor neto, ponderado, probabilidad y responsable */}
+                          {/* Valor neto y responsable */}
                           <div className="flex items-end justify-between gap-2">
                             <div className="min-w-0">
                               <p className="font-mono text-sm font-bold text-[var(--c-text)] leading-none">
                                 {formatMoneda(op.valor_neto, op.moneda)}
                               </p>
-                              <p className="font-mono text-[10px] text-[var(--c-muted)] mt-1">
-                                Pond. {formatMoneda(op.valor_ponderado, op.moneda)} · {op.probabilidad}%
-                              </p>
+                              {esNegocio && emp?.mrr_actual_clp ? (
+                                <p className="font-mono text-[10px] text-[var(--c-muted)] mt-1">
+                                  MRR {formatMoneda(emp.mrr_actual_clp, 'CLP')}
+                                </p>
+                              ) : null}
                               {esUSD && (
                                 <p className="text-[9px] text-[var(--c-muted)] font-mono leading-none mt-0.5">
                                   No incluido en totales CLP
@@ -419,7 +418,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                           </div>
 
                           {/* Calificación (vista v_calificacion_oportunidad) */}
-                          {tieneCalificacion && calificacion && (
+                          {!esNegocio && tieneCalificacion && calificacion && (
                             <div>
                               <div className="flex items-center justify-between text-[10px] font-mono text-[var(--c-muted)] mb-1">
                                 <span>Calificación</span>
@@ -444,11 +443,13 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                             </div>
                           )}
 
-                          {/* Señales: seguimiento, cierre y fuente */}
-                          {(seguimiento || cierreTexto || fuente) && (
+                          {/* Señales: renovación o cierre, y fuente. El seguimiento se muestra solo en la caja inferior y en el borde */}
+                          {(renovacionTexto || cierreTexto || fuente) && (
                             <div className="flex flex-wrap items-center gap-1.5">
-                              {seguimiento && (
-                                <ChipSenal tono={seguimiento.tono}>{seguimiento.label}</ChipSenal>
+                              {renovacionTexto && (
+                                <span className={`font-mono text-[10px] ${diasRenov !== null && diasRenov < 0 ? 'text-[var(--c-danger)]' : diasRenov !== null && diasRenov <= 60 ? 'text-[var(--c-warn)]' : 'text-[var(--c-muted)]'}`}>
+                                  {renovacionTexto}
+                                </span>
                               )}
                               {cierreTexto && (
                                 <span className={`font-mono text-[10px] ${cierreTono}`}>{cierreTexto}</span>

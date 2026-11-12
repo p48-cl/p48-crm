@@ -105,6 +105,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({ isOpen, onClose, onC
         return;
       }
       const creada = await crearOportunidad({
+        pipeline: pipelineNuevo,
         nombre: nombre.trim(),
         empresa_id: idEmpresa,
         etapa_id: etapaId || etapas.find((e) => e.activa)?.id,

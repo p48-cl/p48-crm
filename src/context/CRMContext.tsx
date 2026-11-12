@@ -7,7 +7,6 @@ import {
   Etapa,
   PlantillaCalificacion,
   CriterioCalificacion,
-  EvaluacionOportunidad,
   VCalificacionOportunidad,
   Actividad,
   Tarea,
@@ -331,6 +330,22 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     cargarKpis();
   }, [filtroAlcance]);
 
+  // SEPARACIÓN DE PIPELINES: leads (captación) y negocios (expansión) son tablas distintas.
+  // v_oportunidades sigue uniendo ambas para lectura. Las tablas hijas guardan lead_id o negocio_id.
+  const esExpansionOp = (opId: string | null | undefined) =>
+    oportunidades.find((o) => o.id === opId)?.pipeline === 'expansion';
+  const tablaOp = (opId: string | null | undefined) => (esExpansionOp(opId) ? 'negocios' : 'leads');
+  const vinculoOp = (opId: string | null | undefined) => ({
+    lead_id: opId && !esExpansionOp(opId) ? opId : null,
+    negocio_id: opId && esExpansionOp(opId) ? opId : null,
+  });
+  // oportunidad_id es columna generada en la base: nunca se envía; se traduce a lead_id o negocio_id
+  const normalizarVinculo = (datos: any) => {
+    const { oportunidad_id, ...resto } = datos;
+    if (oportunidad_id === undefined) return resto;
+    return { ...resto, ...vinculoOp(oportunidad_id) };
+  };
+
   // MUTACIÓN: Mover etapa de oportunidad (REGLA: NUNCA enviar valor_ponderado)
   // Tras mover, refetch de la fila desde v_oportunidades
   const moverOportunidadEtapa = async (
@@ -357,7 +372,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       payload.motivo_perdida_detalle = motivoDetalle || null;
     }
 
-    const { error } = await supabase.from('oportunidades').update(payload).eq('id', oportunidadId);
+    const { error } = await supabase.from(tablaOp(oportunidadId)).update(payload).eq('id', oportunidadId);
 
     if (error) {
       setErrorMensaje(parseSupabaseError(error));
@@ -376,7 +391,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           monto_clp: opActual.valor_neto,
           activo: true,
           inicio: new Date().toLocaleDateString('en-CA', { timeZone: 'America/Santiago' }),
-          oportunidad_id: oportunidadId,
+          negocio_id: oportunidadId,
         });
       }
     }
@@ -425,11 +440,12 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return null;
     }
 
-    // NUNCA incluir valor_ponderado
-    const { valor_ponderado, ...datosLimpios } = datos as any;
+    // NUNCA incluir valor_ponderado. pipeline lo fija la tabla (trigger)
+    const { valor_ponderado, pipeline, ...datosLimpios } = datos as any;
+    const tabla = pipeline === 'expansion' ? 'negocios' : 'leads';
 
     const { data, error } = await supabase
-      .from('oportunidades')
+      .from(tabla)
       .insert(datosLimpios)
       .select()
       .single();
@@ -460,7 +476,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (isModoDemo) setOportunidades((prev) => prev.map((o) => (o.id === oportunidadId ? { ...o, ...limpios } : o)));
       return;
     }
-    const { error } = await supabase.from('oportunidades').update(limpios).eq('id', oportunidadId);
+    const { error } = await supabase.from(tablaOp(oportunidadId)).update(limpios).eq('id', oportunidadId);
     if (error) {
       setErrorMensaje(parseSupabaseError(error));
       return;
@@ -484,7 +500,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const { error } = await supabase
-      .from('oportunidades')
+      .from(tablaOp(oportunidadId))
       .update({
         proxima_accion_texto: accion,
         proxima_accion_fecha: fecha,
@@ -514,7 +530,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const { error } = await supabase
-      .from('oportunidades')
+      .from(tablaOp(oportunidadId))
       .update({ archivado: true })
       .eq('id', oportunidadId);
 
@@ -535,8 +551,9 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ) => {
     if (!supabase) return;
 
-    const payload: EvaluacionOportunidad = {
-      oportunidad_id: oportunidadId,
+    // Calificación solo aplica a leads (captación)
+    const payload = {
+      lead_id: oportunidadId,
       criterio_id: criterioId,
       valor_respuesta: valor,
       excepcion_aplicada: Boolean(excepcion),
@@ -759,7 +776,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const actualizarActividad = async (actividadId: string, datos: Partial<Omit<Actividad, 'id' | 'created_at' | 'autor_id'>>) => {
     if (!supabase) return;
-    const { error } = await supabase.from('actividades').update(datos).eq('id', actividadId);
+    const { error } = await supabase.from('actividades').update(normalizarVinculo(datos)).eq('id', actividadId);
     if (error) {
       setErrorMensaje(parseSupabaseError(error));
       return;
@@ -779,7 +796,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const crearFactura = async (datos: Omit<Factura, 'id' | 'created_at' | 'updated_at' | 'creada_por' | 'archivado'>) => {
     if (!supabase) return null;
-    const { data, error } = await supabase.from('facturas').insert(datos).select('*').single();
+    const { data, error } = await supabase.from('facturas').insert(normalizarVinculo(datos)).select('*').single();
     if (error) {
       setErrorMensaje(parseSupabaseError(error));
       return null;
@@ -793,7 +810,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!supabase) return;
     const { error } = await supabase
       .from('facturas')
-      .update({ ...datos, updated_at: new Date().toISOString() })
+      .update({ ...normalizarVinculo(datos), updated_at: new Date().toISOString() })
       .eq('id', facturaId);
     if (error) {
       setErrorMensaje(parseSupabaseError(error));
@@ -837,7 +854,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
 
-    const { error } = await supabase.from('actividades').insert(datos);
+    const { error } = await supabase.from('actividades').insert(normalizarVinculo(datos));
 
     if (error) {
       setErrorMensaje(parseSupabaseError(error));
@@ -866,7 +883,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
 
-    const { error } = await supabase.from('tareas').insert(datos);
+    const { error } = await supabase.from('tareas').insert(normalizarVinculo(datos));
 
     if (error) {
       setErrorMensaje(parseSupabaseError(error));
@@ -920,7 +937,7 @@ export const CRMProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (isModoDemo) setTareas((prev) => prev.map((t) => (t.id === tareaId ? { ...t, ...datos } : t)));
       return;
     }
-    const { error } = await supabase.from('tareas').update(datos).eq('id', tareaId);
+    const { error } = await supabase.from('tareas').update(normalizarVinculo(datos)).eq('id', tareaId);
     if (error) {
       setErrorMensaje(parseSupabaseError(error));
       return;

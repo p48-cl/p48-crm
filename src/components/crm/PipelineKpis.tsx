@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useCRM } from '../../context/CRMContext';
 import { formatCLP } from '../../lib/formatters';
-import { Kpi, Dona, estilos } from '../dashboard/ui';
+import { Kpi } from '../dashboard/ui';
 import { metricasPipeline, resultadosPeriodo } from '../dashboard/metricas';
 
 export const PipelineKpis: React.FC<{ pipeline?: 'captacion' | 'expansion' }> = ({ pipeline }) => {
@@ -11,7 +11,7 @@ export const PipelineKpis: React.FC<{ pipeline?: 'captacion' | 'expansion' }> = 
   const pctPonderado = p.valorCLP > 0 ? (p.ponderadoCLP / p.valorCLP) * 100 : null;
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+    <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
       <Kpi
         acento="var(--c-accent)"
         etiqueta="Pipeline abierto"
@@ -38,23 +38,6 @@ export const PipelineKpis: React.FC<{ pipeline?: 'captacion' | 'expansion' }> = 
         tono={p.atrasados > 0 ? 'peligro' : 'normal'}
         nota={p.sinAccion > 0 ? `${p.sinAccion} sin próxima acción` : p.atrasados > 0 ? 'Requieren acción hoy' : 'Todo al día'}
       />
-      <div className={`${estilos.tarjeta} col-span-2`} style={{ borderTop: '3px solid var(--c-warn)' }}>
-        <p className={estilos.etiqueta}>Distribución por etapa</p>
-        {p.abiertas.length === 0 ? (
-          <p className={estilos.nota}>Sin negocios abiertos</p>
-        ) : (
-          <Dona
-            rotulo="Distribución del pipeline por etapa"
-            centro={
-              <>
-                <span className="text-lg font-bold font-mono text-[var(--c-text)] leading-none">{p.abiertas.length}</span>
-                <span className="text-[9px] font-mono uppercase text-[var(--c-muted)] mt-0.5">negocios</span>
-              </>
-            }
-            segmentos={p.porEtapa.map((e) => ({ clave: e.id, etiqueta: e.nombre, n: e.n, color: e.color }))}
-          />
-        )}
-      </div>
     </div>
   );
 };
