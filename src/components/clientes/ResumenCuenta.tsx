@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Mail, Phone, ChevronRight } from 'lucide-react';
+import { Mail, Phone, ChevronRight, Pencil } from 'lucide-react';
+import { DatosFacturacion } from './DatosFacturacion';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { formatCLP, formatFecha, formatMoneda, formatCorrelativo } from '../../lib/formatters';
 import { estadoEfectivo, redondear, MonedaCotizacion } from '../../lib/cotizaciones';
@@ -72,7 +73,22 @@ const ETIQUETA_PROYECTO: Record<ProyectoRes['estado'], string> = {
   finalizado: 'Finalizado',
 };
 
-const input = 'w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2 py-1 text-xs text-[var(--c-text)]';
+const input = 'w-full bg-[var(--c-field)] border border-[var(--c-line)] rounded px-2 py-1 text-xs text-[var(--c-text)] hover:border-[var(--c-muted)] focus:border-[var(--c-accent)] outline-none transition-colors';
+
+// Color por categoría: mismo criterio que la franja superior
+const TONO_SALUD: Record<string, 'ok' | 'warn' | 'danger' | 'muted'> = { verde: 'ok', amarillo: 'warn', rojo: 'danger', '': 'muted' };
+const TONO_PAGO: Record<string, 'ok' | 'warn' | 'danger' | 'muted'> = { al_dia: 'ok', por_vencer: 'warn', atrasado: 'danger', '': 'muted' };
+const CLASE_TEXTO = { ok: 'text-[var(--c-ok)]', warn: 'text-[var(--c-warn)]', danger: 'text-[var(--c-danger)]', muted: 'text-[var(--c-muted)]' };
+const CLASE_PUNTO = { ok: 'bg-[var(--c-ok)]', warn: 'bg-[var(--c-warn)]', danger: 'bg-[var(--c-danger)]', muted: 'bg-[var(--c-muted)]' };
+
+const SelectColor: React.FC<{ valor: string; tono: 'ok' | 'warn' | 'danger' | 'muted'; onChange: (v: string) => void; opciones: { valor: string; texto: string }[] }> = ({ valor, tono, onChange, opciones }) => (
+  <div className="relative">
+    <span className={`absolute left-2.5 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full pointer-events-none ${CLASE_PUNTO[tono]}`} />
+    <select value={valor} onChange={(e) => onChange(e.target.value)} className={`${input} pl-6 font-medium ${CLASE_TEXTO[tono]}`}>
+      {opciones.map((o) => <option key={o.valor} value={o.valor}>{o.texto}</option>)}
+    </select>
+  </div>
+);
 const soloFecha = (v?: string | null) => (v ? v.slice(0, 10) : '');
 const hoyISO = (() => {
   const d = new Date();
@@ -89,9 +105,12 @@ const Bloque: React.FC<{ titulo: string; accion?: { texto: string; onClick: () =
   </section>
 );
 
-const Campo: React.FC<{ etiqueta: string; nota?: string; children: React.ReactNode }> = ({ etiqueta, nota, children }) => (
+const Campo: React.FC<{ etiqueta: string; nota?: string; editable?: boolean; children: React.ReactNode }> = ({ etiqueta, nota, editable = false, children }) => (
   <div className="min-w-0">
-    <p className="text-[10px] font-mono uppercase text-[var(--c-muted)] mb-1">{etiqueta}</p>
+    <p className="flex items-center gap-1 text-[10px] font-mono uppercase text-[var(--c-muted)] mb-1">
+      {etiqueta}
+      {editable && <Pencil className="w-2.5 h-2.5 text-[var(--c-accent)] opacity-70" aria-label="Editable" />}
+    </p>
     {children}
     {nota && <p className="text-[10px] font-mono text-[var(--c-muted)] mt-0.5">{nota}</p>}
   </div>
@@ -169,12 +188,13 @@ export const ResumenCuenta: React.FC<Props> = ({
   const ltvEstimado = mesesContrato !== null && empresa.mrr_actual_clp ? empresa.mrr_actual_clp * mesesContrato : null;
 
   const ultimasActividades = [...actividades].sort((a, b) => b.fecha_actividad.localeCompare(a.fecha_actividad)).slice(0, 3);
-  const tonoPago = empresa.estado_pago === 'atrasado' ? 'text-[var(--c-danger)]' : empresa.estado_pago === 'por_vencer' ? 'text-[var(--c-warn)]' : empresa.estado_pago === 'al_dia' ? 'text-[var(--c-ok)]' : 'text-[var(--c-text)]';
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] lg:grid-cols-[280px_minmax(0,1fr)] gap-4 items-start">
       {/* Izquierda: quién es el cliente y dónde está todo */}
       <aside className="space-y-4">
+        {estrategia}
+
         <Bloque titulo="Contacto principal">
           {contactoPrincipal ? (
             <div className="space-y-1 text-xs">
@@ -218,19 +238,15 @@ export const ResumenCuenta: React.FC<Props> = ({
 
       {/* Derecha: contrato, lo que requiere atención y lo que sigue */}
       <div className="space-y-4 min-w-0">
-        <Bloque titulo="Contrato y cobranza" accion={{ texto: 'Editar plan y fee', onClick: () => onIr('info') }}>
+        <Bloque titulo="Contrato y datos" accion={{ texto: 'Plan y fee', onClick: () => onIr('info') }}>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-4 text-xs">
-            <Campo etiqueta="Salud">
-              <select value={empresa.salud ?? ''} onChange={(e) => onActualizar({ salud: (e.target.value || null) as Empresa['salud'] })} className={input}>
-                {SALUDES.map((s) => <option key={s.valor} value={s.valor}>{s.texto}</option>)}
-              </select>
+            <Campo etiqueta="Salud" editable>
+              <SelectColor valor={empresa.salud ?? ''} tono={TONO_SALUD[empresa.salud ?? '']} opciones={SALUDES} onChange={(v) => onActualizar({ salud: (v || null) as Empresa['salud'] })} />
             </Campo>
-            <Campo etiqueta="Estado de pago">
-              <select value={empresa.estado_pago ?? ''} onChange={(e) => onActualizar({ estado_pago: (e.target.value || null) as EstadoPago | null })} className={`${input} ${tonoPago}`}>
-                {ESTADOS_PAGO.map((s) => <option key={s.valor} value={s.valor}>{s.texto}</option>)}
-              </select>
+            <Campo etiqueta="Estado de pago" editable>
+              <SelectColor valor={empresa.estado_pago ?? ''} tono={TONO_PAGO[empresa.estado_pago ?? '']} opciones={ESTADOS_PAGO} onChange={(v) => onActualizar({ estado_pago: (v || null) as EstadoPago | null })} />
             </Campo>
-            <Campo etiqueta="Último pago">
+            <Campo etiqueta="Último pago" editable>
               <input type="date" value={soloFecha(empresa.fecha_ultimo_pago)} onChange={(e) => onActualizar({ fecha_ultimo_pago: e.target.value || null })} className={`${input} font-mono`} />
             </Campo>
 
@@ -240,19 +256,22 @@ export const ResumenCuenta: React.FC<Props> = ({
             <Campo etiqueta="Fee mensual">
               <span className="font-mono text-[var(--c-text)]">{empresa.fee_mensual_clp ? formatCLP(empresa.fee_mensual_clp) : '—'}</span>
             </Campo>
-            <Campo etiqueta="Inicio de contrato">
+            <Campo etiqueta="Inicio de contrato" editable>
               <input type="date" value={soloFecha(empresa.inicio_contrato)} onChange={(e) => onActualizar({ inicio_contrato: e.target.value || null })} className={`${input} font-mono`} />
             </Campo>
 
-            <Campo etiqueta="Próxima facturación" nota={`Pago a ${empresa.dias_pago ?? 30} días`}>
+            <Campo etiqueta="Próxima facturación" nota={`Pago a ${empresa.dias_pago ?? 30} días`} editable>
               <input type="date" value={soloFecha(empresa.proxima_facturacion)} onChange={(e) => onActualizar({ proxima_facturacion: e.target.value || null })} className={`${input} font-mono`} />
             </Campo>
-            <Campo etiqueta="Próxima renovación" nota={empresa.renovacion_tipo === 'automatica' ? 'Automática' : 'Manual'}>
+            <Campo etiqueta="Próxima renovación" nota={empresa.renovacion_tipo === 'automatica' ? 'Automática' : 'Manual'} editable>
               <input type="date" value={soloFecha(empresa.fecha_renovacion)} onChange={(e) => onActualizar({ fecha_renovacion: e.target.value || null })} className={`${input} font-mono`} />
             </Campo>
             <Campo etiqueta="LTV estimado" nota={mesesContrato !== null ? `MRR × ${mesesContrato} meses` : 'Falta inicio de contrato'}>
               <span className="font-mono text-[var(--c-text)]">{ltvEstimado !== null ? formatCLP(ltvEstimado) : '—'}</span>
             </Campo>
+          </div>
+          <div className="mt-4 pt-4 border-t border-[var(--c-line)]">
+            <DatosFacturacion empresa={empresa} onGuardar={onActualizar} embebido />
           </div>
         </Bloque>
 
@@ -373,7 +392,6 @@ export const ResumenCuenta: React.FC<Props> = ({
           )}
         </Bloque>
 
-        {estrategia}
       </div>
     </div>
   );
