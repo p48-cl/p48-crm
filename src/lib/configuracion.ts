@@ -15,6 +15,11 @@ export interface ConfiguracionCRM {
   medios_pago: string[];
   // Etiqueta y color por estado de cotización (vacío = valores por defecto)
   estados_cotizacion: Record<string, { etiqueta?: string; color?: string }>;
+  // Alertas por correo (Resend). Apagadas hasta configurar destino y remitente.
+  alertas_email_activo: boolean;
+  alertas_email_destino: string | null;
+  alertas_email_remitente: string | null;
+  dias_cotizacion_sin_respuesta: number;
 }
 
 export const CONFIGURACION_DEFAULT: ConfiguracionCRM = {
@@ -31,10 +36,14 @@ export const CONFIGURACION_DEFAULT: ConfiguracionCRM = {
     'Valores netos en pesos chilenos, más IVA. Cotización válida por el plazo indicado. El servicio inicia con la aceptación y la entrega de accesos de administrador a las plataformas.',
   medios_pago: ['Transferencia', 'Cheque', 'Tarjeta', 'Efectivo'],
   estados_cotizacion: {},
+  alertas_email_activo: false,
+  alertas_email_destino: null,
+  alertas_email_remitente: null,
+  dias_cotizacion_sin_respuesta: 7,
 };
 
 const COLUMNAS =
-  'tema_defecto, dias_alerta_renovacion, dias_sin_actividad, vista_clientes_defecto, setup_lista_clp, cotizacion_validez_dias, iva_pct, comision_base, condiciones_base, medios_pago, estados_cotizacion';
+  'tema_defecto, dias_alerta_renovacion, dias_sin_actividad, vista_clientes_defecto, setup_lista_clp, cotizacion_validez_dias, iva_pct, comision_base, condiciones_base, medios_pago, estados_cotizacion, alertas_email_activo, alertas_email_destino, alertas_email_remitente, dias_cotizacion_sin_respuesta';
 
 // Última configuración cargada: evita parpadeos y consultas repetidas entre componentes.
 let cache: ConfiguracionCRM | null = null;
