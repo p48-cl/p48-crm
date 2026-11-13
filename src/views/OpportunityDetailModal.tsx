@@ -199,6 +199,15 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                     {etapa.nombre}
                   </span>
                 )}
+                {atrasada && <ChipSenal tono="danger" className="alerta-parpadeo">Acción atrasada</ChipSenal>}
+                {!esNegocio && !tieneCalificacion && <ChipSenal tono="warn" className="alerta-parpadeo">Sin calificar</ChipSenal>}
+                {diasSinActividad === null ? (
+                  <ChipSenal tono="warn" className="alerta-parpadeo">Sin actividades registradas</ChipSenal>
+                ) : (
+                  diasSinActividad >= configCRM.dias_sin_actividad && (
+                    <ChipSenal tono="warn" className="alerta-parpadeo">Sin actividad hace {diasSinActividad} d</ChipSenal>
+                  )
+                )}
               </div>
               <h2 className="text-lg font-bold text-[var(--c-text)] leading-tight truncate">{oportunidad.nombre}</h2>
               {empresa && (
@@ -281,7 +290,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
             onVerCliente={(id) => { onClose(); onSelectEmpresa(id); }}
           />
 
-          {/* Derecha: etapa comercial (alineada con Datos del negocio), señales y próxima acción */}
+          {/* Derecha: etapa comercial (alineada con Datos del negocio) y próxima acción */}
           <div className="space-y-6">
             {/* Etapa */}
             <div className="p-4 bg-[var(--c-surface-2)] rounded-lg border border-[var(--c-line)] space-y-3">
@@ -300,19 +309,6 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
               <div className="text-[11px] font-mono text-[var(--c-muted)] pt-1">
                 <p>Ponderado (Base): {formatMoneda(oportunidad.valor_ponderado, oportunidad.moneda)}</p>
               </div>
-            </div>
-
-            {/* Señales de la oportunidad */}
-            <div className="flex flex-wrap gap-1.5">
-              {atrasada && <ChipSenal tono="danger">Acción atrasada</ChipSenal>}
-              {!esNegocio && !tieneCalificacion && <ChipSenal tono="warn">Sin calificar</ChipSenal>}
-              {diasSinActividad === null ? (
-                <ChipSenal tono="warn">Sin actividades registradas</ChipSenal>
-              ) : (
-                diasSinActividad >= configCRM.dias_sin_actividad && (
-                  <ChipSenal tono="warn">Sin actividad hace {diasSinActividad} d</ChipSenal>
-                )
-              )}
             </div>
 
             {/* Próxima Acción */}

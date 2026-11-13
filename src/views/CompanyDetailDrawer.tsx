@@ -193,7 +193,7 @@ export const CompanyDetailDrawer: React.FC<CompanyDetailDrawerProps> = ({
     riesgos.push({ texto: 'Sin negocio abierto de renovación o expansión', tono: 'info', destino: 'oportunidades' });
   }
   if (empresa.estado === 'cliente' && [accesos.google_ads, accesos.ga4, accesos.meta_bm, accesos.gtm_cmp].filter(Boolean).length < 4) {
-    riesgos.push({ texto: 'Accesos admin incompletos', tono: 'info', destino: 'info' });
+    riesgos.push({ texto: `Accesos admin incompletos (${[accesos.google_ads, accesos.ga4, accesos.meta_bm, accesos.gtm_cmp].filter(Boolean).length}/4)`, tono: 'info', destino: 'marketing' });
   }
 
   // Acción principal del encabezado según la pestaña activa

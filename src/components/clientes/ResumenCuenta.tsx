@@ -12,7 +12,7 @@ import { usePlanes } from '../../lib/planes';
 import { useConfiguracionCRM } from '../../lib/configuracion';
 import { OPCIONES_ORIGEN, ORIGEN_ETIQUETA } from '../../lib/origen';
 
-export type DestinoResumen = 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'facturacion' | 'estrategia' | 'marketing' | 'proyectos' | 'info';
+export type DestinoResumen = 'contactos' | 'oportunidades' | 'actividades' | 'tareas' | 'facturacion' | 'estrategia' | 'marketing' | 'proyectos' | 'reportes' | 'info';
 
 export interface AlertaResumen {
   texto: string;
@@ -334,7 +334,7 @@ export const ResumenCuenta: React.FC<Props> = ({
   if (empresa.estado_pago === 'atrasado') alertasFicha.push({ texto: 'Pago atrasado', tono: 'alerta', destino: 'facturacion' });
   if (empresa.estado_pago === 'por_vencer') alertasFicha.push({ texto: 'Pago por vencer', tono: 'info', destino: 'facturacion' });
   if (empresa.proxima_facturacion && soloFecha(empresa.proxima_facturacion) < hoyISO) {
-    alertasFicha.push({ texto: `Facturación vencida desde ${formatFecha(empresa.proxima_facturacion)}`, tono: 'alerta', destino: 'info' });
+    alertasFicha.push({ texto: `Facturación vencida desde ${formatFecha(empresa.proxima_facturacion)}`, tono: 'alerta', destino: 'facturacion' });
   }
   // Alertas del resumen 360 que no repiten las de arriba (facturas y cotizaciones ya están listadas)
   const r360 = resumen360(empresa, {
@@ -342,8 +342,8 @@ export const ResumenCuenta: React.FC<Props> = ({
     proyectos: crm.proyectos, tareas: crm.tareas, reportes: crm.reportes, actividades: crm.actividades, contactos: crm.contactos,
   });
   const alertasCrm: AlertaResumen[] = r360.alertas
-    .filter((a) => !/factura|cotización/i.test(a.texto))
-    .map((a) => ({ texto: a.texto, tono: a.nivel === 'peligro' ? 'alerta' : 'info', destino: /proyecto/i.test(a.texto) ? 'proyectos' : /reporte/i.test(a.texto) ? 'info' : /negocio/i.test(a.texto) ? 'oportunidades' : 'info' }) as AlertaResumen);
+    .filter((a) => !/factura|cotización|ficha incompleta/i.test(a.texto))
+    .map((a) => ({ texto: a.texto, tono: a.nivel === 'peligro' ? 'alerta' : 'info', destino: /proyecto/i.test(a.texto) ? 'proyectos' : /reporte/i.test(a.texto) ? 'reportes' : /negocio/i.test(a.texto) ? 'oportunidades' : 'info' }) as AlertaResumen);
   const todasAlertas = [...alertas, ...alertasFicha, ...alertasCot, ...alertasCrm];
 
   const mesesContrato = empresa.inicio_contrato
@@ -418,12 +418,6 @@ export const ResumenCuenta: React.FC<Props> = ({
             <span className="text-[var(--c-muted)]">Responsable</span>
             <span className="text-[var(--c-text)] truncate">{responsable ?? 'Sin asignar'}</span>
           </div>
-          {accesosTotal > 0 && (
-            <button onClick={() => onIr('marketing')} className="w-full flex items-center justify-between gap-3 mt-2 text-xs">
-              <span className="text-[var(--c-muted)]">Accesos admin</span>
-              <span className={`font-mono ${accesosConcedidos < accesosTotal ? 'text-[var(--c-warn)]' : 'text-[var(--c-ok)]'}`}>{accesosConcedidos}/{accesosTotal}</span>
-            </button>
-          )}
         </Bloque>
 
         <Bloque titulo="Enlaces">
@@ -581,11 +575,29 @@ export const ResumenCuenta: React.FC<Props> = ({
             )}
           </Bloque>
 
+          <Bloque titulo="Última actividad" accion={{ texto: 'Ver todas', onClick: () => onIr('actividades') }}>
+            {ultimasActividades.length === 0 ? (
+              <p className="text-xs text-[var(--c-muted)]">Sin actividad registrada.</p>
+            ) : (
+              <ul className="divide-y divide-[var(--c-line)] text-xs">
+                {ultimasActividades.map((a) => (
+                  <li key={a.id} className="flex items-center justify-between gap-3 py-2 first:pt-0 last:pb-0">
+                    <span className="truncate text-[var(--c-text)]"><span className="text-[10px] font-mono uppercase text-[var(--c-muted)] mr-2">{a.tipo.replace('_', ' ')}</span>{a.titulo}</span>
+                    <span className="font-mono text-[10px] text-[var(--c-muted)] shrink-0">{formatFecha(a.fecha_actividad)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Bloque>
+
+        </div>
+
+        {(empresa.estado === 'cliente' || proyectos.length > 0) && (
           <Bloque titulo={`Proyectos activos (${proyectos.length})`} accion={{ texto: 'Ver proyectos', onClick: () => onIr('proyectos') }}>
             {proyectos.length === 0 ? (
               <p className="text-xs text-[var(--c-muted)]">Sin proyectos activos.</p>
             ) : (
-              <ul className="space-y-3">
+              <ul className="grid grid-cols-[minmax(0,1fr)] md:grid-cols-2 gap-x-6 gap-y-4">
                 {proyectos.slice(0, 4).map((p) => {
                   const total = p.entregables.length;
                   const hechos = p.entregables.filter((e) => e.estado === 'entregado').length;
@@ -608,22 +620,7 @@ export const ResumenCuenta: React.FC<Props> = ({
               </ul>
             )}
           </Bloque>
-        </div>
-
-        <Bloque titulo="Última actividad" accion={{ texto: 'Ver todas', onClick: () => onIr('actividades') }}>
-          {ultimasActividades.length === 0 ? (
-            <p className="text-xs text-[var(--c-muted)]">Sin actividad registrada.</p>
-          ) : (
-            <ul className="divide-y divide-[var(--c-line)] text-xs">
-              {ultimasActividades.map((a) => (
-                <li key={a.id} className="flex items-center justify-between gap-3 py-1.5 first:pt-0 last:pb-0">
-                  <span className="truncate text-[var(--c-text)]"><span className="text-[10px] font-mono uppercase text-[var(--c-muted)] mr-2">{a.tipo.replace('_', ' ')}</span>{a.titulo}</span>
-                  <span className="font-mono text-[10px] text-[var(--c-muted)] shrink-0">{formatFecha(a.fecha_actividad)}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Bloque>
+        )}
 
       </div>
     </div>
