@@ -1,4 +1,4 @@
--- crm_53 · Notificaciones internas (campanita, alertas de cobro y cotización, resumen diario).
+-- crm_54 · Notificaciones internas (campanita, alertas de cobro y cotización, resumen diario).
 -- NO aplicar en producción sin respaldo previo de P48-CRM confirmado.
 -- Requiere: pg_cron, pg_net y supabase_vault (ya instalados). La clave de Resend se guarda en Vault
 -- con el nombre 'resend_alertas_api_key' (no va en este archivo). Envío apagado hasta activarlo en Preferencias.
