@@ -18,6 +18,7 @@ import {
   Settings,
 } from 'lucide-react';
 import { useConfiguracionCRM, guardarConfiguracion, ConfiguracionCRM } from '../lib/configuracion';
+import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useCRM } from '../context/CRMContext';
 import { Miembro, CriterioCalificacion, CatalogoItem } from '../types/crm';
@@ -45,6 +46,7 @@ export const AdminView: React.FC = () => {
   const [draftCfg, setDraftCfg] = useState<ConfiguracionCRM>(configCRM);
   const [guardandoCfg, setGuardandoCfg] = useState(false);
   const [mensajeCfg, setMensajeCfg] = useState<{ tipo: 'ok' | 'error'; texto: string } | null>(null);
+  const [mensajeRespaldo, setMensajeRespaldo] = useState<{ tipo: 'ok' | 'error'; texto: string } | null>(null);
   useEffect(() => {
     setDraftCfg(configCRM);
   }, [configCRM]);
@@ -265,6 +267,49 @@ export const AdminView: React.FC = () => {
       {/* TAB PREFERENCIAS: valores por defecto del sistema */}
       {activeTab === 'preferencias' && (
         <div className="space-y-4 max-w-2xl">
+          <div className="bg-[var(--c-surface)] rounded-lg border border-[var(--c-line)] p-4 space-y-2 text-xs">
+            <h3 className="font-semibold text-[var(--c-text)]">Respaldo de datos</h3>
+            <p className="text-[11px] text-[var(--c-muted)]">
+              Descarga un JSON con todas las tablas del CRM. Hazlo antes de cualquier borrado o carga masiva.
+            </p>
+            <button
+              type="button"
+              onClick={async () => {
+                setMensajeRespaldo(null);
+                const { data: { session } } = supabase
+                  ? await supabase.auth.getSession()
+                  : { data: { session: null } };
+                if (!session) {
+                  setMensajeRespaldo({ tipo: 'error', texto: 'Sesión no válida. Vuelve a entrar.' });
+                  return;
+                }
+                const r = await fetch('/api/admin/respaldo', {
+                  headers: { Authorization: `Bearer ${session.access_token}` },
+                });
+                if (!r.ok) {
+                  setMensajeRespaldo({ tipo: 'error', texto: `No se pudo generar el respaldo (${r.status}).` });
+                  return;
+                }
+                const blob = await r.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `p48-crm-respaldo-${new Date().toISOString().slice(0, 10)}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                setMensajeRespaldo({ tipo: 'ok', texto: 'Respaldo descargado.' });
+              }}
+              className="py-1.5 px-3 rounded bg-[var(--c-accent)] text-[var(--c-accent-fg,#0A0A0A)] font-semibold"
+            >
+              Descargar respaldo
+            </button>
+            {mensajeRespaldo && (
+              <p className={mensajeRespaldo.tipo === 'ok' ? 'text-[11px] text-[var(--c-accent)]' : 'text-[11px] text-red-400'}>
+                {mensajeRespaldo.texto}
+              </p>
+            )}
+          </div>
+
           <div>
             <h3 className="text-xs font-semibold text-[var(--c-text)]">Preferencias del sistema</h3>
             <p className="text-[11px] text-[var(--c-muted)]">
