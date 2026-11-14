@@ -3,6 +3,7 @@ import React from 'react';
 import { Search, Sun, Moon, LogOut, ShieldAlert, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCRM } from '../../context/CRMContext';
+import { CampanaNotificaciones } from './CampanaNotificaciones';
 
 interface HeaderProps {
   onOpenSearch: () => void;
@@ -84,6 +85,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Zona 3: Modo oscuro/claro + Usuario y Conmutador de miembros */}
       <div className="flex items-center gap-3 shrink-0">
+        {isSupabaseLive && <CampanaNotificaciones />}
         <button
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
           className="p-1.5 text-[var(--c-muted)] hover:text-[var(--c-text)] transition-colors rounded hover:bg-[var(--c-surface-2)]"

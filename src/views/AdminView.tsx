@@ -102,12 +102,35 @@ export const AdminView: React.FC = () => {
     e.preventDefault();
     const dAlerta = Number(draftCfg.dias_alerta_renovacion);
     const dSin = Number(draftCfg.dias_sin_actividad);
+    const dCot = Number(draftCfg.dias_cotizacion_sin_respuesta);
     if (!Number.isInteger(dAlerta) || dAlerta < 1 || dAlerta > 365 || !Number.isInteger(dSin) || dSin < 1 || dSin > 365) {
       setMensajeCfg({ tipo: 'error', texto: 'Los días deben ser enteros entre 1 y 365.' });
       return;
     }
+    if (!Number.isInteger(dCot) || dCot < 1 || dCot > 365) {
+      setMensajeCfg({ tipo: 'error', texto: 'Los días de cotización sin respuesta deben ser un entero entre 1 y 365.' });
+      return;
+    }
+    const destino = (draftCfg.alertas_email_destino ?? '').trim();
+    const remitente = (draftCfg.alertas_email_remitente ?? '').trim();
+    const correo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if ((destino && !correo.test(destino)) || (remitente && !correo.test(remitente))) {
+      setMensajeCfg({ tipo: 'error', texto: 'Revisa el formato de los correos de alertas.' });
+      return;
+    }
+    if (draftCfg.alertas_email_activo && (!destino || !remitente)) {
+      setMensajeCfg({ tipo: 'error', texto: 'Para activar el envío indica correo de destino y remitente.' });
+      return;
+    }
     setGuardandoCfg(true);
-    const error = await guardarConfiguracion({ ...draftCfg, dias_alerta_renovacion: dAlerta, dias_sin_actividad: dSin });
+    const error = await guardarConfiguracion({
+      ...draftCfg,
+      dias_alerta_renovacion: dAlerta,
+      dias_sin_actividad: dSin,
+      dias_cotizacion_sin_respuesta: dCot,
+      alertas_email_destino: destino || null,
+      alertas_email_remitente: remitente || null,
+    });
     setGuardandoCfg(false);
     setMensajeCfg(error ? { tipo: 'error', texto: `No se pudo guardar: ${error}` } : { tipo: 'ok', texto: 'Preferencias guardadas para todo el equipo.' });
   };
@@ -298,6 +321,49 @@ export const AdminView: React.FC = () => {
                   className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] font-mono"
                 />
               </div>
+
+              <div>
+                <label className="block text-[11px] text-[var(--c-muted)] mb-1">Cotización sin respuesta (días)</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={365}
+                  value={draftCfg.dias_cotizacion_sin_respuesta}
+                  onChange={(e) => setDraftCfg({ ...draftCfg, dias_cotizacion_sin_respuesta: Number(e.target.value) })}
+                  className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)] font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] text-[var(--c-muted)] mb-1">Correo de alertas: destino</label>
+                <input
+                  type="email"
+                  value={draftCfg.alertas_email_destino ?? ''}
+                  onChange={(e) => setDraftCfg({ ...draftCfg, alertas_email_destino: e.target.value })}
+                  placeholder="equipo@tu-dominio.cl"
+                  className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] text-[var(--c-muted)] mb-1">Correo de alertas: remitente</label>
+                <input
+                  type="email"
+                  value={draftCfg.alertas_email_remitente ?? ''}
+                  onChange={(e) => setDraftCfg({ ...draftCfg, alertas_email_remitente: e.target.value })}
+                  placeholder="alertas@dominio-verificado.cl"
+                  className="w-full bg-[var(--c-surface-2)] border border-[var(--c-line)] rounded px-2.5 py-1.5 text-xs text-[var(--c-text)]"
+                />
+              </div>
+
+              <label className="flex items-center gap-2 text-[11px] text-[var(--c-text-2)] sm:col-span-2">
+                <input
+                  type="checkbox"
+                  checked={draftCfg.alertas_email_activo}
+                  onChange={(e) => setDraftCfg({ ...draftCfg, alertas_email_activo: e.target.checked })}
+                />
+                Enviar por correo los cobros vencidos y el resumen diario de las 08:00
+              </label>
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-3 border-t border-[var(--c-line)]">
